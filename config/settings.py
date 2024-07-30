@@ -24,7 +24,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'complaints.apps.ComplaintsConfig',
-    'messaging.apps.MessagingConfig',
+    'chats.apps.ChatsConfig',
     'notifications.apps.NotificationsConfig',
     'questions.apps.QuestionsConfig',
     'realty.apps.RealtyConfig',
