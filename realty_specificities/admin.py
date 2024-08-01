@@ -11,7 +11,7 @@ class AboutBuildingAdmin(admin.ModelAdmin):
 
 @admin.register(models.AboutApartment)
 class AboutApartmentAdmin(admin.ModelAdmin):
-    list_display = ("number_of_rooms", "area", "loggia", "balcony", "elevator")
+    list_display = ("number_of_rooms", "area", "loggia", "balcony", "elevator", "floor", "floors_number",)
     list_filter = ("number_of_rooms",)
 
 

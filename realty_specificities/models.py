@@ -55,6 +55,8 @@ class AboutApartment(models.Model):
     loggia = models.BooleanField(verbose_name="Лоджия", blank=True)
     balcony = models.BooleanField(verbose_name="Балкон", blank=True)
     elevator = models.BooleanField(verbose_name="Лифт", blank=True)
+    floor = models.PositiveSmallIntegerField(verbose_name="Этаж")
+    floors_number = models.PositiveSmallIntegerField(verbose_name="Этажность")
 
     class Meta:
         ordering = ["number_of_rooms"]
@@ -65,7 +67,8 @@ class AboutApartment(models.Model):
         return (
             f"Кол-во комнат: {self.number_of_rooms}, Площадь: {self.area}, "
             f"Лоджия: {self.loggia}, Балкон: {self.balcony}, "
-            f"Лифт: {self.elevator}"
+            f"Лифт: {self.elevator}, "
+            f"Этаж: {self.floor}, Этажность: {self.floors_number}"
         )
 
 
@@ -169,6 +172,7 @@ class LeasePayments(models.Model):
         return (
             f"Оплата счетчиков: {self.counters_payment}, "
             f"Оплата ЖКХ: {self.communal_payment}, "
+            f"Залог: {self.deposit}"
         )
 
 

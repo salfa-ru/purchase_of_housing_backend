@@ -1,6 +1,5 @@
 from django.db import models
 
-# from django.core import validators
 from config import constants
 
 
@@ -140,18 +139,26 @@ class TradeParticipant(models.Model):
 class TradeType(models.Model):
     """Trade Type model."""
 
-    type = models.CharField(
+    noun_type = models.CharField(
         max_length=constants.CHAR_LENGHT,
-        verbose_name="Тип сделки",
+        verbose_name="Тип сделки сущ.",
+    )
+
+    verb_type = models.CharField(
+        max_length=constants.CHAR_LENGHT,
+        verbose_name="Тип сделки гл.",
     )
 
     class Meta:
-        ordering = ["type"]
+        ordering = ["noun_type"]
         verbose_name = "Тип сделки"
         verbose_name_plural = "Типы сделок"
 
     def __str__(self):
-        return f"Тип сделки - {self.type}"
+        return (
+            f"Тип сделки сущ. - {self.noun_type}, "
+            f"Тип сделки гл. - {self.verb_type}, "
+            )
 
 
 class RealtyType(models.Model):
