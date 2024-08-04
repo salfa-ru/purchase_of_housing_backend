@@ -9,3 +9,9 @@ MAX_ROOM_AREA = 1500  # поменять?
 
 
 CHAR_LENGHT = 50
+DESCRIPTION_LENGTH = 500
+COMPLAINT_LENGTH = 200
+
+NULLABLE_FIELD = {'blank': True, 'null': True}
+
+
