@@ -19,9 +19,7 @@ class Chat(models.Model):
         Realty,
         on_delete=models.CASCADE, verbose_name='Недвижимость', related_name='chats',
     )
-    datetime = models.DateTimeField(
-        auto_now_add=True, verbose_name='Дата+Время'
-    )
+    datetime = models.DateTimeField(auto_now_add=True, verbose_name='Дата+Время')
     message = models.TextField(verbose_name='Сообщение',)
     is_new = models.BooleanField(default=True, verbose_name='Новое')
     is_deleted_from = models.BooleanField(default=False, verbose_name='Удалено (от кого)')
