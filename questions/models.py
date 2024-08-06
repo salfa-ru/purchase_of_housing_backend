@@ -1,12 +1,12 @@
 from django.db import models
 
-from config.constants import CHAR_LENGHT, QUESTION_LENGTH
+from config.constants import CHAR_LENGTH, QUESTION_LENGTH
 
 
 class QuestionType(models.Model):
     """Question Type model."""
 
-    type = models.CharField(max_length=CHAR_LENGHT, verbose_name='Тип вопроса')
+    type = models.CharField(max_length=CHAR_LENGTH, verbose_name='Тип вопроса')
 
     class Meta:
         verbose_name = 'Тип вопроса'
@@ -19,7 +19,7 @@ class QuestionType(models.Model):
 class QuestionSection(models.Model):
     """Question Type model."""
 
-    section = models.CharField(max_length=CHAR_LENGHT, verbose_name='Раздел')
+    section = models.CharField(max_length=CHAR_LENGTH, verbose_name='Раздел')
     type = models.ForeignKey(
         QuestionType,
         on_delete=models.PROTECT, verbose_name='Тип вопроса', related_name='questions',
@@ -51,7 +51,7 @@ class Question(models.Model):
 
 
 class DocumentTemplate(models.Model):
-    title = models.CharField(max_length=CHAR_LENGHT, verbose_name='Название')
+    title = models.CharField(max_length=CHAR_LENGTH, verbose_name='Название')
     document = models.FileField(upload_to='questions/documents', verbose_name='Документ')
     question = models.ForeignKey(
         Question,
