@@ -1,22 +1,22 @@
 from django.db import models
 
-from realty.models import Realty
-from users.models import User
+from realty import models as realty_models
+from users import models as users_models
 
 
 class Chat(models.Model):
     """Chat model."""
 
     user_from = models.ForeignKey(
-        User,
+        users_models.User,
         on_delete=models.PROTECT, verbose_name='От кого', related_name='chats_from_me',
     )
     user_to = models.ForeignKey(
-        User,
+        users_models.User,
         on_delete=models.PROTECT, verbose_name='Кому', related_name='chats_to_me',
     )
     realty = models.ForeignKey(
-        Realty,
+        realty_models.Realty,
         on_delete=models.CASCADE, verbose_name='Недвижимость', related_name='chats',
     )
     datetime = models.DateTimeField(auto_now_add=True, verbose_name='Дата+Время')

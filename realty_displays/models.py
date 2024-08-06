@@ -1,13 +1,13 @@
 from django.db import models
 
-from realty.models import Realty
+from realty import models as realty_models
 
 
 class DisplayInSearch(models.Model):
     """Display In Search model."""
 
     realty = models.ForeignKey(
-        Realty,
+        realty_models.Realty,
         on_delete=models.CASCADE, verbose_name='Недвижимость', related_name='display_in_search',
     )
     date = models.DateField(auto_now_add=True, verbose_name='Дата показа')
@@ -25,7 +25,7 @@ class DisplayFullInfo(models.Model):
     """Display Full Info model."""
 
     realty = models.ForeignKey(
-        Realty,
+        realty_models.Realty,
         on_delete=models.CASCADE, verbose_name='Недвижимость', related_name='display_full_info',
     )
     count = models.PositiveIntegerField(verbose_name='Кол-во показов')

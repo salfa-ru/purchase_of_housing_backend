@@ -1,13 +1,13 @@
 from django.db import models
 
-from realty.models import Realty
+from realty import models as realty_models
 
 
 class RealtyPhoto(models.Model):
     """Realty Photo model."""
 
     realty = models.ForeignKey(
-        Realty,
+        realty_models.Realty,
         on_delete=models.PROTECT, verbose_name='Недвижимость', related_name='realty_photos',
     )
     image = models.ImageField(upload_to='realty_photos', verbose_name='Фото')

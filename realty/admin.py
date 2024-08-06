@@ -8,7 +8,7 @@ from realty.models import Realty
 @admin.register(Realty)
 class RealtyAdmin(admin.ModelAdmin):
     # TODO добавить город в адрес, когда поправим таблицы
-    list_display = ('apartment', 'address', 'owner', 'owner_type', 'trade_type', 'realty_status',)
+    list_display = ('apartment', 'address_short', 'owner', 'owner_type', 'trade_type', 'realty_status', 'changed_at')
     list_filter = ('realty_status', 'trade_type', 'owner_type',)
 
     def apartment(self, obj):
@@ -18,12 +18,12 @@ class RealtyAdmin(admin.ModelAdmin):
                 f'{obj.about_apartment.area} м², '
                 f'{obj.about_apartment.floor}/{obj.about_apartment.floors_number} этаж')
 
-    def address(self, obj):
-        return (f'{obj.house.street.name}, '
-                f'{obj.house.house_number}'
-                f'{"копр." + obj.house.corpus if obj.house.corpus != "" else ""}'
-                f'{"стр." + obj.house.building if obj.house.building != "" else ""}'
-                f'{"вл." + obj.house.ownership if obj.house.ownership != "" else ""}')
+    def address_short(self, obj):
+        return (f'{obj.address.street.name}, '
+                f'{obj.address.house_number}'
+                f'{"копр." + obj.address.corpus if obj.address.corpus != "" else ""}'
+                f'{"стр." + obj.address.building if obj.address.building != "" else ""}'
+                f'{"вл." + obj.address.ownership if obj.address.ownership != "" else ""}')
 
     apartment.short_description = 'Квартира'
-    address.short_description = 'Адрес'
+    address_short.short_description = 'Адрес'

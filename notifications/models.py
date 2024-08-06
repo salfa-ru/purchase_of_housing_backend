@@ -1,8 +1,8 @@
 from django.db import models
 
 from config.constants import NOTIFICATION_LENGTH, NULLABLE_FIELD
-from realty.models import Realty
-from users.models import User
+from realty import models as realty_models
+from users import models as users_models
 
 
 class NotificationTemplate(models.Model):
@@ -34,11 +34,11 @@ class Notification(models.Model):
         on_delete=models.PROTECT, verbose_name='Шаблон', related_name='notifications',
     )
     user_to = models.ForeignKey(
-        User,
+        users_models.User,
         on_delete=models.PROTECT, verbose_name='Кому', related_name='notifications',
     )
     realty = models.ForeignKey(
-        Realty,
+        realty_models.Realty,
         on_delete=models.PROTECT, verbose_name='Недвижимость', related_name='notifications',
     )
     datetime = models.DateTimeField(auto_now_add=True, verbose_name='Дата+Время')

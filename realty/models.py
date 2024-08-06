@@ -1,9 +1,9 @@
 from django.db import models
 
-from users.models import User
+from users import models as user_models
 from realty_values import models as values_models
 from realty_specificities import models as specificities_models
-from realty_addresses.models import House
+from realty_addresses import models as addresses_models
 from config.constants import DESCRIPTION_LENGTH, NULLABLE_FIELD
 
 
@@ -11,7 +11,7 @@ class Realty(models.Model):
     """Realty model."""
 
     owner = models.ForeignKey(
-        User,
+        user_models.User,
         on_delete=models.PROTECT, verbose_name='Владелец', related_name='realty',
     )
     trade_type = models.ForeignKey(
@@ -22,8 +22,8 @@ class Realty(models.Model):
         values_models.RealtyType,
         on_delete=models.PROTECT, verbose_name='Тип недвижимости', related_name='realty',
     )
-    house = models.ForeignKey(
-        House,
+    address = models.ForeignKey(
+        addresses_models.House,
         on_delete=models.PROTECT, verbose_name='Номер дома', related_name='realty',
     )
     sales_parameters = models.ForeignKey(
@@ -81,6 +81,7 @@ class Realty(models.Model):
         default=None, verbose_name='Дата и время публикации',
         **NULLABLE_FIELD,
     )
+    changed_at = models.DateTimeField(auto_now=True, verbose_name='Последнее изменение',)
 
     class Meta:
         verbose_name = 'Недвижимость'
@@ -91,12 +92,12 @@ class Realty(models.Model):
                 f'{"-комн." if len(self.about_apartment.number_of_rooms.number_of_rooms) <= 2 else ""} '
                 f'{self.realty_type.type}, '
                 f'{self.about_apartment.area} м², '
-                f'{self.about_apartment.floor}/{self.about_apartment.floors_number} этаж, '
-                f'{self.house.street.name}, '
-                f'{self.house.house_number}'
-                f'{"копр." + self.house.corpus if self.house.corpus != "" else ""}'
-                f'{"стр." + self.house.building if self.house.building != "" else ""}'
-                f'{"вл." + self.house.ownership if self.house.ownership != "" else ""}, '
+                f'{self.about_apartment.floor}/{self.about_apartment.floors_number} этаж --- '
+                f'{self.address.street.name}, '
+                f'{self.address.house_number}'
+                f'{"копр." + self.address.corpus if self.address.corpus != "" else ""}'
+                f'{"стр." + self.address.building if self.address.building != "" else ""}'
+                f'{"вл." + self.address.ownership if self.address.ownership != "" else ""} --- '
                 f'владелец - {self.owner.username}')
         # TODO добавить город в адрес, когда поправим таблицы адресов
         # TODO переделать пользователя, когда будет кастомный пользователь
