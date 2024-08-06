@@ -14,14 +14,14 @@ class AboutBuilding(models.Model):
             validators.MinValueValidator(constants.MIN_YEAR_BUILT),
             validators.MaxValueValidator(constants.CURRENT_YEAR),
         ],
-        blank=True,
+        **constants.NULLABLE_FIELD,
     )
     type = models.ForeignKey(
         md.BuildingType,
         on_delete=models.PROTECT,
         verbose_name="Тип дома",
-        related_name="about_house",
-        blank=True,
+        related_name="about_houses",
+        **constants.NULLABLE_FIELD,
     )
 
     class Meta:
@@ -43,7 +43,7 @@ class AboutApartment(models.Model):
         md.RoomsNumber,
         on_delete=models.PROTECT,
         verbose_name="Кол-во комнат",
-        related_name="about_apartment",
+        related_name="about_apartments",
     )
     area = models.FloatField(
         verbose_name="Площадь квартиры кв.м.",
@@ -65,10 +65,10 @@ class AboutApartment(models.Model):
 
     def __str__(self):
         return (
-            f"Кол-во комнат: {self.number_of_rooms}, Площадь: {self.area}, "
-            f"Лоджия: {self.loggia}, Балкон: {self.balcony}, "
-            f"Лифт: {self.elevator}, "
-            f"Этаж: {self.floor}, Этажность: {self.floors_number}"
+            f"{self.number_of_rooms}, {self.area}, "
+            f"{self.loggia}, {self.balcony}, "
+            f"{self.elevator}, "
+            f"{self.floor}, {self.floors_number}"
         )
 
 
@@ -80,7 +80,7 @@ class CommonCharacteristics(models.Model):
         on_delete=models.PROTECT,
         verbose_name="Тип ремонта",
         related_name="common_characteristics",
-        blank=True,
+        **constants.NULLABLE_FIELD,
     )
     furniture = models.BooleanField(blank=True, verbose_name="Мебель")
     courtyard_view = models.BooleanField(
@@ -95,10 +95,10 @@ class CommonCharacteristics(models.Model):
 
     def __str__(self):
         return (
-            f"Тип ремонта: {self.repair_type}, "
-            f"Мебель: {self.furniture}, "
-            f"Вид на двор: {self.courtyard_view}, "
-            f"Вид на улицу: {self.street_view}"
+            f"{self.repair_type}, "
+            f"{self.furniture}, "
+            f"{self.courtyard_view}, "
+            f"{self.street_view}"
         )
 
 
@@ -132,15 +132,15 @@ class RentalFeatures(models.Model):
 
     def __str__(self):
         return (
-            f"Холодильник: {self.fridge}, "
-            f"Интернет: {self.internet}, "
-            f"Кондиционер: {self.conditioner}, "
-            f"Телевизор: {self.tv}, "
-            f"Посудомоеяная машина: {self.internet}, "
-            f"Стиральная машина: {self.conditioner}, "
-            f"Мусоропровод: {self.tv}, "
-            f"Можно с детьми: {self.tv}, "
-            f"Можно с животными: {self.fridge}, "
+            f"{self.fridge}, "
+            f"{self.internet}, "
+            f"{self.conditioner}, "
+            f"{self.tv}, "
+            f"{self.internet}, "
+            f"{self.conditioner}, "
+            f"{self.tv}, "
+            f"{self.tv}, "
+            f"{self.fridge}"
         )
 
 
@@ -150,18 +150,20 @@ class LeasePayments(models.Model):
     counters_payment = models.ForeignKey(
         md.TradeParticipant,
         on_delete=models.PROTECT,
-        blank=True,
+        **constants.NULLABLE_FIELD,
         verbose_name="Оплата счетчиков",
-        related_name="lease_payment_communal",
+        related_name="lease_payments_communal",
     )
     communal_payment = models.ForeignKey(
         md.TradeParticipant,
         on_delete=models.PROTECT,
-        blank=True,
+        **constants.NULLABLE_FIELD,
         verbose_name="Оплата ЖКХ",
-        related_name="lease_payment_counters",
+        related_name="lease_payments_counters",
     )
-    deposit = models.PositiveIntegerField(verbose_name="Залог", blank=True)
+    deposit = models.PositiveIntegerField(
+        verbose_name="Залог", **constants.NULLABLE_FIELD
+    )
 
     class Meta:
         ordering = ["deposit"]
@@ -170,9 +172,9 @@ class LeasePayments(models.Model):
 
     def __str__(self):
         return (
-            f"Оплата счетчиков: {self.counters_payment}, "
-            f"Оплата ЖКХ: {self.communal_payment}, "
-            f"Залог: {self.deposit}"
+            f"{self.counters_payment}, "
+            f"{self.communal_payment}, "
+            f"{self.deposit}"
         )
 
 
@@ -198,7 +200,4 @@ class SalesParameters(models.Model):
         verbose_name_plural = "Параметры продаж"
 
     def __str__(self):
-        return (
-            f"Тип жилья: {self.housing_type}, "
-            f"Тип продажи: {self.sale_type}, "
-        )
+        return f"{self.housing_type}, {self.sale_type}"

@@ -7,7 +7,7 @@ class City(models.Model):
     """City model."""
 
     name = models.CharField(
-        max_length=constants.CHAR_LENGHT, verbose_name="Город"
+        max_length=constants.CHAR_LENGTH, verbose_name="Город"
     )
 
     class Meta:
@@ -16,21 +16,21 @@ class City(models.Model):
         verbose_name_plural = "Города"
 
     def __str__(self):
-        return f"Город: {self.name}"
+        return f"{self.name}"
 
 
 class District(models.Model):
     """District model."""
 
     name = models.CharField(
-        max_length=constants.CHAR_LENGHT, verbose_name="Округ"
+        max_length=constants.CHAR_LENGTH, verbose_name="Округ"
     )
     city = models.ForeignKey(
         City,
         verbose_name="Город",
         on_delete=models.PROTECT,
-        related_name="district",
-        blank=True,
+        related_name="districts",
+        **constants.NULLABLE_FIELD,
     )
 
     class Meta:
@@ -39,21 +39,21 @@ class District(models.Model):
         verbose_name_plural = "Округа"
 
     def __str__(self):
-        return f"Округ: {self.name}, город: {self.city}"
+        return f"{self.name}, {self.city}"
 
 
 class Zone(models.Model):
     """Zone model."""
 
     name = models.CharField(
-        max_length=constants.CHAR_LENGHT, verbose_name="Район"
+        max_length=constants.CHAR_LENGTH, verbose_name="Район"
     )
     district = models.ForeignKey(
         District,
         verbose_name="Округ",
         on_delete=models.PROTECT,
-        related_name="zone",
-        blank=True,
+        related_name="zones",
+        **constants.NULLABLE_FIELD,
     )
 
     class Meta:
@@ -62,21 +62,21 @@ class Zone(models.Model):
         verbose_name_plural = "Районы"
 
     def __str__(self):
-        return f"Район: {self.name}, округ: {self.district}"
+        return f"{self.name}, {self.district}"
 
 
 class Street(models.Model):
     """Street model."""
 
     name = models.CharField(
-        max_length=constants.CHAR_LENGHT, verbose_name="Улица"
+        max_length=constants.CHAR_LENGTH, verbose_name="Улица"
     )
     zone = models.ForeignKey(
         Zone,
         verbose_name="Район",
         on_delete=models.PROTECT,
-        related_name="street",
-        blank=True,
+        related_name="streets",
+        **constants.NULLABLE_FIELD,
     )
 
     class Meta:
@@ -85,14 +85,14 @@ class Street(models.Model):
         verbose_name_plural = "Улицы"
 
     def __str__(self):
-        return f"Улица: {self.name}, район: {self.zone}"
+        return f"{self.name}, {self.zone}"
 
 
 class Metro(models.Model):
     """Metro model."""
 
     name = models.CharField(
-        max_length=constants.CHAR_LENGHT, verbose_name="Метро"
+        max_length=constants.CHAR_LENGTH, verbose_name="Метро"
     )
 
     class Meta:
@@ -101,7 +101,7 @@ class Metro(models.Model):
         verbose_name_plural = "Метро"
 
     def __str__(self):
-        return f"Метро: {self.name}"
+        return f"{self.name}"
 
 
 class House(models.Model):
@@ -111,29 +111,39 @@ class House(models.Model):
         Street,
         verbose_name="Улица",
         on_delete=models.PROTECT,
-        related_name="house",
+        related_name="houses",
     )
-    house_number = models.PositiveSmallIntegerField(verbose_name="Номер дома")
+    house_number = models.CharField(
+        max_length=constants.CHAR_LENGTH, verbose_name="Номер дома"
+    )
     corpus = models.CharField(
-        max_length=constants.CHAR_LENGHT, verbose_name="Корпус", blank=True
+        max_length=constants.CHAR_LENGTH,
+        verbose_name="Корпус",
+        **constants.NULLABLE_FIELD,
     )
     building = models.CharField(
-        max_length=constants.CHAR_LENGHT, verbose_name="Строение", blank=True
+        max_length=constants.CHAR_LENGTH,
+        verbose_name="Строение",
+        **constants.NULLABLE_FIELD,
     )
     ownership = models.CharField(
-        max_length=constants.CHAR_LENGHT, verbose_name="Владение", blank=True
+        max_length=constants.CHAR_LENGTH,
+        verbose_name="Владение",
+        **constants.NULLABLE_FIELD,
     )
     map_point = models.CharField(
-        max_length=constants.CHAR_LENGHT, verbose_name="Точка на карте"
+        max_length=constants.CHAR_LENGTH, verbose_name="Точка на карте"
     )
     metro = models.ForeignKey(
         Metro,
         verbose_name="Метро",
         on_delete=models.PROTECT,
-        related_name="house",
+        related_name="houses",
+        **constants.NULLABLE_FIELD,
     )
     minutes_to_metro = models.PositiveSmallIntegerField(
-        verbose_name="Минут до метро"  # добавить валидацию на максимальное значение?
+        verbose_name="Минут до метро",  # добавить валидацию на максимальное значение?
+        **constants.NULLABLE_FIELD,
     )
 
     class Meta:
@@ -143,12 +153,12 @@ class House(models.Model):
 
     def __str__(self):
         return (
-            f"Улица: {self.street}, "
-            f"Номер дома: {self.house_number}, "
-            f"Корпус: {self.corpus}, "
-            f"Строение: {self.building}, "
-            f"Владение: {self.ownership}, "
-            f"Точка на карте: {self.map_point}, "
-            f"Метро: {self.metro}, "
-            f"Минут до метро: {self.minutes_to_metro}, "
+            f"{self.street}, "
+            f"{self.house_number}, "
+            f"{self.corpus}, "
+            f"{self.building}, "
+            f"{self.ownership}, "
+            f"{self.map_point}, "
+            f"{self.metro}, "
+            f"{self.minutes_to_metro}"
         )
