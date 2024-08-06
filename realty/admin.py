@@ -21,9 +21,9 @@ class RealtyAdmin(admin.ModelAdmin):
     def address_short(self, obj):
         return (f'{obj.address.street.name}, '
                 f'{obj.address.house_number}'
-                f'{"копр." + obj.address.corpus if obj.address.corpus != "" else ""}'
-                f'{"стр." + obj.address.building if obj.address.building != "" else ""}'
-                f'{"вл." + obj.address.ownership if obj.address.ownership != "" else ""}')
+                f'{"копр." + obj.address.corpus if obj.address.corpus else ""}'
+                f'{"стр." + obj.address.building if obj.address.building else ""}'
+                f'{"вл." + obj.address.ownership if obj.address.ownership else ""}')
 
     apartment.short_description = 'Квартира'
     address_short.short_description = 'Адрес'

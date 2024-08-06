@@ -24,7 +24,7 @@ class Realty(models.Model):
     )
     address = models.ForeignKey(
         addresses_models.House,
-        on_delete=models.PROTECT, verbose_name='Номер дома', related_name='realty',
+        on_delete=models.PROTECT, verbose_name='Адрес', related_name='realty',
     )
     sales_parameters = models.ForeignKey(
         specificities_models.SalesParameters,
@@ -74,7 +74,7 @@ class Realty(models.Model):
         on_delete=models.PROTECT, verbose_name='Способ связи', related_name='realty',
     )
     realty_status = models.ForeignKey(
-        values_models.AdStatus,
+        values_models.RealtyAdvStatus,
         on_delete=models.PROTECT, verbose_name='Статус', related_name='realty',
     )
     published_at = models.DateTimeField(
@@ -95,9 +95,9 @@ class Realty(models.Model):
                 f'{self.about_apartment.floor}/{self.about_apartment.floors_number} этаж --- '
                 f'{self.address.street.name}, '
                 f'{self.address.house_number}'
-                f'{"копр." + self.address.corpus if self.address.corpus != "" else ""}'
-                f'{"стр." + self.address.building if self.address.building != "" else ""}'
-                f'{"вл." + self.address.ownership if self.address.ownership != "" else ""} --- '
-                f'владелец - {self.owner.username}')
+                f'{"копр." + self.address.corpus if self.address.corpus else ""}'
+                f'{"стр." + self.address.building if self.address.building else ""}'
+                f'{"вл." + self.address.ownership if self.address.ownership else ""} --- '
+                f'{self.owner.username}')
         # TODO добавить город в адрес, когда поправим таблицы адресов
         # TODO переделать пользователя, когда будет кастомный пользователь
