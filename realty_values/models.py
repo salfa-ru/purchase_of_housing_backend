@@ -11,7 +11,6 @@ class BuildingType(models.Model):
     )
 
     class Meta:
-        ordering = ["type"]
         verbose_name = "Тип дома"
         verbose_name_plural = "Типы домов"
 
@@ -27,7 +26,6 @@ class RoomsNumber(models.Model):
     )
 
     class Meta:
-        ordering = ["number_of_rooms"]
         verbose_name = "Количество комнат"
         verbose_name_plural = "Количество комнат"
 
@@ -43,7 +41,6 @@ class RepairType(models.Model):
     )
 
     class Meta:
-        ordering = ["type"]
         verbose_name = "Тип ремонта"
         verbose_name_plural = "Типы ремонта"
 
@@ -59,7 +56,6 @@ class CommunicationMethod(models.Model):
     )
 
     class Meta:
-        ordering = ["method"]
         verbose_name = "Способ связи"
         verbose_name_plural = "Способы связи"
 
@@ -75,7 +71,6 @@ class RealtyAdvStatus(models.Model):
     )
 
     class Meta:
-        ordering = ["status"]
         verbose_name = "Статус объявления"
         verbose_name_plural = "Статусы объявлений"
 
@@ -93,7 +88,6 @@ class HousingType(models.Model):
     )
 
     class Meta:
-        ordering = ["type"]
         verbose_name = "Тип жилья"
         verbose_name_plural = "Типы жилья"
 
@@ -111,7 +105,6 @@ class SaleType(models.Model):
     )
 
     class Meta:
-        ordering = ["type"]
         verbose_name = "Тип продажи"
         verbose_name_plural = "Типы продажи"
 
@@ -128,7 +121,6 @@ class TradeParticipant(models.Model):
     )
 
     class Meta:
-        ordering = ["participant"]
         verbose_name = "Участник сделки"
         verbose_name_plural = "Участники сделок"
 
@@ -150,7 +142,6 @@ class TradeType(models.Model):
     )
 
     class Meta:
-        ordering = ["noun_type"]
         verbose_name = "Тип сделки"
         verbose_name_plural = "Типы сделок"
 
@@ -170,7 +161,6 @@ class RealtyType(models.Model):
     )
 
     class Meta:
-        ordering = ["type"]
         verbose_name = "Тип недвижимости"
         verbose_name_plural = "Типы недвижимости"
 
