@@ -29,7 +29,7 @@ class District(models.Model):
         City,
         verbose_name="Город",
         on_delete=models.PROTECT,
-        related_name="district",
+        related_name="districts",
         **constants.NULLABLE_FIELD,
     )
 
@@ -52,7 +52,7 @@ class Zone(models.Model):
         District,
         verbose_name="Округ",
         on_delete=models.PROTECT,
-        related_name="zone",
+        related_name="zones",
         **constants.NULLABLE_FIELD,
     )
 
@@ -75,7 +75,7 @@ class Street(models.Model):
         Zone,
         verbose_name="Район",
         on_delete=models.PROTECT,
-        related_name="street",
+        related_name="streets",
         **constants.NULLABLE_FIELD,
     )
 
@@ -111,7 +111,7 @@ class House(models.Model):
         Street,
         verbose_name="Улица",
         on_delete=models.PROTECT,
-        related_name="house",
+        related_name="houses",
     )
     house_number = models.CharField(
         max_length=constants.CHAR_LENGTH, verbose_name="Номер дома"
@@ -138,7 +138,7 @@ class House(models.Model):
         Metro,
         verbose_name="Метро",
         on_delete=models.PROTECT,
-        related_name="house",
+        related_name="houses",
         **constants.NULLABLE_FIELD,
     )
     minutes_to_metro = models.PositiveSmallIntegerField(

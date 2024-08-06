@@ -20,7 +20,7 @@ class AboutBuilding(models.Model):
         md.BuildingType,
         on_delete=models.PROTECT,
         verbose_name="Тип дома",
-        related_name="about_house",
+        related_name="about_houses",
         **constants.NULLABLE_FIELD,
     )
 
@@ -43,7 +43,7 @@ class AboutApartment(models.Model):
         md.RoomsNumber,
         on_delete=models.PROTECT,
         verbose_name="Кол-во комнат",
-        related_name="about_apartment",
+        related_name="about_apartments",
     )
     area = models.FloatField(
         verbose_name="Площадь квартиры кв.м.",
@@ -52,15 +52,9 @@ class AboutApartment(models.Model):
             validators.MaxValueValidator(constants.MAX_ROOM_AREA),
         ],
     )
-    loggia = models.BooleanField(
-        verbose_name="Лоджия", blank=True
-    )
-    balcony = models.BooleanField(
-        verbose_name="Балкон", blank=True
-    )
-    elevator = models.BooleanField(
-        verbose_name="Лифт", blank=True
-    )
+    loggia = models.BooleanField(verbose_name="Лоджия", blank=True)
+    balcony = models.BooleanField(verbose_name="Балкон", blank=True)
+    elevator = models.BooleanField(verbose_name="Лифт", blank=True)
     floor = models.PositiveSmallIntegerField(verbose_name="Этаж")
     floors_number = models.PositiveSmallIntegerField(verbose_name="Этажность")
 
@@ -111,18 +105,10 @@ class CommonCharacteristics(models.Model):
 class RentalFeatures(models.Model):
     """Rental Features model."""
 
-    fridge = models.BooleanField(
-        verbose_name="Холодильник", blank=True
-    )
-    internet = models.BooleanField(
-        verbose_name="Интернет", blank=True
-    )
-    conditioner = models.BooleanField(
-        verbose_name="Кондиционер", blank=True
-    )
-    tv = models.BooleanField(
-        verbose_name="Телевизор", blank=True
-    )
+    fridge = models.BooleanField(verbose_name="Холодильник", blank=True)
+    internet = models.BooleanField(verbose_name="Интернет", blank=True)
+    conditioner = models.BooleanField(verbose_name="Кондиционер", blank=True)
+    tv = models.BooleanField(verbose_name="Телевизор", blank=True)
     dishwasher = models.BooleanField(
         verbose_name="Посудомоечная машина", blank=True
     )
@@ -166,14 +152,14 @@ class LeasePayments(models.Model):
         on_delete=models.PROTECT,
         **constants.NULLABLE_FIELD,
         verbose_name="Оплата счетчиков",
-        related_name="lease_payment_communal",
+        related_name="lease_payments_communal",
     )
     communal_payment = models.ForeignKey(
         md.TradeParticipant,
         on_delete=models.PROTECT,
         **constants.NULLABLE_FIELD,
         verbose_name="Оплата ЖКХ",
-        related_name="lease_payment_counters",
+        related_name="lease_payments_counters",
     )
     deposit = models.PositiveIntegerField(
         verbose_name="Залог", **constants.NULLABLE_FIELD
@@ -214,4 +200,4 @@ class SalesParameters(models.Model):
         verbose_name_plural = "Параметры продаж"
 
     def __str__(self):
-        return f"{self.housing_type}, " f"{self.sale_type}, "
+        return f"{self.housing_type}, {self.sale_type}"
