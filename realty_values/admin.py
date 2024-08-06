@@ -27,8 +27,8 @@ class CommunicationMethodAdmin(admin.ModelAdmin):
     list_filter = ("method",)
 
 
-@admin.register(models.AdStatus)
-class AdStatusAdmin(admin.ModelAdmin):
+@admin.register(models.RealtyAdvStatus)
+class RealtyAdvStatusAdmin(admin.ModelAdmin):
     list_display = ("status",)
     list_filter = ("status",)
 

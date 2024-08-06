@@ -8,4 +8,6 @@ MIN_ROOM_AREA = 5  # поменять?
 MAX_ROOM_AREA = 1500  # поменять?
 
 
-CHAR_LENGHT = 50
+CHAR_LENGTH = 50
+
+NULLABLE_FIELD = {'blank': True, 'null': True}
