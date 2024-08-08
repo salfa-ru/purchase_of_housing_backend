@@ -44,7 +44,7 @@ class MetroAdmin(admin.ModelAdmin):
 
 
 @admin.register(models.Address)
-class HouseAdmin(admin.ModelAdmin):
+class AddressAdmin(admin.ModelAdmin):
     list_display = (
         "house_number",
         "street",
