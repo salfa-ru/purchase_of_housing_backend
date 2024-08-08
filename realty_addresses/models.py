@@ -62,21 +62,21 @@ class Street(models.Model):
         Zone,
         verbose_name="Район",
         on_delete=models.PROTECT,
-        related_name="zones",
+        related_name="streets",
         **constants.NULLABLE_FIELD,
     )
     district = models.ForeignKey(
         District,
         verbose_name="Округ",
         on_delete=models.PROTECT,
-        related_name="districts",
+        related_name="streets",
         **constants.NULLABLE_FIELD,
     )
     city = models.ForeignKey(
         City,
         verbose_name="Город",
         on_delete=models.PROTECT,
-        related_name="cities",
+        related_name="streets",
     )
 
     class Meta:
@@ -114,7 +114,7 @@ class Address(models.Model):
         Street,
         verbose_name="Улица",
         on_delete=models.PROTECT,
-        related_name="address_streets",
+        related_name="addresses",
     )
     corpus = models.CharField(
         max_length=constants.CHAR_LENGTH,
@@ -138,7 +138,7 @@ class Address(models.Model):
         Metro,
         verbose_name="Метро",
         on_delete=models.PROTECT,
-        related_name="houses",
+        related_name="addresses",
         **constants.NULLABLE_FIELD,
     )
     minutes_to_metro = models.PositiveSmallIntegerField(
