@@ -12,92 +12,125 @@ class Realty(models.Model):
 
     owner = models.ForeignKey(
         user_models.User,
-        on_delete=models.PROTECT, verbose_name='Владелец', related_name='realty',
+        on_delete=models.PROTECT,
+        verbose_name="Владелец",
+        related_name="realty",
     )
     trade_type = models.ForeignKey(
         values_models.TradeType,
-        on_delete=models.PROTECT, verbose_name='Тип сделки', related_name='realty',
+        on_delete=models.PROTECT,
+        verbose_name="Тип сделки",
+        related_name="realty",
     )
     realty_type = models.ForeignKey(
         values_models.RealtyType,
-        on_delete=models.PROTECT, verbose_name='Тип недвижимости', related_name='realty',
+        on_delete=models.PROTECT,
+        verbose_name="Тип недвижимости",
+        related_name="realty",
     )
     address = models.ForeignKey(
-        addresses_models.House,
-        on_delete=models.PROTECT, verbose_name='Адрес', related_name='realty',
+        addresses_models.Address,
+        on_delete=models.PROTECT,
+        verbose_name="Адрес",
+        related_name="realty",
     )
     sales_parameters = models.ForeignKey(
         specificities_models.SalesParameters,
-        on_delete=models.PROTECT, verbose_name='Параметры продажи', related_name='realty',
+        on_delete=models.PROTECT,
+        verbose_name="Параметры продажи",
+        related_name="realty",
         **NULLABLE_FIELD,
     )
     about_building = models.ForeignKey(
         specificities_models.AboutBuilding,
-        on_delete=models.PROTECT, verbose_name='О доме', related_name='realty',
+        on_delete=models.PROTECT,
+        verbose_name="О доме",
+        related_name="realty",
         **NULLABLE_FIELD,
     )
     about_apartment = models.ForeignKey(
         specificities_models.AboutApartment,
-        on_delete=models.PROTECT, verbose_name='О квартире', related_name='realty',
+        on_delete=models.PROTECT,
+        verbose_name="О квартире",
+        related_name="realty",
     )
     common_characteristics = models.ForeignKey(
         specificities_models.CommonCharacteristics,
-        on_delete=models.PROTECT, verbose_name='Общие характеристики', related_name='realty',
+        on_delete=models.PROTECT,
+        verbose_name="Общие характеристики",
+        related_name="realty",
         **NULLABLE_FIELD,
     )
     rental_features = models.ForeignKey(
         specificities_models.RentalFeatures,
-        on_delete=models.PROTECT, verbose_name='Особенности аренды', related_name='realty',
+        on_delete=models.PROTECT,
+        verbose_name="Особенности аренды",
+        related_name="realty",
         **NULLABLE_FIELD,
     )
     lease_payments = models.ForeignKey(
         specificities_models.LeasePayments,
-        on_delete=models.PROTECT, verbose_name='Платежи аренды', related_name='realty',
+        on_delete=models.PROTECT,
+        verbose_name="Платежи аренды",
+        related_name="realty",
         **NULLABLE_FIELD,
     )
     description = models.TextField(
-        max_length=DESCRIPTION_LENGTH, verbose_name='Описание',
+        max_length=DESCRIPTION_LENGTH,
+        verbose_name="Описание",
     )
     price = models.PositiveIntegerField(
-        verbose_name='Цена',
+        verbose_name="Цена",
     )
     commission = models.PositiveIntegerField(
-        verbose_name='Комиссия',
+        verbose_name="Комиссия",
         **NULLABLE_FIELD,
     )
     owner_type = models.ForeignKey(
         values_models.TradeParticipant,
-        on_delete=models.PROTECT, verbose_name='Тип владельца', related_name='realty',
+        on_delete=models.PROTECT,
+        verbose_name="Тип владельца",
+        related_name="realty",
     )
     communication_method = models.ForeignKey(
         values_models.CommunicationMethod,
-        on_delete=models.PROTECT, verbose_name='Способ связи', related_name='realty',
+        on_delete=models.PROTECT,
+        verbose_name="Способ связи",
+        related_name="realty",
     )
     realty_status = models.ForeignKey(
         values_models.RealtyAdvStatus,
-        on_delete=models.PROTECT, verbose_name='Статус', related_name='realty',
+        on_delete=models.PROTECT,
+        verbose_name="Статус",
+        related_name="realty",
     )
     published_at = models.DateTimeField(
-        default=None, verbose_name='Дата и время публикации',
+        default=None,
+        verbose_name="Дата и время публикации",
         **NULLABLE_FIELD,
     )
-    changed_at = models.DateTimeField(auto_now=True, verbose_name='Последнее изменение',)
+    changed_at = models.DateTimeField(
+        auto_now=True,
+        verbose_name="Последнее изменение",
+    )
 
     class Meta:
-        verbose_name = 'Недвижимость'
-        verbose_name_plural = 'Недвижимость'
+        verbose_name = "Недвижимость"
+        verbose_name_plural = "Недвижимость"
 
     def __str__(self):
-        return (f'{self.about_apartment.number_of_rooms.number_of_rooms}'
-                f'{"-комн." if len(self.about_apartment.number_of_rooms.number_of_rooms) <= 2 else ""} '
-                f'{self.realty_type.type}, '
-                f'{self.about_apartment.area} м², '
-                f'{self.about_apartment.floor}/{self.about_apartment.floors_number} этаж --- '
-                f'{self.address.street.name}, '
-                f'{self.address.house_number}'
-                f'{"копр." + self.address.corpus if self.address.corpus else ""}'
-                f'{"стр." + self.address.building if self.address.building else ""}'
-                f'{"вл." + self.address.ownership if self.address.ownership else ""} --- '
-                f'{self.owner.username}')
+        return (
+            f"{self.about_apartment.number_of_rooms.number_of_rooms}"
+            f'{"-комн." if len(self.about_apartment.number_of_rooms.number_of_rooms) <= 2 else ""} '
+            f"{self.realty_type.type}, "
+            f"{self.about_apartment.area} м², "
+            f"{self.about_apartment.floor}/{self.about_apartment.floors_number} этаж --- "
+            f"{self.address.street.name}, "
+            f"{self.address.house_number}"
+            f'{"копр." + self.address.corpus if self.address.corpus else ""}'
+            f'{"стр." + self.address.building if self.address.building else ""}'
+            f'{"вл." + self.address.ownership if self.address.ownership else ""} --- '
+            f"{self.owner.username}"
+        )
         # TODO добавить город в адрес, когда поправим таблицы адресов
         # TODO переделать пользователя, когда будет кастомный пользователь
