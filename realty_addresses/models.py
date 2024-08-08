@@ -1,3 +1,4 @@
+from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 
 from config import constants
@@ -25,13 +26,6 @@ class District(models.Model):
     name = models.CharField(
         max_length=constants.CHAR_LENGTH, verbose_name="Округ"
     )
-    city = models.ForeignKey(
-        City,
-        verbose_name="Город",
-        on_delete=models.PROTECT,
-        related_name="districts",
-        **constants.NULLABLE_FIELD,
-    )
 
     class Meta:
         ordering = ["name"]
@@ -39,7 +33,7 @@ class District(models.Model):
         verbose_name_plural = "Округа"
 
     def __str__(self):
-        return f"{self.name}, {self.city}"
+        return f"{self.name}"
 
 
 class Zone(models.Model):
@@ -48,13 +42,6 @@ class Zone(models.Model):
     name = models.CharField(
         max_length=constants.CHAR_LENGTH, verbose_name="Район"
     )
-    district = models.ForeignKey(
-        District,
-        verbose_name="Округ",
-        on_delete=models.PROTECT,
-        related_name="zones",
-        **constants.NULLABLE_FIELD,
-    )
 
     class Meta:
         ordering = ["name"]
@@ -62,7 +49,7 @@ class Zone(models.Model):
         verbose_name_plural = "Районы"
 
     def __str__(self):
-        return f"{self.name}, {self.district}"
+        return f"{self.name}"
 
 
 class Street(models.Model):
@@ -78,6 +65,19 @@ class Street(models.Model):
         related_name="streets",
         **constants.NULLABLE_FIELD,
     )
+    district = models.ForeignKey(
+        District,
+        verbose_name="Округ",
+        on_delete=models.PROTECT,
+        related_name="streets",
+        **constants.NULLABLE_FIELD,
+    )
+    city = models.ForeignKey(
+        City,
+        verbose_name="Город",
+        on_delete=models.PROTECT,
+        related_name="streets",
+    )
 
     class Meta:
         ordering = ["name"]
@@ -85,7 +85,7 @@ class Street(models.Model):
         verbose_name_plural = "Улицы"
 
     def __str__(self):
-        return f"{self.name}, {self.zone}"
+        return f"{self.name}, {self.zone}, {self.district}, {self.city}"
 
 
 class Metro(models.Model):
@@ -104,17 +104,17 @@ class Metro(models.Model):
         return f"{self.name}"
 
 
-class House(models.Model):
-    """House model."""
+class Address(models.Model):
+    """Address model."""
 
+    house_number = models.CharField(
+        max_length=constants.CHAR_LENGTH, verbose_name="Номер дома"
+    )
     street = models.ForeignKey(
         Street,
         verbose_name="Улица",
         on_delete=models.PROTECT,
-        related_name="houses",
-    )
-    house_number = models.CharField(
-        max_length=constants.CHAR_LENGTH, verbose_name="Номер дома"
+        related_name="addresses",
     )
     corpus = models.CharField(
         max_length=constants.CHAR_LENGTH,
@@ -138,18 +138,27 @@ class House(models.Model):
         Metro,
         verbose_name="Метро",
         on_delete=models.PROTECT,
-        related_name="houses",
+        related_name="addresses",
         **constants.NULLABLE_FIELD,
     )
     minutes_to_metro = models.PositiveSmallIntegerField(
-        verbose_name="Минут до метро",  # добавить валидацию на максимальное значение?
+        verbose_name="Минут до метро",
         **constants.NULLABLE_FIELD,
+        validators=[
+            MinValueValidator(
+                constants.MIN_TIME,
+                message='Минимальное время не может быть меньше 1 минуты!'),
+            MaxValueValidator(
+                constants.MAX_TIME,
+                message='Минимальное время не может быть больше 60 минут!'
+            )
+        ]
     )
 
     class Meta:
         ordering = ["street"]
-        verbose_name = "Дом"
-        verbose_name_plural = "Дома"
+        verbose_name = "Адрес"
+        verbose_name_plural = "Адреса"
 
     def __str__(self):
         return (

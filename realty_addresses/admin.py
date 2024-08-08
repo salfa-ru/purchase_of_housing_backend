@@ -13,7 +13,6 @@ class CityAdmin(admin.ModelAdmin):
 class DistrictAdmin(admin.ModelAdmin):
     list_display = (
         "name",
-        "city",
     )
     list_filter = ("name",)
 
@@ -22,7 +21,6 @@ class DistrictAdmin(admin.ModelAdmin):
 class ZoneAdmin(admin.ModelAdmin):
     list_display = (
         "name",
-        "district",
     )
     list_filter = ("name",)
 
@@ -32,6 +30,9 @@ class StreetAdmin(admin.ModelAdmin):
     list_display = (
         "name",
         "zone",
+        "district",
+        "city",
+
     )
     list_filter = ("name",)
 
@@ -42,11 +43,11 @@ class MetroAdmin(admin.ModelAdmin):
     list_filter = ("name",)
 
 
-@admin.register(models.House)
-class HouseAdmin(admin.ModelAdmin):
+@admin.register(models.Address)
+class AddressAdmin(admin.ModelAdmin):
     list_display = (
-        "street",
         "house_number",
+        "street",
         "corpus",
         "building",
         "ownership",

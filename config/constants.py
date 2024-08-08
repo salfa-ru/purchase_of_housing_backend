@@ -16,3 +16,7 @@ NOTIFICATION_LENGTH = {'code': 50, 'part1': 100, 'part2': 200}
 QUESTION_LENGTH = 100
 
 NULLABLE_FIELD = {'blank': True, 'null': True}
+
+# min и max время до метро в мин.
+MIN_TIME = 1
+MAX_TIME = 60
