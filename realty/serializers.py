@@ -26,5 +26,5 @@ class RealtySerializer(serializers.ModelSerializer):
                   "rooms",
                   "realty_type",
                   "area",
-                  "address",
-                  "metro")
+                  "address",)
+                #   "metro")
