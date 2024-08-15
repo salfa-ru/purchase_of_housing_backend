@@ -8,7 +8,9 @@ class RealtyPhoto(models.Model):
 
     realty = models.ForeignKey(
         realty_models.Realty,
-        on_delete=models.PROTECT, verbose_name='Недвижимость', related_name='realty_photos',
+        on_delete=models.CASCADE,
+        verbose_name='Недвижимость',
+        related_name='realty_photos',
     )
     image = models.ImageField(upload_to='realty_photos', verbose_name='Фото')
 
@@ -18,3 +20,5 @@ class RealtyPhoto(models.Model):
 
     def __str__(self):
         return self.image.name
+
+    # TODO настроить postdelete сигнал для удаления фото из медиа-папки!

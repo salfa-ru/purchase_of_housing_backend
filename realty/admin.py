@@ -7,9 +7,16 @@ from realty.models import Realty
 # TODO нужно настроить админку для prod-a
 @admin.register(Realty)
 class RealtyAdmin(admin.ModelAdmin):
-    # TODO добавить город в адрес, когда поправим таблицы
-    list_display = ('apartment', 'address_short', 'owner', 'owner_type', 'trade_type', 'realty_status', 'changed_at')
-    list_filter = ('realty_status', 'trade_type', 'owner_type',)
+    # TODO добавить город в адрес, когда поправим
+    list_display = ('apartment',
+                    'address_short',
+                    'owner', 'owner_type',
+                    'trade_type',
+                    'realty_status',
+                    'changed_at')
+    list_filter = ('realty_status',
+                   'trade_type',
+                   'owner_type',)
 
     def apartment(self, obj):
         return (f'{obj.about_apartment.number_of_rooms.number_of_rooms}'
