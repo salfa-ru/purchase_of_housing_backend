@@ -35,3 +35,6 @@ class ConstantsAuth:
     URL_GET_TOKEN = HOST + 'api/v1/auth/token/'
     URL_GET_PROFILE = HOST + 'api/v1/profile/'
     URL_REFRESH_TOKEN = HOST + '/api/v1/auth/token/refresh/'
+
+    PREFIX_USER_ID_IN_TOKEN = 'user_id'
+    PREFIX_UPDATED_DATE_IN_TOKEN = 'pr_up'

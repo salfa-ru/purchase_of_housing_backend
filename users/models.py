@@ -1,3 +1,5 @@
+import uuid
+
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 
@@ -7,11 +9,12 @@ from realty_values import models as values_models
 
 class User(AbstractUser):
     """Custom User model."""
-
-    birthday = models.DateTimeField(
-        verbose_name='День рождения',
-        **constants.NULLABLE_FIELD,
+    uuid_esa = models.UUIDField(
+        editable=False,
+        verbose_name='UUID из ЕСА',
+        **constants.NULLABLE_FIELD
     )
+
     avatar = models.ImageField(
         upload_to='users/avatars',
         verbose_name='Аватарка',
@@ -29,8 +32,9 @@ class User(AbstractUser):
         verbose_name='Номер телефона',
         **constants.NULLABLE_FIELD,
     )
-    changed_at = models.DateTimeField(
+    updated_at = models.DateTimeField(
         verbose_name='Последнее изменение',
+        default=None,
         **constants.NULLABLE_FIELD,
     )
     # TODO доделать генерацию qr-кода
