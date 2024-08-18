@@ -34,13 +34,6 @@ class Realty(models.Model):
         verbose_name="Адрес",
         related_name="realty",
     )
-    # sales_parameters = models.ForeignKey(
-    #     specificities_models.SalesParameters,
-    #     on_delete=models.PROTECT,
-    #     verbose_name="Параметры продажи",
-    #     related_name="realty",
-    #     **NULLABLE_FIELD,
-    # )
     about_building = models.ForeignKey(
         specificities_models.AboutBuilding,
         on_delete=models.PROTECT,
@@ -61,20 +54,6 @@ class Realty(models.Model):
         related_name="realty",
         **NULLABLE_FIELD,
     )
-    # rental_features = models.ForeignKey(
-    #     specificities_models.RentalFeatures,
-    #     on_delete=models.PROTECT,
-    #     verbose_name="Особенности аренды",
-    #     related_name="realty",
-    #     **NULLABLE_FIELD,
-    # )
-    # lease_payments = models.ForeignKey(
-    #     specificities_models.LeasePayments,
-    #     on_delete=models.PROTECT,
-    #     verbose_name="Платежи аренды",
-    #     related_name="realty",
-    #     **NULLABLE_FIELD,
-    # )
     description = models.TextField(
         max_length=DESCRIPTION_LENGTH,
         verbose_name="Описание",
@@ -116,9 +95,9 @@ class Realty(models.Model):
 
     @property
     def type(self):
-        if hasattr(self, "sale"):
+        if hasattr(self, "sale_profile"):
             return "sale"
-        if hasattr(self, "rent"):
+        if hasattr(self, "rent_profile"):
             return "rent"
         return "unknown"
 
@@ -140,7 +119,6 @@ class Realty(models.Model):
             f'{"вл." + self.address.ownership if self.address.ownership else ""} --- '
             f"{self.owner.username}"
         )
-        # TODO добавить город в адрес, когда поправим таблицы адресов
         # TODO переделать пользователя, когда будет кастомный пользователь
 
 
@@ -149,14 +127,19 @@ class Sale(models.Model):
     realty = models.OneToOneField(
         Realty,
         on_delete=models.CASCADE,
-        related_name='sale',
+        related_name='sale_profile',
     )
     sales_parameters = models.ForeignKey(
         specificities_models.SalesParameters,
         on_delete=models.PROTECT,
         verbose_name="Параметры продажи",
         related_name="sales",
+        **NULLABLE_FIELD,
     )
+
+    class Meta:
+        verbose_name = "Продажа"
+        verbose_name_plural = "Продажи"
 
 
 class Rent(models.Model):
@@ -164,17 +147,23 @@ class Rent(models.Model):
     realty = models.OneToOneField(
         Realty,
         on_delete=models.CASCADE,
-        related_name='rent',
+        related_name='rent_profile',
     )
     rental_features = models.ForeignKey(
         specificities_models.RentalFeatures,
         on_delete=models.PROTECT,
         verbose_name="Особенности аренды",
         related_name="rents",
+        **NULLABLE_FIELD,
     )
     lease_payments = models.ForeignKey(
         specificities_models.LeasePayments,
         on_delete=models.PROTECT,
         verbose_name="Платежи аренды",
         related_name="rents",
+        **NULLABLE_FIELD,
     )
+
+    class Meta:
+        verbose_name = "Аренда"
+        verbose_name_plural = "Аренда"
