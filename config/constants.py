@@ -20,3 +20,18 @@ NULLABLE_FIELD = {'blank': True, 'null': True}
 # min и max время до метро в мин.
 MIN_TIME = 1
 MAX_TIME = 60
+
+
+class ConstantsAuth:
+    """Constants for custom authentication"""
+
+    AUTH_KEY_PATH = 'public_key.pem'
+    AUTH_HEADER_PREFIX = b'Bearer'
+    TOKEN_AUD = 'example.com'
+
+    HOST = 'http://api.dev.esa.ktsf.ru/'
+    URL_REGISTRATION = HOST + 'api/v1/registration/'
+    URL_REGISTRATION_PROFILE = HOST + 'api/v1/registration/profile/'
+    URL_GET_TOKEN = HOST + 'api/v1/auth/token/'
+    URL_GET_PROFILE = HOST + 'api/v1/profile/'
+    URL_REFRESH_TOKEN = HOST + '/api/v1/auth/token/refresh/'
