@@ -33,6 +33,7 @@ class UserSerializer(serializers.ModelSerializer):
         }
 
     def create(self, validated_data):
+        print('-'*50, 'create')
         """При создании определяем username (нет в форме в дизайне), хэшируем пароль"""
         validated_data['username'] = validated_data['email']
         user = super().create(validated_data)
@@ -42,6 +43,7 @@ class UserSerializer(serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
         """При обновлении определяем username (нет в форме в дизайне), хэшируем пароль"""
+        print('-'*50, 'update')
         if validated_data.get('email'):
             validated_data['username'] = validated_data['email']
         user = super().update(instance, validated_data)

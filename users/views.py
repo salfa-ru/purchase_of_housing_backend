@@ -1,5 +1,6 @@
 from rest_framework import viewsets, mixins
 from rest_framework import status
+from rest_framework import permissions
 from rest_framework.response import Response
 
 from users.models import User
@@ -14,3 +15,9 @@ class UserDevViewSet(mixins.CreateModelMixin,
 
     queryset = User.objects.all()
     serializer_class = UserSerializer
+
+    def get_permissions(self):
+        if self.action == 'create':
+            return [permissions.AllowAny()]
+        return [permissions.IsAdminUser()]
+

@@ -11,14 +11,14 @@ from realty_values import models as values_models
 class CustomUserManager(UserManager):
     """Переопределение работы менеджера, для того чтобы работала команда createsuperuser.
     Для superuser задаются значения для обязательных полей."""
-    def create_superuser(self, username, password=None, **extra_fields):
+    def create_superuser(self, username, email=None, password=None, **extra_fields):
         email = username + '@email.com'
-        extra_fields.setdefault("is_staff", False)
-        extra_fields.setdefault("is_superuser", False)
+        extra_fields.setdefault("is_staff", True)
+        extra_fields.setdefault("is_superuser", True)
         extra_fields.setdefault("first_name", username)
         extra_fields.setdefault("last_name", username)
         extra_fields.setdefault("phone_number", username + '_phone')
-        return self._create_user(username, email, password, **extra_fields)
+        return super().create_superuser(username, email, password, **extra_fields)
 
 
 class User(AbstractUser):
