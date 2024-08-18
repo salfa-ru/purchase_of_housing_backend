@@ -22,6 +22,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'drf_yasg',
     'rest_framework',
     'complaints.apps.ComplaintsConfig',
     'chats.apps.ChatsConfig',
@@ -65,7 +66,6 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'config.wsgi.application'
-
 
 if DEBUG:
     DATABASES = {

@@ -7,11 +7,11 @@ from users.models import User
 class UserAdmin(admin.ModelAdmin):
     readonly_fields = ('id', 'uuid_esa',)
     fields = [
-        'uuid_esa',
+        ('id', 'uuid_esa'),
         'username',
         ('first_name', 'last_name'),
         ('email', 'phone_number'),
-        'updated_at',
+        ('updated_at', 'date_joined'),
         'user_type',
         'avatar',
         'password',

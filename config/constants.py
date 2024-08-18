@@ -21,6 +21,9 @@ NULLABLE_FIELD = {'blank': True, 'null': True}
 MIN_TIME = 1
 MAX_TIME = 60
 
+# тип пользователя для MVP
+USER_TYPE_DEFAULT = 'Собственник'
+
 
 class ConstantsAuth:
     """Constants for custom authentication"""
