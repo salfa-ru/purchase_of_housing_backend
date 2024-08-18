@@ -4,6 +4,7 @@ from rest_framework import permissions
 from rest_framework.response import Response
 
 from users.models import User
+from users.permissions import IsAdminOrOwner
 from users.serializers import UserSerializer
 
 
@@ -19,5 +20,7 @@ class UserDevViewSet(mixins.CreateModelMixin,
     def get_permissions(self):
         if self.action == 'create':
             return [permissions.AllowAny()]
+        if self.action == 'destroy':
+            return [IsAdminOrOwner()]
         return [permissions.IsAdminUser()]
 
