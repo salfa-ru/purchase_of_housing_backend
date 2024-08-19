@@ -25,7 +25,6 @@ from .yasg import urlpatterns as doc_urls
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('complaint/', include('complaints.urls', namespace='complaint')),  # для тестирорования, удалить!!!
     path('', include('users.urls', namespace='users')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
