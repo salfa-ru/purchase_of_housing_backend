@@ -131,14 +131,9 @@ class TradeParticipant(models.Model):
 class TradeType(models.Model):
     """Trade Type model."""
 
-    noun_type = models.CharField(
+    type = models.CharField(
         max_length=constants.CHAR_LENGTH,
-        verbose_name="Тип сделки сущ.",
-    )
-
-    verb_type = models.CharField(
-        max_length=constants.CHAR_LENGTH,
-        verbose_name="Тип сделки гл.",
+        verbose_name="Тип сделки",
     )
 
     class Meta:
@@ -146,7 +141,7 @@ class TradeType(models.Model):
         verbose_name_plural = "Типы сделок"
 
     def __str__(self):
-        return f"{self.noun_type}, " f"{self.verb_type}"
+        return f"{self.type}"
 
 
 class RealtyType(models.Model):
