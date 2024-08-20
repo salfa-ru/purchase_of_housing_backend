@@ -142,3 +142,19 @@ class RealtyType(models.Model):
 
     def __str__(self):
         return f"{self.type}"
+
+
+class BathroomType(models.Model):
+    """Bathroom Type model."""
+
+    type = models.CharField(
+        max_length=constants.CHAR_LENGTH,
+        verbose_name="Тип санузла",
+    )
+
+    class Meta:
+        verbose_name = "Тип санузла"
+        verbose_name_plural = "Типы санузлов"
+
+    def __str__(self):
+        return f"{self.type}"
