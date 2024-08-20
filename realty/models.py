@@ -134,7 +134,6 @@ class Sale(models.Model):
         on_delete=models.PROTECT,
         verbose_name="Параметры продажи",
         related_name="sales",
-        **NULLABLE_FIELD,
     )
 
     class Meta:
