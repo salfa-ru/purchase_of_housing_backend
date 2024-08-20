@@ -41,7 +41,7 @@ class RealtyAdmin(admin.ModelAdmin):
                 f'{"вл." + obj.address.ownership if obj.address.ownership else ""}')
 
     def trade_type_short(self, obj):
-        return f'{obj.trade_type.noun_type}'
+        return f'{obj.trade_type.type}'
 
     apartment.short_description = 'Квартира'
     address_short.short_description = 'Адрес'
@@ -50,9 +50,9 @@ class RealtyAdmin(admin.ModelAdmin):
     def get_inlines(self, request, obj=None):
         """Использование inline формы только для уже созданной модели"""
         inlines = []
-        if obj and obj.trade_type and obj.trade_type.noun_type.lower() == 'sale':
+        if obj and obj.trade_type and obj.trade_type.type.lower() == 'sale':
             inlines = [SaleInline]
-        elif obj and obj.trade_type and obj.trade_type.noun_type.lower() == 'rent':
+        elif obj and obj.trade_type and obj.trade_type.type.lower() == 'rent':
             inlines = [RentInline]
         return inlines
 
