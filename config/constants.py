@@ -21,6 +21,9 @@ NULLABLE_FIELD = {'blank': True, 'null': True}
 MIN_TIME = 1
 MAX_TIME = 60
 
+# тип пользователя для MVP
+USER_TYPE_DEFAULT = 'Собственник'
+
 
 class ConstantsAuth:
     """Constants for custom authentication"""
@@ -35,3 +38,6 @@ class ConstantsAuth:
     URL_GET_TOKEN = HOST + 'api/v1/auth/token/'
     URL_GET_PROFILE = HOST + 'api/v1/profile/'
     URL_REFRESH_TOKEN = HOST + '/api/v1/auth/token/refresh/'
+
+    PREFIX_USER_ID_IN_TOKEN = 'user_id'
+    PREFIX_UPDATED_DATE_IN_TOKEN = 'pr_up'

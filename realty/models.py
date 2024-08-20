@@ -16,12 +16,6 @@ class Realty(models.Model):
         verbose_name="Владелец",
         related_name="realty",
     )
-    trade_type = models.ForeignKey(
-        values_models.TradeType,
-        on_delete=models.PROTECT,
-        verbose_name="Тип сделки",
-        related_name="realty",
-    )
     realty_type = models.ForeignKey(
         values_models.RealtyType,
         on_delete=models.PROTECT,
@@ -94,7 +88,7 @@ class Realty(models.Model):
     )
 
     @property
-    def type(self):
+    def trade_type(self):
         if hasattr(self, "sale_profile"):
             return "sale"
         if hasattr(self, "rent_profile"):
