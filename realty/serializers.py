@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from .models import Realty
+from .models import Realty, Sale, Rent
 from realty_photos.serializers import RealtyPhotoSerializer
 from realty_addresses.serializers import AddressSerializer
 
@@ -9,7 +9,7 @@ class RealtySerializer(serializers.ModelSerializer):
     photos = RealtyPhotoSerializer(
         many=True, source="realty_photos"
     )
-    rooms = serializers.CharField(
+    number_of_rooms = serializers.CharField(
         source="about_apartment.number_of_rooms.number_of_rooms"
     )
     area = serializers.DecimalField(
@@ -23,8 +23,26 @@ class RealtySerializer(serializers.ModelSerializer):
         fields = ("id",
                   "photos",
                   "price",
-                  "rooms",
+                  "number_of_rooms",
                   "realty_type",
                   "area",
                   "address",)
-                #   "metro")
+                #   "metro",)
+
+
+class SaleSerializer(serializers.ModelSerializer):
+    realty = RealtySerializer()
+
+    class Meta:
+        model = Sale
+        fields = ("id",
+                  "realty",)
+
+
+class RentSerializer(serializers.ModelSerializer):
+    realty = RealtySerializer()
+
+    class Meta:
+        model = Rent
+        fields = ("id",
+                  "realty")
