@@ -22,9 +22,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-
     'drf_yasg',
-
     'rest_framework',
     'rest_framework.authtoken',
 
@@ -137,3 +135,16 @@ if DEBUG:
     REST_FRAMEWORK['DEFAULT_AUTHENTICATION_CLASSES'].append(
         'rest_framework.authentication.TokenAuthentication'
     )
+
+    
+# Для возможности передавать токен при отправке запросов расскомментируйте SWAGGER_SETTINGS
+
+# SWAGGER_SETTINGS = {
+#    'SECURITY_DEFINITIONS': {
+#       'Bearer': {
+#             'type': 'apiKey',
+#             'name': 'Authorization',
+#             'in': 'header'
+#       }
+#    }
+# }

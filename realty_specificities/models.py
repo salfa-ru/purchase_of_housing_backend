@@ -2,7 +2,7 @@ from django.db import models
 from django.core import validators
 from config import constants
 
-from realty_values import models as md
+from realty_values import models as values_models
 
 
 class AboutBuilding(models.Model):
@@ -17,7 +17,7 @@ class AboutBuilding(models.Model):
         **constants.NULLABLE_FIELD,
     )
     type = models.ForeignKey(
-        md.BuildingType,
+        values_models.BuildingType,
         on_delete=models.PROTECT,
         verbose_name="Тип дома",
         related_name="about_houses",
@@ -40,7 +40,7 @@ class AboutApartment(models.Model):
     """About Apartment model."""
 
     number_of_rooms = models.ForeignKey(
-        md.RoomsNumber,
+        values_models.RoomsNumber,
         on_delete=models.PROTECT,
         verbose_name="Кол-во комнат",
         related_name="about_apartments",
@@ -76,13 +76,20 @@ class CommonCharacteristics(models.Model):
     """Common Charcteristics model."""
 
     repair_type = models.ForeignKey(
-        md.RepairType,
+        values_models.RepairType,
         on_delete=models.PROTECT,
         verbose_name="Тип ремонта",
         related_name="common_characteristics",
         **constants.NULLABLE_FIELD,
     )
     furniture = models.BooleanField(blank=True, verbose_name="Мебель")
+    bathroom = models.ForeignKey(
+        values_models.BathroomType,
+        on_delete=models.PROTECT,
+        verbose_name="Тип санузла",
+        related_name="common_characteristics",
+        **constants.NULLABLE_FIELD,
+    )
     courtyard_view = models.BooleanField(
         blank=True, verbose_name="Вид во двор"
     )
@@ -148,14 +155,14 @@ class LeasePayments(models.Model):
     """Lease Payment model."""
 
     counters_payment = models.ForeignKey(
-        md.TradeParticipant,
+        values_models.TradeParticipant,
         on_delete=models.PROTECT,
         **constants.NULLABLE_FIELD,
         verbose_name="Оплата счетчиков",
         related_name="lease_payments_communal",
     )
     communal_payment = models.ForeignKey(
-        md.TradeParticipant,
+        values_models.TradeParticipant,
         on_delete=models.PROTECT,
         **constants.NULLABLE_FIELD,
         verbose_name="Оплата ЖКХ",
@@ -182,13 +189,13 @@ class SalesParameters(models.Model):
     """Sales Parameters model."""
 
     housing_type = models.ForeignKey(
-        md.HousingType,
+        values_models.HousingType,
         on_delete=models.PROTECT,
         verbose_name="Тип жилья",
         related_name="sales_parameters",
     )
     sale_type = models.ForeignKey(
-        md.SaleType,
+        values_models.SaleType,
         on_delete=models.PROTECT,
         verbose_name="Тип продажи",
         related_name="sales_parameters",

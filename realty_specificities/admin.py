@@ -20,6 +20,7 @@ class CommonCharacteristicsAdmin(admin.ModelAdmin):
     list_display = (
         "repair_type",
         "furniture",
+        "bathroom",
         "courtyard_view",
         "street_view",
     )
