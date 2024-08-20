@@ -146,10 +146,7 @@ class TradeType(models.Model):
         verbose_name_plural = "Типы сделок"
 
     def __str__(self):
-        return (
-            f"{self.noun_type}, "
-            f"{self.verb_type}"
-            )
+        return f"{self.noun_type}, " f"{self.verb_type}"
 
 
 class RealtyType(models.Model):
@@ -163,6 +160,22 @@ class RealtyType(models.Model):
     class Meta:
         verbose_name = "Тип недвижимости"
         verbose_name_plural = "Типы недвижимости"
+
+    def __str__(self):
+        return f"{self.type}"
+
+
+class BathroomType(models.Model):
+    """Bathroom Type model."""
+
+    type = models.CharField(
+        max_length=constants.CHAR_LENGTH,
+        verbose_name="Тип санузла",
+    )
+
+    class Meta:
+        verbose_name = "Тип санузла"
+        verbose_name_plural = "Типы санузлов"
 
     def __str__(self):
         return f"{self.type}"
