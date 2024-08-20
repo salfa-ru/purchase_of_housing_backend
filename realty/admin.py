@@ -1,15 +1,30 @@
 from django.contrib import admin
 
-from realty.models import Realty
+from .models import Realty, Sale, Rent
 
 
-# вариант для разработки (отображение и редактирование всех полей)
-# TODO нужно настроить админку для prod-a
+class SaleInline(admin.StackedInline):
+    model = Sale
+    extra = 0
+
+
+class RentInline(admin.StackedInline):
+    model = Rent
+    extra = 0
+
+
 @admin.register(Realty)
 class RealtyAdmin(admin.ModelAdmin):
-    # TODO добавить город в адрес, когда поправим таблицы
-    list_display = ('apartment', 'address_short', 'owner', 'owner_type', 'trade_type', 'realty_status', 'changed_at')
-    list_filter = ('realty_status', 'trade_type', 'owner_type',)
+    list_display = ('apartment',
+                    'address_short',
+                    'owner',
+                    'price',
+                    'trade_type_short',
+                    'realty_status',
+                    'changed_at')
+    list_filter = ('realty_status',
+                   'trade_type',
+                   'owner_type',)
 
     def apartment(self, obj):
         return (f'{obj.about_apartment.number_of_rooms.number_of_rooms}'
@@ -21,9 +36,35 @@ class RealtyAdmin(admin.ModelAdmin):
     def address_short(self, obj):
         return (f'{obj.address.street.name}, '
                 f'{obj.address.house_number}'
-                f'{"копр." + obj.address.corpus if obj.address.corpus else ""}'
+                f'{"корп." + obj.address.corpus if obj.address.corpus else ""}'
                 f'{"стр." + obj.address.building if obj.address.building else ""}'
                 f'{"вл." + obj.address.ownership if obj.address.ownership else ""}')
 
+    def trade_type_short(self, obj):
+        return f'{obj.trade_type.noun_type}'
+
     apartment.short_description = 'Квартира'
     address_short.short_description = 'Адрес'
+    trade_type_short.short_description = 'Тип сделки'
+
+    def get_inlines(self, request, obj=None):
+        """Использование inline формы только для уже созданной модели"""
+        inlines = []
+        if obj and obj.trade_type and obj.trade_type.noun_type.lower() == 'sale':
+            inlines = [SaleInline]
+        elif obj and obj.trade_type and obj.trade_type.noun_type.lower() == 'rent':
+            inlines = [RentInline]
+        return inlines
+
+
+@admin.register(Sale)
+class SaleAdmin(admin.ModelAdmin):
+    list_display = ('realty',
+                    'sales_parameters',)
+
+
+@admin.register(Rent)
+class RentAdmin(admin.ModelAdmin):
+    list_display = ('realty',
+                    'rental_features',
+                    'lease_payments',)
