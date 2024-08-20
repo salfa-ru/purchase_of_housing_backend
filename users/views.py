@@ -1,3 +1,26 @@
-from django.shortcuts import render
+from rest_framework import viewsets, mixins
+from rest_framework import status
+from rest_framework import permissions
+from rest_framework.response import Response
 
-# Create your views here.
+from users.models import User
+from users.permissions import IsAdminOrOwner
+from users.serializers import UserSerializer
+
+
+class UserDevViewSet(mixins.CreateModelMixin,
+                     mixins.DestroyModelMixin,
+                     mixins.ListModelMixin,
+                     viewsets.GenericViewSet):
+    """Вьюсет юзера только для разработки, на прод будет работа через ЕСА"""
+
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+
+    def get_permissions(self):
+        if self.action == 'create':
+            return [permissions.AllowAny()]
+        if self.action == 'destroy':
+            return [IsAdminOrOwner()]
+        return [permissions.IsAdminUser()]
+
