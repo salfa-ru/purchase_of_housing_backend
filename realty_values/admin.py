@@ -51,12 +51,6 @@ class TradeParticipantAdmin(admin.ModelAdmin):
     list_filter = ("participant",)
 
 
-@admin.register(models.TradeType)
-class TradeTypeAdmin(admin.ModelAdmin):
-    list_display = ("noun_type", "verb_type")
-    list_filter = ("noun_type",)
-
-
 @admin.register(models.RealtyType)
 class RealtyTypeAdmin(admin.ModelAdmin):
     list_display = ("type",)
