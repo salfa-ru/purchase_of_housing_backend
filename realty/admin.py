@@ -19,11 +19,10 @@ class RealtyAdmin(admin.ModelAdmin):
                     'address_short',
                     'owner',
                     'price',
-                    'trade_type_short',
+                    # 'trade_type_short',
                     'realty_status',
                     'changed_at')
     list_filter = ('realty_status',
-                   'trade_type',
                    'owner_type',)
 
     def apartment(self, obj):
@@ -40,21 +39,21 @@ class RealtyAdmin(admin.ModelAdmin):
                 f'{"стр." + obj.address.building if obj.address.building else ""}'
                 f'{"вл." + obj.address.ownership if obj.address.ownership else ""}')
 
-    def trade_type_short(self, obj):
-        return f'{obj.trade_type.type}'
+    # def trade_type_short(self, obj):
+    #     return f'{obj.trade_type.type}'
 
-    apartment.short_description = 'Квартира'
+    # apartment.short_description = 'Квартира'
     address_short.short_description = 'Адрес'
-    trade_type_short.short_description = 'Тип сделки'
+    # trade_type_short.short_description = 'Тип сделки'
 
-    def get_inlines(self, request, obj=None):
-        """Использование inline формы только для уже созданной модели"""
-        inlines = []
-        if obj and obj.trade_type and obj.trade_type.type.lower() == 'sale':
-            inlines = [SaleInline]
-        elif obj and obj.trade_type and obj.trade_type.type.lower() == 'rent':
-            inlines = [RentInline]
-        return inlines
+    # def get_inlines(self, request, obj=None):
+    #     """Использование inline формы только для уже созданной модели"""
+    #     inlines = []
+    #     if obj and obj.trade_type and obj.trade_type.type.lower() == 'sale':
+    #         inlines = [SaleInline]
+    #     elif obj and obj.trade_type and obj.trade_type.type.lower() == 'rent':
+    #         inlines = [RentInline]
+    #     return inlines
 
 
 @admin.register(Sale)
