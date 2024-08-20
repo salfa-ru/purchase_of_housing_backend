@@ -51,12 +51,6 @@ class TradeParticipantAdmin(admin.ModelAdmin):
     list_filter = ("participant",)
 
 
-@admin.register(models.TradeType)
-class TradeTypeAdmin(admin.ModelAdmin):
-    list_display = ("type",)
-    list_filter = ("type",)
-
-
 @admin.register(models.RealtyType)
 class RealtyTypeAdmin(admin.ModelAdmin):
     list_display = ("type",)
