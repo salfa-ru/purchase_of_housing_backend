@@ -5,6 +5,7 @@ from users.models import User
 
 class UserSerializer(serializers.ModelSerializer):
     """Сериализатор для list, create, delete"""
+
     class Meta:
         model = User
         fields = [
@@ -33,22 +34,12 @@ class UserSerializer(serializers.ModelSerializer):
         }
 
     def create(self, validated_data):
-        print('-'*50, 'create')
-        """При создании определяем username (нет в форме в дизайне), хэшируем пароль"""
+        """При создании определяем username (нет в форме в дизайне)"""
         validated_data['username'] = validated_data['email']
-        user = super().create(validated_data)
-        user.set_password(validated_data['password'])
-        user.save()
-        return user
+        return super().create(validated_data)
 
     def update(self, instance, validated_data):
-        """При обновлении определяем username (нет в форме в дизайне), хэшируем пароль"""
-        print('-'*50, 'update')
+        """При обновлении определяем username (нет в форме в дизайне)"""
         if validated_data.get('email'):
             validated_data['username'] = validated_data['email']
-        user = super().update(instance, validated_data)
-        if validated_data.get('password'):
-            user.set_password(validated_data['password'])
-            user.save()
-        return user
-
+        return super().update(instance, validated_data)

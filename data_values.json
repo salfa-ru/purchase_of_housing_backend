@@ -1,0 +1,417 @@
+[
+  {
+    "model": "realty_values.buildingtype",
+    "pk": 1,
+    "fields": {
+      "type": "Кирпичный"
+    }
+  },
+  {
+    "model": "realty_values.buildingtype",
+    "pk": 2,
+    "fields": {
+      "type": "Монолитный"
+    }
+  },
+  {
+    "model": "realty_values.buildingtype",
+    "pk": 3,
+    "fields": {
+      "type": "Панельный"
+    }
+  },
+  {
+    "model": "realty_values.buildingtype",
+    "pk": 4,
+    "fields": {
+      "type": "Блочный"
+    }
+  },
+  {
+    "model": "realty_values.buildingtype",
+    "pk": 5,
+    "fields": {
+      "type": "Кирпично-монолитный"
+    }
+  },
+  {
+    "model": "realty_values.buildingtype",
+    "pk": 6,
+    "fields": {
+      "type": "Деревянный"
+    }
+  },
+  {
+    "model": "realty_values.roomsnumber",
+    "pk": 1,
+    "fields": {
+      "number_of_rooms": "1"
+    }
+  },
+  {
+    "model": "realty_values.roomsnumber",
+    "pk": 2,
+    "fields": {
+      "number_of_rooms": "2"
+    }
+  },
+  {
+    "model": "realty_values.roomsnumber",
+    "pk": 3,
+    "fields": {
+      "number_of_rooms": "3"
+    }
+  },
+  {
+    "model": "realty_values.roomsnumber",
+    "pk": 4,
+    "fields": {
+      "number_of_rooms": "4+"
+    }
+  },
+  {
+    "model": "realty_values.roomsnumber",
+    "pk": 5,
+    "fields": {
+      "number_of_rooms": "Студия"
+    }
+  },
+  {
+    "model": "realty_values.repairtype",
+    "pk": 1,
+    "fields": {
+      "type": "Без ремонта"
+    }
+  },
+  {
+    "model": "realty_values.repairtype",
+    "pk": 2,
+    "fields": {
+      "type": "Косметический"
+    }
+  },
+  {
+    "model": "realty_values.repairtype",
+    "pk": 3,
+    "fields": {
+      "type": "Евроремонт"
+    }
+  },
+  {
+    "model": "realty_values.repairtype",
+    "pk": 4,
+    "fields": {
+      "type": "Дизайнерский"
+    }
+  },
+  {
+    "model": "realty_values.communicationmethod",
+    "pk": 1,
+    "fields": {
+      "method": "Только звонки"
+    }
+  },
+  {
+    "model": "realty_values.communicationmethod",
+    "pk": 2,
+    "fields": {
+      "method": "Только сообщения"
+    }
+  },
+  {
+    "model": "realty_values.communicationmethod",
+    "pk": 3,
+    "fields": {
+      "method": "Звонки и сообщения"
+    }
+  },
+  {
+    "model": "realty_values.realtyadvstatus",
+    "pk": 1,
+    "fields": {
+      "status": "Активно"
+    }
+  },
+  {
+    "model": "realty_values.realtyadvstatus",
+    "pk": 2,
+    "fields": {
+      "status": "На модерации"
+    }
+  },
+  {
+    "model": "realty_values.realtyadvstatus",
+    "pk": 3,
+    "fields": {
+      "status": "Отклонено"
+    }
+  },
+  {
+    "model": "realty_values.realtyadvstatus",
+    "pk": 4,
+    "fields": {
+      "status": "В архиве"
+    }
+  },
+  {
+    "model": "realty_values.housingtype",
+    "pk": 1,
+    "fields": {
+      "type": "Вторичное жилье"
+    }
+  },
+  {
+    "model": "realty_values.saletype",
+    "pk": 1,
+    "fields": {
+      "type": "Свободная продажа"
+    }
+  },
+  {
+    "model": "realty_values.tradeparticipant",
+    "pk": 1,
+    "fields": {
+      "participant": "Собственник"
+    }
+  },
+  {
+    "model": "realty_values.tradeparticipant",
+    "pk": 2,
+    "fields": {
+      "participant": "Арендатор"
+    }
+  },
+  {
+    "model": "realty_values.tradeparticipant",
+    "pk": 3,
+    "fields": {
+      "participant": "Агент"
+    }
+  },
+  {
+    "model": "realty_values.realtytype",
+    "pk": 1,
+    "fields": {
+      "type": "Квартира"
+    }
+  },
+  {
+    "model": "realty_values.realtytype",
+    "pk": 2,
+    "fields": {
+      "type": "Апартаменты"
+    }
+  },
+  {
+    "model": "realty_values.bathroomtype",
+    "pk": 1,
+    "fields": {
+      "type": "Раздельный"
+    }
+  },
+  {
+    "model": "realty_values.bathroomtype",
+    "pk": 2,
+    "fields": {
+      "type": "Совмещенный"
+    }
+  },
+  {
+    "model": "notifications.notificationtemplate",
+    "pk": 1,
+    "fields": {
+      "code": "on_moderation",
+      "part1": "Ваше объявление №___ отправлено на модерацию.",
+      "part2": null
+    }
+  },
+  {
+    "model": "notifications.notificationtemplate",
+    "pk": 2,
+    "fields": {
+      "code": "published",
+      "part1": "Ваше объявление №___ опубликовано.",
+      "part2": null
+    }
+  },
+  {
+    "model": "notifications.notificationtemplate",
+    "pk": 3,
+    "fields": {
+      "code": "rejected",
+      "part1": "Ваше объявление №___ отклонено модератором.",
+      "part2": "Объявление не соответствует Правилам размещения объявлений на сайте."
+    }
+  },
+  {
+    "model": "notifications.notificationtemplate",
+    "pk": 4,
+    "fields": {
+      "code": "expired",
+      "part1": "Истек срок публикации объявления №___.",
+      "part2": "Ваше объявление было перемещено в архив. Чтобы снова опубликовать объявление, нажмите «Опубликовать»."
+    }
+  },
+  {
+    "model": "notifications.notificationtemplate",
+    "pk": 5,
+    "fields": {
+      "code": "blocked",
+      "part1": "Ваше объявление №___ заблокировано модератором.",
+      "part2": "Объявление не соответствует Правилам размещения объявлений на сайте."
+    }
+  },
+  {
+    "model": "questions.questiontype",
+    "pk": 1,
+    "fields": {
+      "type": "FAQ"
+    }
+  },
+  {
+    "model": "questions.questiontype",
+    "pk": 2,
+    "fields": {
+      "type": "Правовая информация"
+    }
+  },
+  {
+    "model": "questions.questionsection",
+    "pk": 1,
+    "fields": {
+      "section": "Аренда",
+      "type": 1
+    }
+  },
+  {
+    "model": "questions.questionsection",
+    "pk": 2,
+    "fields": {
+      "section": "Покупка",
+      "type": 1
+    }
+  },
+  {
+    "model": "questions.questionsection",
+    "pk": 3,
+    "fields": {
+      "section": "Продажа",
+      "type": 1
+    }
+  },
+  {
+    "model": "questions.questionsection",
+    "pk": 4,
+    "fields": {
+      "section": "Частые вопросы о недвижимости",
+      "type": 2
+    }
+  },
+  {
+    "model": "questions.questionsection",
+    "pk": 5,
+    "fields": {
+      "section": "Шаблоны документов",
+      "type": 2
+    }
+  },
+  {
+    "model": "questions.question",
+    "pk": 1,
+    "fields": {
+      "question": "Список документов, которые стоит собрать еще до продажи квартиры",
+      "answer": "Ответ на вопрос «Список документов, которые стоит собрать еще до продажи квартиры»",
+      "section": 1
+    }
+  },
+  {
+    "model": "questions.question",
+    "pk": 2,
+    "fields": {
+      "question": "Как управлять ценой в объявлении, чтобы продать свой объект быстро и не продешевить",
+      "answer": "Ответ на вопрос «Как управлять ценой в объявлении, чтобы продать свой объект быстро и не продешевить»",
+      "section": 1
+    }
+  },
+  {
+    "model": "questions.question",
+    "pk": 3,
+    "fields": {
+      "question": "Какие могут быть сложности при продаже квартиры?",
+      "answer": "Ответ на вопрос «Какие могут быть сложности при продаже квартиры?»",
+      "section": 1
+    }
+  },
+  {
+    "model": "questions.question",
+    "pk": 4,
+    "fields": {
+      "question": "Основные этапы продажи объекта",
+      "answer": "Ответ на вопрос «Основные этапы продажи объекта»",
+      "section": 1
+    }
+  },
+  {
+    "model": "questions.question",
+    "pk": 5,
+    "fields": {
+      "question": "Вопрос 1 о покупках",
+      "answer": "Ответ на вопрос 1 о покупках",
+      "section": 2
+    }
+  },
+  {
+    "model": "questions.question",
+    "pk": 6,
+    "fields": {
+      "question": "Вопрос 1 о продажах",
+      "answer": "Ответ на вопрос 1 о продажах",
+      "section": 3
+    }
+  },
+  {
+    "model": "questions.question",
+    "pk": 7,
+    "fields": {
+      "question": "Правила размещения",
+      "answer": "Ответ на вопрос «Правила размещения»",
+      "section": 4
+    }
+  },
+  {
+    "model": "questions.question",
+    "pk": 8,
+    "fields": {
+      "question": "Модерация объявления",
+      "answer": "Ответ на вопрос «Модерация объявления»",
+      "section": 4
+    }
+  },
+  {
+    "model": "questions.question",
+    "pk": 9,
+    "fields": {
+      "question": "Правила переписки в чатах",
+      "answer": "Ответ на вопрос «Правила переписки в чатах»",
+      "section": 4
+    }
+  },
+  {
+    "model": "questions.question",
+    "pk": 10,
+    "fields": {
+      "question": "Собственникам",
+      "answer": "Ответ на вопрос «Собственникам»",
+      "section": 4
+    }
+  },
+  {
+    "model": "questions.question",
+    "pk": 11,
+    "fields": {
+      "question": "Вопрос 1 о шаблонах",
+      "answer": "Ответ на вопрос 1 о шаблонах",
+      "section": 5
+    }
+  }
+]

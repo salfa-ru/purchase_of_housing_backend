@@ -1,7 +1,6 @@
-import uuid
 from django.db import models
 from django.contrib.auth.models import AbstractUser, UserManager
-from django.db.models.signals import pre_init, post_init, pre_save
+from django.db.models.signals import pre_save
 from django.dispatch import receiver
 
 from config import constants
@@ -64,7 +63,17 @@ class User(AbstractUser):
     #     verbose_name='QR-код телефона',
     #     ** constants.NULLABLE_FIELD,
     # )
-    
+
+    def save(self, *args, **kwargs):
+        """Хэшируем пароль при создании пользователя или при изменении пароля"""
+        password_previous = None
+        if self.pk:
+            user_previous = User.objects.get(pk=self.pk)
+            password_previous = user_previous.password
+        if not self.is_superuser and (self._state.adding or self.password != password_previous):
+            self.set_password(self.password)
+        return super().save(*args, **kwargs)
+
 @receiver(pre_save, sender=User)
 def set_default_user_type(sender, instance, *args, **kwargs):
     """Устанавливает дефолтное значение user_type. Используется для MVP"""
