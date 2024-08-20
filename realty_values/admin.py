@@ -61,3 +61,9 @@ class TradeTypeAdmin(admin.ModelAdmin):
 class RealtyTypeAdmin(admin.ModelAdmin):
     list_display = ("type",)
     list_filter = ("type",)
+
+
+@admin.register(models.BathroomType)
+class BathroomTypeAdmin(admin.ModelAdmin):
+    list_display = ("type",)
+    list_filter = ("type",)
