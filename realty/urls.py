@@ -1,19 +1,11 @@
-from django.urls import include, path
+from django.urls import path
 
-from rest_framework.routers import DefaultRouter
-
-from .views import LastRentsView, LastSalesView  # LatestRealtyViewSet
+from .views import LastRentsView, LastSalesView
 
 app_name = 'realty'
 
 
-router_v1 = DefaultRouter()
-
-# router_v1.register(r'latest-realty', LatestRealtyViewSet,
-#                   basename='latest-realty')
-router_v1.register(r'latest-rent', LastRentsView, basename='latest-rent')
-router_v1.register(r'latest-sale', LastSalesView, basename='latest-sale')
-
 urlpatterns = [
-    path('', include(router_v1.urls)),
+    path('latest-rent/', LastRentsView.as_view(), name='sale-list'),
+    path('latest-sale/', LastSalesView.as_view(), name='latest-sale'),
 ]

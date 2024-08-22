@@ -1,19 +1,14 @@
-from rest_framework import viewsets
+from rest_framework import generics
 
-from .models import Realty, Sale, Rent
-from .serializers import RealtySerializer, SaleSerializer, RentSerializer
-
-
-# class LatestRealtyViewSet(viewsets.ReadOnlyModelViewSet):
-#     queryset = Realty.objects.order_by("-published_at")[:3]
-#     serializer_class = RealtySerializer
+from .models import Sale, Rent
+from .serializers import SaleSerializer, RentSerializer
 
 
-class LastSalesView(viewsets.ReadOnlyModelViewSet):
+class LastSalesView(generics.ListAPIView):
     queryset = Sale.objects.all().order_by("-realty__published_at")[:3]
     serializer_class = SaleSerializer
 
 
-class LastRentsView(viewsets.ReadOnlyModelViewSet):
+class LastRentsView(generics.ListAPIView):
     queryset = Rent.objects.all().order_by("-realty__published_at")[:3]
     serializer_class = RentSerializer
