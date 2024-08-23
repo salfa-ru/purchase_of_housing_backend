@@ -2,6 +2,7 @@ from rest_framework import serializers
 from rest_framework.relations import SlugRelatedField
 
 from realty_specificities import models as spec_models
+from realty_values import models as values_models
 from realty_values import serializers as values_serializers
 
 
@@ -15,6 +16,18 @@ class AboutBuildingSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
+class AboutBuildingCreateSerializer(serializers.ModelSerializer):
+
+    type = serializers.PrimaryKeyRelatedField(
+        queryset=values_models.BuildingType.objects.all(),
+        required=False,
+    )
+
+    class Meta:
+        model = spec_models.AboutBuilding
+        fields = "__all__"
+
+
 class AboutApartmentSerializer(serializers.ModelSerializer):
     """About Apartment Serializer."""
 
@@ -22,6 +35,36 @@ class AboutApartmentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = spec_models.AboutApartment
+        fields = "__all__"
+
+
+class AboutApartmentCreateSerializer(serializers.ModelSerializer):
+    """About Apartment Create Serializer."""
+
+    number_of_rooms = serializers.PrimaryKeyRelatedField(
+        queryset=values_models.RoomsNumber.objects.all(),
+        required=True,
+    )
+
+    class Meta:
+        model = spec_models.AboutApartment
+        fields = "__all__"
+
+
+class CommonCharacteristicsCreateSerializer(serializers.ModelSerializer):
+    """Common Characteristics Create Serilalizer."""
+
+    repair_type = serializers.PrimaryKeyRelatedField(
+        queryset=values_models.RepairType.objects.all(),
+        required=False,
+    )
+    bathroom = serializers.PrimaryKeyRelatedField(
+        queryset=values_models.BathroomType.objects.all(),
+        required=False,
+    )
+
+    class Meta:
+        model = spec_models.CommonCharacteristics
         fields = "__all__"
 
 

@@ -18,7 +18,7 @@ class RealtyBaseViewSet(viewsets.ModelViewSet):
 
     queryset = realty_models.Realty.objects.all()
     # permission_classes =
-    serializer_class = realty_serializers.RealtyBaseSerializer
+    serializer_class = realty_serializers.RealtyCreateSerializer
     # filter_backends =
 
     # def perform_create(self, serializer):
@@ -36,16 +36,15 @@ class RentViewSet(RealtyBaseViewSet):
     """Rent Viewset."""
 
     queryset = realty_models.Rent.objects.all()
-    serializer_class = realty_serializers.RentReadSerializer
 
     # def get_serializer_class(self):
     #     if self.action == "create":
-    #         return realty_serializers.RealtyCreateSerializer
+    #         return realty_serializers.RentCreateSerializer
     #     elif self.action == "update" or self.action == "partial_update":
-    #         return realty_serializers.RealtyUpdateSerializer
+    #         return realty_serializers.RentUpdateSerializer
     #     elif self.action == "destroy":
-    #         return realty_serializers.RealtyDeleteSerializer
-    #     return realty_serializers.RealtyReadSerializer
+    #         return realty_serializers.RentDeleteSerializer
+    #     return realty_serializers.RentReadSerializer
 
     # @staticmethod
     # def create_obj(request, pk, serializers): # на будущее для доб в избранное

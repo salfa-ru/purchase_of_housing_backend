@@ -88,7 +88,7 @@ class Realty(models.Model):
     )
 
     @property
-    def type(self):
+    def trade_type(self):
         if hasattr(self, "sale_profile"):
             return "sale"
         if hasattr(self, "rent_profile"):
