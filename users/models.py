@@ -1,6 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser, UserManager
-from django.db.models.signals import pre_save
+from django.db.models.signals import pre_save, post_save
 from django.dispatch import receiver
 
 from config import constants
@@ -10,6 +10,7 @@ from realty_values import models as values_models
 class CustomUserManager(UserManager):
     """Переопределение работы менеджера, для того чтобы работала команда createsuperuser.
     Для superuser задаются значения для обязательных полей."""
+
     def create_superuser(self, username, email=None, password=None, **extra_fields):
         email = username + '@email.com'
         extra_fields.setdefault("is_staff", True)
@@ -57,6 +58,7 @@ class User(AbstractUser):
         default=None,
         **constants.NULLABLE_FIELD,
     )
+
     # TODO доделать генерацию qr-кода
     # phone_qr_code = models.ImageField(
     #     upload_to='users/phone_qr_codes',
@@ -65,14 +67,28 @@ class User(AbstractUser):
     # )
 
     def save(self, *args, **kwargs):
-        """Хэшируем пароль при создании пользователя или при изменении пароля"""
+        """Хэшируем пароль.
+         Меняем username для 'своих' пользователей (при замене email)."""
         password_previous = None
+        email_previous = None
+        uuid_esa = None
+
         if self.pk:
             user_previous = User.objects.get(pk=self.pk)
             password_previous = user_previous.password
+            email_previous = user_previous.email
+            uuid_esa = user_previous.uuid_esa
+
+        # Хэшируем пароль
         if not self.is_superuser and (self._state.adding or self.password != password_previous):
             self.set_password(self.password)
+
+        # Меняем username для 'своих' пользователей
+        if not uuid_esa and (self._state.adding or self.email != email_previous):
+            self.username = self.email
+
         return super().save(*args, **kwargs)
+
 
 @receiver(pre_save, sender=User)
 def set_default_user_type(sender, instance, *args, **kwargs):

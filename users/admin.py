@@ -1,11 +1,12 @@
 from django.contrib import admin
+from django.utils.safestring import mark_safe
 
 from users.models import User
 
 
 @admin.register(User)
 class UserAdmin(admin.ModelAdmin):
-    readonly_fields = ('id', 'uuid_esa',)
+    readonly_fields = ('id', 'uuid_esa', 'preview',)
     fields = [
         ('id', 'uuid_esa'),
         'username',
@@ -13,7 +14,7 @@ class UserAdmin(admin.ModelAdmin):
         ('email', 'phone_number'),
         ('updated_at', 'date_joined'),
         'user_type',
-        'avatar',
+        ('preview', 'avatar'),
         'password',
         'is_superuser',
         'is_staff',
@@ -22,3 +23,7 @@ class UserAdmin(admin.ModelAdmin):
         'user_permissions',
     ]
 
+    def preview(self, obj):
+        return mark_safe(f'<img src="{obj.avatar.url}" style="width: 100px">')
+
+    preview.short_description = 'Превью'
