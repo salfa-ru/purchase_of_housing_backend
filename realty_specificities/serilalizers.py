@@ -47,13 +47,13 @@ class AboutApartmentCreateSerializer(serializers.ModelSerializer):
         queryset=values_models.RoomsNumber.objects.all(),
         required=True,
     )
-    # area = serializers.FloatField(
-    #     required=True,
-    #     validators=[
-    #         validators.MinValueValidator(constants.MIN_ROOM_AREA),
-    #         validators.MaxValueValidator(constants.MAX_ROOM_AREA),
-    #     ],
-    # )
+    area = serializers.FloatField(
+        required=True,
+        validators=[
+            validators.MinValueValidator(constants.MIN_ROOM_AREA),
+            validators.MaxValueValidator(constants.MAX_ROOM_AREA),
+        ],
+    )
 
     class Meta:
         model = spec_models.AboutApartment
@@ -96,12 +96,32 @@ class RentalFeaturesSerilalizer(serializers.ModelSerializer):
         fields = "__all__"
 
 
-class RentalFeaturesCreateSerilalizer(serializers.ModelSerializer):
-    """Rental Feature serializer."""
+class LeasePaymentsCreateSerializer(serializers.ModelSerializer):
+    """Lease Payments Serializer."""
+
+    counters_payment = serializers.PrimaryKeyRelatedField(
+        queryset=values_models.TradeParticipant.objects.all(),
+        required=False,
+    )
+    communal_payment = serializers.PrimaryKeyRelatedField(
+        queryset=values_models.TradeParticipant.objects.all(),
+        required=False,
+    )
+    deposit = serializers.IntegerField(
+        required=False,
+    )
 
     class Meta:
-        model = spec_models.RentalFeatures
+        model = spec_models.LeasePayments
         fields = "__all__"
+
+    def validate_deposit(self, value):
+        """Проверка значения депозита."""
+        if value < 0:
+            raise serializers.ValidationError(
+                "Залог не может быть отрицательным."
+            )
+        return value
 
 
 class LeasePaymentsSerializer(serializers.ModelSerializer):

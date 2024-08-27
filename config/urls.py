@@ -11,7 +11,6 @@ from .settings import DEBUG
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("realty/", include("realty.urls")),
-    path("address/", include("realty_addresses.urls")),
     path("", include("users.urls", namespace="users")),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 

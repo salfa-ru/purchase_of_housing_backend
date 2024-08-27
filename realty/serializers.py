@@ -145,6 +145,7 @@ class RealtyCreateSerializer(serializers.ModelSerializer):
             address_serilizer.is_valid(raise_exception=True)
             address = address_serilizer.save()
             validated_data["address"] = address
+            
         if about_building_data:
             about_building = specificities_models.AboutBuilding.objects.create(
                 **about_building_data
@@ -171,8 +172,48 @@ class RealtyCreateSerializer(serializers.ModelSerializer):
         return realty
 
 
-# class RentCreateSerializer(serializers.ModelSerializer):
-#     """Rent Create Serializer."""
+class RentCreateSerializer(serializers.ModelSerializer):
+    """Rent Create Serializer."""
 
-#     realty = RealtyCreateSerializer()
+    realty = RealtyCreateSerializer(required=True)
+    rental_features = specif_serializers.RentalFeaturesSerilalizer(
+        required=False
+    )
+    lease_payments = specif_serializers.LeasePaymentsCreateSerializer(
+        required=False
+    )
 
+    def create(self, validated_data):
+        realty_data = validated_data.pop("realty", None)
+        rental_features_data = validated_data.pop("rental_features", None)
+        lease_payments_data = validated_data.pop("lease_payments", None)
+
+        if realty_data:
+            realty_serilizer = RealtyCreateSerializer(
+                data=realty_data
+            )
+            realty_serilizer.is_valid(raise_exception=True)
+            realty = realty_serilizer.save()
+            validated_data["realty"] = realty
+
+        if rental_features_data:
+            rental_features = (
+                specificities_models.RentalFeatures.objects.create(
+                    **rental_features_data
+                )
+            )
+            validated_data["rental_features"] = rental_features
+
+        if lease_payments_data:
+            lease_payments = (
+                specificities_models.LeasePayments.objects.create(
+                    **lease_payments_data
+                )
+            )
+            validated_data["lease_payments"] = lease_payments
+        rent = realty_models.Rent.objects.create(**validated_data)
+        return rent
+
+    class Meta:
+        model = realty_models.Rent
+        fields = "__all__"
