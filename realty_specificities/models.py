@@ -63,14 +63,6 @@ class AboutApartment(models.Model):
         verbose_name = "О квартире"
         verbose_name_plural = "О квартирах"
 
-    # def __str__(self):
-    #     return (
-    #         f"{self.number_of_rooms}, {self.area}, "
-    #         f"{self.loggia}, {self.balcony}, "
-    #         f"{self.elevator}, "
-    #         f"{self.floor}, {self.floors_number}"
-    #     )
-
     def __str__(self):
         characteristics = [f"{self.number_of_rooms} комн., {self.area} кв.м"]
 
@@ -112,14 +104,6 @@ class CommonCharacteristics(models.Model):
         ordering = ["repair_type"]
         verbose_name = "Общие характеристики"
         verbose_name_plural = "Общие характеристики"
-
-    # def __str__(self):
-    #     return (
-    #         f"{self.repair_type}, "
-    #         f"{self.furniture}, "
-    #         f"{self.courtyard_view}, "
-    #         f"{self.street_view}"
-    #     )
 
     def __str__(self):
         characteristics = []
@@ -169,19 +153,6 @@ class RentalFeatures(models.Model):
         ordering = ["internet"]
         verbose_name = "Особенности аренды"
         verbose_name_plural = "Особенности аренды"
-
-    # def __str__(self):
-    #     return (
-    #         f"{self.fridge}, "
-    #         f"{self.internet}, "
-    #         f"{self.conditioner}, "
-    #         f"{self.tv}, "
-    #         f"{self.internet}, "
-    #         f"{self.conditioner}, "
-    #         f"{self.tv}, "
-    #         f"{self.tv}, "
-    #         f"{self.fridge}"
-    #     )
 
     def __str__(self):
         features = []

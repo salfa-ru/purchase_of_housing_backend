@@ -1,9 +1,11 @@
 from rest_framework import serializers
 from rest_framework.relations import SlugRelatedField
+from django.core import validators
 
 from realty_specificities import models as spec_models
 from realty_values import models as values_models
 from realty_values import serializers as values_serializers
+from config import constants
 
 
 class AboutBuildingSerializer(serializers.ModelSerializer):
@@ -45,6 +47,13 @@ class AboutApartmentCreateSerializer(serializers.ModelSerializer):
         queryset=values_models.RoomsNumber.objects.all(),
         required=True,
     )
+    # area = serializers.FloatField(
+    #     required=True,
+    #     validators=[
+    #         validators.MinValueValidator(constants.MIN_ROOM_AREA),
+    #         validators.MaxValueValidator(constants.MAX_ROOM_AREA),
+    #     ],
+    # )
 
     class Meta:
         model = spec_models.AboutApartment
@@ -80,6 +89,14 @@ class CommonCharacteristicsSerializer(serializers.ModelSerializer):
 
 
 class RentalFeaturesSerilalizer(serializers.ModelSerializer):
+    """Rental Feature serializer."""
+
+    class Meta:
+        model = spec_models.RentalFeatures
+        fields = "__all__"
+
+
+class RentalFeaturesCreateSerilalizer(serializers.ModelSerializer):
     """Rental Feature serializer."""
 
     class Meta:

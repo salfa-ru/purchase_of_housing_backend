@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from rest_framework.relations import SlugRelatedField
+from yaml import add_representer
 
 from realty import models as realty_models
 from realty_values import models as values_models
@@ -19,7 +20,7 @@ class RealtyBaseSerializer(serializers.ModelSerializer):
     realty_type = SlugRelatedField(
         slug_field="type", queryset=values_models.RealtyType.objects.all()
     )
-    address = address_serilizers.AddressSerializer()
+    address = address_serilizers.AddressReadSerializer()
     about_building = specif_serializers.AboutBuildingSerializer()
     about_apartment = specif_serializers.AboutApartmentSerializer()
     common_characteristics = (
@@ -76,6 +77,10 @@ class RealtyCreateSerializer(serializers.ModelSerializer):
         queryset=values_models.RealtyType.objects.all(),
         required=True,
     )
+    description = serializers.CharField(
+        max_length=constants.DESCRIPTION_LENGTH,
+        required=True,
+    )
     address = address_serilizers.AddressCreateSerializer(
         required=True,
     )
@@ -89,10 +94,6 @@ class RealtyCreateSerializer(serializers.ModelSerializer):
         specif_serializers.CommonCharacteristicsCreateSerializer(
             required=False
         )
-    )
-    description = serializers.CharField(
-        max_length=constants.DESCRIPTION_LENGTH,
-        required=True,
     )
     price = serializers.IntegerField(
         required=True,
@@ -138,10 +139,12 @@ class RealtyCreateSerializer(serializers.ModelSerializer):
             "common_characteristics", None
         )
         if address_data:
-            address = addresses_models.Address.objects.create(
-                **address_data
+            address_serilizer = address_serilizers.AddressCreateSerializer(
+                data=address_data
             )
-            validated_data["adress"] = address
+            address_serilizer.is_valid(raise_exception=True)
+            address = address_serilizer.save()
+            validated_data["address"] = address
         if about_building_data:
             about_building = specificities_models.AboutBuilding.objects.create(
                 **about_building_data
@@ -168,84 +171,8 @@ class RealtyCreateSerializer(serializers.ModelSerializer):
         return realty
 
 
-class RentCreateSerializer(serializers.ModelSerializer):
-    """Realty Create Serializer."""
+# class RentCreateSerializer(serializers.ModelSerializer):
+#     """Rent Create Serializer."""
 
-    owner = SlugRelatedField(slug_field="username", read_only=True)
-    realty_type = serializers.PrimaryKeyRelatedField(
-        queryset=values_models.RealtyType.objects.all()
-    )
+#     realty = RealtyCreateSerializer()
 
-    class Meta:
-        model = realty_models.Realty
-        exclude = ["published_at", "changed_at"]
-
-    def create(self, validated_data):
-        # Получите текущего пользователя из контекста запроса
-        request = self.context.get("request")
-        user = request.user
-
-        address_data = validated_data.pop("address")
-        about_building_data = validated_data.pop("about_building")
-        about_apartment_data = validated_data.pop("about_apartment")
-        common_characteristics_data = validated_data.pop(
-            "common_characteristics"
-        )
-        rental_features_data = validated_data.pop("rental_features")
-        lease_payments_data = validated_data.pop("lease_payments")
-
-        address = specifities_models.Address.objects.create(**address_data)
-        about_building = specifities_models.AboutBuilding.objects.create(
-            **about_building_data
-        )
-        about_apartment = specifities_models.AboutApartment.objects.create(
-            **about_apartment_data
-        )
-        common_characteristics = (
-            specifities_models.CommonCharacteristics.objects.create(
-                **common_characteristics_data
-            )
-        )
-        rental_features = specifities_models.RentalFeatures.objects.create(
-            **rental_features_data
-        )
-        lease_payments = specifities_models.LeasePayments.objects.create(
-            **lease_payments_data
-        )
-
-        realty = realty_models.Realty.objects.create(
-            owner=user,  # Присвойте пользователя к полю 'owner'
-            address=address,
-            about_building=about_building,
-            about_apartment=about_apartment,
-            common_characteristics=common_characteristics,
-            rental_features=rental_features,
-            lease_payments=lease_payments,
-            **validated_data,
-        )
-
-        return realty
-
-
-class RealtyUpdateSerializer(serializers.ModelSerializer):
-    """Realty Update Serializer."""
-
-    class Meta:
-        model = realty_models.Realty
-        ...
-
-
-class RealtyReadSerializer(serializers.ModelSerializer):
-    """Realty Read Serializer."""
-
-    class Meta:
-        model = realty_models.Realty
-        ...
-
-
-class RealtyDeleteSerializer(serializers.ModelSerializer):
-    """Realty Delete Serializer."""
-
-    class Meta:
-        model = realty_models.Realty
-        ...

@@ -18,33 +18,44 @@ class RealtyBaseViewSet(viewsets.ModelViewSet):
 
     queryset = realty_models.Realty.objects.all()
     # permission_classes =
-    serializer_class = realty_serializers.RealtyCreateSerializer
     # filter_backends =
 
     # def perform_create(self, serializer):
     #     serializer.save(owner=self.request.user)
 
+    def get_serializer_class(self):
+        if self.action == "create":
+            return realty_serializers.RealtyCreateSerializer
+        return realty_serializers.RealtyBaseSerializer
 
-class SaleViewSet(RealtyBaseViewSet):
+
+class SaleViewSet(viewsets.ModelViewSet):
     """Sale Viewset."""
 
     queryset = realty_models.Sale.objects.all()
-    serializer_class = realty_serializers.SaleReadSerializer
 
-
-class RentViewSet(RealtyBaseViewSet):
-    """Rent Viewset."""
-
-    queryset = realty_models.Rent.objects.all()
-
-    # def get_serializer_class(self):
-    #     if self.action == "create":
-    #         return realty_serializers.RentCreateSerializer
+    def get_serializer_class(self):
+        if self.action == "create":
+            return realty_serializers.SaleCreateSerializer
     #     elif self.action == "update" or self.action == "partial_update":
     #         return realty_serializers.RentUpdateSerializer
     #     elif self.action == "destroy":
     #         return realty_serializers.RentDeleteSerializer
-    #     return realty_serializers.RentReadSerializer
+        return realty_serializers.SaleReadSerializer
+
+class RentViewSet(viewsets.ModelViewSet):
+    """Rent Viewset."""
+
+    queryset = realty_models.Rent.objects.all()
+
+    def get_serializer_class(self):
+        if self.action == "create":
+            return realty_serializers.RentCreateSerializer
+    #     elif self.action == "update" or self.action == "partial_update":
+    #         return realty_serializers.RentUpdateSerializer
+    #     elif self.action == "destroy":
+    #         return realty_serializers.RentDeleteSerializer
+        return realty_serializers.RentReadSerializer
 
     # @staticmethod
     # def create_obj(request, pk, serializers): # на будущее для доб в избранное
