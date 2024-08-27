@@ -1,6 +1,10 @@
+from io import BytesIO
+
+import qrcode
+from django.core.files.base import ContentFile
 from django.db import models
 from django.contrib.auth.models import AbstractUser, UserManager
-from django.db.models.signals import pre_save, post_save
+from django.db.models.signals import pre_save
 from django.dispatch import receiver
 
 from config import constants
@@ -59,33 +63,50 @@ class User(AbstractUser):
         **constants.NULLABLE_FIELD,
     )
 
-    # TODO доделать генерацию qr-кода
-    # phone_qr_code = models.ImageField(
-    #     upload_to='users/phone_qr_codes',
-    #     verbose_name='QR-код телефона',
-    #     ** constants.NULLABLE_FIELD,
-    # )
+    phone_qr_code = models.ImageField(
+        upload_to='users/phone_qr_codes',
+        verbose_name='QR-код телефона',
+        **constants.NULLABLE_FIELD,
+    )
 
     def save(self, *args, **kwargs):
         """Хэшируем пароль.
-         Меняем username для 'своих' пользователей (при замене email)."""
+         Меняем username для 'своих' пользователей (при замене email).
+         Создаем QR-code, если изменился телефон."""
         password_previous = None
         email_previous = None
+        phone_number_previous = None
         uuid_esa = None
+        user_previous = None
 
         if self.pk:
             user_previous = User.objects.get(pk=self.pk)
             password_previous = user_previous.password
             email_previous = user_previous.email
+            phone_number_previous = user_previous.phone_number
             uuid_esa = user_previous.uuid_esa
 
         # Хэшируем пароль
         if not self.is_superuser and (self._state.adding or self.password != password_previous):
+            print('-'*50, 'Хэшируем пароль')
             self.set_password(self.password)
 
         # Меняем username для 'своих' пользователей
         if not uuid_esa and (self._state.adding or self.email != email_previous):
             self.username = self.email
+
+        # Создаем QR-код при создании пользователя или обновлении номера телефона,
+        # старый при необходимости удаляем
+        if self._state.adding or self.phone_number != phone_number_previous:
+            img = create_qrcode(self.phone_number)
+            file_name = f'{self.phone_number}.png'
+            self.phone_qr_code.save(
+                file_name,
+                ContentFile(img.read()),
+                save=False,
+            )
+            if user_previous:
+                user_previous.phone_qr_code.delete()
 
         return super().save(*args, **kwargs)
 
@@ -98,3 +119,15 @@ def set_default_user_type(sender, instance, *args, **kwargs):
             participant=constants.USER_TYPE_DEFAULT
         )
         instance.user_type = user_type
+
+
+def create_qrcode(phone_number):
+    """Создает QR-код по номеру телефона,
+    возвращает изображение"""
+
+    img = qrcode.make('tel:' + phone_number)
+    img_bytes = BytesIO()
+    img.save(img_bytes, format='png')
+    img_bytes.seek(0)
+
+    return img_bytes

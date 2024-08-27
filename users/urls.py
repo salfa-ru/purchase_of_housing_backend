@@ -12,7 +12,7 @@ router_dev = routers.DefaultRouter()
 router_dev.register(r'users-dev', UserDevViewSet, basename='users')
 
 urlpatterns = [
-    path('users/', UserRetrieveUpdateAPIView.as_view(), name='users')
+    path('users-profile/', UserRetrieveUpdateAPIView.as_view(), name='users-profile')
 ]
 
 # Пути для разработки: list, create, delete для User

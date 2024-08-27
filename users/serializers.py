@@ -21,7 +21,7 @@ class UserBaseSerializer(serializers.ModelSerializer):
         }
 
 
-class UserSelfSerializer(UserBaseSerializer):
+class UserSelfProfileSerializer(UserBaseSerializer):
     """Используется для полного обновления профиля,
      для 'своих' пользователей."""
 
@@ -35,12 +35,14 @@ class UserSelfSerializer(UserBaseSerializer):
         extra_kwargs = {**UserBaseSerializer.Meta.extra_kwargs, **extra_kwargs_add}
 
 
-class UserDevSerializer(UserSelfSerializer):
-    """Сериализатор для list, create, delete"""
+class UserFullSerializer(UserSelfProfileSerializer):
+    """Сериализатор для list, create, delete.
+    Полные данные по пользователю."""
 
-    class Meta(UserSelfSerializer.Meta):
+    class Meta(UserSelfProfileSerializer.Meta):
         model = User
-        fields = UserSelfSerializer.Meta.fields + [
+        fields = UserSelfProfileSerializer.Meta.fields + [
+            'phone_qr_code',
             'username',
             'user_type',
             'uuid_esa',
@@ -54,11 +56,12 @@ class UserDevSerializer(UserSelfSerializer):
             'uuid_esa': {'read_only': True},
             'updated_at': {'read_only': True},
             'date_joined': {'read_only': True},
+            'phone_qr_code': {'read_only': True},
         }
-        extra_kwargs = {**UserSelfSerializer.Meta.extra_kwargs, **extra_kwargs_add}
+        extra_kwargs = {**UserSelfProfileSerializer.Meta.extra_kwargs, **extra_kwargs_add}
 
 
-class UserESASerializer(UserBaseSerializer):
+class UserESAProfileSerializer(UserBaseSerializer):
     """Используется для частичного обновления профиля,
      для пользователей из ЕСА."""
 
