@@ -144,3 +144,20 @@ class SalesParametersSerializer(serializers.ModelSerializer):
     class Meta:
         model = spec_models.SalesParameters
         fields = "__all__"
+
+
+class SalesParametersCreateSerializer(serializers.ModelSerializer):
+    """Sales Parameters Serializer."""
+
+    housing_type = serializers.PrimaryKeyRelatedField(
+        queryset=values_models.HousingType.objects.all(),
+        required=False,
+    )
+    sale_type = serializers.PrimaryKeyRelatedField(
+        queryset=values_models.SaleType.objects.all(),
+        required=False,
+    )
+
+    class Meta:
+        model = spec_models.SalesParameters
+        fields = "__all__"
