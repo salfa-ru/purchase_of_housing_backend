@@ -9,10 +9,10 @@ app_name = UsersConfig.name
 
 # Роутер для разработки: list, create, delete для User
 router_dev = routers.DefaultRouter()
-router_dev.register(r'users-dev', UserDevViewSet, basename='users')
+router_dev.register(r'dev', UserDevViewSet, basename='dev')
 
 urlpatterns = [
-    path('users-profile/', UserRetrieveUpdateAPIView.as_view(), name='users-profile')
+    path('profile/', UserRetrieveUpdateAPIView.as_view(), name='profile')
 ]
 
 # Пути для разработки: list, create, delete для User
