@@ -72,12 +72,14 @@ class User(AbstractUser):
     def save(self, *args, **kwargs):
         """Хэшируем пароль.
          Меняем username для 'своих' пользователей (при замене email).
-         Создаем QR-code, если изменился телефон."""
+         Создаем QR-code, если изменился телефон.
+         Удаляем старую аватарку (файл), если аватарка меняется."""
         password_previous = None
         email_previous = None
         phone_number_previous = None
         uuid_esa = None
         user_previous = None
+        avatar_previous = None
 
         if self.pk:
             user_previous = User.objects.get(pk=self.pk)
@@ -85,10 +87,10 @@ class User(AbstractUser):
             email_previous = user_previous.email
             phone_number_previous = user_previous.phone_number
             uuid_esa = user_previous.uuid_esa
+            avatar_previous = user_previous.avatar
 
         # Хэшируем пароль
         if not self.is_superuser and (self._state.adding or self.password != password_previous):
-            print('-'*50, 'Хэшируем пароль')
             self.set_password(self.password)
 
         # Меняем username для 'своих' пользователей
@@ -107,6 +109,10 @@ class User(AbstractUser):
             )
             if user_previous:
                 user_previous.phone_qr_code.delete()
+
+        # Удаляем старую аватарку при замене
+        if user_previous and self.avatar != avatar_previous:
+            user_previous.avatar.delete(save=False)
 
         return super().save(*args, **kwargs)
 
