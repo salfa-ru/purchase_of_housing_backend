@@ -40,7 +40,6 @@ class UserFullSerializer(UserSelfProfileSerializer):
     Полные данные по пользователю."""
 
     class Meta(UserSelfProfileSerializer.Meta):
-        model = User
         fields = UserSelfProfileSerializer.Meta.fields + [
             'phone_qr_code',
             'username',
@@ -73,3 +72,47 @@ class UserESAProfileSerializer(UserBaseSerializer):
             'phone_number': {'read_only': True},
         }
         extra_kwargs = {**UserBaseSerializer.Meta.extra_kwargs, **extra_kwargs_add}
+
+
+class UserPersonalAccountSerializer(serializers.ModelSerializer):
+    """Краткая информацию по пользователю. Используется в ЛК."""
+
+    new_chats_count = serializers.SerializerMethodField()
+    new_notifications_count = serializers.SerializerMethodField()
+
+    def get_new_chats_count(self, instance):
+        return instance.chats_to_me.filter(is_new=True).count()
+
+    def get_new_notifications_count(self, instance):
+        return instance.notifications.filter(is_new=True).count()
+
+    class Meta:
+        model = User
+        fields = [
+            'id',
+            'first_name',
+            'last_name',
+            'avatar',
+            'new_chats_count',
+            'new_notifications_count',
+        ]
+
+
+class UserNewMsgsSerializer(serializers.ModelSerializer):
+    """Краткая информацию по пользователю. Используется в ЛК."""
+
+    is_new_msgs = serializers.SerializerMethodField()
+
+    def get_is_new_msgs(self, instance):
+        return bool(
+            instance.chats_to_me.filter(is_new=True).count() +
+            instance.notifications.filter(is_new=True).count()
+        )
+
+
+    class Meta:
+        model = User
+        fields = [
+            'id',
+            'is_new_msgs',
+        ]
