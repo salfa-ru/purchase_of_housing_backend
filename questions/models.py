@@ -22,7 +22,7 @@ class QuestionSection(models.Model):
     section = models.CharField(max_length=CHAR_LENGTH, verbose_name='Раздел')
     type = models.ForeignKey(
         QuestionType,
-        on_delete=models.PROTECT, verbose_name='Тип вопроса', related_name='questions',
+        on_delete=models.PROTECT, verbose_name='Тип вопроса', related_name='sections',
     )
 
     class Meta:
