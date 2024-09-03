@@ -1,45 +1,123 @@
 from rest_framework import serializers
 
-from .models import City, Metro, Street, Address
+# from .models import City, Metro, Street, Address
+
+from realty_addresses import models as address_models
+from config import constants
+
+
+# class CitySerializer(serializers.ModelSerializer):
+
+#     class Meta:
+#         model = City
+#         fields = ("name",)
+
+
+# class MetroSerializer(serializers.ModelSerializer):
+
+#     class Meta:
+#         model = Metro
+#         fields = ("name",)
+
+
+# class StreetSerializer(serializers.ModelSerializer):
+#     city = CitySerializer()
+
+#     class Meta:
+#         model = Street
+#         fields = (
+#             "name",
+#             "city"
+#         )
+
+
+# class AddressSerializer(serializers.ModelSerializer):
+#     street = StreetSerializer()
+#     metro = MetroSerializer()
+
+#     class Meta:
+#         model = Address
+#         fields = (
+#             "house_number",
+#             "corpus",
+#             "building",
+#             "ownership",
+#             "street",
+#             "metro",
+#             "minutes_to_metro",
+#         )
+
+
+class ZoneSerializer(serializers.ModelSerializer):
+    """Zone Serializer."""
+
+    name = serializers.CharField(
+        max_length=constants.DESCRIPTION_LENGTH,
+        required=True,
+    )
+
+    class Meta:
+        model = address_models.Zone
+        fields = ["name"]
+
+
+class DistrictSerializer(serializers.ModelSerializer):
+    """District Serilalizer."""
+
+    name = serializers.CharField(
+        max_length=constants.DESCRIPTION_LENGTH,
+        required=True,
+    )
+
+    class Meta:
+        model = address_models.District
+        fields = ["name"]
 
 
 class CitySerializer(serializers.ModelSerializer):
+    """City Serilalizer."""
+
+    name = serializers.CharField(
+        max_length=constants.DESCRIPTION_LENGTH,
+        required=True,
+    )
 
     class Meta:
-        model = City
-        fields = ("name",)
+        model = address_models.City
+        fields = ["name"]
 
 
-class MetroSerializer(serializers.ModelSerializer):
+class StreetReadSerializer(serializers.ModelSerializer):
+    """Street Serializer."""
 
-    class Meta:
-        model = Metro
-        fields = ("name",)
-
-
-class StreetSerializer(serializers.ModelSerializer):
+    zone = ZoneSerializer()
+    district = DistrictSerializer()
     city = CitySerializer()
 
     class Meta:
-        model = Street
-        fields = (
-            "name",
-            "city"
-        )
+        model = address_models.Street
+        fields = "__all__"
 
 
-class AddressSerializer(serializers.ModelSerializer):
-    street = StreetSerializer()
+class MetroSerializer(serializers.ModelSerializer):
+    """Metro Serilalizer."""
+
+    name = serializers.CharField(
+        max_length=constants.DESCRIPTION_LENGTH,
+        required=True,
+    )
+
+    class Meta:
+        model = address_models.Metro
+        fields = "__all__"
+
+
+class AddressReadSerializer(serializers.ModelSerializer):
+    """Address Serializer."""
+
+    street = StreetReadSerializer()
     metro = MetroSerializer()
 
     class Meta:
-        model = Address
-        fields = (
-            "house_number",
-            "corpus",
-            "building",
-            "ownership",
-            "street",
-            "metro",
-            "minutes_to_metro",
-        )
+        model = address_models.Address
+        fields = "__all__"

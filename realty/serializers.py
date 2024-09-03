@@ -6,7 +6,7 @@ from realty_photos.serializers import RealtyPhotoSerializer
 from realty import models as realty_models
 from realty_values import models as values_models
 from realty_addresses import serializers as address_serializers
-from realty_specificities import serilalizers as specif_serializers
+from realty_specificities import serializers as specif_serializers
 
 
 class ShortRealtySerializer(serializers.ModelSerializer):

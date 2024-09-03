@@ -3,7 +3,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 
 from .models import Sale, Rent, Realty
 from .serializers import (ShortSaleSerializer, ShortRentSerializer,
-                          RealtySerializer)
+                          RealtyBaseSerializer)  # RealtySerializer
 from .filters import RealtyFilter
 
 
@@ -19,7 +19,7 @@ class LastRentsView(generics.ListAPIView):
 
 class RealtyListView(generics.ListAPIView):
     queryset = Realty.objects.all().order_by('-published_at')
-    serializer_class = RealtySerializer
+    serializer_class = RealtyBaseSerializer
     filter_backends = (DjangoFilterBackend,)
     pagination_class = None
     filterset_class = RealtyFilter
