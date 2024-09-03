@@ -34,10 +34,6 @@ class CustomAuthentication(authentication.BaseAuthentication):
 
         user = self._get_user_by_id(token_data['user_id'], token)
 
-        print('-'*50)
-        print(user.updated_at)
-        print(datetime.fromisoformat(token_data.get('updated_at')))
-
         if (token_data.get('updated_at') and
                 user.updated_at.timestamp() != datetime.fromisoformat(token_data.get('updated_at')).timestamp()):
             update_user_from_esa(user, token)
