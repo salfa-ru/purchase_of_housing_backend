@@ -34,6 +34,7 @@ class QuestionSection(models.Model):
 
 
 class Question(models.Model):
+    """Question model."""
     question = models.CharField(max_length=QUESTION_LENGTH, verbose_name='Вопрос')
     answer = models.TextField(verbose_name='Ответ')
     section = models.ForeignKey(
@@ -51,6 +52,7 @@ class Question(models.Model):
 
 
 class DocumentTemplate(models.Model):
+    """Document Template model."""
     title = models.CharField(max_length=CHAR_LENGTH, verbose_name='Название')
     document = models.FileField(upload_to='questions/documents', verbose_name='Документ')
     question = models.ForeignKey(
