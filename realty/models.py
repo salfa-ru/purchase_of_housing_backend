@@ -111,7 +111,8 @@ class Realty(models.Model):
             f'{"копр." + self.address.corpus if self.address.corpus else ""}'
             f'{"стр." + self.address.building if self.address.building else ""}'
             f'{"вл." + self.address.ownership if self.address.ownership else ""} --- '
-            f"{self.owner.username}"
+            f"{self.owner.username}--"
+            f"{self.realty_status}"
         )
         # TODO переделать пользователя, когда будет кастомный пользователь
 

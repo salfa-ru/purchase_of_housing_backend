@@ -8,7 +8,7 @@ class ZoneSerializer(serializers.ModelSerializer):
     """Zone Serializer."""
 
     name = serializers.CharField(
-        max_length=constants.DESCRIPTION_LENGTH,
+        max_length=constants.CHAR_LENGTH,
         required=True,
     )
 
@@ -21,7 +21,7 @@ class DistrictSerializer(serializers.ModelSerializer):
     """District Serilalizer."""
 
     name = serializers.CharField(
-        max_length=constants.DESCRIPTION_LENGTH,
+        max_length=constants.CHAR_LENGTH,
         required=True,
     )
 
@@ -34,7 +34,7 @@ class CitySerializer(serializers.ModelSerializer):
     """City Serilalizer."""
 
     name = serializers.CharField(
-        max_length=constants.DESCRIPTION_LENGTH,
+        max_length=constants.CHAR_LENGTH,
         required=True,
     )
 
@@ -59,7 +59,7 @@ class StreetCreateSerializer(serializers.ModelSerializer):
     """Street Create Serializer."""
 
     name = serializers.CharField(
-        max_length=constants.DESCRIPTION_LENGTH,
+        max_length=constants.CHAR_LENGTH,
         required=True,
     )
     zone = ZoneSerializer(required=False)
@@ -72,22 +72,19 @@ class StreetCreateSerializer(serializers.ModelSerializer):
         city_data = validated_data.pop("city", None)
 
         if zone_data:
-            zone_serializer = ZoneSerializer(data=zone_data)
-            zone_serializer.is_valid(raise_exception=True)
-            zone = zone_serializer.save()
+            zone, _ = address_models.Zone.objects.get_or_create(**zone_data)
             validated_data["zone"] = zone
         if district_data:
-            district_serializer = DistrictSerializer(data=district_data)
-            district_serializer.is_valid(raise_exception=True)
-            district = district_serializer.save()
+            district, _ = address_models.District.objects.get_or_create(
+                **district_data
+            )
             validated_data["district"] = district
         if city_data:
-            city_serializer = CitySerializer(data=city_data)
-            city_serializer.is_valid(raise_exception=True)
-            city = city_serializer.save()
+            city, _ = address_models.City.objects.get_or_create(**city_data)
             validated_data["city"] = city
-
-        street = address_models.Street.objects.create(**validated_data)
+        street, _ = address_models.Street.objects.get_or_create(
+            **validated_data
+        )
         return street
 
     class Meta:
@@ -99,7 +96,7 @@ class MetroSerializer(serializers.ModelSerializer):
     """Metro Serilalizer."""
 
     name = serializers.CharField(
-        max_length=constants.DESCRIPTION_LENGTH,
+        max_length=constants.CHAR_LENGTH,
         required=True,
     )
 
@@ -123,27 +120,23 @@ class AddressCreateSerializer(serializers.ModelSerializer):
     """Address Serializer."""
 
     house_number = serializers.CharField(
-        max_length=constants.DESCRIPTION_LENGTH,
-        required=True,
-    )
-    street = serializers.CharField(
-        max_length=constants.DESCRIPTION_LENGTH,
+        max_length=constants.CHAR_LENGTH,
         required=True,
     )
     corpus = serializers.CharField(
-        max_length=constants.DESCRIPTION_LENGTH,
-        required=True,
+        max_length=constants.CHAR_LENGTH,
+        required=False,
     )
     building = serializers.CharField(
-        max_length=constants.DESCRIPTION_LENGTH,
-        required=True,
+        max_length=constants.CHAR_LENGTH,
+        required=False,
     )
     ownership = serializers.CharField(
-        max_length=constants.DESCRIPTION_LENGTH,
-        required=True,
+        max_length=constants.CHAR_LENGTH,
+        required=False,
     )
     map_point = serializers.CharField(
-        max_length=constants.DESCRIPTION_LENGTH,
+        max_length=constants.CHAR_LENGTH,
         required=True,
     )
     street = StreetCreateSerializer(required=True)
@@ -154,26 +147,16 @@ class AddressCreateSerializer(serializers.ModelSerializer):
         metro_data = validated_data.pop("metro", None)
 
         if street_data:
-            street_serializer = StreetCreateSerializer(
-                data=street_data
-            )
-            street_serializer.is_valid(
-                raise_exception=True
-            )
+            street_serializer = StreetCreateSerializer(data=street_data)
+            street_serializer.is_valid(raise_exception=True)
             street = street_serializer.save()
             validated_data["street"] = street
 
         if metro_data:
-            metro_serializer = MetroSerializer(
-                data=metro_data
-            )
-            metro_serializer.is_valid(
-                raise_exception=True
-            )
-            metro = metro_serializer.save()
+            metro, _ = address_models.Metro.objects.get_or_create(**metro_data)
             validated_data["metro"] = metro
 
-        address = address_models.Address.objects.create(
+        address, _ = address_models.Address.objects.get_or_create(
             **validated_data
         )
         return address

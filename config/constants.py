@@ -24,6 +24,15 @@ MAX_TIME = 60
 # тип пользователя для MVP
 USER_TYPE_DEFAULT = 'Собственник'
 
+REALTY_STATUS = "На модерации"
+
+# тип жилья для MVP
+HOUSING_TYPE = "Вторичное жилье"
+
+
+# тип продажи для MVP
+SALE_TYPE = "Свободная продажа"
+
 
 class ConstantsAuth:
     """Constants for custom authentication"""

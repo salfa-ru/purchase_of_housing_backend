@@ -1,5 +1,4 @@
 from rest_framework import serializers
-from rest_framework.relations import SlugRelatedField
 from django.core import validators
 
 from realty_specificities import models as spec_models
@@ -116,7 +115,7 @@ class LeasePaymentsCreateSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
     def validate_deposit(self, value):
-        """Проверка значения депозита."""
+        """Deposit value check."""
         if value < 0:
             raise serializers.ValidationError(
                 "Залог не может быть отрицательным."
@@ -140,23 +139,6 @@ class SalesParametersSerializer(serializers.ModelSerializer):
 
     housing_type = values_serializers.HousingTypeSerializer()
     sale_type = values_serializers.SaleTypeSerializer()
-
-    class Meta:
-        model = spec_models.SalesParameters
-        fields = "__all__"
-
-
-class SalesParametersCreateSerializer(serializers.ModelSerializer):
-    """Sales Parameters Serializer."""
-
-    housing_type = serializers.PrimaryKeyRelatedField(
-        queryset=values_models.HousingType.objects.all(),
-        required=False,
-    )
-    sale_type = serializers.PrimaryKeyRelatedField(
-        queryset=values_models.SaleType.objects.all(),
-        required=False,
-    )
 
     class Meta:
         model = spec_models.SalesParameters

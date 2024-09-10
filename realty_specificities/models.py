@@ -52,9 +52,9 @@ class AboutApartment(models.Model):
             validators.MaxValueValidator(constants.MAX_ROOM_AREA),
         ],
     )
-    loggia = models.BooleanField(verbose_name="Лоджия", blank=True)
-    balcony = models.BooleanField(verbose_name="Балкон", blank=True)
-    elevator = models.BooleanField(verbose_name="Лифт", blank=True)
+    loggia = models.BooleanField(verbose_name="Лоджия")
+    balcony = models.BooleanField(verbose_name="Балкон")
+    elevator = models.BooleanField(verbose_name="Лифт")
     floor = models.PositiveSmallIntegerField(verbose_name="Этаж")
     floors_number = models.PositiveSmallIntegerField(verbose_name="Этажность")
 
@@ -87,7 +87,7 @@ class CommonCharacteristics(models.Model):
         related_name="common_characteristics",
         **constants.NULLABLE_FIELD,
     )
-    furniture = models.BooleanField(blank=True, verbose_name="Мебель")
+    furniture = models.BooleanField(verbose_name="Мебель")
     bathroom = models.ForeignKey(
         values_models.BathroomType,
         on_delete=models.PROTECT,
@@ -95,10 +95,8 @@ class CommonCharacteristics(models.Model):
         related_name="common_characteristics",
         **constants.NULLABLE_FIELD,
     )
-    courtyard_view = models.BooleanField(
-        blank=True, verbose_name="Вид во двор"
-    )
-    street_view = models.BooleanField(blank=True, verbose_name="Вид на улицу")
+    courtyard_view = models.BooleanField(verbose_name="Вид во двор")
+    street_view = models.BooleanField(verbose_name="Вид на улицу")
 
     class Meta:
         ordering = ["repair_type"]
@@ -129,25 +127,15 @@ class CommonCharacteristics(models.Model):
 class RentalFeatures(models.Model):
     """Rental Features model."""
 
-    fridge = models.BooleanField(verbose_name="Холодильник", blank=True)
-    internet = models.BooleanField(verbose_name="Интернет", blank=True)
-    conditioner = models.BooleanField(verbose_name="Кондиционер", blank=True)
-    tv = models.BooleanField(verbose_name="Телевизор", blank=True)
-    dishwasher = models.BooleanField(
-        verbose_name="Посудомоечная машина", blank=True
-    )
-    washing_machine = models.BooleanField(
-        verbose_name="Стиральная машина", blank=True
-    )
-    garbage_chute = models.BooleanField(
-        verbose_name="Мусоропровод", blank=True
-    )
-    kids_allowed = models.BooleanField(
-        verbose_name="Можно с детьми", blank=True
-    )
-    animals_allowed = models.BooleanField(
-        verbose_name="Можно с животными", blank=True
-    )
+    fridge = models.BooleanField(verbose_name="Холодильник")
+    internet = models.BooleanField(verbose_name="Интернет")
+    conditioner = models.BooleanField(verbose_name="Кондиционер")
+    tv = models.BooleanField(verbose_name="Телевизор")
+    dishwasher = models.BooleanField(verbose_name="Посудомоечная машина")
+    washing_machine = models.BooleanField(verbose_name="Стиральная машина")
+    garbage_chute = models.BooleanField(verbose_name="Мусоропровод")
+    kids_allowed = models.BooleanField(verbose_name="Можно с детьми")
+    animals_allowed = models.BooleanField(verbose_name="Можно с животными")
 
     class Meta:
         ordering = ["internet"]

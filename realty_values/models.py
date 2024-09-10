@@ -67,7 +67,8 @@ class RealtyAdvStatus(models.Model):
     """Realty Advertisment Status model."""
 
     status = models.CharField(
-        max_length=constants.CHAR_LENGTH, verbose_name="Статус объявления"
+        max_length=constants.CHAR_LENGTH,
+        verbose_name="Статус объявления",
     )
 
     class Meta:

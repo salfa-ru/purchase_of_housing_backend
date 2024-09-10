@@ -5,7 +5,7 @@ from realty import models as realty_models
 from realty_values import models as values_models
 from realty_specificities import models as specificities_models
 from realty_addresses import serializers as address_serializers
-from realty_specificities import serilalizers as specif_serializers
+from realty_specificities import serializers as specif_serializers
 from config import constants
 
 
@@ -67,7 +67,7 @@ class RentReadSerializer(serializers.ModelSerializer):
 class RealtyCreateSerializer(serializers.ModelSerializer):
     """Realty Create Serializer."""
 
-    owner = SlugRelatedField(slug_field="username", read_only=True)
+    owner = SlugRelatedField(slug_field="email", read_only=True)
     realty_type = serializers.PrimaryKeyRelatedField(
         queryset=values_models.RealtyType.objects.all(),
         required=True,
@@ -104,14 +104,11 @@ class RealtyCreateSerializer(serializers.ModelSerializer):
         queryset=values_models.CommunicationMethod.objects.all(),
         required=True,
     )
-    realty_status = serializers.PrimaryKeyRelatedField(
-        queryset=values_models.RealtyAdvStatus.objects.all(),
-        required=True,
-    )
 
     class Meta:
         model = realty_models.Realty
         fields = [
+            "id",
             "owner",
             "realty_type",
             "address",
@@ -123,7 +120,6 @@ class RealtyCreateSerializer(serializers.ModelSerializer):
             "commission",
             "owner_type",
             "communication_method",
-            "realty_status",
         ]
 
     def create(self, validated_data):
@@ -146,26 +142,36 @@ class RealtyCreateSerializer(serializers.ModelSerializer):
             validated_data["address"] = address
 
         if about_building_data:
-            about_building = specificities_models.AboutBuilding.objects.create(
-                **about_building_data
+            about_building, _ = (
+                specificities_models.AboutBuilding.objects.get_or_create(
+                    **about_building_data
+                )
             )
             validated_data["about_building"] = about_building
 
         if about_apartment_data:
-            about_apartment = (
-                specificities_models.AboutApartment.objects.create(
+            about_apartment, _ = (
+                specificities_models.AboutApartment.objects.get_or_create(
                     **about_apartment_data
                 )
             )
             validated_data["about_apartment"] = about_apartment
 
         if common_characteristics_data:
-            common_characteristics = (
-                specificities_models.CommonCharacteristics.objects.create(
+            common_characteristics, _ = (
+                specificities_models.CommonCharacteristics.objects.get_or_create(
                     **common_characteristics_data
                 )
             )
             validated_data["common_characteristics"] = common_characteristics
+
+        if "realty_status" not in validated_data:
+            default_status, _ = (
+                values_models.RealtyAdvStatus.objects.get_or_create(
+                    status=constants.REALTY_STATUS
+                )
+            )
+            validated_data["realty_status"] = default_status
 
         realty = realty_models.Realty.objects.create(**validated_data)
         return realty
@@ -220,13 +226,15 @@ class SaleCreateSerializer(serializers.ModelSerializer):
     """Sale Create Serializer."""
 
     realty = RealtyCreateSerializer(required=True)
-    sales_parameters = specif_serializers.SalesParametersCreateSerializer(
-        required=True
-    )
+
+    class Meta:
+        model = realty_models.Sale
+        exclude = [
+            "sales_parameters",
+        ]
 
     def create(self, validated_data):
         realty_data = validated_data.pop("realty", None)
-        sales_parameters_data = validated_data.pop("sales_parameters", None)
 
         if realty_data:
             realty_data["owner"] = self.context["request"].user
@@ -235,17 +243,20 @@ class SaleCreateSerializer(serializers.ModelSerializer):
             )._create_realty(realty_data)
             validated_data["realty"] = realty
 
-        if sales_parameters_data:
-            sales_parameters = (
-                specificities_models.SalesParameters.objects.create(
-                    **sales_parameters_data
+        if "sales_parameters" not in validated_data:
+            housing_type, _ = values_models.HousingType.objects.get_or_create(
+                type=constants.HOUSING_TYPE
+            )
+            sale_type, _ = values_models.SaleType.objects.get_or_create(
+                type=constants.SALE_TYPE
+            )
+            sales_parameters, _ = (
+                specificities_models.SalesParameters.objects.get_or_create(
+                    housing_type=housing_type, sale_type=sale_type
                 )
             )
             validated_data["sales_parameters"] = sales_parameters
-            validated_data.pop("owner", None)
-            sale = realty_models.Sale.objects.create(**validated_data)
-            return sale
 
-    class Meta:
-        model = realty_models.Sale
-        fields = "__all__"
+        validated_data.pop("owner", None)
+        sale = realty_models.Sale.objects.create(**validated_data)
+        return sale
