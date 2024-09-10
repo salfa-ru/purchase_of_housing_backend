@@ -47,6 +47,7 @@ class Notification(models.Model):
     class Meta:
         verbose_name = 'Уведомление'
         verbose_name_plural = 'Уведомления'
+        ordering = ['-datetime', ]
 
     def __str__(self):
         return f'{self.template} --- {self.realty}'
