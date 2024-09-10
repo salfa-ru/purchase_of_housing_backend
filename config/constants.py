@@ -24,6 +24,17 @@ MAX_TIME = 60
 # тип пользователя для MVP
 USER_TYPE_DEFAULT = 'Собственник'
 
+# тип сделки
+RENT_TRADE_TYPE = 'Аренда'
+SALE_TRADE_TYPE = 'Продажа'
+
+# статус объявления
+ADVERTISMENT_STATUS = 'Активно'
+
+# тип санузла
+SEPARATE_BATHROOM = 'Раздельный'
+COMBINED_BATHROOM = 'Совмещенный'
+
 
 class ConstantsAuth:
     """Constants for custom authentication"""

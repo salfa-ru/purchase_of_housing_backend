@@ -10,12 +10,15 @@ from realty_specificities import serializers as specif_serializers
 
 
 class ShortRealtySerializer(serializers.ModelSerializer):
+    """Realty Short Detail Read Serializer."""
+
     photos = RealtyPhotoSerializer(
         many=True, source="realty_photos"
     )
     number_of_rooms = serializers.CharField(
         source="about_apartment.number_of_rooms.number_of_rooms"
     )
+    realty_type = serializers.ReadOnlyField(source='realty_type.type')
     area = serializers.DecimalField(
         source="about_apartment.area",
         max_digits=10, decimal_places=2
@@ -44,6 +47,8 @@ class ShortRealtySerializer(serializers.ModelSerializer):
 
 
 class ShortSaleSerializer(serializers.ModelSerializer):
+    """Sale Short Detail Read Serializer."""
+
     realty = ShortRealtySerializer()
 
     class Meta:
@@ -52,6 +57,8 @@ class ShortSaleSerializer(serializers.ModelSerializer):
 
 
 class ShortRentSerializer(serializers.ModelSerializer):
+    """Rent Short Detail Read Serializer."""
+
     realty = ShortRealtySerializer()
 
     class Meta:
@@ -89,18 +96,3 @@ class RealtyBaseSerializer(serializers.ModelSerializer):
         model = realty_models.Realty
         # exclude = ["published_at", "changed_at"]
         fields = "__all__"
-
-# class RealtySerializer(serializers.ModelSerializer):
-#     trade_type = serializers.ReadOnlyField()
-
-#     class Meta:
-#         model = Realty
-#         fields = ('id',
-#                   'realty_type',
-#                   'address',
-#                   'description',
-#                   'price',
-#                   'trade_type',
-#                   'published_at',
-#                   'about_apartment',
-#                   'owner')
