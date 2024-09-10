@@ -12,7 +12,7 @@ from config import constants
 class RealtyBaseSerializer(serializers.ModelSerializer):
     """Realty Base Read Serializer."""
 
-    owner = SlugRelatedField(slug_field="username", read_only=True)
+    owner = SlugRelatedField(slug_field="email", read_only=True)
     realty_type = SlugRelatedField(
         slug_field="type", queryset=values_models.RealtyType.objects.all()
     )
