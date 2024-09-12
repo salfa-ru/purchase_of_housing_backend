@@ -2,7 +2,6 @@ from rest_framework import serializers
 
 from notifications.models import Notification, NotificationTemplate
 from realty.models import Realty
-from realty_specificities.models import AboutApartment
 
 
 class NotificationTemplateSerializer(serializers.ModelSerializer):
@@ -20,11 +19,14 @@ class NotificationTemplateSerializer(serializers.ModelSerializer):
 class RealtyForNotificationSerializer(serializers.ModelSerializer):
     """Сериализатор информации об объявлении.
     Используется внутри NotificationSerializer."""
-    realty_type = serializers.SlugRelatedField(slug_field='type', read_only=True, )
-    number_of_rooms = serializers.CharField(source='about_apartment.number_of_rooms.number_of_rooms')
+    realty_type = serializers.SlugRelatedField(slug_field='type',
+                                               read_only=True, )
+    number_of_rooms = serializers.CharField(
+        source='about_apartment.number_of_rooms.number_of_rooms')
     area = serializers.FloatField(source='about_apartment.area')
     floor = serializers.IntegerField(source='about_apartment.floor')
-    floors_number = serializers.IntegerField(source='about_apartment.floors_number')
+    floors_number = serializers.IntegerField(
+        source='about_apartment.floors_number')
 
     class Meta:
         model = Realty
