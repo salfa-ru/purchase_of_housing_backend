@@ -99,8 +99,12 @@ class CommonCharacteristics(models.Model):
         related_name="common_characteristics",
         **constants.NULLABLE_FIELD,
     )
-    courtyard_view = models.BooleanField(verbose_name="Вид во двор")
-    street_view = models.BooleanField(verbose_name="Вид на улицу")
+    courtyard_view = models.BooleanField(
+        verbose_name="Вид во двор", default=False
+    )
+    street_view = models.BooleanField(
+        verbose_name="Вид на улицу", default=False
+    )
 
     class Meta:
         ordering = ["repair_type"]
