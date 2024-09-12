@@ -83,7 +83,7 @@ class RealtyCreateSerializer(serializers.ModelSerializer):
         required=False
     )
     about_apartment = specif_serializers.AboutApartmentCreateSerializer(
-        required=False
+        required=True
     )
     common_characteristics = (
         specif_serializers.CommonCharacteristicsCreateSerializer(
@@ -201,16 +201,18 @@ class RentCreateSerializer(serializers.ModelSerializer):
             validated_data["realty"] = realty
 
         if rental_features_data:
-            rental_features = (
-                specificities_models.RentalFeatures.objects.create(
+            rental_features, _ = (
+                specificities_models.RentalFeatures.objects.get_or_create(
                     **rental_features_data
                 )
             )
             validated_data["rental_features"] = rental_features
 
         if lease_payments_data:
-            lease_payments = specificities_models.LeasePayments.objects.create(
-                **lease_payments_data
+            lease_payments, _ = (
+                specificities_models.LeasePayments.objects.get_or_create(
+                    **lease_payments_data
+                )
             )
             validated_data["lease_payments"] = lease_payments
         validated_data.pop("owner", None)
