@@ -9,6 +9,7 @@ class BaseViewSet(viewsets.ModelViewSet):
     """Base viewset."""
 
     # filter_backends =
+    http_method_names = ["post"]
 
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
