@@ -35,7 +35,7 @@ class RealtyListView(generics.ListAPIView):
     queryset = Realty.objects.all().filter(
         realty_status__status=constants.ADVERTISMENT_STATUS
         ).order_by('-published_at')
-    serializer_class = RealtyBaseSerializer
+    serializer_class = ShortRealtySerializer
     filter_backends = (DjangoFilterBackend,)
     pagination_class = LimitRealtyPagination
     filterset_class = RealtyFilter
@@ -46,5 +46,7 @@ class RealtyListView(generics.ListAPIView):
 class RealtyDetailView(generics.RetrieveAPIView):
     """Viewing Realty object by <id>."""
 
-    queryset = Realty.objects.all()
+    queryset = Realty.objects.all().filter(
+        realty_status__status=constants.ADVERTISMENT_STATUS
+        )
     serializer_class = RealtyBaseSerializer

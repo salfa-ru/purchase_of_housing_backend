@@ -24,8 +24,8 @@ class RealtyFilter(django_filters.FilterSet):
         field_name='realty_type__type', lookup_expr='iexact',
         label='Тип недвижимости. (Квартира или Апартаменты)'
     )
-    room_count = django_filters.NumberFilter(
-        field_name='about_apartment__number_of_rooms',
+    room_count = django_filters.CharFilter(
+        field_name='about_apartment__number_of_rooms__number_of_rooms',
         label='Кол-во комнат'
     )
     price_min = django_filters.NumberFilter(

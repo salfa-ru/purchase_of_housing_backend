@@ -87,12 +87,12 @@ class RealtyBaseSerializer(serializers.ModelSerializer):
         slug_field="method",
         queryset=values_models.CommunicationMethod.objects.all(),
     )
-    realty_status = SlugRelatedField(
-        slug_field="status",
-        queryset=values_models.RealtyAdvStatus.objects.all(),
-    )
+    # realty_status = SlugRelatedField(
+    #     slug_field="status",
+    #     queryset=values_models.RealtyAdvStatus.objects.all(),
+    # )
 
     class Meta:
         model = realty_models.Realty
-        # exclude = ["published_at", "changed_at"]
-        fields = "__all__"
+        exclude = ["changed_at", "realty_status",]
+        # fields = "__all__"
