@@ -9,6 +9,7 @@ from .settings import DEBUG
 
 
 urlpatterns = [
+    path('realty/', include('realty.urls')),
     path('admin/', admin.site.urls),
     path('users/', include('users.urls', namespace='users')),
     path('questions/', include('questions.urls', namespace='questions')),
