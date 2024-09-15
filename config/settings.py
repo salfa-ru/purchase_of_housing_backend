@@ -26,7 +26,6 @@ INSTALLED_APPS = [
     'django_filters',
     'rest_framework',
     'rest_framework.authtoken',
-
     'complaints.apps.ComplaintsConfig',
     'chats.apps.ChatsConfig',
     'notifications.apps.NotificationsConfig',
@@ -138,7 +137,7 @@ if DEBUG:
         'rest_framework.authentication.TokenAuthentication'
     )
 
-    
+
 SPECTACULAR_SETTINGS = {
     'TITLE': 'purchase_of_housing_backend',
     'DESCRIPTION': 'Документация для приложения purchase_of_housing_backend',

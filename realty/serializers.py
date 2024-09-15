@@ -87,17 +87,12 @@ class RealtyBaseSerializer(serializers.ModelSerializer):
         slug_field="method",
         queryset=values_models.CommunicationMethod.objects.all(),
     )
-    # realty_status = SlugRelatedField(
-    #     slug_field="status",
-    #     queryset=values_models.RealtyAdvStatus.objects.all(),
-    # )
     sale = serializers.SerializerMethodField()
     rent = serializers.SerializerMethodField()
 
     class Meta:
         model = realty_models.Realty
         exclude = ["changed_at", "realty_status",]
-        # fields = "__all__"
 
     def get_sale(self, obj):
         """Return sales parameters."""

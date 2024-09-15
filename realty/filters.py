@@ -1,15 +1,20 @@
 import django_filters
 from django.db.models import F, Q
+from django.utils.functional import lazy
 
 from config import constants
 from .models import Realty
 from realty_values.models import BathroomType
 
 
+def get_bathroom_type_choices():
+    return [(bt.type, bt.type) for bt in BathroomType.objects.all()]
+
+
 class RealtyFilter(django_filters.FilterSet):
     """Custom filterset for Realty model."""
 
-    BATHROOM_TYPE_CHOICES = [(bt.type, bt.type) for bt in BathroomType.objects.all()]
+    BATHROOM_TYPE_CHOICES = lazy(get_bathroom_type_choices, list)()
 
     bathroom_type = django_filters.MultipleChoiceFilter(
         choices=BATHROOM_TYPE_CHOICES,
