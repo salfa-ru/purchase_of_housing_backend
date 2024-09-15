@@ -25,7 +25,6 @@ INSTALLED_APPS = [
     'drf_spectacular',
     'django_filters',
     'rest_framework',
-    'django_filters',
     'rest_framework.authtoken',
 
     'complaints.apps.ComplaintsConfig',
