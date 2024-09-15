@@ -91,8 +91,33 @@ class RealtyBaseSerializer(serializers.ModelSerializer):
     #     slug_field="status",
     #     queryset=values_models.RealtyAdvStatus.objects.all(),
     # )
+    sale = serializers.SerializerMethodField()
+    rent = serializers.SerializerMethodField()
 
     class Meta:
         model = realty_models.Realty
         exclude = ["changed_at", "realty_status",]
         # fields = "__all__"
+
+    def get_sale(self, obj):
+        """Return sales parameters."""
+        if hasattr(obj, 'sale_profile'):
+            return {
+                "sales_parameters": specif_serializers.SalesParametersSerializer(
+                    obj.sale_profile.sales_parameters
+                ).data
+            }
+        return None
+
+    def get_rent(self, obj):
+        """Return rental_features."""
+        if hasattr(obj, 'rent_profile'):
+            return {
+                "rental_features": specif_serializers.RentalFeaturesSerializer(
+                    obj.rent_profile.rental_features
+                ).data,
+                "lease_payments": specif_serializers.LeasePaymentsSerializer(
+                    obj.rent_profile.lease_payments
+                ).data
+            }
+        return None

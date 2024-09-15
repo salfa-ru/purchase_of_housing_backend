@@ -37,3 +37,37 @@ class CommonCharacteristicsSerializer(serializers.ModelSerializer):
     class Meta:
         model = spec_models.CommonCharacteristics
         fields = "__all__"
+
+
+class SalesParametersSerializer(serializers.ModelSerializer):
+    """Serializer for SalesParameters."""
+
+    housing_type = values_serializers.HousingTypeSerializer(read_only=True)
+    sale_type = values_serializers.SaleTypeSerializer(read_only=True)
+
+    class Meta:
+        model = spec_models.SalesParameters
+        fields = ['housing_type', 'sale_type']
+
+
+class RentalFeaturesSerializer(serializers.ModelSerializer):
+    """Serializer for RentalFeatures."""
+
+    class Meta:
+        model = spec_models.RentalFeatures
+        fields = [
+            'fridge', 'internet', 'conditioner', 'tv',
+            'dishwasher', 'washing_machine', 'garbage_chute',
+            'kids_allowed', 'animals_allowed'
+        ]
+
+
+class LeasePaymentsSerializer(serializers.ModelSerializer):
+    """Serializer for LeasePayments."""
+
+    counters_payment = values_serializers.TradeParticipantSerializer(read_only=True)
+    communal_payment = values_serializers.TradeParticipantSerializer(read_only=True)
+
+    class Meta:
+        model = spec_models.LeasePayments
+        fields = ['counters_payment', 'communal_payment', 'deposit']
