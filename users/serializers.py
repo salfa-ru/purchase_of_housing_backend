@@ -1,10 +1,18 @@
+from django.core.validators import FileExtensionValidator
 from rest_framework import serializers
 
-from users.models import User
+from config.constants import IMAGE_EXTENSIONS
+from users.models import User, validate_avatar_size
 
 
 class UserBaseSerializer(serializers.ModelSerializer):
     """Базовый сериализатор для профиля (retrieve, put, patch)."""
+    avatar = serializers.ImageField(
+        validators=[
+            FileExtensionValidator(allowed_extensions=IMAGE_EXTENSIONS),
+            validate_avatar_size
+        ]
+    )
 
     class Meta:
         model = User
@@ -32,7 +40,8 @@ class UserSelfProfileSerializer(UserBaseSerializer):
         extra_kwargs_add = {
             'password': {'write_only': True},
         }
-        extra_kwargs = {**UserBaseSerializer.Meta.extra_kwargs, **extra_kwargs_add}
+        extra_kwargs = {**UserBaseSerializer.Meta.extra_kwargs,
+                        **extra_kwargs_add}
 
 
 class UserFullSerializer(UserSelfProfileSerializer):
@@ -57,7 +66,8 @@ class UserFullSerializer(UserSelfProfileSerializer):
             'date_joined': {'read_only': True},
             'phone_qr_code': {'read_only': True},
         }
-        extra_kwargs = {**UserSelfProfileSerializer.Meta.extra_kwargs, **extra_kwargs_add}
+        extra_kwargs = {**UserSelfProfileSerializer.Meta.extra_kwargs,
+                        **extra_kwargs_add}
 
 
 class UserESAProfileSerializer(UserBaseSerializer):
@@ -71,7 +81,8 @@ class UserESAProfileSerializer(UserBaseSerializer):
             'email': {'read_only': True},
             'phone_number': {'read_only': True},
         }
-        extra_kwargs = {**UserBaseSerializer.Meta.extra_kwargs, **extra_kwargs_add}
+        extra_kwargs = {**UserBaseSerializer.Meta.extra_kwargs,
+                        **extra_kwargs_add}
 
 
 class UserPersonalAccountSerializer(serializers.ModelSerializer):
@@ -108,7 +119,6 @@ class UserNewMsgsSerializer(serializers.ModelSerializer):
             instance.chats_to_me.filter(is_new=True).count() +
             instance.notifications.filter(is_new=True).count()
         )
-
 
     class Meta:
         model = User

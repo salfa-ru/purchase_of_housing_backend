@@ -24,12 +24,19 @@ MAX_TIME = 60
 # тип пользователя для MVP
 USER_TYPE_DEFAULT = 'Собственник'
 
+
 # тип сделки
 RENT_TRADE_TYPE = 'Аренда'
 SALE_TRADE_TYPE = 'Продажа'
 
 # статус объявления
 ADVERTISMENT_STATUS = 'Активно'
+
+# допустимые типы для изображений
+IMAGE_EXTENSIONS = ('jpg', 'jpeg', 'png')
+
+# максимально допустимый размер для аватара (в Б)
+MAX_AVATAR_SIZE = 5 * 1024 * 1024
 
 
 class ConstantsAuth:

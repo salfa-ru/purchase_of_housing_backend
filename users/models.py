@@ -1,28 +1,39 @@
 from io import BytesIO
 
 import qrcode
+from django.core.exceptions import ValidationError
 from django.core.files.base import ContentFile
+from django.core.validators import FileExtensionValidator
 from django.db import models
 from django.contrib.auth.models import AbstractUser, UserManager
 from django.db.models.signals import pre_save
 from django.dispatch import receiver
 
 from config import constants
+from config.constants import IMAGE_EXTENSIONS, MAX_AVATAR_SIZE
 from realty_values import models as values_models
+
+
+def validate_avatar_size(value):
+    filesize = value.size
+    if filesize > MAX_AVATAR_SIZE:
+        raise ValidationError('The allowed file size has been exceeded')
 
 
 class CustomUserManager(UserManager):
     """Переопределение работы менеджера, для того чтобы работала команда createsuperuser.
     Для superuser задаются значения для обязательных полей."""
 
-    def create_superuser(self, username, email=None, password=None, **extra_fields):
+    def create_superuser(self, username, email=None, password=None,
+                         **extra_fields):
         email = username + '@email.com'
         extra_fields.setdefault("is_staff", True)
         extra_fields.setdefault("is_superuser", True)
         extra_fields.setdefault("first_name", username)
         extra_fields.setdefault("last_name", username)
         extra_fields.setdefault("phone_number", username + '_phone')
-        return super().create_superuser(username, email, password, **extra_fields)
+        return super().create_superuser(username, email, password,
+                                        **extra_fields)
 
 
 class User(AbstractUser):
@@ -30,8 +41,10 @@ class User(AbstractUser):
     objects = CustomUserManager()
     REQUIRED_FIELDS = []
 
-    first_name = models.CharField(verbose_name='Имя', max_length=constants.CHAR_LENGTH)
-    last_name = models.CharField(verbose_name='Фамилия', max_length=constants.CHAR_LENGTH)
+    first_name = models.CharField(verbose_name='Имя',
+                                  max_length=constants.CHAR_LENGTH)
+    last_name = models.CharField(verbose_name='Фамилия',
+                                 max_length=constants.CHAR_LENGTH)
     email = models.EmailField(verbose_name='email', unique=True)
 
     uuid_esa = models.UUIDField(
@@ -43,6 +56,10 @@ class User(AbstractUser):
     avatar = models.ImageField(
         upload_to='users/avatars',
         verbose_name='Аватарка',
+        validators=[
+            FileExtensionValidator(allowed_extensions=IMAGE_EXTENSIONS),
+            validate_avatar_size
+        ],
         **constants.NULLABLE_FIELD,
     )
     user_type = models.ForeignKey(
@@ -90,11 +107,17 @@ class User(AbstractUser):
             avatar_previous = user_previous.avatar
 
         # Хэшируем пароль
-        if not self.is_superuser and (self._state.adding or self.password != password_previous):
+        if not self.is_superuser and (
+                self._state.adding or self.password != password_previous):
             self.set_password(self.password)
 
+        # Меняем регистр почты на нижний
+        if self.email != email_previous:
+            self.email = self.email.lower()
+
         # Меняем username для 'своих' пользователей
-        if not uuid_esa and (self._state.adding or self.email != email_previous):
+        if not uuid_esa and (
+                self._state.adding or self.email != email_previous):
             self.username = self.email
 
         # Создаем QR-код при создании пользователя или обновлении номера телефона,
