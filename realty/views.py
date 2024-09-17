@@ -1,12 +1,13 @@
 from rest_framework import generics
+from rest_framework.response import Response
 from rest_framework.pagination import LimitOffsetPagination
 from django_filters.rest_framework import DjangoFilterBackend
-from drf_spectacular.utils import extend_schema
+from drf_spectacular.utils import extend_schema, OpenApiParameter
 
 from config import constants
 from .models import Realty
 from .pagination import LimitRealtyPagination
-from .serializers import (ShortRealtySerializer, RealtyBaseSerializer)
+from .serializers import (ShortRealtySerializer, RealtyBaseSerializer, CountRealtySerializer)
 from .filters import RealtyFilter
 
 
@@ -50,3 +51,22 @@ class RealtyDetailView(generics.RetrieveAPIView):
         realty_status__status=constants.ADVERTISMENT_STATUS
         )
     serializer_class = RealtyBaseSerializer
+
+
+@extend_schema(
+    summary='Количество найденных объявлений по фильтрам',
+    )
+class RealtyCountView(generics.ListAPIView):
+    """Endpoint to get the count of filtered realty objects."""
+
+    queryset = Realty.objects.all().filter(
+        realty_status__status=constants.ADVERTISMENT_STATUS
+    )
+    serializer_class = CountRealtySerializer
+    filter_backends = (DjangoFilterBackend,)
+    filterset_class = RealtyFilter
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())
+        count = queryset.count()
+        return Response({'count': count})
