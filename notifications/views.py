@@ -1,5 +1,5 @@
-from drf_spectacular.utils import extend_schema
-from rest_framework import generics, status
+from drf_spectacular.utils import extend_schema, inline_serializer
+from rest_framework import generics, status, serializers
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
@@ -46,7 +46,13 @@ class NotificationUpdateAPIView(generics.UpdateAPIView):
 
 @extend_schema(
     request=IdsListSerializer,
-    summary='Множественное удаление уведомлений'
+    summary='Множественное удаление уведомлений',
+    responses={200: inline_serializer(
+        name='NotificationDestroy',
+        fields={
+            'detail': serializers.CharField(),
+        }
+    )},
 )
 class NotificationDestroyAPIView(generics.CreateAPIView):
     """Множественное удаление уведомлений.

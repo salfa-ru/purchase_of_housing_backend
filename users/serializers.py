@@ -8,11 +8,16 @@ from users.models import User, validate_avatar_size
 class UserBaseSerializer(serializers.ModelSerializer):
     """Базовый сериализатор для профиля (retrieve, put, patch)."""
     avatar = serializers.ImageField(
+        required=False,
         validators=[
             FileExtensionValidator(allowed_extensions=IMAGE_EXTENSIONS),
             validate_avatar_size
         ]
     )
+
+    def to_internal_value(self, data):
+        data['email'] = data.get('email').lower()
+        return super().to_internal_value(data)
 
     class Meta:
         model = User
@@ -112,9 +117,9 @@ class UserPersonalAccountSerializer(serializers.ModelSerializer):
 class UserNewMsgsSerializer(serializers.ModelSerializer):
     """Краткая информацию по пользователю. Используется в ЛК."""
 
-    is_new_msgs = serializers.SerializerMethodField()
+    have_new_msgs = serializers.SerializerMethodField()
 
-    def get_is_new_msgs(self, instance):
+    def get_have_new_msgs(self, instance) -> bool:
         return bool(
             instance.chats_to_me.filter(is_new=True).count() +
             instance.notifications.filter(is_new=True).count()
@@ -124,5 +129,5 @@ class UserNewMsgsSerializer(serializers.ModelSerializer):
         model = User
         fields = [
             'id',
-            'is_new_msgs',
+            'have_new_msgs',
         ]

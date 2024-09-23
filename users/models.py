@@ -111,10 +111,6 @@ class User(AbstractUser):
                 self._state.adding or self.password != password_previous):
             self.set_password(self.password)
 
-        # Меняем регистр почты на нижний
-        if self.email != email_previous:
-            self.email = self.email.lower()
-
         # Меняем username для 'своих' пользователей
         if not uuid_esa and (
                 self._state.adding or self.email != email_previous):
