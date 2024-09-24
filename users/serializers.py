@@ -16,7 +16,10 @@ class UserBaseSerializer(serializers.ModelSerializer):
     )
 
     def to_internal_value(self, data):
-        data['email'] = data.get('email').lower()
+        if data.get('email'):
+            new_data = data.copy()
+            new_data['email'] = data.get('email').lower()
+            return super().to_internal_value(new_data)
         return super().to_internal_value(data)
 
     class Meta:

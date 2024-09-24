@@ -29,7 +29,7 @@ class RealtyAdmin(admin.ModelAdmin):
         return (f'{obj.about_apartment.number_of_rooms.number_of_rooms}'
                 f'{"-комн." if len(obj.about_apartment.number_of_rooms.number_of_rooms) <= 2 else ""} '
                 f'{obj.realty_type.type}, '
-                f'{obj.about_apartment.area} м², '
+                f'{obj.about_apartment.area} м.кв., '
                 f'{obj.about_apartment.floor}/{obj.about_apartment.floors_number} этаж')
 
     def address_short(self, obj):
