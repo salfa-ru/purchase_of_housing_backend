@@ -116,3 +116,13 @@ class RealtyBaseSerializer(serializers.ModelSerializer):
                 ).data
             }
         return None
+
+
+class CountRealtySerializer(RealtyBaseSerializer):
+    """Filtered Realty Count Serializer."""
+
+    count = serializers.IntegerField()
+
+    class Meta:
+        model = realty_models.Realty
+        fields = ('count',)
