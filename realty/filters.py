@@ -29,9 +29,12 @@ class RealtyFilter(django_filters.FilterSet):
         field_name='realty_type__type', lookup_expr='iexact',
         label='Тип недвижимости. (Квартира или Апартаменты)'
     )
-    room_count = django_filters.CharFilter(
+    room_count = django_filters.BaseInFilter(
         field_name='about_apartment__number_of_rooms__number_of_rooms',
-        label='Кол-во комнат'
+        lookup_expr='in',
+        help_text='Кол-во комнат. (Значения вводить с учетом регистра! '
+                  'Можно ввести несколько значений, через запятую без пробелов '
+                  'или добавить значение в новый строковый элемент.)'
     )
     price_min = django_filters.NumberFilter(
         field_name='price', lookup_expr='gte',
@@ -91,12 +94,16 @@ class RealtyFilter(django_filters.FilterSet):
     repair_type = django_filters.BaseInFilter(
         field_name='common_characteristics__repair_type__type',
         lookup_expr='in',
-        help_text='Тип ремонта. (Значения вводить с учетом регистра!)'
+        help_text='Тип ремонта. (Значения вводить с учетом регистра! '
+                  'Можно ввести несколько значений, через запятую без пробелов '
+                  'или добавить значение в новый строковый элемент.)'
     )
     about_building = django_filters.BaseInFilter(
         field_name='about_building__type__type',
         lookup_expr='in',
-        help_text='Тип дома. (Значения вводить с учетом регистра!)'
+        help_text='Тип дома. (Значения вводить с учетом регистра! '
+                  'Можно ввести несколько значений, через запятую без пробелов '
+                  'или добавить значение в новый строковый элемент.)'
     )
     has_furniture = django_filters.BooleanFilter(
         field_name='common_characteristics__furniture',
