@@ -139,7 +139,7 @@ class UserNewMsgsSerializer(serializers.ModelSerializer):
         ]
 
 
-class UserContactsSerializer(UserBaseSerializer):
+class UserDataSerializer(UserBaseSerializer):
     """Сериализатор для отображения данных для карточки контактов."""
 
     date_joined = serializers.SerializerMethodField()
