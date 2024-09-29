@@ -1,6 +1,8 @@
 from django.db.models import Q
+from rest_framework import exceptions
 
 from chats.models import Chat
+from chats.serializers import IdSerializer
 
 
 def get_chats(current_user):
@@ -20,3 +22,21 @@ def get_chats(current_user):
             filtered_queryset.append(chat)
 
     return filtered_queryset
+
+def get_chat_by_id(user, data):
+    """Получение сообщения по id из запроса,
+    включает валидацию данных в запросе
+    и проверку существования такого чата у текущего пользователя"""
+    serializer = IdSerializer(data=data)
+    serializer.is_valid(raise_exception=True)
+
+    chat_id = serializer.validated_data.get('id')
+    chat = Chat.objects.filter(
+        Q(user_from=user) | Q(user_to=user)
+    ).filter(id=chat_id).first()
+
+    if not chat:
+        msg = f'Chat with pk={chat_id} not found for current user'
+        raise exceptions.NotFound(detail=msg)
+
+    return chat
