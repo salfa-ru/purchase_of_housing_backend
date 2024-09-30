@@ -79,7 +79,7 @@ class RealtyCountView(generics.ListAPIView):
 @extend_schema(
     summary='Получение информации о владельце объявления')
 class RealtyOwnerDataView(generics.RetrieveAPIView):
-    """Endpoint to get realty's owner contacts."""
+    """Endpoint to get realty's owner data."""
 
     queryset = Realty.objects.all()
     serializer_class = RealtyOwnerDataSerializer
