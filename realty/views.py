@@ -10,7 +10,8 @@ from .models import Realty
 from users.models import User
 from .pagination import LimitRealtyPagination
 from .serializers import (ShortRealtySerializer, RealtyBaseSerializer,
-                          CountRealtySerializer, RealtyOwnerDataSerializer)
+                          CountRealtySerializer, RealtyOwnerDataSerializer,
+                          RealtyOwnerContactsSerializer)
 from .filters import RealtyFilter
 
 
@@ -85,5 +86,10 @@ class RealtyOwnerDataView(generics.RetrieveAPIView):
     serializer_class = RealtyOwnerDataSerializer
 
 
+@extend_schema(
+    summary='Получение контактов владельца объявления')
 class RealtyOwnerContactsView(generics.RetrieveAPIView):
-    ...
+    """Endpoint to get realty's owner contacts."""
+
+    queryset = Realty.objects.all()
+    serializer_class = RealtyOwnerContactsSerializer

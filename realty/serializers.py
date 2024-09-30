@@ -3,7 +3,7 @@ from rest_framework.relations import SlugRelatedField
 
 from .models import Realty, Sale, Rent
 from users.models import User
-from users.serializers import UserDataSerializer
+from users.serializers import UserDataSerializer, UserContactsSerializer
 from realty_photos.serializers import RealtyPhotoSerializer
 from realty import models as realty_models
 from realty_values import models as values_models
@@ -143,4 +143,17 @@ class RealtyOwnerDataSerializer(serializers.ModelSerializer):
         fields = ("owner",
                   "owner_type",
                   "communication_method",
+                  )
+
+
+class RealtyOwnerContactsSerializer(serializers.ModelSerializer):
+    """Realty's Owner Contacts Serializer."""
+
+    owner = UserContactsSerializer(read_only=True)
+    owner_type = serializers.ReadOnlyField(source='owner_type.participant')
+
+    class Meta:
+        model = Realty
+        fields = ("owner",
+                  "owner_type",
                   )
