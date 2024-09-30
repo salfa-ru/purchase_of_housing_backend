@@ -142,17 +142,17 @@ class UserNewMsgsSerializer(serializers.ModelSerializer):
 class UserDataSerializer(UserBaseSerializer):
     """Сериализатор для отображения данных для карточки контактов."""
 
-    date_joined = serializers.SerializerMethodField()
+    registered_for = serializers.SerializerMethodField()
 
     class Meta(UserBaseSerializer.Meta):
         fields = ('id',
                   'first_name',
                   'last_name',
-                  'date_joined',
+                  'registered_for',
                   'avatar',
                   )
 
-    def get_date_joined(self, obj):
+    def get_registered_for(self, obj):
         now = datetime.now()
         date_joined = obj.date_joined
         years = now.year - date_joined.year

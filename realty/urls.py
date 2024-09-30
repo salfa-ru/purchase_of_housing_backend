@@ -11,7 +11,6 @@ urlpatterns = [
     path('latest/', LastRealtyListView.as_view(), name='latest'),
     path('', RealtyListView.as_view(), name='realty-list'),
     path('<int:pk>/', RealtyDetailView.as_view(), name='realty-detail'),
-    path('<int:id>/owner/', RealtyOwnerDataView.as_view(), name='owner-data'),
-    path('<int:id>/contacts/', RealtyOwnerContactsView.as_view(), name='owner-contacts'),
+    path('<int:pk>/owner/', RealtyOwnerDataView.as_view(), name='owner-data'),
+    path('<int:pk>/contacts/', RealtyOwnerContactsView.as_view(), name='owner-contacts'),
 ]
- ## Я перепутал contacts и owner Поменять местами!!! owner-data'
