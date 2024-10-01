@@ -37,7 +37,6 @@ class NotificationUpdateAPIView(generics.UpdateAPIView):
             data=self.request.data
         )
         for obj in queryset:
-            print(obj)
             obj.is_new = False
             obj.save()
         serializer = self.get_serializer(queryset, many=True)

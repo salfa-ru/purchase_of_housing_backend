@@ -38,6 +38,8 @@ IMAGE_EXTENSIONS = ('jpg', 'jpeg', 'png')
 # максимально допустимый размер для аватара (в Б)
 MAX_AVATAR_SIZE = 5 * 1024 * 1024
 
+# длина строки для вывода в str
+SHORT_STR_LENGTH = 20
 
 class ConstantsAuth:
     """Constants for custom authentication"""
