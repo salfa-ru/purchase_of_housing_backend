@@ -1,13 +1,12 @@
-from rest_framework import generics, status
+from rest_framework import generics, permissions
 from rest_framework.response import Response
 from rest_framework.pagination import LimitOffsetPagination
 from django_filters.rest_framework import DjangoFilterBackend
-from drf_spectacular.utils import extend_schema, OpenApiParameter
+from drf_spectacular.utils import extend_schema  # , OpenApiParameter
 from drf_spectacular.helpers import forced_singular_serializer
 
 from config import constants
 from .models import Realty
-from users.models import User
 from .pagination import LimitRealtyPagination
 from .serializers import (ShortRealtySerializer, RealtyBaseSerializer,
                           CountRealtySerializer, RealtyOwnerDataSerializer,
@@ -93,3 +92,4 @@ class RealtyOwnerContactsView(generics.RetrieveAPIView):
 
     queryset = Realty.objects.all()
     serializer_class = RealtyOwnerContactsSerializer
+    permission_classes = [permissions.IsAuthenticated]
