@@ -1,5 +1,6 @@
 from django.db import models
 
+from config.constants import SHORT_STR_LENGTH
 from realty import models as realty_models
 from users import models as users_models
 
@@ -48,5 +49,5 @@ class Chat(models.Model):
         verbose_name_plural = 'Сообщения'
 
     def __str__(self):
-        return (f'{self.message[:20]}'
-                f'{"..." if len(self.message) > 20 else ""} ')
+        return (f'{self.message[:SHORT_STR_LENGTH]}'
+                f'{"..." if len(self.message) > SHORT_STR_LENGTH else ""} ')
