@@ -189,3 +189,14 @@ class UserDataSerializer(UserBaseSerializer):
             return f'{months} {get_ending(months, months_endings)} на сайте'
         else:
             return 'менее месяца на сайте'
+
+
+class UserContactsSerializer(UserBaseSerializer):
+    """Сериализатор для отображения карточки контактов."""
+
+    class Meta(UserBaseSerializer.Meta):
+        fields = ('id',
+                  'phone_number',
+                  'first_name',
+                  'phone_qr_code'
+                  )
