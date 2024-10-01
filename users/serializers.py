@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from django.core.validators import FileExtensionValidator
 from rest_framework import serializers
 
@@ -135,3 +137,55 @@ class UserNewMsgsSerializer(serializers.ModelSerializer):
             'id',
             'have_new_msgs',
         ]
+
+
+class UserDataSerializer(UserBaseSerializer):
+    """Сериализатор для отображения данных для карточки контактов."""
+
+    registered_for = serializers.SerializerMethodField()
+
+    class Meta(UserBaseSerializer.Meta):
+        fields = ('id',
+                  'first_name',
+                  'last_name',
+                  'registered_for',
+                  'avatar',
+                  )
+
+    def get_registered_for(self, obj):
+        now = datetime.now()
+        date_joined = obj.date_joined
+        years = now.year - date_joined.year
+        months = now.month - date_joined.month
+
+        if months < 0:
+            years -= 1
+            months += 12
+
+        months_endings = {
+            (5, 12): 'месяцев',
+            (2, 4): 'месяца',
+            (1, 1): 'месяц',
+        }
+
+        years_endings = {
+            (5, 20): 'лет',
+            (2, 4): 'года',
+            (1, 1): 'год',
+        }
+
+        def get_ending(value, endings):
+            """Функция для возврата правильного окончания."""
+            for (start, end), ending in endings.items():
+                if start <= value <= end:
+                    return ending
+            return list(endings.values())[-1]
+
+        if years > 0 and months > 0:
+            return f'{years} {get_ending(years, years_endings)} и {months} {get_ending(months, months_endings)} на сайте'
+        elif years > 0:
+            return f'{years} {get_ending(years, years_endings)} на сайте'
+        elif months > 0:
+            return f'{months} {get_ending(months, months_endings)} на сайте'
+        else:
+            return 'менее месяца на сайте'

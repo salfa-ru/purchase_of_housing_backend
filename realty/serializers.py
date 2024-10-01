@@ -2,6 +2,8 @@ from rest_framework import serializers
 from rest_framework.relations import SlugRelatedField
 
 from .models import Realty, Sale, Rent
+from users.models import User
+from users.serializers import UserDataSerializer
 from realty_photos.serializers import RealtyPhotoSerializer
 from realty import models as realty_models
 from realty_values import models as values_models
@@ -126,3 +128,19 @@ class CountRealtySerializer(RealtyBaseSerializer):
     class Meta:
         model = realty_models.Realty
         fields = ('count',)
+
+
+class RealtyOwnerDataSerializer(serializers.ModelSerializer):
+    """Realty's Owner Contacts Serializer."""
+
+    owner = UserDataSerializer(read_only=True)
+    owner_type = serializers.ReadOnlyField(source='owner_type.participant')
+    communication_method = serializers.CharField(
+        source='communication_method.method', read_only=True)
+
+    class Meta:
+        model = Realty
+        fields = ("owner",
+                  "owner_type",
+                  "communication_method",
+                  )

@@ -1,4 +1,4 @@
-from rest_framework import generics
+from rest_framework import generics, status
 from rest_framework.response import Response
 from rest_framework.pagination import LimitOffsetPagination
 from django_filters.rest_framework import DjangoFilterBackend
@@ -7,9 +7,10 @@ from drf_spectacular.helpers import forced_singular_serializer
 
 from config import constants
 from .models import Realty
+from users.models import User
 from .pagination import LimitRealtyPagination
 from .serializers import (ShortRealtySerializer, RealtyBaseSerializer,
-                          CountRealtySerializer)
+                          CountRealtySerializer, RealtyOwnerDataSerializer)
 from .filters import RealtyFilter
 
 
@@ -73,3 +74,16 @@ class RealtyCountView(generics.ListAPIView):
         queryset = self.filter_queryset(self.get_queryset())
         count = queryset.count()
         return Response({'count': count})
+
+
+@extend_schema(
+    summary='Получение информации о владельце объявления')
+class RealtyOwnerDataView(generics.RetrieveAPIView):
+    """Endpoint to get realty's owner data."""
+
+    queryset = Realty.objects.all()
+    serializer_class = RealtyOwnerDataSerializer
+
+
+class RealtyOwnerContactsView(generics.RetrieveAPIView):
+    ...
