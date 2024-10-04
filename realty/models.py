@@ -104,15 +104,14 @@ class Realty(models.Model):
             f"{self.about_apartment.number_of_rooms.number_of_rooms}"
             f'{"-комн." if len(self.about_apartment.number_of_rooms.number_of_rooms) <= 2 else ""} '
             f"{self.realty_type.type}, "
-            f"{self.about_apartment.area} м², "
+            f"{self.about_apartment.area} м.кв., "
             f"{self.about_apartment.floor}/{self.about_apartment.floors_number} этаж --- "
             f"{self.address.street.name}, "
             f"{self.address.house_number}"
             f'{"копр." + self.address.corpus if self.address.corpus else ""}'
             f'{"стр." + self.address.building if self.address.building else ""}'
             f'{"вл." + self.address.ownership if self.address.ownership else ""} --- '
-            f"{self.owner.username}--"
-            f"{self.realty_status}"
+            f"{self.owner.username}"
         )
         # TODO переделать пользователя, когда будет кастомный пользователь
 

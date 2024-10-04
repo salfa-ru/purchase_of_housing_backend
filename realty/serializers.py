@@ -37,8 +37,8 @@ class RealtyBaseSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = realty_models.Realty
-        # exclude = ["published_at", "changed_at"]
-        fields = "__all__"
+        exclude = ["published_at", "changed_at"]
+        # fields = "__all__"
 
 
 class SaleReadSerializer(serializers.ModelSerializer):
@@ -141,21 +141,23 @@ class RealtyCreateSerializer(serializers.ModelSerializer):
             address = address_serializer.save()
             validated_data["address"] = address
 
-        if about_building_data:
-            about_building, _ = (
-                specificities_models.AboutBuilding.objects.get_or_create(
-                    **about_building_data
-                )
-            )
-            validated_data["about_building"] = about_building
+        about_building = specificities_models.AboutBuilding.objects.create(**about_building_data) if about_building_data else None
+        # if about_building_data:
+        #     about_building, _ = (
+        #         specificities_models.AboutBuilding.objects.get_or_create(
+        #             **about_building_data
+        #         )
+        #     )
+        validated_data["about_building"] = about_building
 
-        if about_apartment_data:
-            about_apartment, _ = (
-                specificities_models.AboutApartment.objects.get_or_create(
-                    **about_apartment_data
-                )
-            )
-            validated_data["about_apartment"] = about_apartment
+        about_apartment = specificities_models.AboutApartment.objects.create(**about_apartment_data) if about_apartment_data else None
+        # if about_apartment_data:
+        #     about_apartment, _ = (
+        #         specificities_models.AboutApartment.objects.get_or_create(
+        #             **about_apartment_data
+        #         )
+        #     )
+        validated_data["about_apartment"] = about_apartment
 
         if common_characteristics_data:
             common_characteristics, _ = (

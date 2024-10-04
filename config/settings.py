@@ -22,14 +22,14 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'drf_yasg',
+    'drf_spectacular',
+    'django_filters',
     'rest_framework',
     'rest_framework.authtoken',
-
     'complaints.apps.ComplaintsConfig',
     'chats.apps.ChatsConfig',
-    'notifications.apps.NotificationsConfig',
-    'questions.apps.QuestionsConfig',
+    # 'notifications.apps.NotificationsConfig',
+    # 'questions.apps.QuestionsConfig',
     'realty.apps.RealtyConfig',
     'realty_addresses.apps.RealtyAddressesConfig',
     'realty_displays.apps.RealtyDisplaysConfig',
@@ -129,6 +129,7 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'users.backends.CustomAuthentication',
     ],
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
 }
 
 if DEBUG:
@@ -136,15 +137,11 @@ if DEBUG:
         'rest_framework.authentication.TokenAuthentication'
     )
 
-    
-# Для возможности передавать токен при отправке запросов расскомментируйте SWAGGER_SETTINGS
 
-# SWAGGER_SETTINGS = {
-#    'SECURITY_DEFINITIONS': {
-#       'Bearer': {
-#             'type': 'apiKey',
-#             'name': 'Authorization',
-#             'in': 'header'
-#       }
-#    }
-# }
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'purchase_of_housing_backend',
+    'DESCRIPTION': 'Документация для приложения purchase_of_housing_backend',
+    'VERSION': '1.0.0',
+    'SERVE_INCLUDE_SCHEMA': False,
+    'COMPONENT_SPLIT_REQUEST': True,
+}
