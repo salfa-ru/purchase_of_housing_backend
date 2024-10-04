@@ -37,12 +37,6 @@ class Chat(models.Model):
     is_deleted_to = models.BooleanField(
         default=False, verbose_name='Удалил (кому)'
     )
-    is_blocked_from = models.BooleanField(
-        default=False, verbose_name='Заблокировал (от кого)'
-    )
-    is_blocked_to = models.BooleanField(
-        default=False, verbose_name='Заблокировал (кому)'
-    )
 
     class Meta:
         verbose_name = 'Сообщение'
@@ -51,3 +45,25 @@ class Chat(models.Model):
     def __str__(self):
         return (f'{self.message[:SHORT_STR_LENGTH]}'
                 f'{"..." if len(self.message) > SHORT_STR_LENGTH else ""} ')
+
+
+class Blocking(models.Model):
+    user_who = models.ForeignKey(
+        users_models.User,
+        on_delete=models.PROTECT,
+        verbose_name='Кто заблокировал',
+        related_name='who_blocked',
+    )
+    user_whom = models.ForeignKey(
+        users_models.User,
+        on_delete=models.PROTECT,
+        verbose_name='Кого заблокировали',
+        related_name='whom_blocked',
+    )
+
+    class Meta:
+        verbose_name = 'Блокировка'
+        verbose_name_plural = 'Блокировки'
+
+    def __str__(self):
+        return f'{self.user_who} - {self.user_whom}'

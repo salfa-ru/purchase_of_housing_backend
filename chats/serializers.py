@@ -1,7 +1,7 @@
 from django.db.models import Q
 from rest_framework import serializers
 
-from chats.models import Chat
+from chats.models import Chat, Blocking
 from realty.models import Realty
 
 
@@ -85,19 +85,9 @@ class MessagesListSerializer(serializers.ModelSerializer):
     def get_is_blocked(self, obj) -> bool:
         """Определяем, заблокировали ли текущего пользователя"""
         current_user, second_user, realty = self.get_chat_data(obj)
-        is_blocked = Chat.objects.filter(
-            Q(
-                user_from=current_user,
-                user_to=second_user,
-                is_blocked_to=True,
-                realty=realty,
-            ) |
-            Q(
-                user_from=second_user,
-                is_blocked_from=True,
-                user_to=current_user,
-                realty=realty
-            )
+        is_blocked = Blocking.objects.filter(
+            user_who=second_user,
+            user_whom=current_user,
         ).exists()
         return is_blocked
 
