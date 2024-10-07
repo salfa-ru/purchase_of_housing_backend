@@ -6,6 +6,7 @@ from drf_spectacular.utils import extend_schema  # , OpenApiParameter
 from drf_spectacular.helpers import forced_singular_serializer
 
 from config import constants
+from realty_displays.models import DisplayFullInfo
 from .models import Realty
 from .pagination import LimitRealtyPagination
 from .serializers import (ShortRealtySerializer, RealtyBaseSerializer,
@@ -54,6 +55,19 @@ class RealtyDetailView(generics.RetrieveAPIView):
         realty_status__status=constants.ADVERTISMENT_STATUS
         )
     serializer_class = RealtyBaseSerializer
+
+    def retrieve(self, request, *args, **kwargs):
+        """ Увеличение счетчика просмотров """
+
+        realty = self.get_object()
+
+        # Получаем или создаем новый счетчик
+        display_info, created = DisplayFullInfo.objects.get_or_create(realty=realty)
+
+        # Увеличиваем счетчик
+        display_info.increment_view_count(request)
+
+        return super().retrieve(request, *args, **kwargs)
 
 
 @extend_schema(
