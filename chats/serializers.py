@@ -186,7 +186,16 @@ class CreateChatResponseSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Chat
-        fields = '__all__'
+        fields = [
+            'id',
+            'message',
+            'user_from',
+            'user_to',
+            'realty',
+            'datetime',
+            'is_deleted_from',
+            'is_deleted_to',
+        ]
 
     def validate(self, attrs):
         """Добавление проверки на блокировку"""
