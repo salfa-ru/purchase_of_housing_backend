@@ -141,7 +141,8 @@ class RealtyCreateSerializer(serializers.ModelSerializer):
             address = address_serializer.save()
             validated_data["address"] = address
 
-        about_building = specificities_models.AboutBuilding.objects.create(**about_building_data) if about_building_data else None
+        about_building = (specificities_models.AboutBuilding.objects.create(
+            **about_building_data) if about_building_data else None)
         # if about_building_data:
         #     about_building, _ = (
         #         specificities_models.AboutBuilding.objects.get_or_create(
@@ -150,7 +151,8 @@ class RealtyCreateSerializer(serializers.ModelSerializer):
         #     )
         validated_data["about_building"] = about_building
 
-        about_apartment = specificities_models.AboutApartment.objects.create(**about_apartment_data) if about_apartment_data else None
+        about_apartment = (specificities_models.AboutApartment.objects.create(
+            **about_apartment_data) if about_apartment_data else None)
         # if about_apartment_data:
         #     about_apartment, _ = (
         #         specificities_models.AboutApartment.objects.get_or_create(
@@ -159,13 +161,15 @@ class RealtyCreateSerializer(serializers.ModelSerializer):
         #     )
         validated_data["about_apartment"] = about_apartment
 
-        if common_characteristics_data:
-            common_characteristics, _ = (
-                specificities_models.CommonCharacteristics.objects.get_or_create(
-                    **common_characteristics_data
-                )
-            )
-            validated_data["common_characteristics"] = common_characteristics
+        common_characteristics = (specificities_models.CommonCharacteristics.objects.create(
+            **common_characteristics_data) if common_characteristics_data else None)
+        # if common_characteristics_data:
+        #     common_characteristics, _ = (
+        #         specificities_models.CommonCharacteristics.objects.get_or_create(
+        #             **common_characteristics_data
+        #         )
+        #     )
+        validated_data["common_characteristics"] = common_characteristics
 
         if "realty_status" not in validated_data:
             default_status, _ = (
@@ -202,21 +206,25 @@ class RentCreateSerializer(serializers.ModelSerializer):
             )._create_realty(realty_data)
             validated_data["realty"] = realty
 
-        if rental_features_data:
-            rental_features, _ = (
-                specificities_models.RentalFeatures.objects.get_or_create(
-                    **rental_features_data
-                )
-            )
-            validated_data["rental_features"] = rental_features
+        rental_features = (specificities_models.RentalFeatures.objects.create(
+            **rental_features_data) if rental_features_data else None)
+        # if rental_features_data:
+        #     rental_features, _ = (
+        #         specificities_models.RentalFeatures.objects.get_or_create(
+        #             **rental_features_data
+        #         )
+        #     )
+        validated_data["rental_features"] = rental_features
 
-        if lease_payments_data:
-            lease_payments, _ = (
-                specificities_models.LeasePayments.objects.get_or_create(
-                    **lease_payments_data
-                )
-            )
-            validated_data["lease_payments"] = lease_payments
+        lease_payments = (specificities_models.LeasePayments.objects.create(
+            **lease_payments_data) if lease_payments_data else None)
+        # if lease_payments_data:
+        #     lease_payments, _ = (
+        #         specificities_models.LeasePayments.objects.get_or_create(
+        #             **lease_payments_data
+        #         )
+        #     )
+        validated_data["lease_payments"] = lease_payments
         validated_data.pop("owner", None)
         rent = realty_models.Rent.objects.create(**validated_data)
         return rent
