@@ -354,7 +354,8 @@
       "corpus": null,
       "building": null,
       "ownership": null,
-      "map_point": "55.811133, 37.514688",
+      "latitude": 55.811133,
+      "longitude": 55.811133,
       "metro": 1,
       "minutes_to_metro": 10
     }
@@ -368,7 +369,8 @@
       "corpus": null,
       "building": null,
       "ownership": null,
-      "map_point": "55.692846, 37.540353",
+      "latitude": 55.692846,
+      "longitude": 37.540353,
       "metro": 2,
       "minutes_to_metro": 6
     }
@@ -382,7 +384,8 @@
       "corpus": "2",
       "building": null,
       "ownership": null,
-      "map_point": "55.679620, 37.750954",
+      "latitude": 55.679620,
+      "longitude": 37.750954,
       "metro": null,
       "minutes_to_metro": null
     }
