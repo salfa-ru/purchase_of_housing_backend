@@ -119,7 +119,7 @@ class ChatRealtyCreateAPIView(generics.CreateAPIView):
 
 @extend_schema(
     request=IdsListSerializer,
-    summary='Множественное удаление уведомлений',
+    summary='Множественное удаление сообщений',
     responses={200: inline_serializer(
         name='NotificationDestroy',
         fields={
@@ -129,7 +129,8 @@ class ChatRealtyCreateAPIView(generics.CreateAPIView):
 )
 class ChatsDestroyAPIView(generics.CreateAPIView):
     """Множественное удаление сообщений.
-    На вход нужно подать список id-шников переписок."""
+    На вход нужно подать список id-шников переписок.
+    Удаляются все существующие сообщения, входящие в переписки."""
     permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request, *args, **kwargs):
