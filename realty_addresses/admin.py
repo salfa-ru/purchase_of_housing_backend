@@ -51,7 +51,8 @@ class AddressAdmin(admin.ModelAdmin):
         "corpus",
         "building",
         "ownership",
-        "map_point",
+        "latitude",
+        "longitude",
         "metro",
         "minutes_to_metro",
     )
