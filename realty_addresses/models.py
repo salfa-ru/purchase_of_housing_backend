@@ -170,7 +170,8 @@ class Address(models.Model):
             f"{self.corpus}, "
             f"{self.building}, "
             f"{self.ownership}, "
-            f"{self.map_point}, "
+            f"{self.latitude}, "
+            f"{self.longitude}, "
             f"{self.metro}, "
             f"{self.minutes_to_metro}"
         )
