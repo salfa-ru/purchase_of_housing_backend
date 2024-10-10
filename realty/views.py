@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from rest_framework import generics, permissions
 from rest_framework.response import Response
 from rest_framework.pagination import LimitOffsetPagination
@@ -6,7 +8,7 @@ from drf_spectacular.utils import extend_schema  # , OpenApiParameter
 from drf_spectacular.helpers import forced_singular_serializer
 
 from config import constants
-from realty_displays.models import DisplayFullInfo
+from realty_displays.models import DisplayFullInfo, DisplayInSearch
 from .models import Realty
 from .pagination import LimitRealtyPagination
 from .serializers import (ShortRealtySerializer, RealtyBaseSerializer,
@@ -30,6 +32,17 @@ class LastRealtyListView(generics.ListAPIView):
         realty_status__status=constants.ADVERTISMENT_STATUS
         ).order_by('-published_at')
 
+    # TODO - Как насчет такого решения?
+    """
+    pagination_class = None  # Убираем пагинацию
+
+    # Выводим три последних объекта
+    queryset = Realty.objects.filter(
+        realty_status__status=constants.ADVERTISMENT_STATUS
+    ).order_by('-published_at')[:3]  # Ограничение до 3 объектов
+    """
+
+
 
 @extend_schema(
     summary='Получение списка всех объявлений. Доступна фильтрация. '
@@ -45,6 +58,26 @@ class RealtyListView(generics.ListAPIView):
     pagination_class = LimitRealtyPagination
     filterset_class = RealtyFilter
 
+    def list(self, request, *args, **kwargs):
+
+        """ Запуск увеличения счетчика проказа в поиске с защитой от накрутки."""
+
+        # Call the original list method to get the paginated response
+        response = super().list(request, *args, **kwargs)
+
+        realty_ids = [realty_data['id'] for realty_data in response.data['results']]
+        realties = Realty.objects.filter(id__in=realty_ids)
+
+        # Prefetched список всех выбранных объявлений
+        for realty_data in response.data['results']:
+            realty = realties.get(id=realty_data['id'])
+            realty_searched_counter, created = DisplayInSearch.objects.get_or_create(realty=realty)
+
+            # Увеличиваем счетчик
+            realty_searched_counter.increment_search_count(request)
+
+        return response
+
 
 @extend_schema(
     summary='Получение объявления по его id')
@@ -57,12 +90,13 @@ class RealtyDetailView(generics.RetrieveAPIView):
     serializer_class = RealtyBaseSerializer
 
     def retrieve(self, request, *args, **kwargs):
-        """ Увеличение счетчика просмотров """
+
+        """ Увеличение счетчика полных просмотров """
 
         realty = self.get_object()
 
-        # Получаем или создаем новый счетчик
-        display_info, created = DisplayFullInfo.objects.get_or_create(realty=realty)
+        # Получаем или создаем новый счетчик (ищем cегодняшнюю дату)
+        display_info, created = DisplayFullInfo.objects.get_or_create(realty=realty, date=datetime.now())
 
         # Увеличиваем счетчик
         display_info.increment_view_count(request)
