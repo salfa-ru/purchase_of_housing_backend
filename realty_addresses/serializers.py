@@ -1,7 +1,6 @@
 from rest_framework import serializers
-
+from realty import models as realty_models
 # from .models import City, Metro, Street, Address
-
 from realty_addresses import models as address_models
 from config import constants
 
@@ -120,4 +119,13 @@ class AddressReadSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = address_models.Address
+        fields = "__all__"
+
+
+class MapPointsSerializer(serializers.ModelSerializer):
+    latitude = serializers.FloatField(source='address.latitude')
+    longitude = serializers.FloatField(source='address.longitude')
+
+    class Meta:
+        model = realty_models.Realty
         fields = "__all__"
