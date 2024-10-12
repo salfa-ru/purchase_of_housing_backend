@@ -10,6 +10,6 @@ class DisplayInSearchAdmin(admin.ModelAdmin):
 
 
 @admin.register(models.DisplayFullInfo)
-class DisplayInSearchAdmin(admin.ModelAdmin):
+class DisplayFullInfoAdmin(admin.ModelAdmin):
     list_display = ('date', 'count', 'realty',)
     list_display_links = ('date', 'count',)

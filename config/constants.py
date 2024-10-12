@@ -1,5 +1,4 @@
-from datetime import datetime
-
+from datetime import datetime, timedelta
 
 CURRENT_YEAR = datetime.now().year
 MIN_YEAR_BUILT = 1500
@@ -40,6 +39,15 @@ MAX_AVATAR_SIZE = 5 * 1024 * 1024
 
 # длина строки для вывода в str
 SHORT_STR_LENGTH = 20
+
+
+# TODO - После тестирования выставить оптимальное время между показами
+# ограничения по частоте обновления счетчиков показов
+# для показа полного объявления
+COUNTER_FULL_VIEW_MIN_TIME_INTERVAL = timedelta(hours=0, minutes=0, seconds=5)
+# для показа объявления в поиске
+COUNTER_VIEW_IN_SEARCH_MIN_TIME_INTERVAL = timedelta(hours=0, minutes=0, seconds=5)
+
 
 class ConstantsAuth:
     """Constants for custom authentication"""

@@ -1,19 +1,20 @@
-from datetime import datetime
+from django.utils import timezone
 
 from rest_framework import generics, permissions
 from rest_framework.response import Response
-from rest_framework.pagination import LimitOffsetPagination
+# from rest_framework.pagination import LimitOffsetPagination
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import extend_schema  # , OpenApiParameter
 from drf_spectacular.helpers import forced_singular_serializer
 
 from config import constants
 from realty_displays.models import DisplayFullInfo, DisplayInSearch
+from realty_displays.utils import increment_counter
 from .models import Realty
 from .pagination import LimitRealtyPagination
 from .serializers import (ShortRealtySerializer, RealtyBaseSerializer,
                           CountRealtySerializer, RealtyOwnerDataSerializer,
-                          RealtyOwnerContactsSerializer)
+                          RealtyOwnerContactsSerializer, RealtyLKSerializer)
 from .filters import RealtyFilter
 
 
@@ -25,23 +26,26 @@ class LastRealtyListView(generics.ListAPIView):
     serializer_class = ShortRealtySerializer
     filter_backends = (DjangoFilterBackend,)
     filterset_class = RealtyFilter
+
+    """
     pagination_class = LimitOffsetPagination
     pagination_class.default_limit = 3
     # TODO найти решение без пагинации. Требуется вывод последних 3х объектов.
     queryset = Realty.objects.all().filter(
         realty_status__status=constants.ADVERTISMENT_STATUS
         ).order_by('-published_at')
+        """
 
-    # TODO - Как насчет такого решения?
-    """
-    pagination_class = None  # Убираем пагинацию
+    # TODO - Как насчет такого решения? Апдейт: заработало после отключения всех строк сверху
+    # Работает, в том числе если:
+    # - объявлений находится меньше, чем надо показать
+    # - если объявлений больше, чем надо показать - показывает 3
+    # Да, при возвращении объектов не показывает их количество, как при пагинации
 
-    # Выводим три последних объекта
+    # Отдаем 3 последних объекта
     queryset = Realty.objects.filter(
         realty_status__status=constants.ADVERTISMENT_STATUS
-    ).order_by('-published_at')[:3]  # Ограничение до 3 объектов
-    """
-
+    ).order_by('-published_at')[:3]
 
 
 @extend_schema(
@@ -64,17 +68,16 @@ class RealtyListView(generics.ListAPIView):
 
         # Call the original list method to get the paginated response
         response = super().list(request, *args, **kwargs)
-
         realty_ids = [realty_data['id'] for realty_data in response.data['results']]
         realties = Realty.objects.filter(id__in=realty_ids)
 
-        # Prefetched список всех выбранных объявлений
         for realty_data in response.data['results']:
             realty = realties.get(id=realty_data['id'])
-            realty_searched_counter, created = DisplayInSearch.objects.get_or_create(realty=realty)
 
-            # Увеличиваем счетчик
-            realty_searched_counter.increment_search_count(request)
+            # Увеличиваем счетчик для поиска
+            increment_counter(request, realty, DisplayInSearch,
+                              constants.COUNTER_VIEW_IN_SEARCH_MIN_TIME_INTERVAL,
+                              "DisplayInSearch_time")
 
         return response
 
@@ -94,12 +97,11 @@ class RealtyDetailView(generics.RetrieveAPIView):
         """ Увеличение счетчика полных просмотров """
 
         realty = self.get_object()
-
-        # Получаем или создаем новый счетчик (ищем cегодняшнюю дату)
-        display_info, created = DisplayFullInfo.objects.get_or_create(realty=realty, date=datetime.now())
-
-        # Увеличиваем счетчик
-        display_info.increment_view_count(request)
+        # Увеличиваем счетчик, передавая нужные параметры
+        increment_counter(request, realty, DisplayFullInfo,
+                          constants.COUNTER_FULL_VIEW_MIN_TIME_INTERVAL,
+                          "DisplayFullInfo_time",
+                          timezone.now().date())
 
         return super().retrieve(request, *args, **kwargs)
 
@@ -141,3 +143,18 @@ class RealtyOwnerContactsView(generics.RetrieveAPIView):
     queryset = Realty.objects.all()
     serializer_class = RealtyOwnerContactsSerializer
     permission_classes = [permissions.IsAuthenticated]
+
+
+@extend_schema(
+    summary='Показ всех объявлений пользователя в ЛК - со счетчиками и статусом.')
+class RealtyLKListView(generics.ListAPIView):
+    """Viewing Realty objects queryset with view counts."""
+
+    serializer_class = RealtyLKSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        owner = self.request.user
+        queryset = Realty.objects.filter(owner_id=owner).order_by('-published_at')
+
+        return queryset
