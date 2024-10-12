@@ -128,4 +128,17 @@ class MapPointsSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = realty_models.Realty
-        fields = "__all__"
+        fields = ['id', 'latitude', 'longitude']
+
+
+class GetAnnouncementsInMapPoint(serializers.ModelSerializer):
+    street = serializers.CharField(source='address.street.name')
+    house_number = serializers.CharField(source='address.house_number')
+    corpus = serializers.CharField(source='address.corpus')
+    building = serializers.CharField(source='address.building')
+    number_of_rooms = serializers.CharField(source='about_apartment.number_of_rooms.number_of_rooms')
+    realty_type = serializers.CharField(source='realty_type.type')
+
+    class Meta:
+        model = realty_models.Realty
+        fields = ['realty_type', 'price', 'street', 'number_of_rooms', 'house_number', 'corpus', 'building', ]
