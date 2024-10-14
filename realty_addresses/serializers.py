@@ -71,14 +71,14 @@ class StreetCreateSerializer(serializers.ModelSerializer):
         district_data = validated_data.pop("district", None)
         city_data = validated_data.pop("city", None)
 
-        if zone_data:
-            zone, _ = address_models.Zone.objects.get_or_create(**zone_data)
-            validated_data["zone"] = zone
-        if district_data:
-            district, _ = address_models.District.objects.get_or_create(
-                **district_data
-            )
-            validated_data["district"] = district
+        zone = (address_models.Zone.objects.create(
+            **zone_data) if zone_data else None)
+        validated_data["zone"] = zone
+
+        district = (address_models.District.objects.create(
+            **district_data) if district_data else None)
+        validated_data["district"] = district
+
         if city_data:
             city, _ = address_models.City.objects.get_or_create(**city_data)
             validated_data["city"] = city
@@ -152,9 +152,9 @@ class AddressCreateSerializer(serializers.ModelSerializer):
             street = street_serializer.save()
             validated_data["street"] = street
 
-        if metro_data:
-            metro, _ = address_models.Metro.objects.get_or_create(**metro_data)
-            validated_data["metro"] = metro
+        metro = (address_models.Metro.objects.create(
+            **metro_data) if metro_data else None)
+        validated_data["metro"] = metro
 
         address, _ = address_models.Address.objects.get_or_create(
             **validated_data
