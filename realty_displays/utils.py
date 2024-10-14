@@ -25,6 +25,12 @@ def increment_counter(request, realty, model, timeout, key, date=None):
 
     # Получаем или создаем новый счетчик (ищем по дате, если она передана)
     if date:
+
+        # Проверка не просматривает ли пользователь свое объявление
+        current_user = request.user
+        if realty.owner_id == current_user.id:
+            return
+
         counter, created = model.objects.get_or_create(realty=realty, date=date)
     else:
         counter, created = model.objects.get_or_create(realty=realty)
