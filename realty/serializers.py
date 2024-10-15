@@ -9,6 +9,7 @@ from realty import models as realty_models
 from realty_values import models as values_models
 from realty_addresses import serializers as address_serializers
 from realty_specificities import serializers as specif_serializers
+from realty_displays import serializers as displays_serializers
 
 
 class ShortRealtySerializer(serializers.ModelSerializer):
@@ -157,3 +158,30 @@ class RealtyOwnerContactsSerializer(serializers.ModelSerializer):
         fields = ("owner",
                   "owner_type",
                   )
+
+
+class RealtyLKSerializer(serializers.Serializer):
+    """Serializer for Realty objects with added view counts and status."""
+
+    short_realty_data = ShortRealtySerializer()
+    counter_views = displays_serializers.CounterViewsSerializer()
+    realty_status = serializers.IntegerField(source='realty_status_id')
+
+    def to_representation(self, instance):
+        representation = {
+            'short_realty_data': ShortRealtySerializer(instance).data,
+            'realty_status': instance.realty_status_id
+        }
+
+        # статусы из realty_values_realtyadvstatus
+        # 1 - Активно
+        # 2 - На модерации
+        # 3 - Отклонено
+        # 4 - В архиве
+
+        if instance.realty_status_id == 1:  # Выдавать ответ только если объявление Активно
+            representation['counter_views'] = displays_serializers.CounterViewsSerializer(instance).data
+        else:
+            representation['counter_views'] = {}  # пустой ответ если объявление не активно
+
+        return representation
