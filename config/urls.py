@@ -12,8 +12,9 @@ urlpatterns = [
     path('realty/', include('realty.urls')),
     path('admin/', admin.site.urls),
     path('users/', include('users.urls', namespace='users')),
-    # path('questions/', include('questions.urls', namespace='questions')),
-    # path('notifications/', include('notifications.urls', namespace='notifications')),
+    path('questions/', include('questions.urls', namespace='questions')),
+    path('notifications/', include('notifications.urls', namespace='notifications')),
+    path('chats/', include('chats.urls', namespace='chats')),
 
     path('schema/', SpectacularAPIView.as_view(), name='schema'),
     path('swagger/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),

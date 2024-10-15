@@ -15,28 +15,32 @@ class RentInline(admin.StackedInline):
 
 @admin.register(Realty)
 class RealtyAdmin(admin.ModelAdmin):
-    list_display = (
-        "apartment",
-        "address_short",
-        "owner",
-        "price",
-        "trade_type_short",
-        "realty_status",
-        "changed_at",
-    )
-    list_filter = (
-        "realty_status",
-        "owner_type",
-    )
+    list_display = ('id',
+                    'apartment',
+                    'address_short',
+                    'owner',
+                    'price',
+                    'trade_type_short',
+                    'realty_status',
+                    'changed_at')
+    list_display_links = ('id', 'apartment',)
+    list_filter = ('realty_status',
+                   'owner_type',)
+    readonly_fields = ('id',)
+
+    def get_fieldsets(self, request, obj=None):
+        """Перемещаем 'id' наверх."""
+        fieldsets = super().get_fieldsets(request, obj)
+        # Преобразуем fieldsets в список кортежей, чтобы добавить 'id'
+        fieldsets = [(None, {'fields': ('id',)})] + list(fieldsets)
+        return fieldsets
 
     def apartment(self, obj):
-        return (
-            f"{obj.about_apartment.number_of_rooms.number_of_rooms}"
-            f'{"-комн." if len(obj.about_apartment.number_of_rooms.number_of_rooms) <= 2 else ""} '
-            f"{obj.realty_type.type}, "
-            f"{obj.about_apartment.area} м², "
-            f"{obj.about_apartment.floor}/{obj.about_apartment.floors_number} этаж"
-        )
+        return (f'{obj.about_apartment.number_of_rooms.number_of_rooms}'
+                f'{"-комн." if len(obj.about_apartment.number_of_rooms.number_of_rooms) <= 2 else ""} '
+                f'{obj.realty_type.type}, '
+                f'{obj.about_apartment.area} м.кв., '
+                f'{obj.about_apartment.floor}/{obj.about_apartment.floors_number} этаж')
 
     def address_short(self, obj):
         return (
@@ -66,16 +70,18 @@ class RealtyAdmin(admin.ModelAdmin):
 
 @admin.register(Sale)
 class SaleAdmin(admin.ModelAdmin):
-    list_display = (
-        "realty",
-        "sales_parameters",
-    )
+    list_display = ('id',
+                    'realty',
+                    'sales_parameters',)
+    list_display_links = ('realty',)
+    readonly_fields = ('id',)
 
 
 @admin.register(Rent)
 class RentAdmin(admin.ModelAdmin):
-    list_display = (
-        "realty",
-        "rental_features",
-        "lease_payments",
-    )
+    list_display = ('id',
+                    'realty',
+                    'rental_features',
+                    'lease_payments',)
+    list_display_links = ('realty',)
+    readonly_fields = ('id',)

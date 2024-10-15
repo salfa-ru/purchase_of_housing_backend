@@ -31,22 +31,32 @@ class Notification(models.Model):
 
     template = models.ForeignKey(
         NotificationTemplate,
-        on_delete=models.PROTECT, verbose_name='Шаблон', related_name='notifications',
+        on_delete=models.PROTECT,
+        verbose_name='Шаблон',
+        related_name='notifications',
     )
     user_to = models.ForeignKey(
         users_models.User,
-        on_delete=models.PROTECT, verbose_name='Кому', related_name='notifications',
+        on_delete=models.PROTECT,
+        verbose_name='Кому',
+        related_name='notifications',
     )
     realty = models.ForeignKey(
         realty_models.Realty,
-        on_delete=models.PROTECT, verbose_name='Недвижимость', related_name='notifications',
+        on_delete=models.PROTECT,
+        verbose_name='Недвижимость',
+        related_name='notifications',
     )
-    datetime = models.DateTimeField(auto_now_add=True, verbose_name='Дата+Время')
+    datetime = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name='Дата+Время'
+    )
     is_new = models.BooleanField(default=True, verbose_name='Новое')
 
     class Meta:
         verbose_name = 'Уведомление'
         verbose_name_plural = 'Уведомления'
+        ordering = ['-datetime', ]
 
     def __str__(self):
         return f'{self.template} --- {self.realty}'

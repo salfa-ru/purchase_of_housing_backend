@@ -1,5 +1,4 @@
-from datetime import datetime
-
+from datetime import datetime, timedelta
 
 CURRENT_YEAR = datetime.now().year
 MIN_YEAR_BUILT = 1500
@@ -32,6 +31,31 @@ HOUSING_TYPE = "Вторичное жилье"
 
 # тип продажи для MVP
 SALE_TYPE = "Свободная продажа"
+
+
+# тип сделки
+RENT_TRADE_TYPE = 'Аренда'
+SALE_TRADE_TYPE = 'Продажа'
+
+# статус объявления
+ADVERTISMENT_STATUS = 'Активно'
+
+# допустимые типы для изображений
+IMAGE_EXTENSIONS = ('jpg', 'jpeg', 'png')
+
+# максимально допустимый размер для аватара (в Б)
+MAX_AVATAR_SIZE = 5 * 1024 * 1024
+
+# длина строки для вывода в str
+SHORT_STR_LENGTH = 20
+
+
+# TODO - После тестирования выставить оптимальное время между показами
+# ограничения по частоте обновления счетчиков показов
+# для показа полного объявления
+COUNTER_FULL_VIEW_MIN_TIME_INTERVAL = timedelta(hours=0, minutes=0, seconds=5)
+# для показа объявления в поиске
+COUNTER_VIEW_IN_SEARCH_MIN_TIME_INTERVAL = timedelta(hours=0, minutes=0, seconds=5)
 
 
 class ConstantsAuth:

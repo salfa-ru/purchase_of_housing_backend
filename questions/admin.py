@@ -17,7 +17,7 @@ class QuestionTypeAdmin(admin.ModelAdmin):
 @admin.register(models.Question)
 class QuestionAdmin(admin.ModelAdmin):
     list_display = ('__str__', 'section', 'q_type')
-    list_filter = ('section', )
+    list_filter = ('section',)
     fields = ('question', 'answer', 'section', 'q_type',)
     readonly_fields = ('q_type',)
 
