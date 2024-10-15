@@ -8,7 +8,6 @@ from realty import models as realty_models
 class BaseViewSet(viewsets.ModelViewSet):
     """Base viewset."""
 
-    # filter_backends =
     http_method_names = ["post"]
 
     def perform_create(self, serializer):
