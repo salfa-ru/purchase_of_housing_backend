@@ -1,21 +1,91 @@
 from django.utils import timezone
 
-from rest_framework import generics, permissions
-from rest_framework.response import Response
-# from rest_framework.pagination import LimitOffsetPagination
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import extend_schema  # , OpenApiParameter
 from drf_spectacular.helpers import forced_singular_serializer
+from rest_framework import generics, permissions, viewsets
+from rest_framework.response import Response
+# from rest_framework.pagination import LimitOffsetPagination
 
 from config import constants
+from realty.pagination import LimitRealtyPagination
 from realty_displays.models import DisplayFullInfo, DisplayInSearch
 from realty_displays.utils import increment_counter
-from .models import Realty
-from .pagination import LimitRealtyPagination
-from .serializers import (ShortRealtySerializer, RealtyBaseSerializer,
-                          CountRealtySerializer, RealtyOwnerDataSerializer,
-                          RealtyOwnerContactsSerializer, RealtyLKSerializer)
-from .filters import RealtyFilter
+from realty import models as realty_models
+from realty import serializers as realty_serializers
+from realty.filters import RealtyFilter
+
+
+class BaseViewSet(viewsets.ModelViewSet):
+    """Base viewset."""
+
+    http_method_names = ["post"]
+
+    def perform_create(self, serializer):
+        serializer.save(owner=self.request.user)
+
+    def get_permissions(self):
+        if self.request.method in ["GET", "HEAD", "OPTIONS"]:
+            permission_classes = [permissions.AllowAny]
+        else:
+            permission_classes = [permissions.IsAuthenticated]
+        return [permission() for permission in permission_classes]
+
+
+class RealtyBaseViewSet(BaseViewSet):
+    """Realty Base viewset.
+    Viewing, creating, editing, removal."""
+
+    queryset = realty_models.Realty.objects.all()
+
+    def get_serializer_class(self):
+        if self.action == "create":
+            return realty_serializers.RealtyCreateSerializer
+        return realty_serializers.RealtyBaseSerializer
+
+
+class SaleViewSet(BaseViewSet):
+    """Sale Viewset."""
+
+    queryset = realty_models.Sale.objects.all()
+
+    def get_serializer_class(self):
+        if self.action == "create":
+            return realty_serializers.SaleCreateSerializer
+        #     elif self.action == "update" or self.action == "partial_update":
+        #         return realty_serializers.SaleUpdateSerializer
+        #     elif self.action == "destroy":
+        #         return realty_serializers.SaleDeleteSerializer
+        return realty_serializers.SaleReadSerializer
+
+
+class RentViewSet(BaseViewSet):
+    """Rent Viewset."""
+
+    queryset = realty_models.Rent.objects.all()
+
+    def get_serializer_class(self):
+        if self.action == "create":
+            return realty_serializers.RentCreateSerializer
+        #     elif self.action == "update" or self.action == "partial_update":
+        #         return realty_serializers.RentUpdateSerializer
+        #     elif self.action == "destroy":
+        #         return realty_serializers.RentDeleteSerializer
+        return realty_serializers.RentReadSerializer
+
+    # на будущее для доб в избранное
+    # @staticmethod
+    # def create_obj(request, pk, serializers):
+    #     user = request.user
+    #     realty_data = {
+    #         "owner": user.id,
+    #         "realty_id": pk,
+    #     }
+    #     serializer = serializers(data=realty_data,
+    # context={'request': request})
+    #     serializer.is_valid(raise_exception=True)
+    #     serializer.save()
+    #     return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
 @extend_schema(
@@ -23,7 +93,7 @@ from .filters import RealtyFilter
 class LastRealtyListView(generics.ListAPIView):
     """Viewing last 3 Realty objects."""
 
-    serializer_class = ShortRealtySerializer
+    serializer_class = realty_serializers.ShortRealtySerializer
     filter_backends = (DjangoFilterBackend,)
     filterset_class = RealtyFilter
 
@@ -43,7 +113,7 @@ class LastRealtyListView(generics.ListAPIView):
     # Да, при возвращении объектов не показывает их количество, как при пагинации
 
     # Отдаем 3 последних объекта
-    queryset = Realty.objects.filter(
+    queryset = realty_models.Realty.objects.filter(
         realty_status__status=constants.ADVERTISMENT_STATUS
     ).order_by('-published_at')[:3]
 
@@ -54,10 +124,10 @@ class LastRealtyListView(generics.ListAPIView):
 class RealtyListView(generics.ListAPIView):
     """Viewing Realty objects queryset."""
 
-    queryset = Realty.objects.all().filter(
+    queryset = realty_models.Realty.objects.all().filter(
         realty_status__status=constants.ADVERTISMENT_STATUS
         ).order_by('-published_at')
-    serializer_class = ShortRealtySerializer
+    serializer_class = realty_serializers.ShortRealtySerializer
     filter_backends = (DjangoFilterBackend,)
     pagination_class = LimitRealtyPagination
     filterset_class = RealtyFilter
@@ -69,7 +139,7 @@ class RealtyListView(generics.ListAPIView):
         # Call the original list method to get the paginated response
         response = super().list(request, *args, **kwargs)
         realty_ids = [realty_data['id'] for realty_data in response.data['results']]
-        realties = Realty.objects.filter(id__in=realty_ids)
+        realties = realty_models.Realty.objects.filter(id__in=realty_ids)
 
         for realty_data in response.data['results']:
             realty = realties.get(id=realty_data['id'])
@@ -87,10 +157,10 @@ class RealtyListView(generics.ListAPIView):
 class RealtyDetailView(generics.RetrieveAPIView):
     """Viewing Realty object by <id>."""
 
-    queryset = Realty.objects.all().filter(
+    queryset = realty_models.Realty.objects.all().filter(
         realty_status__status=constants.ADVERTISMENT_STATUS
         )
-    serializer_class = RealtyBaseSerializer
+    serializer_class = realty_serializers.RealtyBaseSerializer
 
     def retrieve(self, request, *args, **kwargs):
 
@@ -108,15 +178,15 @@ class RealtyDetailView(generics.RetrieveAPIView):
 
 @extend_schema(
     summary='Количество найденных объявлений по фильтрам',
-    responses=forced_singular_serializer(CountRealtySerializer)
+    responses=forced_singular_serializer(realty_serializers.CountRealtySerializer)
     )
 class RealtyCountView(generics.ListAPIView):
     """Endpoint to get the count of filtered realty objects."""
 
-    queryset = Realty.objects.all().filter(
+    queryset = realty_models.Realty.objects.all().filter(
         realty_status__status=constants.ADVERTISMENT_STATUS
     )
-    serializer_class = CountRealtySerializer
+    serializer_class = realty_serializers.CountRealtySerializer
     filter_backends = (DjangoFilterBackend,)
     filterset_class = RealtyFilter
 
@@ -131,8 +201,8 @@ class RealtyCountView(generics.ListAPIView):
 class RealtyOwnerDataView(generics.RetrieveAPIView):
     """Endpoint to get realty's owner data."""
 
-    queryset = Realty.objects.all()
-    serializer_class = RealtyOwnerDataSerializer
+    queryset = realty_models.Realty.objects.all()
+    serializer_class = realty_serializers.RealtyOwnerDataSerializer
 
 
 @extend_schema(
@@ -140,8 +210,8 @@ class RealtyOwnerDataView(generics.RetrieveAPIView):
 class RealtyOwnerContactsView(generics.RetrieveAPIView):
     """Endpoint to get realty's owner contacts."""
 
-    queryset = Realty.objects.all()
-    serializer_class = RealtyOwnerContactsSerializer
+    queryset = realty_models.Realty.objects.all()
+    serializer_class = realty_serializers.RealtyOwnerContactsSerializer
     permission_classes = [permissions.IsAuthenticated]
 
 
@@ -150,11 +220,11 @@ class RealtyOwnerContactsView(generics.RetrieveAPIView):
 class RealtyLKListView(generics.ListAPIView):
     """Viewing Realty objects queryset with view counts."""
 
-    serializer_class = RealtyLKSerializer
+    serializer_class = realty_serializers.RealtyLKSerializer
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
         owner = self.request.user
-        queryset = Realty.objects.filter(owner_id=owner).order_by('-published_at')
+        queryset = realty_models.Realty.objects.filter(owner_id=owner).order_by('-published_at')
 
         return queryset

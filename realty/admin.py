@@ -43,25 +43,27 @@ class RealtyAdmin(admin.ModelAdmin):
                 f'{obj.about_apartment.floor}/{obj.about_apartment.floors_number} этаж')
 
     def address_short(self, obj):
-        return (f'{obj.address.street.name}, '
-                f'{obj.address.house_number}'
-                f'{"корп." + obj.address.corpus if obj.address.corpus else ""}'
-                f'{"стр." + obj.address.building if obj.address.building else ""}'
-                f'{"вл." + obj.address.ownership if obj.address.ownership else ""}')
+        return (
+            f"{obj.address.street.name}, "
+            f"{obj.address.house_number}"
+            f'{"корп." + obj.address.corpus if obj.address.corpus else ""}'
+            f'{"стр." + obj.address.building if obj.address.building else ""}'
+            f'{"вл." + obj.address.ownership if obj.address.ownership else ""}'
+        )
 
     def trade_type_short(self, obj):
         return obj.trade_type
 
-    apartment.short_description = 'Квартира'
-    address_short.short_description = 'Адрес'
-    trade_type_short.short_description = 'Тип сделки'
+    apartment.short_description = "Квартира"
+    address_short.short_description = "Адрес"
+    trade_type_short.short_description = "Тип сделки"
 
     def get_inlines(self, request, obj=None):
         """Использование inline формы только для уже созданной модели"""
         inlines = []
-        if obj and obj.trade_type == 'sale':
+        if obj and obj.trade_type == "sale":
             inlines = [SaleInline]
-        elif obj and obj.trade_type == 'rent':
+        elif obj and obj.trade_type == "rent":
             inlines = [RentInline]
         return inlines
 

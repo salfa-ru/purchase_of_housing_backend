@@ -36,12 +36,20 @@ class BathroomTypeSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
+class TradeParticipantSerializer(serializers.ModelSerializer):
+    """Trade Participant Serializer."""
+
+    class Meta:
+        model = values_models.TradeParticipant
+        fields = "__all__"
+
+
 class HousingTypeSerializer(serializers.ModelSerializer):
     """Housing Type Serializer."""
 
     class Meta:
         model = values_models.HousingType
-        fields = ['type']
+        fields = "__all__"
 
 
 class SaleTypeSerializer(serializers.ModelSerializer):
@@ -49,12 +57,4 @@ class SaleTypeSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = values_models.SaleType
-        fields = ['type']
-
-
-class TradeParticipantSerializer(serializers.ModelSerializer):
-    """Serializer for TradeParticipant."""
-
-    class Meta:
-        model = values_models.TradeParticipant
-        fields = ['participant']
+        fields = "__all__"

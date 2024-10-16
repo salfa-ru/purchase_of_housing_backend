@@ -1,12 +1,21 @@
-from django.urls import path
+from rest_framework.routers import DefaultRouter
+from django.urls import include, path
 
 from .views import (RealtyListView, LastRealtyListView, RealtyDetailView,
                     RealtyCountView, RealtyOwnerContactsView,
-                    RealtyOwnerDataView, RealtyLKListView)
+                    RealtyOwnerDataView, RealtyLKListView, SaleViewSet,
+                    RentViewSet)
 
-app_name = 'realty'
+
+app_name = "realty"
+
+router = DefaultRouter()
+
+router.register("sales", SaleViewSet, basename="sales")
+router.register("rents", RentViewSet, basename="rents")
 
 urlpatterns = [
+    path("", include(router.urls)),
     path('count/', RealtyCountView.as_view(), name='realty-count'),
     path('latest/', LastRealtyListView.as_view(), name='latest'),
     path('', RealtyListView.as_view(), name='realty-list'),
