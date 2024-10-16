@@ -2,8 +2,8 @@ from rest_framework import serializers
 from rest_framework.relations import SlugRelatedField
 
 from config import constants
-from realty import models as realty_models #!
-from .models import Realty, Sale, Rent #!
+from realty import models as realty_models
+from .models import Realty, Sale, Rent
 from realty_values import models as values_models
 from realty_specificities import models as specificities_models
 from realty_addresses import serializers as address_serializers
@@ -16,7 +16,7 @@ from users.serializers import UserDataSerializer, UserContactsSerializer
 class RealtyBaseSerializer(serializers.ModelSerializer):
     """Realty Base Read Serializer."""
 
-    owner = SlugRelatedField(slug_field="username", read_only=True) # или slug_field="email" ?
+    owner = SlugRelatedField(slug_field="username", read_only=True)  # или slug_field="email" ?
     realty_type = SlugRelatedField(
         slug_field="type", queryset=values_models.RealtyType.objects.all()
     )
