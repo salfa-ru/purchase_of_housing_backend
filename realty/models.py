@@ -1,4 +1,6 @@
 from django.db import models
+from django.db.models.signals import pre_save
+from django.dispatch import receiver
 
 from users import models as user_models
 from realty_values import models as values_models
@@ -160,3 +162,64 @@ class Rent(models.Model):
     class Meta:
         verbose_name = "Аренда"
         verbose_name_plural = "Аренда"
+
+
+# TODO - Перенести обработку сигналов в signals.py ?
+# TODO - Вопрос о целесообразности использования сигналов:
+
+""" Из документации Django: Signals can make your code harder to maintain. 
+Consider implementing a helper method on a custom manager, to both update your models 
+and perform additional logic, or else overriding model methods before using model signals"""
+
+
+@receiver(pre_save, sender=Realty)
+def handle_realty_save(sender, instance, **kwargs):
+    """ Обработка сохранения объявления:
+    - установка статуса "на модерации" новому объявлению
+    - создание уведомлений при смене статусов """
+
+    if hasattr(instance, '_pre_save_in_progress'):
+        return  # Предотвращаем рекурсию
+
+    from notifications.utils import create_notification
+
+    instance._pre_save_in_progress = True  # Устанавливаем флаг
+
+    is_new = instance.id is None
+
+    if is_new:
+        # Новое объявление - устанавливаем статус 'На модерации'
+        instance.realty_status = values_models.RealtyAdvStatus.objects.get(id=2)
+        instance.save()  # Сохраняем, чтобы получить id
+        create_notification(instance, "on_moderation")
+
+    else:
+        # Старое объявление - узнаем старый статус
+        old_instance = Realty.objects.get(id=instance.id)
+        old_status = old_instance.realty_status
+        new_status = instance.realty_status
+
+        if new_status != old_status:
+            # print(f"Статус realty #{instance.id} "
+            #       f"изменился с '{old_status.status}' на '{new_status.status}'.")
+
+            if new_status.id == 1:
+                create_notification(instance, "published")
+            elif new_status.id == 2:
+                create_notification(instance, "on_moderation")
+            elif new_status.id == 3:
+                create_notification(instance, "rejected")
+            elif new_status.id == 4:
+                create_notification(instance, "expired")
+
+            # Статуса для заблокированного объявления пока нет, есть только Нотификация "blocked"
+            # elif new_status.id == 5:
+            #    create_notification(instance, "blocked")
+
+
+""" Статусы realty  ---   Типы нотификаций  (16/10/2024) """
+# 1 - Активно       ---   2 published      <----  жалко, что id
+# 2 - На модерации  ---   1 on_moderation  <----  не совпадают
+# 3 - Отклонено     ---   3 rejected
+# 4 - В архиве      ---   4 expired
+# 5 - xxxxxxxx      ---   5 blocked   <---------  В таблице пока нет такого статуса
