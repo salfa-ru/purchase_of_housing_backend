@@ -16,7 +16,7 @@ from users.serializers import UserDataSerializer, UserContactsSerializer
 class RealtyBaseSerializer(serializers.ModelSerializer):
     """Realty Base Read Serializer."""
 
-    owner = SlugRelatedField(slug_field="username", read_only=True)
+    owner = SlugRelatedField(slug_field="username", read_only=True) # или slug_field="email" ?
     realty_type = SlugRelatedField(
         slug_field="type", queryset=values_models.RealtyType.objects.all()
     )
@@ -63,36 +63,6 @@ class RealtyBaseSerializer(serializers.ModelSerializer):
                 ).data
             }
         return None
-
-# class RealtyBaseSerializer(serializers.ModelSerializer):
-#     """Realty Base Read Serializer."""
-
-#     owner = SlugRelatedField(slug_field="email", read_only=True)
-#     realty_type = SlugRelatedField(
-#         slug_field="type", queryset=values_models.RealtyType.objects.all()
-#     )
-#     address = address_serializers.AddressReadSerializer()
-#     about_building = specif_serializers.AboutBuildingSerializer()
-#     about_apartment = specif_serializers.AboutApartmentSerializer()
-#     common_characteristics = (
-#         specif_serializers.CommonCharacteristicsSerializer()
-#     )
-#     owner_type = SlugRelatedField(
-#         slug_field="participant",
-#         queryset=values_models.TradeParticipant.objects.all(),
-#     )
-#     communication_method = SlugRelatedField(
-#         slug_field="method",
-#         queryset=values_models.CommunicationMethod.objects.all(),
-#     )
-#     realty_status = SlugRelatedField(
-#         slug_field="status",
-#         queryset=values_models.RealtyAdvStatus.objects.all(),
-#     )
-
-#     class Meta:
-#         model = realty_models.Realty
-#         exclude = ["published_at", "changed_at"]
 
 
 class SaleReadSerializer(serializers.ModelSerializer):
