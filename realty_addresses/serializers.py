@@ -131,6 +131,16 @@ class MapPointsSerializer(serializers.ModelSerializer):
         fields = ['id', 'latitude', 'longitude']
 
 
+class MapPointsRequestSerializer(serializers.Serializer):
+    top_left_latitude = serializers.FloatField(required=True)
+    top_left_longitude = serializers.FloatField(required=True)
+    bottom_right_latitude = serializers.FloatField(required=True)
+    bottom_right_longitude = serializers.FloatField(required=True)
+
+class GetAnnouncementsInMapPointRequestSerializer(serializers.Serializer):
+    latitude = serializers.FloatField(required=True)
+    longitude = serializers.FloatField(required=True)
+
 class GetAnnouncementsInMapPoint(serializers.ModelSerializer):
     street = serializers.CharField(source='address.street.name')
     house_number = serializers.CharField(source='address.house_number')
