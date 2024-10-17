@@ -16,6 +16,5 @@ class ComplaintsCreateAPIView(generics.CreateAPIView):
 
     def perform_create(self, serializer):
         owner = self.request.user
-        realty_id = self.request.data.get('realty_id')
-        realty = Realty.objects.get(pk=realty_id)
-        serializer.save(owner=owner, realty=realty)
+
+        serializer.save(owner=owner)
