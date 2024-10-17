@@ -137,9 +137,11 @@ class MapPointsRequestSerializer(serializers.Serializer):
     bottom_right_latitude = serializers.FloatField(required=True)
     bottom_right_longitude = serializers.FloatField(required=True)
 
+
 class GetAnnouncementsInMapPointRequestSerializer(serializers.Serializer):
     latitude = serializers.FloatField(required=True)
     longitude = serializers.FloatField(required=True)
+
 
 class GetAnnouncementsInMapPoint(serializers.ModelSerializer):
     street = serializers.CharField(source='address.street.name')
