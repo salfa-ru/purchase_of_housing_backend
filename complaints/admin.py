@@ -13,3 +13,10 @@ class ComplaintAdmin(admin.ModelAdmin):
                 f'{"..." if len(obj.description) > 20 else ""}')
 
     desc.short_description = 'Жалоба'
+
+    readonly_fields = ('owner', 'realty', 'description',)
+
+    def get_readonly_fields(self, request, obj=None):
+        if obj:
+            return self.readonly_fields
+        return self.readonly_fields

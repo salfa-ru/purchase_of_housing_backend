@@ -3,7 +3,7 @@ from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated
 
 from complaints.models import Complaint
-from complaints.serializers import ComplaintsSerializer, ComplaintsListSerializer
+from complaints.serializers import ComplaintsSerializer
 from realty.models import Realty
 
 
@@ -19,8 +19,3 @@ class ComplaintsCreateAPIView(generics.CreateAPIView):
         owner = self.request.user
 
         serializer.save(owner=owner)
-
-
-class ComplaintsListAPIView(generics.ListAPIView):
-    queryset = Complaint.objects.all()
-    serializer_class = ComplaintsListSerializer
