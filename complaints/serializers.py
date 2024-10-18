@@ -14,3 +14,9 @@ class ComplaintsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Complaint
         fields = ['realty_id', 'description']
+
+
+class ComplaintsListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Complaint
+        fields = ['is_new', 'description', 'owner']
