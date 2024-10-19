@@ -39,7 +39,7 @@ class RealtyBaseSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = realty_models.Realty
-        exclude = ["changed_at", "realty_status",]
+        exclude = ["changed_at", "realty_status", ]
 
     def get_sale(self, obj):
         """Return sales parameters."""
@@ -389,3 +389,9 @@ class RealtyLKSerializer(serializers.Serializer):
             representation['counter_views'] = {}  # пустой ответ если объявление не активно
 
         return representation
+
+
+class StatusSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = realty_models.Realty
+        fields = ['realty_status']
