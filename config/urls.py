@@ -15,6 +15,7 @@ urlpatterns = [
     path('questions/', include('questions.urls', namespace='questions')),
     path('notifications/', include('notifications.urls', namespace='notifications')),
     path('chats/', include('chats.urls', namespace='chats')),
+    path('complaints/', include('complaints.urls', namespace='complaints')),
 
     path('schema/', SpectacularAPIView.as_view(), name='schema'),
     path('swagger/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
