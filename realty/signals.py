@@ -79,7 +79,7 @@ def handle_realty_save(sender, instance, **kwargs):
             elif new_status.id == 2:  # ушло на Модерацию
                 create_notification(instance, "on_moderation")
 
-            elif new_status.id == 3:      # ОКТЛОНЕНО:
+            elif new_status.id == 3:      # ОТКЛОНЕНО:
                 if old_status.id == 1:    # было активно, но заблокировано Админом
                     create_notification(instance, "blocked")
                 elif old_status.id == 2:  # было на модерации, но отклонено Админом
