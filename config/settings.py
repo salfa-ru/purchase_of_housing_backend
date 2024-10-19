@@ -26,6 +26,7 @@ INSTALLED_APPS = [
     'django_filters',
     'rest_framework',
     'rest_framework.authtoken',
+    'django_q',
     'complaints.apps.ComplaintsConfig',
     'chats.apps.ChatsConfig',
     'notifications.apps.NotificationsConfig',
@@ -144,4 +145,18 @@ SPECTACULAR_SETTINGS = {
     'VERSION': '1.0.0',
     'SERVE_INCLUDE_SCHEMA': False,
     'COMPONENT_SPLIT_REQUEST': True,
+}
+
+# Настройки Django Q2 для деактивации устаревших объявлений
+Q_CLUSTER = {
+    'name': 'DjangoORM',
+    'orm': 'default',  # Use the default Django database for task management
+    'workers': 4,  # Number of workers to handle tasks
+    'retry': 360,  # Time to keep retrying tasks before marking as failed
+    'timeout': 60,  # Task execution timeout in seconds
+    'queue_limit': 50,  # Max number of tasks in the queue
+    'bulk': 10,  # Max number of tasks processed at once
+    'catch_up': False,  # Prevent overdue tasks from being executed if the system was offline
+    # 'admin': False,  # Hide Django Q models from the admin ( better try with admin.py, to see only as admin )
+    'poll': 1,  # Poll every 1 second instead of 0.2
 }

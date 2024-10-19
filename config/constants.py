@@ -48,6 +48,9 @@ COUNTER_FULL_VIEW_MIN_TIME_INTERVAL = timedelta(hours=0, minutes=0, seconds=5)
 # для показа объявления в поиске
 COUNTER_VIEW_IN_SEARCH_MIN_TIME_INTERVAL = timedelta(hours=0, minutes=0, seconds=5)
 
+# срок жизни объявления, плановое значение - 30 дней
+MAX_LISTING_DURATION = timedelta(days=30, hours=0, minutes=0, seconds=0)
+
 
 class ConstantsAuth:
     """Constants for custom authentication"""
