@@ -228,3 +228,10 @@ class RealtyLKListView(generics.ListAPIView):
         queryset = realty_models.Realty.objects.filter(owner_id=owner).order_by('-published_at')
 
         return queryset
+
+
+class ChangeStatusUpdateAPIView(generics.UpdateAPIView):
+    queryset = realty_models.Realty.objects.all()
+    serializer_class = realty_serializers.StatusSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
