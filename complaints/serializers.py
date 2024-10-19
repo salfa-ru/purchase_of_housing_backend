@@ -14,3 +14,15 @@ class ComplaintsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Complaint
         fields = ['realty_id', 'description']
+
+    def validate(self, attrs):
+        realty = attrs['realty']
+
+        owner = self.context['request'].user
+
+        if realty.owner == owner:
+            raise serializers.ValidationError(
+                'Вы не можете отправить жалобу на своё собственное объявление!'
+            )
+
+        return attrs
