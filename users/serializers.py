@@ -11,18 +11,31 @@ class UserBaseSerializer(serializers.ModelSerializer):
     """Базовый сериализатор для профиля (retrieve, put, patch)."""
     avatar = serializers.ImageField(
         required=False,
+        # если нужно иметь возможность удалить аватар, добавить allow_null=True,
         validators=[
             FileExtensionValidator(allowed_extensions=IMAGE_EXTENSIONS),
             validate_avatar_size
         ]
     )
 
+    # AnnaKolmychek - прошлый вариант
+    """
     def to_internal_value(self, data):
         if data.get('email'):
             _mutable = data._mutable
             data._mutable = True
             data['email'] = data.get('email').lower()
             data._mutable = _mutable
+        return super().to_internal_value(data)  
+    """
+
+
+    # версия 20/10/2024
+    def to_internal_value(self, data):
+        if isinstance(data, dict) and data.get('email'):
+            new_data = data.copy()  # Create a new dictionary
+            new_data['email'] = new_data['email'].lower()
+            return super().to_internal_value(new_data)
         return super().to_internal_value(data)
 
     class Meta:
