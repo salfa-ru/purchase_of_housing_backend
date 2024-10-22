@@ -18,19 +18,6 @@ class UserBaseSerializer(serializers.ModelSerializer):
         ]
     )
 
-    # AnnaKolmychek - прошлый вариант
-    """
-    def to_internal_value(self, data):
-        if data.get('email'):
-            _mutable = data._mutable
-            data._mutable = True
-            data['email'] = data.get('email').lower()
-            data._mutable = _mutable
-        return super().to_internal_value(data)  
-    """
-
-
-    # версия 20/10/2024
     def to_internal_value(self, data):
         if isinstance(data, dict) and data.get('email'):
             new_data = data.copy()  # Create a new dictionary
