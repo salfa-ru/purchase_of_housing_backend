@@ -143,3 +143,15 @@ class SalesParametersSerializer(serializers.ModelSerializer):
     class Meta:
         model = spec_models.SalesParameters
         fields = "__all__"
+
+
+class RentalFeaturesSerializer(serializers.ModelSerializer):
+    """Serializer for RentalFeatures."""
+
+    class Meta:
+        model = spec_models.RentalFeatures
+        fields = [
+            'fridge', 'internet', 'conditioner', 'tv',
+            'dishwasher', 'washing_machine', 'garbage_chute',
+            'kids_allowed', 'animals_allowed'
+        ]

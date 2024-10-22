@@ -5,7 +5,7 @@ from drf_spectacular.utils import extend_schema  # , OpenApiParameter
 from drf_spectacular.helpers import forced_singular_serializer
 from rest_framework import generics, permissions, viewsets
 from rest_framework.response import Response
-# from rest_framework.pagination import LimitOffsetPagination
+from rest_framework.pagination import LimitOffsetPagination
 
 from config import constants
 from realty.pagination import LimitRealtyPagination
@@ -44,6 +44,8 @@ class RealtyBaseViewSet(BaseViewSet):
         return realty_serializers.RealtyBaseSerializer
 
 
+@extend_schema(
+    summary='Создание объявления о продаже недвижимости.')
 class SaleViewSet(BaseViewSet):
     """Sale Viewset."""
 
@@ -59,6 +61,8 @@ class SaleViewSet(BaseViewSet):
         return realty_serializers.SaleReadSerializer
 
 
+@extend_schema(
+    summary='Создание объявления об аренде недвижимости.')
 class RentViewSet(BaseViewSet):
     """Rent Viewset."""
 
@@ -96,15 +100,12 @@ class LastRealtyListView(generics.ListAPIView):
     serializer_class = realty_serializers.ShortRealtySerializer
     filter_backends = (DjangoFilterBackend,)
     filterset_class = RealtyFilter
-
-    """
     pagination_class = LimitOffsetPagination
     pagination_class.default_limit = 3
     # TODO найти решение без пагинации. Требуется вывод последних 3х объектов.
-    queryset = Realty.objects.all().filter(
+    queryset = realty_models.Realty.objects.all().filter(
         realty_status__status=constants.ADVERTISMENT_STATUS
         ).order_by('-published_at')
-        """
 
     # TODO - Как насчет такого решения? Апдейт: заработало после отключения всех строк сверху
     # Работает, в том числе если:
@@ -113,9 +114,9 @@ class LastRealtyListView(generics.ListAPIView):
     # Да, при возвращении объектов не показывает их количество, как при пагинации
 
     # Отдаем 3 последних объекта
-    queryset = realty_models.Realty.objects.filter(
-        realty_status__status=constants.ADVERTISMENT_STATUS
-    ).order_by('-published_at')[:3]
+    # queryset = realty_models.Realty.objects.filter(
+    #     realty_status__status=constants.ADVERTISMENT_STATUS
+    # ).order_by('-published_at')[:3]
 
 
 @extend_schema(

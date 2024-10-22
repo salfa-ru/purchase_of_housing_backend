@@ -15,7 +15,6 @@ router.register("sales", SaleViewSet, basename="sales")
 router.register("rents", RentViewSet, basename="rents")
 
 urlpatterns = [
-    path("", include(router.urls)),
     path('count/', RealtyCountView.as_view(), name='realty-count'),
     path('latest/', LastRealtyListView.as_view(), name='latest'),
     path('', RealtyListView.as_view(), name='realty-list'),
@@ -23,4 +22,5 @@ urlpatterns = [
     path('<int:pk>/', RealtyDetailView.as_view(), name='realty-detail'),
     path('<int:pk>/owner/', RealtyOwnerDataView.as_view(), name='owner-data'),
     path('<int:pk>/contacts/', RealtyOwnerContactsView.as_view(), name='owner-contacts'),
+    path("", include(router.urls)),
 ]
