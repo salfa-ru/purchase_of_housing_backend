@@ -35,7 +35,7 @@ class RealtyAdmin(admin.ModelAdmin):
         return self.readonly_fields
 
     def save_model(self, request, obj, form, change):
-        """Логика проверки изменения статуса только в админке"""
+        """Логика проверки изменения статуса"""
         if change:
             old_instance = Realty.objects.get(pk=obj.pk)
 
