@@ -11,6 +11,7 @@ from realty_specificities import serializers as specif_serializers
 from realty_displays import serializers as displays_serializers
 from realty_photos.serializers import RealtyPhotoSerializer
 from users.serializers import UserDataSerializer, UserContactsSerializer
+from django.core.exceptions import ValidationError
 
 
 class RealtyBaseSerializer(serializers.ModelSerializer):
@@ -391,7 +392,31 @@ class RealtyLKSerializer(serializers.Serializer):
         return representation
 
 
-class StatusSerializer(serializers.ModelSerializer):
+class RealtyUpdateSerializer(serializers.ModelSerializer):
+    """Serializer for update realty_status"""
+
     class Meta:
-        model = realty_models.Realty
+        model = Realty
         fields = ['realty_status']
+
+    def validate_realty_status(self, value):
+
+        obj = self.instance
+        allowed_transitions = {
+            'Активно': ['В архиве'],
+            'Отклонено': ['В архиве'],
+            'На модерации': ['В архиве'],
+            'В архиве': ['На модерации']
+        }
+
+        if obj.realty_status.status in allowed_transitions:
+
+            if str(value) not in allowed_transitions[obj.realty_status.status]:
+                raise ValidationError(
+                    f"Статус можно изменить с '{obj.realty_status.status}' "
+                    f"только на {allowed_transitions[obj.realty_status.status]}."
+                )
+        else:
+            raise ValidationError(f"Недопустимая операция: статус '{obj.realty_status.status}' нельзя изменить.")
+
+        return value
