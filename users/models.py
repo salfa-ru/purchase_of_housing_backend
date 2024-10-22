@@ -86,6 +86,11 @@ class User(AbstractUser):
         **constants.NULLABLE_FIELD,
     )
 
+    def clean(self):
+        super().clean()
+        if self.email:
+            self.email = self.email.lower()
+
     def save(self, *args, **kwargs):
         """Хэшируем пароль.
          Меняем username для 'своих' пользователей (при замене email).
