@@ -229,3 +229,14 @@ class RealtyLKListView(generics.ListAPIView):
         queryset = realty_models.Realty.objects.filter(owner_id=owner).order_by('-published_at')
 
         return queryset
+
+
+class ChangeStatusUpdateAPIView(generics.UpdateAPIView):
+    """Endpoint for change status in realty"""
+    queryset = realty_models.Realty.objects.all()
+    serializer_class = realty_serializers.RealtyStatusUpdateSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def perform_update(self, serializer):
+        serializer.save()
+
