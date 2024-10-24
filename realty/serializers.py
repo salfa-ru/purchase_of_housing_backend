@@ -392,7 +392,7 @@ class RealtyLKSerializer(serializers.Serializer):
         return representation
 
 
-class RealtyUpdateSerializer(serializers.ModelSerializer):
+class RealtyStatusUpdateSerializer(serializers.ModelSerializer):
     """Serializer for update realty_status"""
 
     class Meta:
