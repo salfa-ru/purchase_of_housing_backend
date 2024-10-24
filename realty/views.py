@@ -231,8 +231,9 @@ class RealtyLKListView(generics.ListAPIView):
 
 
 class ChangeStatusUpdateAPIView(generics.UpdateAPIView):
+    """Endpoint for change status in realty"""
     queryset = realty_models.Realty.objects.all()
-    serializer_class = realty_serializers.RealtyUpdateSerializer
+    serializer_class = realty_serializers.RealtyStatusUpdateSerializer
     permission_classes = [permissions.IsAuthenticated]
 
     def perform_update(self, serializer):
