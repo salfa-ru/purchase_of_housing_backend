@@ -402,21 +402,26 @@ class RealtyStatusUpdateSerializer(serializers.ModelSerializer):
     def validate_realty_status(self, value):
 
         obj = self.instance
-        allowed_transitions = {
-            'Активно': ['В архиве'],
-            'Отклонено': ['В архиве'],
-            'На модерации': ['В архиве'],
-            'В архиве': ['На модерации']
-        }
+        request = self.context.get('request')
+        if obj.owner == request.user:
+            allowed_transitions = {
+                'Активно': ['В архиве'],
+                'Отклонено': ['В архиве'],
+                'На модерации': ['В архиве'],
+                'В архиве': ['На модерации']
+            }
 
-        if obj.realty_status.status in allowed_transitions:
+            if obj.realty_status.status in allowed_transitions:
 
-            if str(value) not in allowed_transitions[obj.realty_status.status]:
-                raise ValidationError(
-                    f"Статус можно изменить с '{obj.realty_status.status}' "
-                    f"только на {allowed_transitions[obj.realty_status.status]}."
-                )
+                if str(value) not in allowed_transitions[obj.realty_status.status]:
+                    raise ValidationError(
+                        f"Статус можно изменить с '{obj.realty_status.status}' "
+                        f"только на {allowed_transitions[obj.realty_status.status]}."
+                    )
+            else:
+                raise ValidationError(f"Недопустимая операция: статус '{obj.realty_status.status}' нельзя изменить.")
+
+            return value
         else:
-            raise ValidationError(f"Недопустимая операция: статус '{obj.realty_status.status}' нельзя изменить.")
+            raise ValidationError(f"Вы не являетесь владельцем объявления!")
 
-        return value
