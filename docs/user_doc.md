@@ -181,12 +181,47 @@ POST http://api.dev.esa.ktsf.ru/api/v1/registration/profile/
 {
   "first_name": "string",
   "last_name": "string",
-  "birthday": "2024-08-19T19:35:58.199Z",
-  "phone": "string",
+  "birthday": "2024-10-20T16:23:53.346Z",
+  "patronymic": "string"
+}
+```
+4. Запросить pin для подтверждения почты.  
+Почта должна быть реальной, на нее придет pin.  
+В ответе на этот эндпоинт придет request_id, его запомнить для следующего шага.
+```
+POST http://api.dev.esa.ktsf.ru/api/v1/registration/profile/email/send/
+{
   "email": "user@example.com"
 }
 ```
-4. Обновить оба токена
+5. Подтвердить почту (используется pin из письма и request_id из предыдущего шага)
+```
+POST http://api.dev.esa.ktsf.ru/api/v1/registration/profile/email/confirm/
+{
+  "email": "user@example.com",
+  "pin": "string",
+  "request_id": "string"
+}
+```
+6. Запросить pin на подтверждение телефона.  
+Временно pin приходит в ответе этого эндпоинта, пока работает так, телефон может быть не настоящим.  
+В ответе на этот эндпоинт придет request_id, его запомнить для следующего шага.
+```
+POST http://api.dev.esa.ktsf.ru/api/v1/registration/profile/phone/send/
+{
+  "phone": "string"
+}
+```
+7. Подтвердить телефон (используется pin и request_id из предыдущего шага)
+```
+POST http://api.dev.esa.ktsf.ru/api/v1/registration/profile/phone/confirm/
+{
+  "phone": "string",
+  "pin": "string",
+  "request_id": "string"
+}
+```
+8. Обновить оба токена
 ```
 POST http://api.dev.esa.ktsf.ru/api/v1/auth/token/
 {
