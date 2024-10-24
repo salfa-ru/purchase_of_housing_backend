@@ -1,5 +1,6 @@
 from django.contrib import admin
-from django.core.exceptions import ValidationError
+
+from .forms import RealtyForm
 from .models import Realty, Sale, Rent
 
 
@@ -15,6 +16,7 @@ class RentInline(admin.StackedInline):
 
 @admin.register(Realty)
 class RealtyAdmin(admin.ModelAdmin):
+    form = RealtyForm
     list_display = ('id',
                     'apartment',
                     'address_short',
@@ -33,22 +35,6 @@ class RealtyAdmin(admin.ModelAdmin):
         if obj:
             return [f.name for f in obj._meta.fields if f.name != 'realty_status'] + list(self.readonly_fields)
         return self.readonly_fields
-
-    def save_model(self, request, obj, form, change):
-        """Логика проверки изменения статуса"""
-        if change:
-            old_instance = Realty.objects.get(pk=obj.pk)
-
-            if old_instance.realty_status.status == 'На модерации':
-                if obj.realty_status.status not in ['Активно', 'Отклонено']:
-                    raise ValidationError("Статус можно изменить только на 'Активно' или 'Отклонено'.")
-            elif old_instance.realty_status.status == 'Активно':
-                if obj.realty_status.status != 'Отклонено':
-                    raise ValidationError("Статус можно изменить только на 'Отклонено', если он 'Активно'.")
-            elif old_instance.realty_status.status == 'Отклонено':
-                raise ValidationError("Статус уже 'Отклонено' и не может быть изменен.")
-
-        super().save_model(request, obj, form, change)
 
     def get_fieldsets(self, request, obj=None):
         """Перемещаем 'id' наверх."""
