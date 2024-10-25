@@ -1,5 +1,6 @@
 from django.contrib import admin
 
+from .forms import RealtyForm
 from .models import Realty, Sale, Rent
 
 
@@ -15,6 +16,7 @@ class RentInline(admin.StackedInline):
 
 @admin.register(Realty)
 class RealtyAdmin(admin.ModelAdmin):
+    form = RealtyForm
     list_display = ('id',
                     'apartment',
                     'address_short',
@@ -27,6 +29,12 @@ class RealtyAdmin(admin.ModelAdmin):
     list_filter = ('realty_status',
                    'owner_type',)
     readonly_fields = ('id',)
+
+    def get_readonly_fields(self, request, obj=None):
+        """Делаем все поля, кроме 'realty_status', только для чтения при редактировании"""
+        if obj:
+            return [f.name for f in obj._meta.fields if f.name != 'realty_status'] + list(self.readonly_fields)
+        return self.readonly_fields
 
     def get_fieldsets(self, request, obj=None):
         """Перемещаем 'id' наверх."""

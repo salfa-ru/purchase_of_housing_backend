@@ -11,6 +11,7 @@ from realty_specificities import serializers as specif_serializers
 from realty_displays import serializers as displays_serializers
 from realty_photos.serializers import RealtyPhotoSerializer
 from users.serializers import UserDataSerializer, UserContactsSerializer
+from django.core.exceptions import ValidationError
 
 
 class RealtyBaseSerializer(serializers.ModelSerializer):
@@ -39,7 +40,7 @@ class RealtyBaseSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = realty_models.Realty
-        exclude = ["changed_at", "realty_status",]
+        exclude = ["changed_at", "realty_status", ]
 
     def get_sale(self, obj):
         """Return sales parameters."""
@@ -389,3 +390,38 @@ class RealtyLKSerializer(serializers.Serializer):
             representation['counter_views'] = {}  # пустой ответ если объявление не активно
 
         return representation
+
+
+class RealtyStatusUpdateSerializer(serializers.ModelSerializer):
+    """Serializer for update realty_status"""
+
+    class Meta:
+        model = Realty
+        fields = ['realty_status']
+
+    def validate_realty_status(self, value):
+
+        obj = self.instance
+        request = self.context.get('request')
+        if obj.owner == request.user:
+            allowed_transitions = {
+                'Активно': ['В архиве'],
+                'Отклонено': ['В архиве'],
+                'На модерации': ['В архиве'],
+                'В архиве': ['На модерации']
+            }
+
+            if obj.realty_status.status in allowed_transitions:
+
+                if str(value) not in allowed_transitions[obj.realty_status.status]:
+                    raise ValidationError(
+                        f"Статус можно изменить с '{obj.realty_status.status}' "
+                        f"только на {allowed_transitions[obj.realty_status.status]}."
+                    )
+            else:
+                raise ValidationError(f"Недопустимая операция: статус '{obj.realty_status.status}' нельзя изменить.")
+
+            return value
+        else:
+            raise ValidationError(f"Вы не являетесь владельцем объявления!")
+
