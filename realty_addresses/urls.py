@@ -7,5 +7,5 @@ app_name = RealtyAddressesConfig.name
 
 urlpatterns = [
     path('map-points/', GetlistMapPointsAPIView.as_view(), name='map-points'),
-    path('map-point-reality/', GetListAnnouncementsInMapPoint.as_view(), name='map-point-reality')
+    path('map-point-realty/', GetListAnnouncementsInMapPoint.as_view(), name='map-point-realty')
 ]
