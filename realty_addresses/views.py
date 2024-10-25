@@ -1,23 +1,28 @@
-
 from django.db.models import Q
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import extend_schema
-from rest_framework import status, filters, generics
+from rest_framework import status, filters, generics, serializers
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from realty.filters import RealtyFilter
 from realty.models import Realty
 from realty.pagination import LimitRealtyPagination
-from realty_addresses.serializers import MapPointsSerializer, GetAnnouncementsInMapPoint, MapPointsRequestSerializer, \
+from realty.serializers import ShortRealtySerializer
+from realty_addresses.serializers import MapPointsSerializer, MapPointsRequestSerializer, \
     GetAnnouncementsInMapPointRequestSerializer
 from config import constants
 
 
 @extend_schema(
-    summary='Получение списка точек на карте в которых есть объявления '
-            'с заданными параметрами, в заданном прямоугольнике, на вход нужно '
-            'подать кардинаты верхнего левого угла и нижнего правого угла карты для вывода списка точек на карте '
-            'а так же передать параметры для фильтрации (опционально)')
+    summary='Получение списка точек на карте с объявлениями',
+    description=(
+            'Возвращает список точек с объявлениями в пределах заданного прямоугольника. '
+            'Необходимо указать координаты верхнего левого и нижнего правого углов, '
+            'а также (опционально) параметры для фильтрации.'
+    ),
+    request=MapPointsRequestSerializer,
+    responses=MapPointsSerializer(many=True),
+)
 class GetlistMapPointsAPIView(APIView):
     """ Get list realty's point in map"""
     queryset = Realty.objects.all().filter(
@@ -42,11 +47,10 @@ class GetlistMapPointsAPIView(APIView):
             Q(address__longitude__lte=bottom_right_longitude)
         )
 
-        filterset = self.filterset_class(request.data, queryset=queryset)
+        filterset = self.filterset_class(request.query_params, queryset=queryset)
 
         if not filterset.is_valid():
             return Response(filterset.errors, status=status.HTTP_400_BAD_REQUEST)
-
         queryset = filterset.qs
 
         response_serializer = MapPointsSerializer(queryset, many=True)
@@ -55,7 +59,15 @@ class GetlistMapPointsAPIView(APIView):
 
 
 @extend_schema(
-    summary='Получение списка объявлений по заданной точке на карте ')
+    summary='Получение списка объявлений по заданной точке на карте ',
+    description=(
+            'Возвращает список объявлений в точке на карте. '
+            'Необходимо указать координаты широты и долготы, '
+            'а также (опционально) параметры для фильтрации.'
+    ),
+    request=GetAnnouncementsInMapPointRequestSerializer,
+    responses=ShortRealtySerializer(many=True),
+)
 class GetListAnnouncementsInMapPoint(APIView):
     """Get List realty in point"""
     queryset = Realty.objects.all().filter(
@@ -65,7 +77,7 @@ class GetListAnnouncementsInMapPoint(APIView):
     filterset_class = RealtyFilter
 
     def post(self, request, *args, **kwargs):
-        serializer = GetAnnouncementsInMapPointRequestSerializer(data=request.data)
+        serializer = ShortRealtySerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
         latitude = request.data.get('latitude')
@@ -81,13 +93,13 @@ class GetListAnnouncementsInMapPoint(APIView):
             Q(address__longitude=longitude)
         )
 
-        filterset = self.filterset_class(request.data, queryset=queryset)
+        filterset = self.filterset_class(request.query_params, queryset=queryset)
 
         if not filterset.is_valid():
             return Response(filterset.errors, status=status.HTTP_400_BAD_REQUEST)
 
         queryset = filterset.qs
 
-        serializer = GetAnnouncementsInMapPoint(queryset, many=True)
+        serializer = ShortRealtySerializer(queryset, many=True)
 
         return Response(serializer.data, status=status.HTTP_200_OK)
