@@ -38,7 +38,16 @@ def handle_realty_save(sender, instance, **kwargs):
 
     else:
         # Старое объявление - узнаем старый статус
-        old_instance = Realty.objects.get(id=instance.id)
+        try:
+            old_instance = Realty.objects.get(id=instance.id)
+
+        except Realty.DoesNotExist:
+            # TODO - Надо ли ставить задачи на деактивации объявлений из loaddata data.json?
+            # Похоже, тут обрабатывается добавление новых объявлений из loaddata data.json
+            # Поэтому выходим из этого сигнала, не обрабатывая такие записи
+            return
+
+        # old_instance = Realty.objects.get(id=instance.id)  # перенесено в try - выше
         old_status = old_instance.realty_status
         new_status = instance.realty_status
 
