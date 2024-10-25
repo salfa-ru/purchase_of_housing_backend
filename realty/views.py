@@ -105,7 +105,7 @@ class LastRealtyListView(generics.ListAPIView):
     # TODO найти решение без пагинации. Требуется вывод последних 3х объектов.
     queryset = realty_models.Realty.objects.all().filter(
         realty_status__status=constants.ADVERTISMENT_STATUS
-        ).order_by('-published_at')
+    ).order_by('-published_at')
 
     # TODO - Как насчет такого решения? Апдейт: заработало после отключения всех строк сверху
     # Работает, в том числе если:
@@ -121,20 +121,19 @@ class LastRealtyListView(generics.ListAPIView):
 
 @extend_schema(
     summary='Получение списка всех объявлений. Доступна фильтрация. '
-    'Есть пагинация по 10 объектов.')
+            'Есть пагинация по 10 объектов.')
 class RealtyListView(generics.ListAPIView):
     """Viewing Realty objects queryset."""
 
     queryset = realty_models.Realty.objects.all().filter(
         realty_status__status=constants.ADVERTISMENT_STATUS
-        ).order_by('-published_at')
+    ).order_by('-published_at')
     serializer_class = realty_serializers.ShortRealtySerializer
     filter_backends = (DjangoFilterBackend,)
     pagination_class = LimitRealtyPagination
     filterset_class = RealtyFilter
 
     def list(self, request, *args, **kwargs):
-
         """ Запуск увеличения счетчика проказа в поиске с защитой от накрутки."""
 
         # Call the original list method to get the paginated response
@@ -160,11 +159,10 @@ class RealtyDetailView(generics.RetrieveAPIView):
 
     queryset = realty_models.Realty.objects.all().filter(
         realty_status__status=constants.ADVERTISMENT_STATUS
-        )
+    )
     serializer_class = realty_serializers.RealtyBaseSerializer
 
     def retrieve(self, request, *args, **kwargs):
-
         """ Увеличение счетчика полных просмотров """
 
         realty = self.get_object()
@@ -180,7 +178,7 @@ class RealtyDetailView(generics.RetrieveAPIView):
 @extend_schema(
     summary='Количество найденных объявлений по фильтрам',
     responses=forced_singular_serializer(realty_serializers.CountRealtySerializer)
-    )
+)
 class RealtyCountView(generics.ListAPIView):
     """Endpoint to get the count of filtered realty objects."""
 
@@ -231,6 +229,8 @@ class RealtyLKListView(generics.ListAPIView):
         return queryset
 
 
+@extend_schema(
+    summary='Изменение статуса объявления (может только владелец объявления) .')
 class ChangeStatusUpdateAPIView(generics.UpdateAPIView):
     """Endpoint for change status in realty"""
     queryset = realty_models.Realty.objects.all()
@@ -239,4 +239,3 @@ class ChangeStatusUpdateAPIView(generics.UpdateAPIView):
 
     def perform_update(self, serializer):
         serializer.save()
-
