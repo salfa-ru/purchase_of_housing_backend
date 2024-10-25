@@ -77,7 +77,7 @@ class GetListAnnouncementsInMapPoint(APIView):
     filterset_class = RealtyFilter
 
     def post(self, request, *args, **kwargs):
-        serializer = ShortRealtySerializer(data=request.data)
+        serializer = GetAnnouncementsInMapPointRequestSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
         latitude = request.data.get('latitude')
