@@ -541,25 +541,42 @@
     "pk": 1,
     "fields": {
       "realty": 1,
-      "date": "2024-08-19",
-      "count": 7
+      "count": 46
     }
   },
   {
     "model": "realty_displays.displayinsearch",
     "pk": 2,
     "fields": {
-      "realty": 1,
-      "date": "2024-08-20",
-      "count": 5
+      "realty": 3,
+      "count": 41
     }
   },
   {
     "model": "realty_displays.displayfullinfo",
     "pk": 1,
     "fields": {
+      "realty": 3,
+      "date": "2024-10-14",
+      "count": 15
+    }
+  },
+  {
+    "model": "realty_displays.displayfullinfo",
+    "pk": 2,
+    "fields": {
       "realty": 1,
-      "count": 23
+      "date": "2024-10-13",
+      "count": 2
+    }
+  },
+  {
+    "model": "realty_displays.displayfullinfo",
+    "pk": 3,
+    "fields": {
+      "realty": 1,
+      "date": "2024-10-14",
+      "count": 1
     }
   },
   {

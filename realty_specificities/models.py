@@ -52,11 +52,15 @@ class AboutApartment(models.Model):
             validators.MaxValueValidator(constants.MAX_ROOM_AREA),
         ],
     )
-    loggia = models.BooleanField(verbose_name="Лоджия", blank=True)
-    balcony = models.BooleanField(verbose_name="Балкон", blank=True)
-    elevator = models.BooleanField(verbose_name="Лифт", blank=True)
-    floor = models.PositiveSmallIntegerField(verbose_name="Этаж")
-    floors_number = models.PositiveSmallIntegerField(verbose_name="Этажность")
+    loggia = models.BooleanField(verbose_name="Лоджия", default=False)
+    balcony = models.BooleanField(verbose_name="Балкон", default=False)
+    elevator = models.BooleanField(verbose_name="Лифт", default=False)
+    floor = models.PositiveSmallIntegerField(
+        verbose_name="Этаж", default=False
+    )
+    floors_number = models.PositiveSmallIntegerField(
+        verbose_name="Этажность", default=False
+    )
 
     class Meta:
         ordering = ["number_of_rooms"]
@@ -64,12 +68,17 @@ class AboutApartment(models.Model):
         verbose_name_plural = "О квартирах"
 
     def __str__(self):
-        return (
-            f"{self.number_of_rooms}, {self.area}, "
-            f"{self.loggia}, {self.balcony}, "
-            f"{self.elevator}, "
-            f"{self.floor}, {self.floors_number}"
-        )
+        characteristics = [f"{self.number_of_rooms} комн., {self.area} кв.м"]
+
+        if self.loggia:
+            characteristics.append("Лоджия")
+        if self.balcony:
+            characteristics.append("Балкон")
+        if self.elevator:
+            characteristics.append("Лифт")
+
+        characteristics.append(f"Этаж: {self.floor}/{self.floors_number}")
+        return ", ".join(characteristics)
 
 
 class CommonCharacteristics(models.Model):
@@ -82,7 +91,7 @@ class CommonCharacteristics(models.Model):
         related_name="common_characteristics",
         **constants.NULLABLE_FIELD,
     )
-    furniture = models.BooleanField(blank=True, verbose_name="Мебель")
+    furniture = models.BooleanField(verbose_name="Мебель", default=False)
     bathroom = models.ForeignKey(
         values_models.BathroomType,
         on_delete=models.PROTECT,
@@ -91,9 +100,11 @@ class CommonCharacteristics(models.Model):
         **constants.NULLABLE_FIELD,
     )
     courtyard_view = models.BooleanField(
-        blank=True, verbose_name="Вид во двор"
+        verbose_name="Вид во двор", default=False
     )
-    street_view = models.BooleanField(blank=True, verbose_name="Вид на улицу")
+    street_view = models.BooleanField(
+        verbose_name="Вид на улицу", default=False
+    )
 
     class Meta:
         ordering = ["repair_type"]
@@ -101,35 +112,49 @@ class CommonCharacteristics(models.Model):
         verbose_name_plural = "Общие характеристики"
 
     def __str__(self):
+        characteristics = []
+
+        if self.repair_type:
+            characteristics.append(f"Тип ремонта: {self.repair_type}")
+        if self.furniture:
+            characteristics.append("Мебель")
+        if self.bathroom:
+            characteristics.append(f"Тип санузла: {self.bathroom}")
+        if self.courtyard_view:
+            characteristics.append("Вид во двор")
+        if self.street_view:
+            characteristics.append("Вид на улицу")
+
         return (
-            f"{self.repair_type}, "
-            f"{self.furniture}, "
-            f"{self.courtyard_view}, "
-            f"{self.street_view}"
+            ", ".join(characteristics)
+            if characteristics
+            else "Нет общих характеристик"
         )
 
 
 class RentalFeatures(models.Model):
     """Rental Features model."""
 
-    fridge = models.BooleanField(verbose_name="Холодильник", blank=True)
-    internet = models.BooleanField(verbose_name="Интернет", blank=True)
-    conditioner = models.BooleanField(verbose_name="Кондиционер", blank=True)
-    tv = models.BooleanField(verbose_name="Телевизор", blank=True)
+    fridge = models.BooleanField(verbose_name="Холодильник", default=False)
+    internet = models.BooleanField(verbose_name="Интернет", default=False)
+    conditioner = models.BooleanField(
+        verbose_name="Кондиционер", default=False
+    )
+    tv = models.BooleanField(verbose_name="Телевизор", default=False)
     dishwasher = models.BooleanField(
-        verbose_name="Посудомоечная машина", blank=True
+        verbose_name="Посудомоечная машина", default=False
     )
     washing_machine = models.BooleanField(
-        verbose_name="Стиральная машина", blank=True
+        verbose_name="Стиральная машина", default=False
     )
     garbage_chute = models.BooleanField(
-        verbose_name="Мусоропровод", blank=True
+        verbose_name="Мусоропровод", default=False
     )
     kids_allowed = models.BooleanField(
-        verbose_name="Можно с детьми", blank=True
+        verbose_name="Можно с детьми", default=False
     )
     animals_allowed = models.BooleanField(
-        verbose_name="Можно с животными", blank=True
+        verbose_name="Можно с животными", default=False
     )
 
     class Meta:
@@ -138,17 +163,27 @@ class RentalFeatures(models.Model):
         verbose_name_plural = "Особенности аренды"
 
     def __str__(self):
-        return (
-            f"{self.fridge}, "
-            f"{self.internet}, "
-            f"{self.conditioner}, "
-            f"{self.tv}, "
-            f"{self.internet}, "
-            f"{self.conditioner}, "
-            f"{self.tv}, "
-            f"{self.tv}, "
-            f"{self.fridge}"
-        )
+        features = []
+        if self.fridge:
+            features.append("Холодильник")
+        if self.internet:
+            features.append("Интернет")
+        if self.conditioner:
+            features.append("Кондиционер")
+        if self.tv:
+            features.append("Телевизор")
+        if self.dishwasher:
+            features.append("Посудомоечная машина")
+        if self.washing_machine:
+            features.append("Стиральная машина")
+        if self.garbage_chute:
+            features.append("Мусоропровод")
+        if self.kids_allowed:
+            features.append("Можно с детьми")
+        if self.animals_allowed:
+            features.append("Можно с животными")
+
+        return ", ".join(features) if features else "Нет особенностей"
 
 
 class LeasePayments(models.Model):

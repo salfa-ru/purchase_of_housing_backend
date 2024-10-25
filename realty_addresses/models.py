@@ -108,7 +108,8 @@ class Address(models.Model):
     """Address model."""
 
     house_number = models.CharField(
-        max_length=constants.CHAR_LENGTH, verbose_name="Номер дома"
+        max_length=constants.CHAR_LENGTH,
+        verbose_name="Номер дома"
     )
     street = models.ForeignKey(
         Street,

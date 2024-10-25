@@ -1,5 +1,5 @@
 from django.db.models import Q
-from rest_framework import serializers
+from rest_framework import serializers, exceptions
 
 from chats.models import Chat, Blocking
 from realty.models import Realty
@@ -47,6 +47,10 @@ class RealtyForChatSerializer(serializers.ModelSerializer):
 class ChatSerializer(serializers.ModelSerializer):
     """Сериализатор для получения списка переписок"""
     realty = RealtyForChatSerializer()
+    is_new = serializers.SerializerMethodField()
+
+    def get_is_new(self, obj):
+        return obj.user_to == self.context['request'].user and obj.is_new
 
     class Meta:
         model = Chat
@@ -61,7 +65,7 @@ class ChatSerializer(serializers.ModelSerializer):
 
 class IdSerializer(serializers.Serializer):
     """Сериализатор для передачи id в теле запроса"""
-    id = serializers.IntegerField(min_value=1)
+    id_from = serializers.IntegerField(min_value=1)
 
 
 class MessageSerializer(serializers.ModelSerializer):
@@ -76,9 +80,9 @@ class MessageSerializer(serializers.ModelSerializer):
         ]
 
 
-class MessagesListSerializer(serializers.ModelSerializer):
-    """Сериализатор цепочки сообщений"""
-    realty = RealtyForChatSerializer()
+class MessagesListBaseSerializer(serializers.ModelSerializer):
+    """Базовый сериализатор цепочки сообщений (для наследования от него)"""
+    realty = None
     is_blocked = serializers.SerializerMethodField()
     messages = serializers.SerializerMethodField()
 
@@ -112,21 +116,121 @@ class MessagesListSerializer(serializers.ModelSerializer):
             )
         ).order_by('datetime').all()
 
+        # Меняем статус "Новое", когда отдали цепочку сообщений
+        queryset.filter(
+            user_to=current_user, is_new=True
+        ).all().update(is_new=False)
+
         serializer = MessageSerializer(queryset, many=True)
         return serializer.data
 
     def get_chat_data(self, obj):
-        """Получение данных по цепочке сообщений:
+        """Получение данных по объекту сериализатора
+        (переписке или объявлению),
+         будет переопределено в наследуюемых классах"""
+        current_user = None
+        second_user = None
+        realty = None
+        return current_user, second_user, realty
+
+    class Meta:
+        fields = [
+            'realty',
+            'is_blocked',
+            'messages',
+        ]
+
+
+class MessagesListPASerializer(MessagesListBaseSerializer):
+    """Сериализатор цепочки сообщений для личного кабинета."""
+
+    realty = RealtyForChatSerializer()
+
+    class Meta(MessagesListBaseSerializer.Meta):
+        model = Chat
+
+    def get_chat_data(self, obj):
+        """Получение данных по сообщению (из ЛК):
         текущий пользователь, собеседник, объявление"""
         current_user = getattr(self.context.get('request'), 'user', None)
         second_user = obj.user_from if obj.user_from != current_user else obj.user_to
         realty = obj.realty
         return current_user, second_user, realty
 
+
+class MessagesListRealtySerializer(MessagesListBaseSerializer):
+    """Сериализатор цепочки сообщений из объявления."""
+
+    realty = RealtyForChatSerializer(source='*')
+
+    class Meta(MessagesListBaseSerializer.Meta):
+        model = Realty
+
+    def get_chat_data(self, obj):
+        """Получение данных по объявлению:
+        текущий пользователь, собеседник, объявление"""
+        current_user = getattr(self.context.get('request'), 'user', None)
+        second_user = obj.owner
+        realty = obj
+        return current_user, second_user, realty
+
+
+class CreateChatRequestSerializer(serializers.Serializer):
+    """Сериализатор тела запроса при создании нового сообщения"""
+    id_from = serializers.IntegerField(min_value=1, write_only=True)
+    message = serializers.CharField(max_length=255)
+
+
+class CreateChatResponseSerializer(serializers.ModelSerializer):
+    """Сериализатор тела ответа при создании нового сообщения"""
+
     class Meta:
         model = Chat
         fields = [
+            'id',
+            'message',
+            'user_from',
+            'user_to',
             'realty',
-            'is_blocked',
-            'messages',
+            'datetime',
+            'is_deleted_from',
+            'is_deleted_to',
+        ]
+
+    def validate(self, attrs):
+        """Добавление проверки на блокировку"""
+        data = super().validate(attrs)
+        is_blocked = Blocking.objects.filter(
+            user_who=data.get('user_to'),
+            user_whom=data.get('user_from'),
+        ).exists()
+        if is_blocked:
+            msg = "Chat blocked."
+            raise exceptions.PermissionDenied(detail=msg)
+
+        return data
+
+
+class IdsListSerializer(serializers.Serializer):
+    """Сериализатор списка id-шников.
+    Используется в множественном удалении и блокировке"""
+    ids = serializers.ListField(
+        child=serializers.IntegerField(min_value=1),
+        allow_empty=True
+    )
+
+
+class BlockingSerializer(serializers.ModelSerializer):
+    """Сериализатор блокировки чатов пользователя"""
+    user_who = serializers.SlugRelatedField(read_only=True,
+                                            slug_field='username')
+    user_whom = serializers.SlugRelatedField(read_only=True,
+                                             slug_field='username')
+
+    class Meta:
+        model = Blocking
+        fields = [
+            'id',
+            'user_who',
+            'user_whom',
         ]

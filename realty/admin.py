@@ -15,15 +15,25 @@ class RentInline(admin.StackedInline):
 
 @admin.register(Realty)
 class RealtyAdmin(admin.ModelAdmin):
-    list_display = ('apartment',
+    list_display = ('id',
+                    'apartment',
                     'address_short',
                     'owner',
                     'price',
                     'trade_type_short',
                     'realty_status',
                     'changed_at')
+    list_display_links = ('id', 'apartment',)
     list_filter = ('realty_status',
                    'owner_type',)
+    readonly_fields = ('id',)
+
+    def get_fieldsets(self, request, obj=None):
+        """Перемещаем 'id' наверх."""
+        fieldsets = super().get_fieldsets(request, obj)
+        # Преобразуем fieldsets в список кортежей, чтобы добавить 'id'
+        fieldsets = [(None, {'fields': ('id',)})] + list(fieldsets)
+        return fieldsets
 
     def apartment(self, obj):
         return (f'{obj.about_apartment.number_of_rooms.number_of_rooms}'
@@ -33,37 +43,45 @@ class RealtyAdmin(admin.ModelAdmin):
                 f'{obj.about_apartment.floor}/{obj.about_apartment.floors_number} этаж')
 
     def address_short(self, obj):
-        return (f'{obj.address.street.name}, '
-                f'{obj.address.house_number}'
-                f'{"корп." + obj.address.corpus if obj.address.corpus else ""}'
-                f'{"стр." + obj.address.building if obj.address.building else ""}'
-                f'{"вл." + obj.address.ownership if obj.address.ownership else ""}')
+        return (
+            f"{obj.address.street.name}, "
+            f"{obj.address.house_number}"
+            f'{"корп." + obj.address.corpus if obj.address.corpus else ""}'
+            f'{"стр." + obj.address.building if obj.address.building else ""}'
+            f'{"вл." + obj.address.ownership if obj.address.ownership else ""}'
+        )
 
     def trade_type_short(self, obj):
         return obj.trade_type
 
-    apartment.short_description = 'Квартира'
-    address_short.short_description = 'Адрес'
-    trade_type_short.short_description = 'Тип сделки'
+    apartment.short_description = "Квартира"
+    address_short.short_description = "Адрес"
+    trade_type_short.short_description = "Тип сделки"
 
     def get_inlines(self, request, obj=None):
         """Использование inline формы только для уже созданной модели"""
         inlines = []
-        if obj and obj.trade_type == 'sale':
+        if obj and obj.trade_type == "sale":
             inlines = [SaleInline]
-        elif obj and obj.trade_type == 'rent':
+        elif obj and obj.trade_type == "rent":
             inlines = [RentInline]
         return inlines
 
 
 @admin.register(Sale)
 class SaleAdmin(admin.ModelAdmin):
-    list_display = ('realty',
+    list_display = ('id',
+                    'realty',
                     'sales_parameters',)
+    list_display_links = ('realty',)
+    readonly_fields = ('id',)
 
 
 @admin.register(Rent)
 class RentAdmin(admin.ModelAdmin):
-    list_display = ('realty',
+    list_display = ('id',
+                    'realty',
                     'rental_features',
                     'lease_payments',)
+    list_display_links = ('realty',)
+    readonly_fields = ('id',)
