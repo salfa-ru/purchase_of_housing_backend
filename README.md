@@ -66,6 +66,24 @@ python manage.py loaddata data_other.json
 ## Ссылки на доки/описания
 
 - [Работа с пользователем](docs/user_doc.md)
+- [Деактивация старых объявлений](docs/deactivation.md) <sup>NEW</sup>
+
+## Запуск приложения 
+
+Для включения функций деактивации объявлений:
+```bash
+# Запуск management command (хотя бы один раз за срок жизни базы): 
+# - деактивирует expired объявления при своем запуске 
+# - создаст или перезапишет задачу на такую деактивацию 
+# (будет выполняться ежечасно)
+python manage.py cleanapp
+
+# Запуск Django 
+python manage.py runserver
+
+# Запуск Q-CLUSTER - pool of workers that will handle your tasks
+python manage.py qcluster
+ ```
 
 
 ## ВАЖНО!
