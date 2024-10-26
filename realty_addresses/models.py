@@ -132,8 +132,11 @@ class Address(models.Model):
         verbose_name="Владение",
         **constants.NULLABLE_FIELD,
     )
-    map_point = models.CharField(
-        max_length=constants.CHAR_LENGTH, verbose_name="Точка на карте"
+    latitude = models.FloatField(
+        verbose_name='Широта'
+    )
+    longitude = models.FloatField(
+        verbose_name='Долгота'
     )
     metro = models.ForeignKey(
         Metro,
@@ -168,7 +171,8 @@ class Address(models.Model):
             f"{self.corpus}, "
             f"{self.building}, "
             f"{self.ownership}, "
-            f"{self.map_point}, "
+            f"{self.latitude}, "
+            f"{self.longitude}, "
             f"{self.metro}, "
             f"{self.minutes_to_metro}"
         )

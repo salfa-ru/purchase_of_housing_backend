@@ -1,4 +1,6 @@
 from rest_framework import serializers
+from realty import models as realty_models
+# from .models import City, Metro, Street, Address
 
 from realty_addresses import models as address_models
 from config import constants
@@ -114,6 +116,40 @@ class AddressReadSerializer(serializers.ModelSerializer):
     class Meta:
         model = address_models.Address
         fields = "__all__"
+
+
+class MapPointsSerializer(serializers.ModelSerializer):
+    latitude = serializers.FloatField(source='address.latitude')
+    longitude = serializers.FloatField(source='address.longitude')
+
+    class Meta:
+        model = realty_models.Realty
+        fields = ['id', 'latitude', 'longitude']
+
+
+class MapPointsRequestSerializer(serializers.Serializer):
+    top_left_latitude = serializers.FloatField(required=True)
+    top_left_longitude = serializers.FloatField(required=True)
+    bottom_right_latitude = serializers.FloatField(required=True)
+    bottom_right_longitude = serializers.FloatField(required=True)
+
+
+class GetAnnouncementsInMapPointRequestSerializer(serializers.Serializer):
+    latitude = serializers.FloatField(required=True)
+    longitude = serializers.FloatField(required=True)
+
+
+class GetAnnouncementsInMapPoint(serializers.ModelSerializer):
+    street = serializers.CharField(source='address.street.name')
+    house_number = serializers.CharField(source='address.house_number')
+    corpus = serializers.CharField(source='address.corpus')
+    building = serializers.CharField(source='address.building')
+    number_of_rooms = serializers.CharField(source='about_apartment.number_of_rooms.number_of_rooms')
+    realty_type = serializers.CharField(source='realty_type.type')
+
+    class Meta:
+        model = realty_models.Realty
+        fields = ['realty_type', 'price', 'street', 'number_of_rooms', 'house_number', 'corpus', 'building', ]
 
 
 class AddressCreateSerializer(serializers.ModelSerializer):
