@@ -1,6 +1,8 @@
 from django.utils import timezone
 from datetime import timedelta
 from django_q.tasks import Schedule
+
+from notifications.utils import create_notification
 from realty.models import Realty
 from realty_values import models as values_models
 
@@ -28,7 +30,7 @@ def plan_mass_deactivation():
 def expire_realty(realty_id):
     """ Деактивирует одно запланированное объявление """
 
-    output = f"DEBUG - realty/tasks.py - expire_realty(): Перенос в архив записи #{realty_id} - "
+    print(f"DEBUG - realty/tasks.py - expire_realty(): ДЕАКТИВАЦИЯ Записи #{realty_id}")
 
     time_threshold = timezone.now() - MAX_LISTING_DURATION
 
@@ -46,15 +48,15 @@ def expire_realty(realty_id):
         expired_status = values_models.RealtyAdvStatus.objects.get(id=4)  # В архиве / expired
         realty.realty_status = expired_status
 
-        output += "OK"
-
         realty.save()
 
     except Realty.DoesNotExist:
-        output += "Failed! Realty is not what is has been."
-        pass  # запись уже удалена / не активна / выставлена еще раз
+        print(f"------- ДЕАКТИВАЦИЯ Записи #{realty_id} НЕ УДАЛАСЬ!")
+        print(f"        (запись уже удалена / не активна / выставлена еще раз)")
+        return
 
-    print(output)
+    print(f"------- ЗАПИСЬ #{realty_id} успешно деактивирована!")
+    create_notification(realty, "expired")
 
 
 def expire_all_outdated_realties():

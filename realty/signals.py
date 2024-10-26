@@ -77,8 +77,8 @@ def handle_realty_save(sender, instance, **kwargs):
                 # иначе объявление, активированное еще раз, отключится по старому графику
                 Schedule.objects.filter(func="realty.tasks.expire_realty", args=instance.id).delete()
 
-            print(f"DEBUG - realty/signals.py @pre_save: handle_realty_save(): "
-                  f"Статус realty #{instance.id}: '{old_status.status}' ⟹  '{new_status.status}'.")
+            print(f"DEBUG - realty/signals.py - handle_realty_save() - @pre_save")
+            print(f"        Статус realty #{instance.id}: '{old_status.status}' --> '{new_status.status}'.")
 
             """ ОТПРАВКА УВЕДОМЛЕНИЙ """
 
@@ -94,16 +94,17 @@ def handle_realty_save(sender, instance, **kwargs):
                 elif old_status.id == 2:  # было на модерации, но отклонено Админом
                     create_notification(instance, "rejected")
 
-            """ Уведомления о переносе в архив отправляются только при истечении срока публикации 
-            деактивирующей функцией.cПри ручном переносе объявлений в архив уведомления не отправляются. 
+            """ ВНИМАНИЕ! Уведомления о переносе АКТИВНЫХ объявлений В АРХИВ 
+            отправляются только при истечении срока публикации деактивирующей функцией из tasks.py. 
+            При ручном переносе объявлений в архив уведомления не отправляются. 
             elif new_status.id == 4:
                 create_notification(instance, "expired")
             """
 
 
 """ Статусы realty          Типы нотификаций  (16/10/2024) """
-# 1 - Активно               2 published      <----  жалко, что id
-# 2 - На модерации          1 on_moderation  <----  не совпадают
+# 1 - Активно               2 published
+# 2 - На модерации          1 on_moderation
 # 3 - Отклонено             3 rejected
 # 4 - В архиве              4 expired
 # 5 - ЧЕРНОВИК (нет)        5 blocked
