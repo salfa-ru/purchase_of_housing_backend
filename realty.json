@@ -366,7 +366,8 @@
       "corpus": null,
       "building": null,
       "ownership": null,
-      "map_point": "124,124",
+      "latitude": 54.99217,
+      "longitude": 73.370558,
       "metro": 4,
       "minutes_to_metro": 12
     }
@@ -380,7 +381,8 @@
       "corpus": "1",
       "building": null,
       "ownership": null,
-      "map_point": "125,125",
+      "latitude": 55.692846,
+      "longitude": 37.540353,
       "metro": 5,
       "minutes_to_metro": 7
     }
@@ -394,7 +396,8 @@
       "corpus": "1",
       "building": null,
       "ownership": null,
-      "map_point": "127,127",
+      "latitude": 54.99217,
+      "longitude": 73.368864,
       "metro": 6,
       "minutes_to_metro": 22
     }
@@ -408,7 +411,8 @@
       "corpus": "3",
       "building": null,
       "ownership": null,
-      "map_point": "128,128",
+      "latitude": 54.99217,
+      "longitude": 73.368864,
       "metro": 7,
       "minutes_to_metro": 15
     }
@@ -422,7 +426,8 @@
       "corpus": null,
       "building": null,
       "ownership": null,
-      "map_point": "12,9",
+      "latitude": 55.69284,
+      "longitude": 37.54035,
       "metro": 8,
       "minutes_to_metro": 3
     }
@@ -436,7 +441,8 @@
       "corpus": "6",
       "building": null,
       "ownership": null,
-      "map_point": "30,13",
+      "latitude": 55.6928,
+      "longitude": 37.5403,
       "metro": 9,
       "minutes_to_metro": 9
     }
@@ -450,7 +456,8 @@
       "corpus": null,
       "building": "1",
       "ownership": null,
-      "map_point": "16,16",
+      "latitude": 55.692,
+      "longitude": 37.540,
       "metro": 10,
       "minutes_to_metro": 21
     }
@@ -464,7 +471,8 @@
       "corpus": null,
       "building": null,
       "ownership": null,
-      "map_point": "18,18",
+      "latitude": 55.69,
+      "longitude": 37.54,
       "metro": 11,
       "minutes_to_metro": 16
     }
@@ -478,7 +486,8 @@
       "corpus": null,
       "building": null,
       "ownership": null,
-      "map_point": "15,15",
+      "latitude": 55.6,
+      "longitude": 37.5,
       "metro": 12,
       "minutes_to_metro": 9
     }
@@ -506,7 +515,8 @@
       "corpus": "3",
       "building": null,
       "ownership": null,
-      "map_point": "6,6",
+      "latitude": 55,
+      "longitude": 37,
       "metro": 14,
       "minutes_to_metro": 29
     }
@@ -520,7 +530,8 @@
       "corpus": null,
       "building": null,
       "ownership": null,
-      "map_point": "16,16",
+      "latitude": 54.9921,
+      "longitude": 73.36886,
       "metro": 15,
       "minutes_to_metro": null
     }
