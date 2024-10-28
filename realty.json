@@ -501,7 +501,8 @@
       "corpus": "2",
       "building": null,
       "ownership": null,
-      "map_point": "6,6",
+      "latitude": 54.992,
+      "longitude": 73.368,
       "metro": 13,
       "minutes_to_metro": null
     }
