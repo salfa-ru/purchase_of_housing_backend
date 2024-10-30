@@ -31,10 +31,15 @@ def handle_realty_save(sender, instance, **kwargs):
     is_new = instance.id is None
 
     if is_new:
+
+        """ 
+        Логика перенесена в serializers - во избежание двойного сохранения записи 
         # Новое объявление - устанавливаем статус 'На модерации'
         instance.realty_status = values_models.RealtyAdvStatus.objects.get(id=2)
         instance.save()  # Сохраняем, чтобы получить id
         create_notification(instance, "on_moderation")
+        """
+        return
 
     else:
         # Старое объявление - узнаем старый статус

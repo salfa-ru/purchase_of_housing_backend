@@ -2,6 +2,7 @@ from rest_framework import serializers
 from rest_framework.relations import SlugRelatedField
 
 from config import constants
+from notifications.utils import create_notification
 from realty import models as realty_models
 from .models import Realty, Sale, Rent
 from realty_values import models as values_models
@@ -187,6 +188,12 @@ class RealtyCreateSerializer(serializers.ModelSerializer):
             validated_data["realty_status"] = default_status
 
         realty = realty_models.Realty.objects.create(**validated_data)
+
+        # Отправка уведомления после успешного создания записи
+        # Проверка статуса после создания записи, если запись на модерации - отправить уведомление.
+        if realty.realty_status.status == constants.REALTY_STATUS:
+            create_notification(realty, "on_moderation")
+
         return realty
 
 
@@ -424,4 +431,3 @@ class RealtyStatusUpdateSerializer(serializers.ModelSerializer):
             return value
         else:
             raise ValidationError(f"Вы не являетесь владельцем объявления!")
-
