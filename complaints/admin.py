@@ -16,7 +16,12 @@ class ComplaintAdmin(admin.ModelAdmin):
 
     readonly_fields = ('owner', 'realty', 'description',)
 
+    def has_change_permission(self, request, obj=None):
+        if obj is not None:
+            return False
+        return True
+
     def get_readonly_fields(self, request, obj=None):
-        if obj:
-            return self.readonly_fields
+        if obj is None:
+            return []
         return self.readonly_fields
