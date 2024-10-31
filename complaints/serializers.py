@@ -30,4 +30,7 @@ class ComplaintsSerializer(serializers.ModelSerializer):
                 'Вы не можете отправить жалобу на своё собственное объявление!'
             )
 
+        elif realty.realty_status.status != "Активно":
+            raise serializers.ValidationError("Вы не можете отправить жалобу если объявление не активно!")
+
         return attrs
