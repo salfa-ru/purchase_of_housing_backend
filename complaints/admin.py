@@ -24,7 +24,7 @@ class ComplaintAdmin(admin.ModelAdmin):
     def owner_name(self, obj):
         return str(obj.owner)
 
-    owner_name.short_description = 'Владелец'
+    owner_name.short_description = 'Владелец жалобы'
 
     def has_change_permission(self, request, obj=None):
         return obj is None
