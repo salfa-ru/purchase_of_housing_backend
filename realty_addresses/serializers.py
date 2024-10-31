@@ -171,8 +171,9 @@ class AddressCreateSerializer(serializers.ModelSerializer):
         max_length=constants.CHAR_LENGTH,
         required=False,
     )
-    map_point = serializers.CharField(
-        max_length=constants.CHAR_LENGTH,
+    latitude = serializers.FloatField(
+        required=True,)
+    longitude = serializers.FloatField(
         required=True,
     )
     street = StreetCreateSerializer(required=True)

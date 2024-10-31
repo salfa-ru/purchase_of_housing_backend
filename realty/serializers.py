@@ -424,4 +424,3 @@ class RealtyStatusUpdateSerializer(serializers.ModelSerializer):
             return value
         else:
             raise ValidationError(f"Вы не являетесь владельцем объявления!")
-
