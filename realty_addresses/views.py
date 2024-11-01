@@ -11,6 +11,7 @@ from realty.serializers import ShortRealtySerializer
 from realty_addresses.serializers import MapPointsSerializer, MapPointsRequestSerializer, \
     GetAnnouncementsInMapPointRequestSerializer
 from config import constants
+from realty_values import models as models_values
 
 
 @extend_schema(
@@ -40,11 +41,15 @@ class GetlistMapPointsAPIView(APIView):
         bottom_right_latitude = request.data.get('bottom_right_latitude')
         bottom_right_longitude = request.data.get('bottom_right_longitude')
 
+        # получаем ID статуса объявления со значением Активно
+        realty_status = models_values.RealtyAdvStatus.objects.get(status="Активно").pk
+
         queryset = Realty.objects.filter(
             Q(address__latitude__gte=bottom_right_latitude) &
             Q(address__latitude__lte=top_left_latitude) &
             Q(address__longitude__gte=top_left_longitude) &
-            Q(address__longitude__lte=bottom_right_longitude)
+            Q(address__longitude__lte=bottom_right_longitude) &
+            Q(realty_status=realty_status)
         )
 
         filterset = self.filterset_class(request.query_params, queryset=queryset)
@@ -88,9 +93,13 @@ class GetListAnnouncementsInMapPoint(APIView):
                 {"error": "Пожалуйста, укажите все необходимые данные!"},
                 status=status.HTTP_400_BAD_REQUEST)
 
+        # получаем ID статуса объявления со значением Активно
+        realty_status = models_values.RealtyAdvStatus.objects.get(status="Активно").pk
+
         queryset = Realty.objects.filter(
             Q(address__latitude=latitude) &
-            Q(address__longitude=longitude)
+            Q(address__longitude=longitude) &
+            Q(realty_status=realty_status)
         )
 
         filterset = self.filterset_class(request.query_params, queryset=queryset)
