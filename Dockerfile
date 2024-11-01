@@ -11,7 +11,7 @@ RUN pip install gunicorn==20.1.0
 COPY . .
 
 # Обновляем pip до последней версии
-RUN python -m pip install --upgrade 
+RUN python -m pip install --upgrade pip
 
 # Устанавливаем зависимости приложения из файла requirements.txt без использования кэша
 RUN pip install -r requirements.txt --no-cache-dir
