@@ -31,3 +31,6 @@ class ComplaintAdmin(admin.ModelAdmin):
 
     def get_readonly_fields(self, request, obj=None):
         return self.readonly_fields if obj is not None else []
+
+    def has_add_permission(self, request):
+        return False
