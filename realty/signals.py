@@ -68,7 +68,7 @@ def handle_realty_save(sender, instance, **kwargs):
                 # Планируем время деактивации (создаем запись в таблице Django_Q)
                 Schedule.objects.create(
                     func="realty.tasks.expire_realty",
-                    name="Deactivation of Realty #{instance.id}",
+                    name=f"Deactivation of Realty #{instance.id}",
                     args=instance.id,  # записываем туда id объявления
                     schedule_type=Schedule.ONCE,
                     next_run=timezone.now() + MAX_LISTING_DURATION

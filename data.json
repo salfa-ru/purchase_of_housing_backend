@@ -460,29 +460,7 @@
       "user_permissions": []
     }
   },
-  {
-    "model": "users.user",
-    "pk": 4,
-    "fields": {
-      "password": "pbkdf2_sha256$600000$hSXquKNLnTyiXda2KoQP2H$en/quGm14MpIhulNN5lNab+E/l3XnvDx2IEd3GbuBhs=",
-      "last_login": null,
-      "is_superuser": true,
-      "username": "admin",
-      "is_staff": true,
-      "is_active": true,
-      "date_joined": "2024-08-21T08:14:13.819Z",
-      "first_name": "admin",
-      "last_name": "admin",
-      "email": "admin@email.com",
-      "uuid_esa": null,
-      "avatar": "",
-      "user_type": 1,
-      "phone_number": "admin_phone",
-      "updated_at": null,
-      "groups": [],
-      "user_permissions": []
-    }
-  },
+
   {
     "model": "realty_specificities.aboutbuilding",
     "pk": 1,
@@ -505,6 +483,102 @@
     "fields": {
       "year_built": 1990,
       "type": 3
+    }
+  },
+  {
+    "model": "realty_specificities.aboutbuilding",
+    "pk": 4,
+    "fields": {
+      "year_built": 1990,
+      "type": 1
+    }
+  },
+  {
+    "model": "realty_specificities.aboutbuilding",
+    "pk": 5,
+    "fields": {
+      "year_built": 1990,
+      "type": 2
+    }
+  },
+  {
+    "model": "realty_specificities.aboutbuilding",
+    "pk": 6,
+    "fields": {
+      "year_built": 1990,
+      "type": 3
+    }
+  },
+  {
+    "model": "realty_specificities.aboutbuilding",
+    "pk": 7,
+    "fields": {
+      "year_built": 1990,
+      "type": 4
+    }
+  },
+  {
+    "model": "realty_specificities.aboutbuilding",
+    "pk": 8,
+    "fields": {
+      "year_built": 1990,
+      "type": 5
+    }
+  },
+  {
+    "model": "realty_specificities.aboutbuilding",
+    "pk": 9,
+    "fields": {
+      "year_built": 1990,
+      "type": 6
+    }
+  },
+  {
+    "model": "realty_specificities.aboutbuilding",
+    "pk": 10,
+    "fields": {
+      "year_built": 1990,
+      "type": 1
+    }
+  },
+  {
+    "model": "realty_specificities.aboutbuilding",
+    "pk": 11,
+    "fields": {
+      "year_built": 1990,
+      "type": 2
+    }
+  },
+  {
+    "model": "realty_specificities.aboutbuilding",
+    "pk": 12,
+    "fields": {
+      "year_built": 1990,
+      "type": 3
+    }
+  },
+  {
+    "model": "realty_specificities.aboutbuilding",
+    "pk": 13,
+    "fields": {
+      "year_built": 1990,
+      "type": 4
+    }
+  },
+  {
+    "model": "realty_specificities.aboutbuilding",
+    "pk": 14,
+    "fields": {
+      "year_built": 1990,
+      "type": 5
+    }
+  },
+  {
+    "model": "realty_specificities.aboutbuilding",
+    "pk": 15,
+    "fields": {
+      "year_built": 1990,
+      "type": 6
     }
   },
   {
@@ -544,6 +618,162 @@
       "elevator": true,
       "floor": 1,
       "floors_number": 23
+    }
+  },
+  {
+    "model": "realty_specificities.aboutapartment",
+    "pk": 4,
+    "fields": {
+      "number_of_rooms": 5,
+      "area": 29.5,
+      "loggia": false,
+      "balcony": true,
+      "elevator": false,
+      "floor": 1,
+      "floors_number": 5
+    }
+  },
+  {
+    "model": "realty_specificities.aboutapartment",
+    "pk": 5,
+    "fields": {
+      "number_of_rooms": 1,
+      "area": 35,
+      "loggia": true,
+      "balcony": false,
+      "elevator": false,
+      "floor": 2,
+      "floors_number": 10
+    }
+  },
+  {
+    "model": "realty_specificities.aboutapartment",
+    "pk": 6,
+    "fields": {
+      "number_of_rooms": 2,
+      "area": 46.8,
+      "loggia": true,
+      "balcony": true,
+      "elevator": false,
+      "floor": 7,
+      "floors_number": 10
+    }
+  },
+  {
+    "model": "realty_specificities.aboutapartment",
+    "pk": 7,
+    "fields": {
+      "number_of_rooms": 3,
+      "area": 75.4,
+      "loggia": false,
+      "balcony": false,
+      "elevator": true,
+      "floor": 15,
+      "floors_number": 20
+    }
+  },
+  {
+    "model": "realty_specificities.aboutapartment",
+    "pk": 8,
+    "fields": {
+      "number_of_rooms": 4,
+      "area": 105,
+      "loggia": false,
+      "balcony": false,
+      "elevator": false,
+      "floor": 1,
+      "floors_number": 20
+    }
+  },
+  {
+    "model": "realty_specificities.aboutapartment",
+    "pk": 9,
+    "fields": {
+      "number_of_rooms": 5,
+      "area": 29.5,
+      "loggia": true,
+      "balcony": true,
+      "elevator": true,
+      "floor": 2,
+      "floors_number": 7
+    }
+  },
+  {
+    "model": "realty_specificities.aboutapartment",
+    "pk": 10,
+    "fields": {
+      "number_of_rooms": 1,
+      "area": 35,
+      "loggia": false,
+      "balcony": true,
+      "elevator": true,
+      "floor": 7,
+      "floors_number": 10
+    }
+  },
+  {
+    "model": "realty_specificities.aboutapartment",
+    "pk": 11,
+    "fields": {
+      "number_of_rooms": 2,
+      "area": 46.8,
+      "loggia": true,
+      "balcony": false,
+      "elevator": true,
+      "floor": 15,
+      "floors_number": 20
+    }
+  },
+  {
+    "model": "realty_specificities.aboutapartment",
+    "pk": 12,
+    "fields": {
+      "number_of_rooms": 3,
+      "area": 75.4,
+      "loggia": true,
+      "balcony": true,
+      "elevator": false,
+      "floor": 20,
+      "floors_number": 20
+    }
+  },
+  {
+    "model": "realty_specificities.aboutapartment",
+    "pk": 13,
+    "fields": {
+      "number_of_rooms": 4,
+      "area": 105,
+      "loggia": false,
+      "balcony": false,
+      "elevator": true,
+      "floor": 15,
+      "floors_number": 15
+    }
+  },
+  {
+    "model": "realty_specificities.aboutapartment",
+    "pk": 14,
+    "fields": {
+      "number_of_rooms": 5,
+      "area": 29.5,
+      "loggia": false,
+      "balcony": false,
+      "elevator": false,
+      "floor": 3,
+      "floors_number": 5
+    }
+  },
+  {
+    "model": "realty_specificities.aboutapartment",
+    "pk": 15,
+    "fields": {
+      "number_of_rooms": 1,
+      "area": 35,
+      "loggia": true,
+      "balcony": false,
+      "elevator": true,
+      "floor": 15,
+      "floors_number": 16
     }
   },
   {
@@ -602,6 +832,138 @@
     }
   },
   {
+    "model": "realty_specificities.commoncharacteristics",
+    "pk": 6,
+    "fields": {
+      "repair_type": 1,
+      "furniture": true,
+      "bathroom": 1,
+      "courtyard_view": true,
+      "street_view": false
+    }
+  },
+  {
+    "model": "realty_specificities.commoncharacteristics",
+    "pk": 7,
+    "fields": {
+      "repair_type": 2,
+      "furniture": false,
+      "bathroom": 2,
+      "courtyard_view": false,
+      "street_view": true
+    }
+  },
+  {
+    "model": "realty_specificities.commoncharacteristics",
+    "pk": 8,
+    "fields": {
+      "repair_type": 3,
+      "furniture": false,
+      "bathroom": 1,
+      "courtyard_view": false,
+      "street_view": false
+    }
+  },
+  {
+    "model": "realty_specificities.commoncharacteristics",
+    "pk": 9,
+    "fields": {
+      "repair_type": 4,
+      "furniture": false,
+      "bathroom": 2,
+      "courtyard_view": true,
+      "street_view": false
+    }
+  },
+  {
+    "model": "realty_specificities.commoncharacteristics",
+    "pk": 10,
+    "fields": {
+      "repair_type": 1,
+      "furniture": false,
+      "bathroom": 1,
+      "courtyard_view": false,
+      "street_view": true
+    }
+  },
+  {
+    "model": "realty_specificities.commoncharacteristics",
+    "pk": 11,
+    "fields": {
+      "repair_type": 2,
+      "furniture": false,
+      "bathroom": 2,
+      "courtyard_view": false,
+      "street_view": false
+    }
+  },
+  {
+    "model": "realty_specificities.commoncharacteristics",
+    "pk": 12,
+    "fields": {
+      "repair_type": 3,
+      "furniture": true,
+      "bathroom": 1,
+      "courtyard_view": true,
+      "street_view": false
+    }
+  },
+  {
+    "model": "realty_specificities.commoncharacteristics",
+    "pk": 13,
+    "fields": {
+      "repair_type": 4,
+      "furniture": false,
+      "bathroom": 2,
+      "courtyard_view": false,
+      "street_view": true
+    }
+  },
+  {
+    "model": "realty_specificities.commoncharacteristics",
+    "pk": 14,
+    "fields": {
+      "repair_type": 1,
+      "furniture": false,
+      "bathroom": 1,
+      "courtyard_view": false,
+      "street_view": false
+    }
+  },
+  {
+    "model": "realty_specificities.commoncharacteristics",
+    "pk": 15,
+    "fields": {
+      "repair_type": 2,
+      "furniture": false,
+      "bathroom": 2,
+      "courtyard_view": true,
+      "street_view": false
+    }
+  },
+  {
+    "model": "realty_specificities.commoncharacteristics",
+    "pk": 16,
+    "fields": {
+      "repair_type": 3,
+      "furniture": true,
+      "bathroom": 1,
+      "courtyard_view": false,
+      "street_view": true
+    }
+  },
+  {
+    "model": "realty_specificities.commoncharacteristics",
+    "pk": 17,
+    "fields": {
+      "repair_type": 4,
+      "furniture": false,
+      "bathroom": 2,
+      "courtyard_view": false,
+      "street_view": false
+    }
+  },
+  {
     "model": "realty_specificities.rentalfeatures",
     "pk": 1,
     "fields": {
@@ -647,6 +1009,187 @@
     }
   },
   {
+    "model": "realty_specificities.rentalfeatures",
+    "pk": 4,
+    "fields": {
+      "fridge": true,
+      "internet": false,
+      "conditioner": false,
+      "tv": false,
+      "dishwasher": false,
+      "washing_machine": false,
+      "garbage_chute": false,
+      "kids_allowed": true,
+      "animals_allowed": false
+    }
+  },
+  {
+    "model": "realty_specificities.rentalfeatures",
+    "pk": 5,
+    "fields": {
+      "fridge": false,
+      "internet": true,
+      "conditioner": false,
+      "tv": false,
+      "dishwasher": false,
+      "washing_machine": false,
+      "garbage_chute": false,
+      "kids_allowed": true,
+      "animals_allowed": false
+    }
+  },
+  {
+    "model": "realty_specificities.rentalfeatures",
+    "pk": 6,
+    "fields": {
+      "fridge": false,
+      "internet": false,
+      "conditioner": true,
+      "tv": false,
+      "dishwasher": false,
+      "washing_machine": false,
+      "garbage_chute": false,
+      "kids_allowed": true,
+      "animals_allowed": true
+    }
+  },
+  {
+    "model": "realty_specificities.rentalfeatures",
+    "pk": 7,
+    "fields": {
+      "fridge": false,
+      "internet": false,
+      "conditioner": false,
+      "tv": true,
+      "dishwasher": false,
+      "washing_machine": false,
+      "garbage_chute": false,
+      "kids_allowed": false,
+      "animals_allowed": false
+    }
+  },
+  {
+    "model": "realty_specificities.rentalfeatures",
+    "pk": 8,
+    "fields": {
+      "fridge": false,
+      "internet": false,
+      "conditioner": false,
+      "tv": false,
+      "dishwasher": true,
+      "washing_machine": false,
+      "garbage_chute": false,
+      "kids_allowed": true,
+      "animals_allowed": false
+    }
+  },
+  {
+    "model": "realty_specificities.rentalfeatures",
+    "pk": 9,
+    "fields": {
+      "fridge": false,
+      "internet": false,
+      "conditioner": false,
+      "tv": false,
+      "dishwasher": false,
+      "washing_machine": true,
+      "garbage_chute": false,
+      "kids_allowed": false,
+      "animals_allowed": true
+    }
+  },
+  {
+    "model": "realty_specificities.rentalfeatures",
+    "pk": 10,
+    "fields": {
+      "fridge": false,
+      "internet": false,
+      "conditioner": false,
+      "tv": false,
+      "dishwasher": false,
+      "washing_machine": false,
+      "garbage_chute": true,
+      "kids_allowed": true,
+      "animals_allowed": true
+    }
+  },
+  {
+    "model": "realty_specificities.rentalfeatures",
+    "pk": 11,
+    "fields": {
+      "fridge": true,
+      "internet": false,
+      "conditioner": true,
+      "tv": true,
+      "dishwasher": false,
+      "washing_machine": false,
+      "garbage_chute": false,
+      "kids_allowed": false,
+      "animals_allowed": false
+    }
+  },
+  {
+    "model": "realty_specificities.rentalfeatures",
+    "pk": 12,
+    "fields": {
+      "fridge": false,
+      "internet": false,
+      "conditioner": false,
+      "tv": false,
+      "dishwasher": true,
+      "washing_machine": true,
+      "garbage_chute": false,
+      "kids_allowed": true,
+      "animals_allowed": false
+    }
+  },
+  {
+    "model": "realty_specificities.rentalfeatures",
+    "pk": 13,
+    "fields": {
+      "fridge": false,
+      "internet": true,
+      "conditioner": false,
+      "tv": true,
+      "dishwasher": false,
+      "washing_machine": false,
+      "garbage_chute": true,
+      "kids_allowed": false,
+      "animals_allowed": true
+    }
+  },
+  {
+    "model": "realty_specificities.rentalfeatures",
+    "pk": 14,
+    "fields": {
+      "fridge": false,
+      "internet": false,
+      "conditioner": false,
+      "tv": false,
+      "dishwasher": false,
+      "washing_machine": false,
+      "garbage_chute": false,
+      "kids_allowed": true,
+      "animals_allowed": true
+    }
+  },
+  {
+    "model": "realty_specificities.rentalfeatures",
+    "pk": 15,
+    "fields": {
+      "fridge": false,
+      "internet": false,
+      "conditioner": false,
+      "tv": true,
+      "dishwasher": true,
+      "washing_machine": false,
+      "garbage_chute": false,
+      "kids_allowed": false,
+      "animals_allowed": false
+    }
+  },
+
+  {
     "model": "realty_specificities.leasepayments",
     "pk": 1,
     "fields": {
@@ -671,6 +1214,114 @@
       "counters_payment": null,
       "communal_payment": null,
       "deposit": 30000
+    }
+  },
+  {
+    "model": "realty_specificities.leasepayments",
+    "pk": 4,
+    "fields": {
+      "counters_payment": 1,
+      "communal_payment": 1,
+      "deposit": 0
+    }
+  },
+  {
+    "model": "realty_specificities.leasepayments",
+    "pk": 5,
+    "fields": {
+      "counters_payment": 2,
+      "communal_payment": 1,
+      "deposit": 10000
+    }
+  },
+  {
+    "model": "realty_specificities.leasepayments",
+    "pk": 6,
+    "fields": {
+      "counters_payment": 2,
+      "communal_payment": 1,
+      "deposit": 10000
+    }
+  },
+  {
+    "model": "realty_specificities.leasepayments",
+    "pk": 7,
+    "fields": {
+      "counters_payment": 2,
+      "communal_payment": 1,
+      "deposit": 15000
+    }
+  },
+  {
+    "model": "realty_specificities.leasepayments",
+    "pk": 8,
+    "fields": {
+      "counters_payment": 2,
+      "communal_payment": 2,
+      "deposit": 0
+    }
+  },
+  {
+    "model": "realty_specificities.leasepayments",
+    "pk": 9,
+    "fields": {
+      "counters_payment": 1,
+      "communal_payment": 1,
+      "deposit": 10000
+    }
+  },
+  {
+    "model": "realty_specificities.leasepayments",
+    "pk": 10,
+    "fields": {
+      "counters_payment": 2,
+      "communal_payment": 2,
+      "deposit": 5000
+    }
+  },
+  {
+    "model": "realty_specificities.leasepayments",
+    "pk": 11,
+    "fields": {
+      "counters_payment": 2,
+      "communal_payment": 2,
+      "deposit": 15000
+    }
+  },
+  {
+    "model": "realty_specificities.leasepayments",
+    "pk": 12,
+    "fields": {
+      "counters_payment": 2,
+      "communal_payment": 1,
+      "deposit": 18000
+    }
+  },
+  {
+    "model": "realty_specificities.leasepayments",
+    "pk": 13,
+    "fields": {
+      "counters_payment": 1,
+      "communal_payment": 1,
+      "deposit": 10000
+    }
+  },
+  {
+    "model": "realty_specificities.leasepayments",
+    "pk": 14,
+    "fields": {
+      "counters_payment": 2,
+      "communal_payment": 1,
+      "deposit": 3000
+    }
+  },
+  {
+    "model": "realty_specificities.leasepayments",
+    "pk": 15,
+    "fields": {
+      "counters_payment": 2,
+      "communal_payment": 1,
+      "deposit": 10000
     }
   },
   {
@@ -703,10 +1354,164 @@
     }
   },
   {
+    "model": "realty_addresses.district",
+    "pk": 3,
+    "fields": {
+      "name": "ЦАО"
+    }
+  },
+  {
+    "model": "realty_addresses.district",
+    "pk": 4,
+    "fields": {
+      "name": "СВАО"
+    }
+  },
+  {
+    "model": "realty_addresses.district",
+    "pk": 5,
+    "fields": {
+      "name": "ВАО"
+    }
+  },
+  {
+    "model": "realty_addresses.district",
+    "pk": 6,
+    "fields": {
+      "name": "ЮВАО"
+    }
+  },
+  {
+    "model": "realty_addresses.district",
+    "pk": 7,
+    "fields": {
+      "name": "ЮАО"
+    }
+  },
+  {
+    "model": "realty_addresses.district",
+    "pk": 8,
+    "fields": {
+      "name": "ЗАО"
+    }
+  },
+  {
+    "model": "realty_addresses.district",
+    "pk": 9,
+    "fields": {
+      "name": "СЗАО"
+    }
+  },
+  {
+    "model": "realty_addresses.district",
+    "pk": 10,
+    "fields": {
+      "name": "Зеленоградский АО"
+    }
+  },
+  {
+    "model": "realty_addresses.district",
+    "pk": 11,
+    "fields": {
+      "name": "Новомосковский АО"
+    }
+  },
+  {
+    "model": "realty_addresses.district",
+    "pk": 12,
+    "fields": {
+      "name": "Троицкий"
+    }
+  },
+  {
     "model": "realty_addresses.zone",
     "pk": 1,
     "fields": {
       "name": "Гагаринский"
+    }
+  },
+  {
+    "model": "realty_addresses.zone",
+    "pk": 2,
+    "fields": {
+      "name": "Красносельский"
+    }
+  },
+  {
+    "model": "realty_addresses.zone",
+    "pk": 3,
+    "fields": {
+      "name": "Войковский"
+    }
+  },
+  {
+    "model": "realty_addresses.zone",
+    "pk": 4,
+    "fields": {
+      "name": "Южное Медведково"
+    }
+  },
+  {
+    "model": "realty_addresses.zone",
+    "pk": 5,
+    "fields": {
+      "name": "Преображенское"
+    }
+  },
+  {
+    "model": "realty_addresses.zone",
+    "pk": 6,
+    "fields": {
+      "name": "Текстильщики"
+    }
+  },
+  {
+    "model": "realty_addresses.zone",
+    "pk": 7,
+    "fields": {
+      "name": "Чертаново Северное"
+    }
+  },
+  {
+    "model": "realty_addresses.zone",
+    "pk": 8,
+    "fields": {
+      "name": "Обручевский"
+    }
+  },
+  {
+    "model": "realty_addresses.zone",
+    "pk": 9,
+    "fields": {
+      "name": "Можайский"
+    }
+  },
+  {
+    "model": "realty_addresses.zone",
+    "pk": 10,
+    "fields": {
+      "name": "Щукино"
+    }
+  },
+  {
+    "model": "realty_addresses.zone",
+    "pk": 11,
+    "fields": {
+      "name": "Старое Крюково"
+    }
+  },
+  {
+    "model": "realty_addresses.zone",
+    "pk": 12,
+    "fields": {
+      "name": "Коммунарка"
+    }
+  },
+  {
+    "model": "realty_addresses.zone",
+    "pk": 13,
+    "fields": {
+      "name": "Краснопахорский"
     }
   },
   {
@@ -740,6 +1545,126 @@
     }
   },
   {
+    "model": "realty_addresses.street",
+    "pk": 4,
+    "fields": {
+      "name": "Малый Головин переулок",
+      "zone": 2,
+      "district": 3,
+      "city": 1
+    }
+  },
+  {
+    "model": "realty_addresses.street",
+    "pk": 5,
+    "fields": {
+      "name": "Старопетровский проезд",
+      "zone": 3,
+      "district": 1,
+      "city": 1
+    }
+  },
+  {
+    "model": "realty_addresses.street",
+    "pk": 6,
+    "fields": {
+      "name": "Проезд Дежнёва",
+      "zone": 4,
+      "district": 4,
+      "city": 1
+    }
+  },
+{
+    "model": "realty_addresses.street",
+    "pk": 7,
+    "fields": {
+      "name": "Большая Черкизовская улица",
+      "zone": 5,
+      "district": 5,
+      "city": 1
+    }
+  },
+  {
+    "model": "realty_addresses.street",
+    "pk": 8,
+    "fields": {
+      "name": "Улица Юных Ленинцев",
+      "zone": 6,
+      "district": 6,
+      "city": 1
+    }
+  },
+  {
+    "model": "realty_addresses.street",
+    "pk": 9,
+    "fields": {
+      "name": "Сумской проезд",
+      "zone": 7,
+      "district": 7,
+      "city": 1
+    }
+  },
+  {
+    "model": "realty_addresses.street",
+    "pk": 10,
+    "fields": {
+      "name": "Профсоюзная улица",
+      "zone": 8,
+      "district": 2,
+      "city": 1
+    }
+  },
+  {
+    "model": "realty_addresses.street",
+    "pk": 11,
+    "fields": {
+      "name": "Сколковское шоссе",
+      "zone": 9,
+      "district": 8,
+      "city": 1
+    }
+  },
+  {
+    "model": "realty_addresses.street",
+    "pk": 12,
+    "fields": {
+      "name": "Улица Академика Бочвара",
+      "zone": 10,
+      "district": 9,
+      "city": 1
+    }
+  },
+  {
+    "model": "realty_addresses.street",
+    "pk": 13,
+    "fields": {
+      "name": "Зеленоград",
+      "zone": 11,
+      "district": 10,
+      "city": 1
+    }
+  },
+  {
+    "model": "realty_addresses.street",
+    "pk": 14,
+    "fields": {
+      "name": "Зимёнковская улица",
+      "zone": 12,
+      "district": 11,
+      "city": 1
+    }
+  },
+  {
+    "model": "realty_addresses.street",
+    "pk": 15,
+    "fields": {
+      "name": "Село Красная Пахра",
+      "zone": 13,
+      "district": 12,
+      "city": 1
+    }
+  },
+  {
     "model": "realty_addresses.metro",
     "pk": 1,
     "fields": {
@@ -758,6 +1683,90 @@
     "pk": 3,
     "fields": {
       "name": "Люблино"
+    }
+  },
+  {
+    "model": "realty_addresses.metro",
+    "pk": 4,
+    "fields": {
+      "name": "Сухаревская"
+    }
+  },
+  {
+    "model": "realty_addresses.metro",
+    "pk": 5,
+    "fields": {
+      "name": "Войковская"
+    }
+  },
+  {
+    "model": "realty_addresses.metro",
+    "pk": 6,
+    "fields": {
+      "name": "Бабушкинская"
+    }
+  },
+  {
+    "model": "realty_addresses.metro",
+    "pk": 7,
+    "fields": {
+      "name": "Преображенская площадь"
+    }
+  },
+  {
+    "model": "realty_addresses.metro",
+    "pk": 8,
+    "fields": {
+      "name": "Печатники"
+    }
+  },
+  {
+    "model": "realty_addresses.metro",
+    "pk": 9,
+    "fields": {
+      "name": "Чертановская"
+    }
+  },
+  {
+    "model": "realty_addresses.metro",
+    "pk": 10,
+    "fields": {
+      "name": "Воронцовская"
+    }
+  },
+  {
+    "model": "realty_addresses.metro",
+    "pk": 11,
+    "fields": {
+      "name": "Давыдково"
+    }
+  },
+  {
+    "model": "realty_addresses.metro",
+    "pk": 12,
+    "fields": {
+      "name": "Щукинская"
+    }
+  },
+  {
+    "model": "realty_addresses.metro",
+    "pk": 13,
+    "fields": {
+      "name": "Ховрино"
+    }
+  },
+  {
+    "model": "realty_addresses.metro",
+    "pk": 14,
+    "fields": {
+      "name": "Прокшино"
+    }
+  },
+  {
+    "model": "realty_addresses.metro",
+    "pk": 15,
+    "fields": {
+      "name": "Саларьево"
     }
   },
   {
@@ -802,6 +1811,186 @@
       "latitude": 54.99217,
       "longitude": 73.368864,
       "metro": null,
+      "minutes_to_metro": null
+    }
+  },
+  {
+    "model": "realty_addresses.address",
+    "pk": 4,
+    "fields": {
+      "house_number": "3",
+      "street": 4,
+      "corpus": "",
+      "building": null,
+      "ownership": null,
+      "latitude": 54.9921,
+      "longitude": 73.36886,
+      "metro": 4,
+      "minutes_to_metro": null
+    }
+  },
+  {
+    "model": "realty_addresses.address",
+    "pk": 5,
+    "fields": {
+      "house_number": "12",
+      "street": 5,
+      "corpus": "1",
+      "building": null,
+      "ownership": null,
+      "latitude": 54.992,
+      "longitude": 73.3688,
+      "metro": 5,
+      "minutes_to_metro": null
+    }
+  },
+  {
+    "model": "realty_addresses.address",
+    "pk": 6,
+    "fields": {
+      "house_number": "15",
+      "street": 6,
+      "corpus": "1",
+      "building": null,
+      "ownership": null,
+      "latitude": 54.991,
+      "longitude": 73.36885,
+      "metro": 6,
+      "minutes_to_metro": null
+    }
+  },
+  {
+    "model": "realty_addresses.address",
+    "pk": 7,
+    "fields": {
+      "house_number": "2",
+      "street": 7,
+      "corpus": "3",
+      "building": null,
+      "ownership": null,
+      "latitude": 54.99,
+      "longitude": 73.36884,
+      "metro": 7,
+      "minutes_to_metro": null
+    }
+  },
+  {
+    "model": "realty_addresses.address",
+    "pk": 8,
+    "fields": {
+      "house_number": "6",
+      "street": 8,
+      "corpus": "",
+      "building": null,
+      "ownership": null,
+      "latitude": 54.98,
+      "longitude": 73.368,
+      "metro": 8,
+      "minutes_to_metro": null
+    }
+  },
+  {
+    "model": "realty_addresses.address",
+    "pk": 9,
+    "fields": {
+      "house_number": "2",
+      "street": 9,
+      "corpus": "6",
+      "building": null,
+      "ownership": null,
+      "latitude": 54.988,
+      "longitude": 73.367,
+      "metro": 9,
+      "minutes_to_metro": null
+    }
+  },
+  {
+    "model": "realty_addresses.address",
+    "pk": 10,
+    "fields": {
+      "house_number": "78",
+      "street": 10,
+      "corpus": null,
+      "building": "1",
+      "ownership": null,
+      "latitude": 54.987,
+      "longitude": 73.3687,
+      "metro": 10,
+      "minutes_to_metro": null
+    }
+  },
+  {
+    "model": "realty_addresses.address",
+    "pk": 11,
+    "fields": {
+      "house_number": "13",
+      "street": 11,
+      "corpus": null,
+      "building": null,
+      "ownership": null,
+      "latitude": 54.983,
+      "longitude": 73.3673,
+      "metro": 11,
+      "minutes_to_metro": null
+    }
+  },
+  {
+    "model": "realty_addresses.address",
+    "pk": 12,
+    "fields": {
+      "house_number": "15",
+      "street": 12,
+      "corpus": null,
+      "building": null,
+      "ownership": null,
+      "latitude": 54.9,
+      "longitude": 73.3,
+      "metro": 12,
+      "minutes_to_metro": null
+    }
+  },
+  {
+    "model": "realty_addresses.address",
+    "pk": 13,
+    "fields": {
+      "house_number": "",
+      "street": 13,
+      "corpus": "812",
+      "building": null,
+      "ownership": null,
+      "latitude": 54.8,
+      "longitude": 73.3,
+      "metro": 13,
+      "minutes_to_metro": null
+    }
+  },
+  {
+    "model": "realty_addresses.address",
+    "pk": 14,
+    "fields": {
+      "house_number": "58",
+      "street": 14,
+      "corpus": "3",
+      "building": null,
+      "ownership": null,
+      "latitude": 54.9921,
+      "longitude": 73.36886,
+      "metro": 14,
+      "minutes_to_metro": null
+    }
+  },
+  {
+    "model": "realty_addresses.address",
+    "pk": 15,
+    "fields": {
+      "house_number": "4",
+      "street": 15,
+      "corpus": null,
+      "building": null,
+      "ownership": null,
+      "latitude": 54,
+      "longitude": 73,
+      "metro": 15,
       "minutes_to_metro": null
     }
   },
@@ -866,10 +2055,586 @@
     }
   },
   {
+    "model": "realty.realty",
+    "pk": 4,
+    "fields": {
+      "owner": 3,
+      "realty_type": 2,
+      "address": 4,
+      "about_building": 4,
+      "about_apartment": 4,
+      "common_characteristics": 6,
+      "description": "Какое-то описание квартиры.",
+      "price": 5500000,
+      "commission": 50000,
+      "owner_type": 3,
+      "communication_method": 2,
+      "realty_status": 1,
+      "published_at": "2024-08-20T20:45:40Z",
+      "changed_at": "2024-08-20T20:47:56.140Z"
+    }
+  },
+  {
+    "model": "realty.realty",
+    "pk": 5,
+    "fields": {
+      "owner": 2,
+      "realty_type": 1,
+      "address": 5,
+      "about_building": 5,
+      "about_apartment": 5,
+      "common_characteristics": 7,
+      "description": "Какое-то описание квартиры.",
+      "price": 8990000,
+      "commission": 100000,
+      "owner_type": 3,
+      "communication_method": 2,
+      "realty_status": 1,
+      "published_at": "2024-08-20T20:45:40Z",
+      "changed_at": "2024-08-20T20:47:56.140Z"
+    }
+  },
+  {
+    "model": "realty.realty",
+    "pk": 6,
+    "fields": {
+      "owner": 2,
+      "realty_type": 1,
+      "address": 6,
+      "about_building": 6,
+      "about_apartment": 6,
+      "common_characteristics": 8,
+      "description": "Какое-то описание квартиры.",
+      "price": 12500000,
+      "commission": 0,
+      "owner_type": 1,
+      "communication_method": 2,
+      "realty_status": 1,
+      "published_at": "2024-08-20T20:45:40Z",
+      "changed_at": "2024-08-20T20:47:56.140Z"
+    }
+  },
+  {
+    "model": "realty.realty",
+    "pk": 7,
+    "fields": {
+      "owner": 3,
+      "realty_type": 1,
+      "address": 7,
+      "about_building": 7,
+      "about_apartment": 7,
+      "common_characteristics": 9,
+      "description": "Какое-то описание квартиры.",
+      "price": 15000000,
+      "commission": 200000,
+      "owner_type": 3,
+      "communication_method": 2,
+      "realty_status": 1,
+      "published_at": "2024-08-20T20:45:40Z",
+      "changed_at": "2024-08-20T20:47:56.140Z"
+    }
+  },
+  {
+    "model": "realty.realty",
+    "pk": 8,
+    "fields": {
+      "owner": 2,
+      "realty_type": 1,
+      "address": 8,
+      "about_building": 8,
+      "about_apartment": 8,
+      "common_characteristics": 10,
+      "description": "Какое-то описание квартиры.",
+      "price": 19990000,
+      "commission": 150000,
+      "owner_type": 3,
+      "communication_method": 2,
+      "realty_status": 1,
+      "published_at": "2024-08-20T20:45:40Z",
+      "changed_at": "2024-08-20T20:47:56.140Z"
+    }
+  },
+  {
+    "model": "realty.realty",
+    "pk": 9,
+    "fields": {
+      "owner": 2,
+      "realty_type": 1,
+      "address": 9,
+      "about_building": 9,
+      "about_apartment": 9,
+      "common_characteristics": 11,
+      "description": "Какое-то описание квартиры.",
+      "price": 3500000,
+      "commission": 50000,
+      "owner_type": 1,
+      "communication_method": 2,
+      "realty_status": 1,
+      "published_at": "2024-08-20T20:45:40Z",
+      "changed_at": "2024-08-20T20:47:56.140Z"
+    }
+  },
+  {
+    "model": "realty.realty",
+    "pk": 10,
+    "fields": {
+      "owner": 3,
+      "realty_type": 1,
+      "address": 10,
+      "about_building": 10,
+      "about_apartment": 10,
+      "common_characteristics": 11,
+      "description": "Какое-то описание квартиры.",
+      "price": 7600000,
+      "commission": 0,
+      "owner_type": 1,
+      "communication_method": 2,
+      "realty_status": 1,
+      "published_at": "2024-08-20T20:45:40Z",
+      "changed_at": "2024-08-20T20:47:56.140Z"
+    }
+  },
+  {
+    "model": "realty.realty",
+    "pk": 11,
+    "fields": {
+      "owner": 2,
+      "realty_type": 2,
+      "address": 11,
+      "about_building": 11,
+      "about_apartment": 11,
+      "common_characteristics": 13,
+      "description": "Какое-то описание квартиры.",
+      "price": 11000000,
+      "commission": 100000,
+      "owner_type": 3,
+      "communication_method": 2,
+      "realty_status": 1,
+      "published_at": "2024-08-20T20:45:40Z",
+      "changed_at": "2024-08-20T20:47:56.140Z"
+    }
+  },
+  {
+    "model": "realty.realty",
+    "pk": 12,
+    "fields": {
+      "owner": 2,
+      "realty_type": 1,
+      "address": 12,
+      "about_building": 12,
+      "about_apartment": 12,
+      "common_characteristics": 14,
+      "description": "Какое-то описание квартиры.",
+      "price": 15500000,
+      "commission": 99000,
+      "owner_type": 1,
+      "communication_method": 2,
+      "realty_status": 1,
+      "published_at": "2024-08-20T20:45:40Z",
+      "changed_at": "2024-08-20T20:47:56.140Z"
+    }
+  },
+  {
+    "model": "realty.realty",
+    "pk": 13,
+    "fields": {
+      "owner": 3,
+      "realty_type": 2,
+      "address": 13,
+      "about_building": 13,
+      "about_apartment": 13,
+      "common_characteristics": 15,
+      "description": "Какое-то описание квартиры.",
+      "price": 21500000,
+      "commission": 150000,
+      "owner_type": 3,
+      "communication_method": 2,
+      "realty_status": 1,
+      "published_at": "2024-08-20T20:45:40Z",
+      "changed_at": "2024-08-20T20:47:56.140Z"
+    }
+  },
+  {
+    "model": "realty.realty",
+    "pk": 14,
+    "fields": {
+      "owner": 2,
+      "realty_type": 1,
+      "address": 14,
+      "about_building": 14,
+      "about_apartment": 14,
+      "common_characteristics": 16,
+      "description": "Какое-то описание квартиры.",
+      "price": 8000000,
+      "commission": 100000,
+      "owner_type": 3,
+      "communication_method": 2,
+      "realty_status": 1,
+      "published_at": "2024-08-20T20:45:40Z",
+      "changed_at": "2024-08-20T20:47:56.140Z"
+    }
+  },
+  {
+    "model": "realty.realty",
+    "pk": 15,
+    "fields": {
+      "owner": 2,
+      "realty_type": 2,
+      "address": 15,
+      "about_building": 15,
+      "about_apartment": 15,
+      "common_characteristics": 17,
+      "description": "Какое-то описание квартиры.",
+      "price": 9400000,
+      "commission": 50000,
+      "owner_type": 3,
+      "communication_method": 2,
+      "realty_status": 1,
+      "published_at": "2024-08-20T20:45:40Z",
+      "changed_at": "2024-08-20T20:47:56.140Z"
+    }
+  },
+  {
+    "model": "realty.realty",
+    "pk": 16,
+    "fields": {
+      "owner": 3,
+      "realty_type": 2,
+      "address": 4,
+      "about_building": 4,
+      "about_apartment": 4,
+      "common_characteristics": 6,
+      "description": "Какое-то описание квартиры.",
+      "price": 35000,
+      "commission": 5000,
+      "owner_type": 3,
+      "communication_method": 2,
+      "realty_status": 1,
+      "published_at": "2024-08-20T20:45:40Z",
+      "changed_at": "2024-08-20T20:47:56.140Z"
+    }
+  },
+  {
+    "model": "realty.realty",
+    "pk": 17,
+    "fields": {
+      "owner": 2,
+      "realty_type": 1,
+      "address": 5,
+      "about_building": 5,
+      "about_apartment": 5,
+      "common_characteristics": 7,
+      "description": "Какое-то описание квартиры.",
+      "price": 44600,
+      "commission": 10000,
+      "owner_type": 3,
+      "communication_method": 2,
+      "realty_status": 1,
+      "published_at": "2024-08-20T20:45:40Z",
+      "changed_at": "2024-08-20T20:47:56.140Z"
+    }
+  },
+  {
+    "model": "realty.realty",
+    "pk": 18,
+    "fields": {
+      "owner": 2,
+      "realty_type": 1,
+      "address": 6,
+      "about_building": 6,
+      "about_apartment": 6,
+      "common_characteristics": 8,
+      "description": "Какое-то описание квартиры.",
+      "price": 50000,
+      "commission": 10000,
+      "owner_type": 3,
+      "communication_method": 2,
+      "realty_status": 1,
+      "published_at": "2024-08-20T20:45:40Z",
+      "changed_at": "2024-08-20T20:47:56.140Z"
+    }
+  },
+  {
+    "model": "realty.realty",
+    "pk": 19,
+    "fields": {
+      "owner": 3,
+      "realty_type": 1,
+      "address": 7,
+      "about_building": 7,
+      "about_apartment": 7,
+      "common_characteristics": 9,
+      "description": "Какое-то описание квартиры.",
+      "price": 69990,
+      "commission": 15000,
+      "owner_type": 1,
+      "communication_method": 2,
+      "realty_status": 1,
+      "published_at": "2024-08-20T20:45:40Z",
+      "changed_at": "2024-08-20T20:47:56.140Z"
+    }
+  },
+  {
+    "model": "realty.realty",
+    "pk": 20,
+    "fields": {
+      "owner": 2,
+      "realty_type": 1,
+      "address": 8,
+      "about_building": 8,
+      "about_apartment": 8,
+      "common_characteristics": 10,
+      "description": "Какое-то описание квартиры.",
+      "price": 75000,
+      "commission": 5000,
+      "owner_type": 3,
+      "communication_method": 2,
+      "realty_status": 1,
+      "published_at": "2024-08-20T20:45:40Z",
+      "changed_at": "2024-08-20T20:47:56.140Z"
+    }
+  },
+  {
+    "model": "realty.realty",
+    "pk": 21,
+    "fields": {
+      "owner": 3,
+      "realty_type": 1,
+      "address": 9,
+      "about_building": 9,
+      "about_apartment": 9,
+      "common_characteristics": 11,
+      "description": "Какое-то описание квартиры.",
+      "price": 48000,
+      "commission": 10000,
+      "owner_type": 3,
+      "communication_method": 2,
+      "realty_status": 1,
+      "published_at": "2024-08-20T20:45:40Z",
+      "changed_at": "2024-08-20T20:47:56.140Z"
+    }
+  },
+  {
+    "model": "realty.realty",
+    "pk": 22,
+    "fields": {
+      "owner": 3,
+      "realty_type": 1,
+      "address": 10,
+      "about_building": 10,
+      "about_apartment": 10,
+      "common_characteristics": 11,
+      "description": "Какое-то описание квартиры.",
+      "price": 45000,
+      "commission": 5000,
+      "owner_type": 3,
+      "communication_method": 2,
+      "realty_status": 1,
+      "published_at": "2024-08-20T20:45:40Z",
+      "changed_at": "2024-08-20T20:47:56.140Z"
+    }
+  },
+  {
+    "model": "realty.realty",
+    "pk": 23,
+    "fields": {
+      "owner": 2,
+      "realty_type": 2,
+      "address": 11,
+      "about_building": 11,
+      "about_apartment": 11,
+      "common_characteristics": 13,
+      "description": "Какое-то описание квартиры.",
+      "price": 56999,
+      "commission": 15000,
+      "owner_type": 1,
+      "communication_method": 2,
+      "realty_status": 1,
+      "published_at": "2024-08-20T20:45:40Z",
+      "changed_at": "2024-08-20T20:47:56.140Z"
+    }
+  },
+  {
+    "model": "realty.realty",
+    "pk": 24,
+    "fields": {
+      "owner": 2,
+      "realty_type": 1,
+      "address": 12,
+      "about_building": 12,
+      "about_apartment": 12,
+      "common_characteristics": 14,
+      "description": "Какое-то описание квартиры.",
+      "price": 67000,
+      "commission": 18000,
+      "owner_type": 3,
+      "communication_method": 2,
+      "realty_status": 1,
+      "published_at": "2024-08-20T20:45:40Z",
+      "changed_at": "2024-08-20T20:47:56.140Z"
+    }
+  },
+  {
+    "model": "realty.realty",
+    "pk": 25,
+    "fields": {
+      "owner": 3,
+      "realty_type": 2,
+      "address": 13,
+      "about_building": 13,
+      "about_apartment": 13,
+      "common_characteristics": 15,
+      "description": "Какое-то описание квартиры.",
+      "price": 78000,
+      "commission": 10000,
+      "owner_type": 1,
+      "communication_method": 2,
+      "realty_status": 1,
+      "published_at": "2024-08-20T20:45:40Z",
+      "changed_at": "2024-08-20T20:47:56.140Z"
+    }
+  },
+  {
+    "model": "realty.realty",
+    "pk": 26,
+    "fields": {
+      "owner": 2,
+      "realty_type": 1,
+      "address": 14,
+      "about_building": 14,
+      "about_apartment": 14,
+      "common_characteristics": 16,
+      "description": "Какое-то описание квартиры.",
+      "price": 33000,
+      "commission": 3000,
+      "owner_type": 1,
+      "communication_method": 2,
+      "realty_status": 1,
+      "published_at": "2024-08-20T20:45:40Z",
+      "changed_at": "2024-08-20T20:47:56.140Z"
+    }
+  },
+  {
+    "model": "realty.realty",
+    "pk": 27,
+    "fields": {
+      "owner": 3,
+      "realty_type": 2,
+      "address": 15,
+      "about_building": 15,
+      "about_apartment": 15,
+      "common_characteristics": 17,
+      "description": "Какое-то описание квартиры.",
+      "price": 45500,
+      "commission": 10000,
+      "owner_type": 1,
+      "communication_method": 2,
+      "realty_status": 1,
+      "published_at": "2024-08-20T20:45:40Z",
+      "changed_at": "2024-08-20T20:47:56.140Z"
+    }
+  },
+  {
     "model": "realty.sale",
     "pk": 1,
     "fields": {
       "realty": 1,
+      "sales_parameters": 1
+    }
+  },
+  {
+    "model": "realty.sale",
+    "pk": 2,
+    "fields": {
+      "realty": 4,
+      "sales_parameters": 1
+    }
+  },
+  {
+    "model": "realty.sale",
+    "pk": 3,
+    "fields": {
+      "realty": 5,
+      "sales_parameters": 1
+    }
+  },
+  {
+    "model": "realty.sale",
+    "pk": 4,
+    "fields": {
+      "realty": 6,
+      "sales_parameters": 1
+    }
+  },
+  {
+    "model": "realty.sale",
+    "pk": 5,
+    "fields": {
+      "realty": 7,
+      "sales_parameters": 1
+    }
+  },
+  {
+    "model": "realty.sale",
+    "pk": 6,
+    "fields": {
+      "realty": 8,
+      "sales_parameters": 1
+    }
+  },
+  {
+    "model": "realty.sale",
+    "pk": 7,
+    "fields": {
+      "realty": 9,
+      "sales_parameters": 1
+    }
+  },
+  {
+    "model": "realty.sale",
+    "pk": 8,
+    "fields": {
+      "realty": 10,
+      "sales_parameters": 1
+    }
+  },
+  {
+    "model": "realty.sale",
+    "pk": 9,
+    "fields": {
+      "realty": 11,
+      "sales_parameters": 1
+    }
+  },
+  {
+    "model": "realty.sale",
+    "pk": 10,
+    "fields": {
+      "realty": 12,
+      "sales_parameters": 1
+    }
+  },
+  {
+    "model": "realty.sale",
+    "pk": 11,
+    "fields": {
+      "realty": 13,
+      "sales_parameters": 1
+    }
+  },
+  {
+    "model": "realty.sale",
+    "pk": 12,
+    "fields": {
+      "realty": 14,
+      "sales_parameters": 1
+    }
+  },
+  {
+    "model": "realty.sale",
+    "pk": 13,
+    "fields": {
+      "realty": 15,
       "sales_parameters": 1
     }
   },
@@ -889,6 +2654,114 @@
       "realty": 3,
       "rental_features": null,
       "lease_payments": 3
+    }
+  },
+  {
+    "model": "realty.rent",
+    "pk": 3,
+    "fields": {
+      "realty": 16,
+      "rental_features": 4,
+      "lease_payments": 4
+    }
+  },
+  {
+    "model": "realty.rent",
+    "pk": 4,
+    "fields": {
+      "realty": 17,
+      "rental_features": 5,
+      "lease_payments": 5
+    }
+  },
+  {
+    "model": "realty.rent",
+    "pk": 5,
+    "fields": {
+      "realty": 18,
+      "rental_features": 6,
+      "lease_payments": 6
+    }
+  },
+  {
+    "model": "realty.rent",
+    "pk": 6,
+    "fields": {
+      "realty": 19,
+      "rental_features": 7,
+      "lease_payments": 7
+    }
+  },
+  {
+    "model": "realty.rent",
+    "pk": 7,
+    "fields": {
+      "realty": 20,
+      "rental_features": 8,
+      "lease_payments": 8
+    }
+  },
+  {
+    "model": "realty.rent",
+    "pk": 8,
+    "fields": {
+      "realty": 21,
+      "rental_features": 9,
+      "lease_payments": 9
+    }
+  },
+  {
+    "model": "realty.rent",
+    "pk": 9,
+    "fields": {
+      "realty": 22,
+      "rental_features": 10,
+      "lease_payments": 10
+    }
+  },
+  {
+    "model": "realty.rent",
+    "pk": 10,
+    "fields": {
+      "realty": 23,
+      "rental_features": 11,
+      "lease_payments": 11
+    }
+  },
+  {
+    "model": "realty.rent",
+    "pk": 11,
+    "fields": {
+      "realty": 24,
+      "rental_features": 12,
+      "lease_payments": 12
+    }
+  },
+  {
+    "model": "realty.rent",
+    "pk": 12,
+    "fields": {
+      "realty": 25,
+      "rental_features": 13,
+      "lease_payments": 13
+    }
+  },
+  {
+    "model": "realty.rent",
+    "pk": 13,
+    "fields": {
+      "realty": 26,
+      "rental_features": 14,
+      "lease_payments": 14
+    }
+  },
+  {
+    "model": "realty.rent",
+    "pk": 14,
+    "fields": {
+      "realty": 27,
+      "rental_features": 15,
+      "lease_payments": 15
     }
   },
   {
