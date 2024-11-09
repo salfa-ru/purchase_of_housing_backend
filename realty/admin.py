@@ -28,20 +28,55 @@ class RealtyAdmin(admin.ModelAdmin):
     list_display_links = ('id', 'apartment',)
     list_filter = ('realty_status',
                    'owner_type',)
-    readonly_fields = ('id',)
+
+    class Media:
+        """ Отключение кнопок "Сохранить", если никаких изменений еще не внесено """
+        js = ('js/disable_save_if_unchanged.js',)
+
 
     def get_readonly_fields(self, request, obj=None):
-        """Делаем все поля, кроме 'realty_status', только для чтения при редактировании"""
-        if obj:
-            return [f.name for f in obj._meta.fields if f.name != 'realty_status'] + list(self.readonly_fields)
-        return self.readonly_fields
+        """ Регулируем редактируемость полей для админа/модератора.
+        Хотя в permissions модератор может менять realty, нужно, чтобы можно было менять только Статус """
 
-    def get_fieldsets(self, request, obj=None):
-        """Перемещаем 'id' наверх."""
-        fieldsets = super().get_fieldsets(request, obj)
-        # Преобразуем fieldsets в список кортежей, чтобы добавить 'id'
-        fieldsets = [(None, {'fields': ('id',)})] + list(fieldsets)
-        return fieldsets
+        if request.user.is_superuser:
+            # единственные read-only поля для админа:
+            return ['id', 'changed_at']
+        else:
+            # для модератора - все поля read-only, кроме Статуса
+            if obj:
+                return [f.name for f in obj._meta.fields if f.name != 'realty_status'] + list(self.readonly_fields)
+            return self.readonly_fields
+
+
+    def get_fields(self, request, obj=None):
+        """ Ставим ID и Статус сверху, дату редактирования в конце """
+
+        # Получаем все поля
+        fields = [f.name for f in Realty._meta.fields]
+
+        # Убираем те, которые хотим разместить в определенном порядке, из текущего списка
+        fields.remove('id')
+        fields.remove('realty_status')
+        fields.remove('changed_at')
+
+        # Возвращаем поля в желаемом, удобном порядке
+        return ['id', 'realty_status'] + fields + ['changed_at']
+
+
+    def get_form(self, request, obj=None, **kwargs):
+        """ Переписываю форму, чтобы в forms.py можно было узнать, какой пользователь сохранял объявление.
+        Так Админ (но не Модератор) может менять в Realty все что угодно, включая статус БЕЗ ограничений! """
+
+        form_class = super().get_form(request, obj, **kwargs)
+
+        class FormWithRequest(form_class):
+            def __init__(self, *args, **form_kwargs):
+                form_kwargs['request'] = request
+                super().__init__(*args, **form_kwargs)
+
+        return FormWithRequest
+
+
 
     def apartment(self, obj):
         return (f'{obj.about_apartment.number_of_rooms.number_of_rooms}'
