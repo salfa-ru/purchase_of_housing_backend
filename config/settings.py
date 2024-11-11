@@ -20,8 +20,8 @@ ALLOWED_HOSTS = [DOMAIN, os.getenv('HOST_IP'), 'localhost']
 CSRF_TRUSTED_ORIGINS = [
     f'http://{DOMAIN}',
     f'https://{DOMAIN}',
-    'http://*',
-    'https://*',
+    # 'http://*',
+    # 'https://*',
 ]
 
 INSTALLED_APPS = [
@@ -173,14 +173,14 @@ Q_CLUSTER = {
     'poll': 1,  # Poll every 1 second instead of 0.2
 }
 
-# CORS_ALLOWED_ORIGINS = [
-#     "http://localhost:5173",
-#     "http://127.0.0.1:5173",
-#     "https://estate.ktsf.ru/",
-#     "https://front.test.estate.ktsf.ru/",
-# ]
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+    "https://estate.ktsf.ru/",
+    "https://front.test.estate.ktsf.ru/",
+]
 
-CORS_ALLOW_ALL_ORIGINS = True
+# CORS_ALLOW_ALL_ORIGINS = True
 
 CORS_ALLOW_METHODS = [
     'DELETE',
@@ -191,17 +191,17 @@ CORS_ALLOW_METHODS = [
     'PUT',
 ]
 
-# CORS_ALLOW_HEADERS = [
-#     'accept',
-#     'accept-encoding',
-#     'authorization',
-#     'content-type',
-#     'dnt',
-#     'origin',
-#     'user-agent',
-#     'x-csrftoken',
-#     'x-requested-with',
-# ]
+CORS_ALLOW_HEADERS = [
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
+]
 
 CORS_ALLOW_CREDENTIALS = True
 
