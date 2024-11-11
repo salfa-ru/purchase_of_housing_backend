@@ -460,7 +460,29 @@
       "user_permissions": []
     }
   },
-
+  {
+    "model": "users.user",
+    "pk": 4,
+    "fields": {
+      "password": "pbkdf2_sha256$600000$hSXquKNLnTyiXda2KoQP2H$en/quGm14MpIhulNN5lNab+E/l3XnvDx2IEd3GbuBhs=",
+      "last_login": null,
+      "is_superuser": true,
+      "username": "admin",
+      "is_staff": true,
+      "is_active": true,
+      "date_joined": "2024-08-21T08:14:13.819Z",
+      "first_name": "admin",
+      "last_name": "admin",
+      "email": "admin@email.com",
+      "uuid_esa": null,
+      "avatar": "",
+      "user_type": 1,
+      "phone_number": "admin_phone",
+      "updated_at": null,
+      "groups": [],
+      "user_permissions": []
+    }
+  },
   {
     "model": "realty_specificities.aboutbuilding",
     "pk": 1,
