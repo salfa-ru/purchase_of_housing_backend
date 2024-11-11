@@ -37,7 +37,6 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'django_q',
     'corsheaders',
-    'corsheaders',
     'complaints.apps.ComplaintsConfig',
     'chats.apps.ChatsConfig',
     'notifications.apps.NotificationsConfig',
