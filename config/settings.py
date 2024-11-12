@@ -20,6 +20,8 @@ ALLOWED_HOSTS = [DOMAIN, os.getenv('HOST_IP'), 'localhost']
 CSRF_TRUSTED_ORIGINS = [
     f'http://{DOMAIN}',
     f'https://{DOMAIN}',
+    # 'http://*',
+    # 'https://*',
 ]
 
 INSTALLED_APPS = [
@@ -34,6 +36,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
     'django_q',
+    'corsheaders',
     'complaints.apps.ComplaintsConfig',
     'chats.apps.ChatsConfig',
     'notifications.apps.NotificationsConfig',
@@ -48,6 +51,8 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -167,3 +172,37 @@ Q_CLUSTER = {
     # 'admin': False,  # Hide Django Q models from the admin ( better try with admin.py, to see only as admin )
     'poll': 1,  # Poll every 1 second instead of 0.2
 }
+
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+    "https://estate.ktsf.ru/",
+    "https://front.test.estate.ktsf.ru/",
+]
+
+# CORS_ALLOW_ALL_ORIGINS = True
+
+CORS_ALLOW_METHODS = [
+    'DELETE',
+    'GET',
+    'OPTIONS',
+    'PATCH',
+    'POST',
+    'PUT',
+]
+
+CORS_ALLOW_HEADERS = [
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
+]
+
+CORS_ALLOW_CREDENTIALS = True
+
+CORS_ALLOW_ALL_LOCALHOST = True
