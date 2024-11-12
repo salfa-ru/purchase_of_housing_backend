@@ -50,12 +50,13 @@ class SaleViewSet(BaseViewSet):
     """Sale Viewset."""
 
     queryset = realty_models.Sale.objects.all()
+    http_method_names = ['get', 'post', 'patch']
 
     def get_serializer_class(self):
         if self.action == "create":
             return realty_serializers.SaleCreateSerializer
-        #     elif self.action == "update" or self.action == "partial_update":
-        #         return realty_serializers.SaleUpdateSerializer
+        elif self.action == "update" or self.action == "partial_update":
+            return realty_serializers.RealtyCreateSerializer
         #     elif self.action == "destroy":
         #         return realty_serializers.SaleDeleteSerializer
         return realty_serializers.SaleReadSerializer
@@ -67,12 +68,14 @@ class RentViewSet(BaseViewSet):
     """Rent Viewset."""
 
     queryset = realty_models.Rent.objects.all()
+    http_method_names = ['get', 'post', 'patch']
 
     def get_serializer_class(self):
+
         if self.action == "create":
             return realty_serializers.RentCreateSerializer
-        #     elif self.action == "update" or self.action == "partial_update":
-        #         return realty_serializers.RentUpdateSerializer
+        elif self.action == "update" or self.action == "partial_update":
+            return realty_serializers.RealtyCreateSerializer
         #     elif self.action == "destroy":
         #         return realty_serializers.RentDeleteSerializer
         return realty_serializers.RentReadSerializer
