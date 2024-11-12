@@ -56,7 +56,7 @@ class SaleViewSet(BaseViewSet):
         if self.action == "create":
             return realty_serializers.SaleCreateSerializer
         elif self.action == "update" or self.action == "partial_update":
-            return realty_serializers.RealtyCreateSerializer
+            return realty_serializers.SaleCreateSerializer
         #     elif self.action == "destroy":
         #         return realty_serializers.SaleDeleteSerializer
         return realty_serializers.SaleReadSerializer
@@ -75,7 +75,7 @@ class RentViewSet(BaseViewSet):
         if self.action == "create":
             return realty_serializers.RentCreateSerializer
         elif self.action == "update" or self.action == "partial_update":
-            return realty_serializers.RealtyCreateSerializer
+            return realty_serializers.RentCreateSerializer
         #     elif self.action == "destroy":
         #         return realty_serializers.RentDeleteSerializer
         return realty_serializers.RentReadSerializer
