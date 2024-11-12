@@ -7,7 +7,7 @@ from complaints import models
 class ComplaintAdmin(admin.ModelAdmin):
     list_display = ('get_short_description', 'display_owner', 'display_realty', 'is_new',)
     list_filter = ('is_new',)
-    readonly_fields = ('display_owner', 'display_realty', 'description',)
+    readonly_fields = ('display_owner', 'display_realty',)
 
     def get_short_description(self, obj):
         return (f'{obj.description[:20]}'
@@ -34,7 +34,7 @@ class ComplaintAdmin(admin.ModelAdmin):
 
     def get_readonly_fields(self, request, obj=None):
         # Если объект уже создан, делаем все поля, кроме 'is_new', только для чтения
-        return self.readonly_fields if obj is None else self.readonly_fields
+        return self.readonly_fields if obj is None else self.readonly_fields + ('description', )
 
     def has_add_permission(self, request):
         return True
