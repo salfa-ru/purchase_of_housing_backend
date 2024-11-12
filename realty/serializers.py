@@ -193,8 +193,47 @@ class RealtyCreateSerializer(serializers.ModelSerializer):
         # Проверка статуса после создания записи, если запись на модерации - отправить уведомление.
         if realty.realty_status.status == constants.REALTY_STATUS:
             create_notification(realty, "on_moderation")
-
         return realty
+
+    def update(self, instance, validated_data):
+        address_data = validated_data.pop("address", None)
+        about_building_data = validated_data.pop("about_building", None)
+        about_apartment_data = validated_data.pop("about_apartment", None)
+        common_characteristics_data = validated_data.pop("common_characteristics", None)
+        print(address_data)
+        print(about_apartment_data)
+        print(about_building_data)
+        print(common_characteristics_data)
+
+        if address_data and instance.address:
+            address_serializer = address_serializers.AddressCreateSerializer(
+                instance=instance.address,
+                data=address_data,
+                partial=True
+            )
+            address_serializer.is_valid(raise_exception=True)
+            address_serializer.save()
+
+        if about_building_data and instance.about_building:
+            for attr, value in about_building_data.items():
+                setattr(instance.about_building, attr, value)
+            instance.about_building.save()
+
+        if about_apartment_data and instance.about_apartment:
+            for attr, value in about_apartment_data.items():
+                setattr(instance.about_apartment, attr, value)
+            instance.about_apartment.save()
+
+        if common_characteristics_data and instance.common_characteristics:
+            for attr, value in common_characteristics_data.items():
+                setattr(instance.common_characteristics, attr, value)
+            instance.common_characteristics.save()
+
+        # for attr, value in validated_data.items():
+        #     setattr(instance, attr, value)
+        # instance.save()
+        # return instance
+        return super().update(instance, validated_data)
 
 
 class RentCreateSerializer(serializers.ModelSerializer):
