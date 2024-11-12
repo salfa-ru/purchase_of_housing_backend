@@ -195,46 +195,6 @@ class RealtyCreateSerializer(serializers.ModelSerializer):
             create_notification(realty, "on_moderation")
         return realty
 
-    def update(self, instance, validated_data):
-        address_data = validated_data.pop("address", None)
-        about_building_data = validated_data.pop("about_building", None)
-        about_apartment_data = validated_data.pop("about_apartment", None)
-        common_characteristics_data = validated_data.pop("common_characteristics", None)
-        print(address_data)
-        print(about_apartment_data)
-        print(about_building_data)
-        print(common_characteristics_data)
-
-        if address_data and instance.address:
-            address_serializer = address_serializers.AddressCreateSerializer(
-                instance=instance.address,
-                data=address_data,
-                partial=True
-            )
-            address_serializer.is_valid(raise_exception=True)
-            address_serializer.save()
-
-        if about_building_data and instance.about_building:
-            for attr, value in about_building_data.items():
-                setattr(instance.about_building, attr, value)
-            instance.about_building.save()
-
-        if about_apartment_data and instance.about_apartment:
-            for attr, value in about_apartment_data.items():
-                setattr(instance.about_apartment, attr, value)
-            instance.about_apartment.save()
-
-        if common_characteristics_data and instance.common_characteristics:
-            for attr, value in common_characteristics_data.items():
-                setattr(instance.common_characteristics, attr, value)
-            instance.common_characteristics.save()
-
-        # for attr, value in validated_data.items():
-        #     setattr(instance, attr, value)
-        # instance.save()
-        # return instance
-        return super().update(instance, validated_data)
-
 
 class RentCreateSerializer(serializers.ModelSerializer):
     """Rent Create Serializer."""
@@ -269,6 +229,61 @@ class RentCreateSerializer(serializers.ModelSerializer):
         validated_data.pop("owner", None)
         rent = realty_models.Rent.objects.create(**validated_data)
         return rent
+
+    def update(self, instance, validated_data):
+        realty_data = validated_data.pop("realty", None)
+        print(realty_data)
+
+        if realty_data:
+            address_data = realty_data.pop("address", None)
+            about_building_data = realty_data.pop("about_building", None)
+            about_apartment_data = realty_data.pop("about_apartment", None)
+            common_characteristics_data = realty_data.pop("common_characteristics", None)
+            # description_data = realty_data.pop("common_characteristics", None)
+            # price_data = realty_data.pop("common_characteristics", None)
+            # commission_data = realty_data.pop("common_characteristics", None)
+            # owner_type_data = realty_data.pop("common_characteristics", None)
+            # communication_method_data = realty_data.pop("common_characteristics", None)
+
+            if address_data and instance.realty.address:
+                address_serializer = address_serializers.AddressCreateSerializer(
+                    instance=instance.realty.address,
+                    data=address_data,
+                    partial=True
+                )
+                address_serializer.is_valid(raise_exception=True)
+                address_serializer.save()
+
+            if about_building_data and instance.realty.about_building:
+                about_building_serializer = specif_serializers.AboutBuildingCreateSerializer(
+                    instance=instance.realty.about_building,
+                    data=about_building_data,
+                    partial=True
+                )
+                about_building_serializer.is_valid(raise_exception=True)
+                about_building_serializer.save()
+
+            if about_apartment_data and instance.realty.about_apartment:
+                about_apartment_serializer = specif_serializers.AboutApartmentCreateSerializer(
+                    instance=instance.realty.about_apartment,
+                    data=about_apartment_data,
+                    partial=True
+                )
+                about_apartment_serializer.is_valid(raise_exception=True)
+                about_apartment_serializer.save()
+
+            if common_characteristics_data and instance.realty.common_characteristics:
+                common_characteristics_serializer = specif_serializers.CommonCharacteristicsCreateSerializer(
+                    instance=instance.realty.common_characteristics,
+                    data=common_characteristics_data,
+                    partial=True
+                )
+                common_characteristics_serializer.is_valid(raise_exception=True)
+                common_characteristics_serializer.save()
+            #     только начал
+            # if description_data and instance.realty.description:
+
+        return super().update(instance, validated_data)
 
     class Meta:
         model = realty_models.Rent
@@ -313,6 +328,60 @@ class SaleCreateSerializer(serializers.ModelSerializer):
         validated_data.pop("owner", None)
         sale = realty_models.Sale.objects.create(**validated_data)
         return sale
+
+    def update(self, instance, validated_data):
+        realty_data = validated_data.pop("realty", None)
+
+        if realty_data:
+            address_data = realty_data.pop("address", None)
+            about_building_data = realty_data.pop("about_building", None)
+            about_apartment_data = realty_data.pop("about_apartment", None)
+            common_characteristics_data = realty_data.pop("common_characteristics", None)
+            # description_data = realty_data.pop("common_characteristics", None)
+            # price_data = realty_data.pop("common_characteristics", None)
+            # commission_data = realty_data.pop("common_characteristics", None)
+            # owner_type_data = realty_data.pop("common_characteristics", None)
+            # communication_method_data = realty_data.pop("common_characteristics", None)
+
+            if address_data and instance.realty.address:
+                address_serializer = address_serializers.AddressCreateSerializer(
+                    instance=instance.realty.address,
+                    data=address_data,
+                    partial=True
+                )
+                address_serializer.is_valid(raise_exception=True)
+                address_serializer.save()
+
+            if about_building_data and instance.realty.about_building:
+                about_building_serializer = specif_serializers.AboutBuildingCreateSerializer(
+                    instance=instance.realty.about_building,
+                    data=about_building_data,
+                    partial=True
+                )
+                about_building_serializer.is_valid(raise_exception=True)
+                about_building_serializer.save()
+
+            if about_apartment_data and instance.realty.about_apartment:
+                about_apartment_serializer = specif_serializers.AboutApartmentCreateSerializer(
+                    instance=instance.realty.about_apartment,
+                    data=about_apartment_data,
+                    partial=True
+                )
+                about_apartment_serializer.is_valid(raise_exception=True)
+                about_apartment_serializer.save()
+
+            if common_characteristics_data and instance.realty.common_characteristics:
+                common_characteristics_serializer = specif_serializers.CommonCharacteristicsCreateSerializer(
+                    instance=instance.realty.common_characteristics,
+                    data=common_characteristics_data,
+                    partial=True
+                )
+                common_characteristics_serializer.is_valid(raise_exception=True)
+                common_characteristics_serializer.save()
+            #     только начал
+            # if description_data and instance.realty.description:
+
+        return super().update(instance, validated_data)
 
 
 class ShortRealtySerializer(serializers.ModelSerializer):
