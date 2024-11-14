@@ -232,18 +232,12 @@ class RentCreateSerializer(serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
         realty_data = validated_data.pop("realty", None)
-        print(realty_data)
 
         if realty_data:
             address_data = realty_data.pop("address", None)
             about_building_data = realty_data.pop("about_building", None)
             about_apartment_data = realty_data.pop("about_apartment", None)
             common_characteristics_data = realty_data.pop("common_characteristics", None)
-            # description_data = realty_data.pop("common_characteristics", None)
-            # price_data = realty_data.pop("common_characteristics", None)
-            # commission_data = realty_data.pop("common_characteristics", None)
-            # owner_type_data = realty_data.pop("common_characteristics", None)
-            # communication_method_data = realty_data.pop("common_characteristics", None)
 
             if address_data and instance.realty.address:
                 address_serializer = address_serializers.AddressCreateSerializer(
@@ -280,8 +274,15 @@ class RentCreateSerializer(serializers.ModelSerializer):
                 )
                 common_characteristics_serializer.is_valid(raise_exception=True)
                 common_characteristics_serializer.save()
-            #     только начал
-            # if description_data and instance.realty.description:
+
+            if realty_data and instance.realty:
+                description_data_serializer = RealtyCreateSerializer(
+                    instance=instance.realty,
+                    data=realty_data,
+                    partial=True
+                )
+                description_data_serializer.is_valid(raise_exception=True)
+                description_data_serializer.save()
 
         return super().update(instance, validated_data)
 
@@ -337,11 +338,6 @@ class SaleCreateSerializer(serializers.ModelSerializer):
             about_building_data = realty_data.pop("about_building", None)
             about_apartment_data = realty_data.pop("about_apartment", None)
             common_characteristics_data = realty_data.pop("common_characteristics", None)
-            # description_data = realty_data.pop("common_characteristics", None)
-            # price_data = realty_data.pop("common_characteristics", None)
-            # commission_data = realty_data.pop("common_characteristics", None)
-            # owner_type_data = realty_data.pop("common_characteristics", None)
-            # communication_method_data = realty_data.pop("common_characteristics", None)
 
             if address_data and instance.realty.address:
                 address_serializer = address_serializers.AddressCreateSerializer(
@@ -378,8 +374,15 @@ class SaleCreateSerializer(serializers.ModelSerializer):
                 )
                 common_characteristics_serializer.is_valid(raise_exception=True)
                 common_characteristics_serializer.save()
-            #     только начал
-            # if description_data and instance.realty.description:
+
+            if realty_data and instance.realty:
+                description_data_serializer = RealtyCreateSerializer(
+                    instance=instance.realty,
+                    data=realty_data,
+                    partial=True
+                )
+                description_data_serializer.is_valid(raise_exception=True)
+                description_data_serializer.save()
 
         return super().update(instance, validated_data)
 
