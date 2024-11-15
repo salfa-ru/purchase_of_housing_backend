@@ -7,6 +7,8 @@ on:
   pull_request:
     branches:
       - dev
+    branches:
+      - dev
 
 jobs:
   build_and_push_to_docker_hub:
@@ -28,6 +30,7 @@ jobs:
           context: .
           push: true
           tags: ${{ secrets.DOCKER_USERNAME }}/purchase_of_housing_backend:latest
+          build-args: --no-cache
 
   deploy:
     runs-on: ubuntu-latest
