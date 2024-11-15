@@ -29,7 +29,7 @@ pip install -r requirements.txt
 ```
 touch .env
 ```
-и заполнить его по следующему образцу:
+и запоfнить его по следующему образцу:
 ```
 # Переменные для PostgreSQL
 POSTGRES_DB=realty_db
