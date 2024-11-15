@@ -2,6 +2,7 @@ from django.core.management.base import BaseCommand
 from django.contrib.auth.models import Group, Permission
 from django.contrib.contenttypes.models import ContentType
 
+from chats.models import Chat
 from realty.models import Realty
 from users.models import User
 
@@ -23,6 +24,7 @@ class Command(BaseCommand):
             content_types = ContentType.objects.all()
             view_permissions = Permission.objects.filter(content_type__in=content_types, codename__icontains='view')
             group.permissions.add(*view_permissions)
+            self.stdout.write(self.style.HTTP_INFO(f'Добавлены права на просмотр всех таблиц'))
 
             # Добавляем права view и change на таблицу Realty
             realty_content_type = ContentType.objects.get_for_model(Realty)
@@ -30,7 +32,28 @@ class Command(BaseCommand):
                 content_type=realty_content_type,
                 codename__in=['view_realty', 'change_realty']
             )
+
             group.permissions.add(*realty_permissions)
+            self.stdout.write(self.style.HTTP_INFO(f'Добавлены права на Realty:'))
+            self.stdout.write(self.style.HTTP_SUCCESS(f'{realty_permissions}'))
+
+            # Добавляем все права на таблицу Сообщение
+            chat_content_type = ContentType.objects.get_for_model(Chat)
+            chat_permissions = Permission.objects.filter(
+                content_type=chat_content_type,
+            #    codename__in=['chat']
+            )
+            group.permissions.add(*chat_permissions)
+            self.stdout.write(self.style.HTTP_INFO(f'Добавлены права на Сообщения: '))
+            self.stdout.write(self.style.HTTP_SUCCESS(f'{chat_permissions}'))
+
+
+            # Убираем все права на таблицы django_q
+            django_q_content_types = ContentType.objects.filter(app_label='django_q')
+            django_q_permissions = Permission.objects.filter(content_type__in=django_q_content_types)
+            group.permissions.remove(*django_q_permissions)
+            self.stdout.write(self.style.HTTP_INFO(f'Убраны права на DJANQO-Q:'))
+            self.stdout.write(self.style.HTTP_SUCCESS(f'{django_q_permissions}'))
 
             # 2. Работа с пользователем
             user, user_created = User.objects.update_or_create(
