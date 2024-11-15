@@ -5,7 +5,8 @@ on:
     branches:
       - dev
   pull_request:
-    types: [closed]
+    branches:
+      - dev
 
 jobs:
   build_and_push_to_docker_hub:
@@ -27,6 +28,7 @@ jobs:
           context: .
           push: true
           tags: ${{ secrets.DOCKER_USERNAME }}/purchase_of_housing_backend:latest
+          build-args: --no-cache
 
   deploy:
     runs-on: ubuntu-latest
@@ -68,7 +70,7 @@ jobs:
             echo HOST_IP="${{ secrets.HOST_IP }}" >> .env
             echo DOMAIN="${{ secrets.DOMAIN }}" >> .env
             echo DEBUG=${{ secrets.DEBUG }} >> .env
-            sudo docker compose up -d --build --no-cache
+            sudo docker compose up -d --build
             sudo docker compose exec -T backend python manage.py makemigrations
             sudo docker compose exec -T backend python manage.py migrate
             sudo docker compose exec -T backend python manage.py collectstatic --no-input
