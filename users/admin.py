@@ -24,6 +24,9 @@ class UserAdmin(admin.ModelAdmin):
         'user_permissions',
     ]
 
+    # По-человечески можно выбирать группы и права для пользователей.
+    filter_horizontal = ('groups', 'user_permissions',)
+
     def preview_avatar(self, obj):
         return mark_safe(f'<img src="{obj.avatar.url}" style="width: 100px">')
 
