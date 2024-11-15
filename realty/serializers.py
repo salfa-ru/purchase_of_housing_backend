@@ -231,59 +231,156 @@ class RentCreateSerializer(serializers.ModelSerializer):
         return rent
 
     def update(self, instance, validated_data):
-        realty_data = validated_data.pop("realty", None)
 
-        if realty_data:
+        if "realty" in validated_data:
+            realty_data = validated_data.pop("realty", None)
+            related_instance_realty = instance.realty
             address_data = realty_data.pop("address", None)
             about_building_data = realty_data.pop("about_building", None)
             about_apartment_data = realty_data.pop("about_apartment", None)
             common_characteristics_data = realty_data.pop("common_characteristics", None)
+            print(realty_data)
 
-            if address_data and instance.realty.address:
-                address_serializer = address_serializers.AddressCreateSerializer(
-                    instance=instance.realty.address,
-                    data=address_data,
-                    partial=True
-                )
-                address_serializer.is_valid(raise_exception=True)
-                address_serializer.save()
+            if address_data and related_instance_realty.address:
 
-            if about_building_data and instance.realty.about_building:
-                about_building_serializer = specif_serializers.AboutBuildingCreateSerializer(
-                    instance=instance.realty.about_building,
-                    data=about_building_data,
-                    partial=True
-                )
-                about_building_serializer.is_valid(raise_exception=True)
-                about_building_serializer.save()
+                for attr, value in address_data.items():
+                    setattr(instance.realty.address, attr, value)
+                related_instance_realty.save()
 
-            if about_apartment_data and instance.realty.about_apartment:
-                about_apartment_serializer = specif_serializers.AboutApartmentCreateSerializer(
-                    instance=instance.realty.about_apartment,
-                    data=about_apartment_data,
-                    partial=True
-                )
-                about_apartment_serializer.is_valid(raise_exception=True)
-                about_apartment_serializer.save()
+            # else:
+            #
+            #     address_class = type(related_instance_realty._meta.get_field('address').related_model)
+            #     related_instance_address = address_class.objects.create(**address_data)
+            #     instance.realty.address = related_instance_address
 
-            if common_characteristics_data and instance.realty.common_characteristics:
-                common_characteristics_serializer = specif_serializers.CommonCharacteristicsCreateSerializer(
-                    instance=instance.realty.common_characteristics,
-                    data=common_characteristics_data,
-                    partial=True
-                )
-                common_characteristics_serializer.is_valid(raise_exception=True)
-                common_characteristics_serializer.save()
+                # address_serializer = address_serializers.AddressCreateSerializer(
+                #     instance=instance.realty.address,
+                #     data=address_data,
+                #     partial=True
+                # )
+                # address_serializer.is_valid(raise_exception=True)
+                # address_serializer.save()
 
-            if realty_data and instance.realty:
-                description_data_serializer = RealtyCreateSerializer(
-                    instance=instance.realty,
-                    data=realty_data,
-                    partial=True
-                )
-                description_data_serializer.is_valid(raise_exception=True)
-                description_data_serializer.save()
+            if about_building_data and related_instance_realty.about_building:
 
+                for attr, value in address_data.items():
+                    setattr(instance.realty.about_building, attr, value)
+                related_instance_realty.save()
+
+                # about_building_serializer = specif_serializers.AboutBuildingCreateSerializer(
+                #     instance=instance.realty.about_building,
+                #     data=about_building_data,
+                #     partial=True
+                # )
+                # about_building_serializer.is_valid(raise_exception=True)
+                # about_building_serializer.save()
+
+            if about_apartment_data and related_instance_realty.about_apartment:
+
+                for attr, value in address_data.items():
+                    setattr(instance.realty.about_apartment, attr, value)
+                related_instance_realty.save()
+
+                # about_apartment_serializer = specif_serializers.AboutApartmentCreateSerializer(
+                #     instance=instance.realty.about_apartment,
+                #     data=about_apartment_data,
+                #     partial=True
+                # )
+                # about_apartment_serializer.is_valid(raise_exception=True)
+                # about_apartment_serializer.save()
+
+            if common_characteristics_data and related_instance_realty.common_characteristics:
+
+                for attr, value in address_data.items():
+                    setattr(instance.realty.common_characteristics, attr, value)
+                related_instance_realty.save()
+
+                # common_characteristics_serializer = specif_serializers.CommonCharacteristicsCreateSerializer(
+                #     instance=instance.realty.common_characteristics,
+                #     data=common_characteristics_data,
+                #     partial=True
+                # )
+                # common_characteristics_serializer.is_valid(raise_exception=True)
+                # common_characteristics_serializer.save()
+
+
+            # if realty_data and related_instance_realty:
+            #
+            #     description_data_serializer = RealtyCreateSerializer(
+            #         instance=instance.realty,
+            #         data=realty_data,
+            #         partial=True
+            #     )
+            #     description_data_serializer.is_valid(raise_exception=True)
+            #     description_data_serializer.save()
+
+            if realty_data and related_instance_realty:
+                for attr, value in realty_data.items():
+                    setattr(related_instance_realty, attr, value)
+                related_instance_realty.save()
+            #
+            # else:
+            #     realty_class = type(instance._meta.get_field('lease_payments').related_model)
+            #     related_instance_realty = realty_class.objects.create(**realty_data)
+            #     instance.realty = related_instance_realty
+
+
+
+
+
+        if "rental_features" in validated_data:
+            rental_features_data = validated_data.pop('rental_features', None)
+            related_instance_rental_features = instance.rental_features
+
+            if related_instance_rental_features:
+                # Обновляем существующий объект
+                for attr, value in rental_features_data.items():
+                    setattr(related_instance_rental_features, attr, value)
+                related_instance_rental_features.save()
+
+            else:
+                rental_features_class = type(instance._meta.get_field('lease_payments').related_model)
+                related_instance_rental_features = rental_features_class.objects.create(**rental_features_data)
+                instance.lease_payments = related_instance_rental_features
+
+        if "lease_payments" in validated_data:
+            lease_payments_data = validated_data.pop('lease_payments', None)
+            related_instance_lease_payments = instance.lease_payments
+
+            if related_instance_lease_payments:
+                # Обновляем существующий объект
+                for attr, value in lease_payments_data.items():
+                    setattr(related_instance_lease_payments, attr, value)
+                related_instance_lease_payments.save()
+
+            else:
+                lease_payments_class = type(instance._meta.get_field('lease_payments').related_model)
+                related_instance_lease_payments = lease_payments_class.objects.create(**lease_payments_data)
+                instance.lease_payments = related_instance_lease_payments
+
+        # if rental_features_data:
+        #     rental_features_serializer = specif_serializers.RentalFeaturesSerializer(
+        #         instance=instance.rental_features,
+        #         data=rental_features_data,
+        #         partial=True
+        #     )
+        #     rental_features_serializer.is_valid(raise_exception=True)
+        #     rental_features_serializer.save()
+        #
+        # if lease_payments_data:
+        #     print(lease_payments_data)
+        #     print(f'Это Инстанц : {instance.realty}')
+        #     print(f'Это Инстанц : {instance.rental_features}')
+        #     print(f'Это Инстанц : {instance.lease_payments}')
+        #
+        #     lease_payments_serializer = RentCreateSerializer(
+        #         instance=instance,
+        #         data=lease_payments_data,
+        #         partial=True
+        #     )
+        #     lease_payments_serializer.is_valid(raise_exception=True)
+        #     lease_payments_serializer.save()
+        #
         return super().update(instance, validated_data)
 
     class Meta:
