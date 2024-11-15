@@ -5,8 +5,7 @@ on:
     branches:
       - dev
   pull_request:
-    branches:
-      - dev
+    types: [closed]
 
 jobs:
   build_and_push_to_docker_hub:
@@ -28,7 +27,6 @@ jobs:
           context: .
           push: true
           tags: ${{ secrets.DOCKER_USERNAME }}/purchase_of_housing_backend:latest
-          build-args: --no-cache
 
   deploy:
     runs-on: ubuntu-latest
@@ -55,9 +53,10 @@ jobs:
           password: ${{ secrets.PASSPHRASE }}
           script: |
             cd purchase_of_housing_backend
-            sudo docker compose -f docker-compose.yml pull
-            sudo docker compose -f docker-compose.yml down
+            sudo docker compose stop
+            sudo docker compose rm backend
             sudo docker system prune -fa && sudo docker volume prune -fa
+            sudo docker pull ${{ secrets.DOCKER_USERNAME }}/purchase_of_housing_backend:latest
             rm -f .env
             touch .env
             echo POSTGRES_DB=${{ secrets.POSTGRES_DB }} >> .env
@@ -69,9 +68,8 @@ jobs:
             echo HOST_IP="${{ secrets.HOST_IP }}" >> .env
             echo DOMAIN="${{ secrets.DOMAIN }}" >> .env
             echo DEBUG=${{ secrets.DEBUG }} >> .env
-            sudo docker compose -f docker-compose.yml up -d
-            sudo docker compose -f docker-compose.yml exec backend python manage.py makemigrations
-            sudo docker compose -f docker-compose.yml exec backend python manage.py migrate
-            sudo docker compose -f docker-compose.yml exec backend python manage.py fix_moderator_permissions
-            sudo docker compose -f docker-compose.yml exec backend python manage.py collectstatic
-  
+            sudo docker compose up -d --build
+            sudo docker compose exec -T backend python manage.py makemigrations
+            sudo docker compose exec -T backend python manage.py migrate
+            sudo docker compose exec -T backend python manage.py collectstatic --no-input
+            sudo docker compose exec -T backend python manage.py fix_moderator_permissions
