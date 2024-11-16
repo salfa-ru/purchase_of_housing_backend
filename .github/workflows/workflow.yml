@@ -5,6 +5,8 @@ on:
     branches:
       - dev
   pull_request:
+    branches:
+      - dev
     types: [closed]
 
 jobs:
@@ -26,7 +28,7 @@ jobs:
         with:
           context: .
           push: true
-          tags: ${{ secrets.DOCKER_USERNAME }}/purchase_of_housing_backend:latest
+          tags: purchase_of_housing_backend:latest
 
   deploy:
     runs-on: ubuntu-latest
@@ -55,8 +57,9 @@ jobs:
             cd purchase_of_housing_backend
             sudo docker compose stop
             sudo docker compose rm backend
-            sudo docker system prune -fa && sudo docker volume prune -fa
-            sudo docker pull ${{ secrets.DOCKER_USERNAME }}/purchase_of_housing_backend:latest
+            npm cache clean --force
+            sudo apt clean && sudo journalctl --vacuum-time=1d && sudo docker system prune -af
+            sudo docker pull purchase_of_housing_backend:latest
             rm -f .env
             touch .env
             echo POSTGRES_DB=${{ secrets.POSTGRES_DB }} >> .env
@@ -69,7 +72,8 @@ jobs:
             echo DOMAIN="${{ secrets.DOMAIN }}" >> .env
             echo DEBUG=${{ secrets.DEBUG }} >> .env
             sudo docker compose up -d --build
-            sudo docker compose exec -T backend python manage.py makemigrations
-            sudo docker compose exec -T backend python manage.py migrate
-            sudo docker compose exec -T backend python manage.py collectstatic --no-input
+            sudo docker compose exec -T backend bash -c "
+            python manage.py makemigrations &&
+            python manage.py migrate &&
+            python manage.py collectstatic --no-input"
             sudo docker compose exec -T backend python manage.py fix_moderator_permissions
