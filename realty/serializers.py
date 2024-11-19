@@ -13,6 +13,7 @@ from realty_displays import serializers as displays_serializers
 from realty_photos.serializers import RealtyPhotoSerializer
 from users.serializers import UserDataSerializer, UserContactsSerializer
 from django.core.exceptions import ValidationError
+from realty_addresses import models as address_models
 
 
 class RealtyBaseSerializer(serializers.ModelSerializer):
@@ -234,6 +235,7 @@ class RentCreateSerializer(serializers.ModelSerializer):
 
         # Обновление модели realty через модель Rent
         if "realty" in validated_data:
+
             # присваиваем полученные аргументы переменным
             realty_data = validated_data.pop("realty", None)
             related_instance_realty = instance.realty
@@ -244,30 +246,48 @@ class RentCreateSerializer(serializers.ModelSerializer):
 
             # обновление поля address в модели realty
             if address_data and related_instance_realty.address:
+                street_data = address_data.pop("street", None)
+                metro_data = address_data.pop("metro", None)
 
-                for attr, value in address_data.items():
-                    setattr(related_instance_realty.address, attr, value)
-                related_instance_realty.save()
+                address_date_serializer = address_serializers.AddressCreateSerializer(
+                    instance=instance.realty.address,
+                    data=address_data,
+                    partial=True
+                )
+                address_date_serializer.is_valid(raise_exception=True)
+                address_date_serializer.save()
+
+                # обновление поля street
+                if street_data and related_instance_realty.address.street:
+                    obj_street, create = address_models.Street.objects.get_or_create(**street_data)
+                    related_instance_realty.address.street = obj_street
+
+                # обновление поля metro
+                if metro_data and related_instance_realty.address.metro:
+                    related_instance_realty.address.metro = metro_data
+
+                related_instance_realty.address.save()
 
             # обновление поля about_building в модели realty
             if about_building_data and related_instance_realty.about_building:
 
-                for attr, value in address_data.items():
+                for attr, value in about_building_data.items():
                     setattr(related_instance_realty.about_building, attr, value)
-                related_instance_realty.save()
+                related_instance_realty.about_building.save()
+
             # обновление поля about_apartment в модели realty
             if about_apartment_data and related_instance_realty.about_apartment:
 
-                for attr, value in address_data.items():
+                for attr, value in about_apartment_data.items():
                     setattr(related_instance_realty.about_apartment, attr, value)
-                related_instance_realty.save()
+                related_instance_realty.about_apartment.save()
 
             # обновление поля common_characteristics в модели realty
             if common_characteristics_data and related_instance_realty.common_characteristics:
 
-                for attr, value in address_data.items():
+                for attr, value in common_characteristics_data.items():
                     setattr(related_instance_realty.common_characteristics, attr, value)
-                related_instance_realty.save()
+                related_instance_realty.common_characteristics.save()
 
             # обновление полей не имеющих dict значений в модели realty
             if realty_data and related_instance_realty:
@@ -344,6 +364,7 @@ class SaleCreateSerializer(serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
         if "realty" in validated_data:
+
             # присваиваем полученные аргументы переменным
             realty_data = validated_data.pop("realty", None)
             related_instance_realty = instance.realty
@@ -354,30 +375,48 @@ class SaleCreateSerializer(serializers.ModelSerializer):
 
             # обновление поля address в модели realty
             if address_data and related_instance_realty.address:
+                street_data = address_data.pop("street", None)
+                metro_data = address_data.pop("metro", None)
 
-                for attr, value in address_data.items():
-                    setattr(related_instance_realty.address, attr, value)
-                related_instance_realty.save()
+                address_date_serializer = address_serializers.AddressCreateSerializer(
+                    instance=instance.realty.address,
+                    data=address_data,
+                    partial=True
+                )
+                address_date_serializer.is_valid(raise_exception=True)
+                address_date_serializer.save()
+
+                # обновление поля street
+                if street_data and related_instance_realty.address.street:
+                    obj_street, create = address_models.Street.objects.get_or_create(**street_data)
+                    related_instance_realty.address.street = obj_street
+
+                # обновление поля metro
+                if metro_data and related_instance_realty.address.metro:
+                    related_instance_realty.address.metro = metro_data
+
+                related_instance_realty.address.save()
 
             # обновление поля about_building в модели realty
             if about_building_data and related_instance_realty.about_building:
 
-                for attr, value in address_data.items():
+                for attr, value in about_building_data.items():
                     setattr(related_instance_realty.about_building, attr, value)
-                related_instance_realty.save()
+                related_instance_realty.about_building.save()
+
             # обновление поля about_apartment в модели realty
             if about_apartment_data and related_instance_realty.about_apartment:
 
-                for attr, value in address_data.items():
+                for attr, value in about_apartment_data.items():
                     setattr(related_instance_realty.about_apartment, attr, value)
-                related_instance_realty.save()
+                related_instance_realty.about_apartment.save()
 
             # обновление поля common_characteristics в модели realty
             if common_characteristics_data and related_instance_realty.common_characteristics:
 
-                for attr, value in address_data.items():
+                for attr, value in common_characteristics_data.items():
                     setattr(related_instance_realty.common_characteristics, attr, value)
-                related_instance_realty.save()
+                related_instance_realty.common_characteristics.save()
 
             # обновление полей не имеющих dict значений в модели realty
             if realty_data and related_instance_realty:
