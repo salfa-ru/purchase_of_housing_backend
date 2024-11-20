@@ -108,7 +108,7 @@
     "model": "realty_values.communicationmethod",
     "pk": 1,
     "fields": {
-      "method": "Только звонки"
+      "method": "Звонки и сообщения"
     }
   },
   {
@@ -116,13 +116,6 @@
     "pk": 2,
     "fields": {
       "method": "Только сообщения"
-    }
-  },
-  {
-    "model": "realty_values.communicationmethod",
-    "pk": 3,
-    "fields": {
-      "method": "Звонки и сообщения"
     }
   },
   {
@@ -2030,7 +2023,7 @@
       "price": 20000000,
       "commission": 100000,
       "owner_type": 3,
-      "communication_method": 3,
+      "communication_method": 1,
       "realty_status": 1,
       "published_at": "2024-08-18T20:42:50Z",
       "changed_at": "2024-08-20T21:06:08.038Z"

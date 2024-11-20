@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from django.core import validators
+from django.core.exceptions import ValidationError
 
 from realty_specificities import models as spec_models
 from realty_values import models as values_models
@@ -53,10 +54,24 @@ class AboutApartmentCreateSerializer(serializers.ModelSerializer):
             validators.MaxValueValidator(constants.MAX_ROOM_AREA),
         ],
     )
+    floor = serializers.IntegerField(
+        validators=(validators.MinValueValidator(constants.MIN_FLOOR),
+                    validators.MaxValueValidator(constants.MAX_FLOOR)))
+    floors_number = serializers.IntegerField(
+        validators=(validators.MinValueValidator(constants.MIN_FLOOR),
+                    validators.MaxValueValidator(constants.MAX_FLOOR)))
 
     class Meta:
         model = spec_models.AboutApartment
         fields = "__all__"
+
+    def validate(self, data):
+        floor = data.get('floor')
+        floors_number = data.get('floors_number')
+        if floor > floors_number:
+            raise ValidationError(
+                'Этаж не может быть больше, чем общая этажность здания!')
+        return data
 
 
 class CommonCharacteristicsCreateSerializer(serializers.ModelSerializer):

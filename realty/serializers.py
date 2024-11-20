@@ -148,6 +148,14 @@ class RealtyCreateSerializer(serializers.ModelSerializer):
             "communication_method",
         ]
 
+    def validate_price(self, price):
+        if price < constants.MIN_PRICE:
+            raise serializers.ValidationError(
+                "Цена должна быть больше 0!"
+            )
+
+        return price
+
     def create(self, validated_data):
         return self._create_realty(validated_data)
 
