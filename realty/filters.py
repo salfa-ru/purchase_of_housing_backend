@@ -170,7 +170,7 @@ class RealtyFilter(django_filters.FilterSet):
         },
         label='Сортировка',
         help_text='Выберите порядок сортировки: '
-                  '"published_at" - сначала новые, '
+                  '"-published_at" - сначала новые, '
                   '"price" - по возрастанию цены, '
                   '"-price" - по убыванию цены.',
     )
