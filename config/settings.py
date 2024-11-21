@@ -176,8 +176,8 @@ Q_CLUSTER = {
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
     "http://127.0.0.1:5173",
-    "https://estate.ktsf.ru",  # убрал "/" в конце иначе локально не запускается
-    "https://front.test.estate.ktsf.ru",  # убрал "/" в конце иначе локально не запускается
+    "https://estate.ktsf.ru/",
+    "https://front.test.estate.ktsf.ru/",
 ]
 
 # CORS_ALLOW_ALL_ORIGINS = True
