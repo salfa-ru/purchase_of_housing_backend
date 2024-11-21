@@ -259,6 +259,14 @@ class RentCreateSerializer(serializers.ModelSerializer):
 
                 # обновление поля street
                 if street_data and related_instance_realty.address.street:
+                    obj_instance = instance.realty.address.street
+                    name = street_data.pop("name", obj_instance.name)
+                    zone = street_data.pop("zone", obj_instance.zone)
+                    district = street_data.pop("district", obj_instance.district)
+                    city = street_data.pop("city", obj_instance.city)
+
+                    street_data = {"name": name, "zone": zone, "district": district, "city": city}
+
                     obj_street, create = address_models.Street.objects.get_or_create(**street_data)
                     related_instance_realty.address.street = obj_street
 
@@ -388,6 +396,14 @@ class SaleCreateSerializer(serializers.ModelSerializer):
 
                 # обновление поля street
                 if street_data and related_instance_realty.address.street:
+                    obj_instance = instance.realty.address.street
+                    name = street_data.pop("name", obj_instance.name)
+                    zone = street_data.pop("zone", obj_instance.zone)
+                    district = street_data.pop("district", obj_instance.district)
+                    city = street_data.pop("city", obj_instance.city)
+
+                    street_data = {"name": name, "zone": zone, "district": district, "city": city}
+
                     obj_street, create = address_models.Street.objects.get_or_create(**street_data)
                     related_instance_realty.address.street = obj_street
 
