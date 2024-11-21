@@ -1,10 +1,14 @@
 from django.db import models
+from django.core.validators import (
+    MinValueValidator,
+    MaxValueValidator
+)
 
 from users import models as user_models
 from realty_values import models as values_models
 from realty_specificities import models as specificities_models
 from realty_addresses import models as addresses_models
-from config.constants import DESCRIPTION_LENGTH, NULLABLE_FIELD
+from config.constants import DESCRIPTION_LENGTH, NULLABLE_FIELD, MIN_PRICE
 
 
 class Realty(models.Model):
@@ -54,6 +58,10 @@ class Realty(models.Model):
     )
     price = models.PositiveIntegerField(
         verbose_name="Цена",
+        validators=[
+            MinValueValidator(MIN_PRICE,
+                              message='Цена должна быть больше 0!')
+        ],
     )
     commission = models.PositiveIntegerField(
         verbose_name="Комиссия",

@@ -16,6 +16,13 @@ QUESTION_LENGTH = 100
 
 NULLABLE_FIELD = {'blank': True, 'null': True}
 
+# min значение цены
+MIN_PRICE = 1
+
+# min и max значения этажности
+MIN_FLOOR = 1
+MAX_FLOOR = 180
+
 # min и max время до метро в мин.
 MIN_TIME = 1
 MAX_TIME = 60

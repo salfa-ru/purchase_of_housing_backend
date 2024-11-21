@@ -5,6 +5,8 @@
 #     branches:
 #       - dev
 #   pull_request:
+#     branches:
+#       - dev
 #     types: [closed]
 
 # jobs:
@@ -33,18 +35,30 @@
 #     needs: build_and_push_to_docker_hub
 #     # if: github.ref == 'refs/heads/master'   запуск deploy только в том случае, если workflow запускается от ветки master.
 #     steps:
-#       - name: executing remote ssh commands to deploy
+#       - name: Checkout repo
+#         uses: actions/checkout@v3
+#       - name: Copy docker-compose.yml via ssh
+#         uses: appleboy/scp-action@master
+#         with:
+#           host: ${{ secrets.HOST }}
+#           username: ${{ secrets.USER }}
+#           # key: ${{ secrets.SSH_KEY }}
+#           password: ${{ secrets.PASSPHRASE }}
+#           source: "docker-compose.yml"
+#           target: "purchase_of_housing_backend"
+#       - name: executing remote ssh commands to deploy using password
 #         uses: appleboy/ssh-action@master
 #         with:
 #           host: ${{ secrets.HOST }}
 #           username: ${{ secrets.USER }}
-#           key: ${{ secrets.SSH_KEY }}
-#           passphrase: ${{ secrets.PASSPHRASE }}
+#           # key: ${{ secrets.SSH_KEY }}
+#           password: ${{ secrets.PASSPHRASE }}
 #           script: |
 #             cd purchase_of_housing_backend
 #             sudo docker compose stop
 #             sudo docker compose rm backend
-#             sudo docker system prune -fa && sudo docker volume prune -fa
+#             npm cache clean --force
+#             sudo apt clean && sudo journalctl --vacuum-time=1d && sudo docker system prune -af
 #             sudo docker pull ${{ secrets.DOCKER_USERNAME }}/purchase_of_housing_backend:latest
 #             rm -f .env
 #             touch .env
@@ -57,7 +71,9 @@
 #             echo HOST_IP="${{ secrets.HOST_IP }}" >> .env
 #             echo DOMAIN="${{ secrets.DOMAIN }}" >> .env
 #             echo DEBUG=${{ secrets.DEBUG }} >> .env
-#             sudo docker-compose up -d --build
-#             sudo docker-compose exec -T backend python manage.py migrate
-#             sudo docker-compose exec -T backend python manage.py collectstatic --no-input
-  
+#             sudo docker compose up -d --build
+#             sudo docker compose exec -T backend bash -c "
+#             python manage.py makemigrations &&
+#             python manage.py migrate &&
+#             python manage.py collectstatic --no-input"
+#             sudo docker compose exec -T backend python manage.py fix_moderator_permissions

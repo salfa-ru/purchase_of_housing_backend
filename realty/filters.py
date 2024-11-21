@@ -156,6 +156,9 @@ class RealtyFilter(django_filters.FilterSet):
     pub_date = django_filters.OrderingFilter(
         fields=('published_at',),
     )
+    price_ordrering = django_filters.OrderingFilter(
+        fields=('price',),
+    )
 
     class Meta:
         model = Realty
