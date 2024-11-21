@@ -125,7 +125,7 @@ class LastRealtyListView(generics.ListAPIView):
     # TODO найти решение без пагинации. Требуется вывод последних 3х объектов.
     queryset = realty_models.Realty.objects.all().filter(
         realty_status__status=constants.ADVERTISMENT_STATUS
-    ).order_by('-published_at')
+    )  # .order_by('-published_at')
 
     # TODO - Как насчет такого решения? Апдейт: заработало после отключения всех строк сверху
     # Работает, в том числе если:
@@ -147,7 +147,7 @@ class RealtyListView(generics.ListAPIView):
 
     queryset = realty_models.Realty.objects.all().filter(
         realty_status__status=constants.ADVERTISMENT_STATUS
-    ).order_by('-published_at')
+    )  # .order_by('-published_at')
     serializer_class = realty_serializers.ShortRealtySerializer
     filter_backends = (DjangoFilterBackend,)
     pagination_class = LimitRealtyPagination

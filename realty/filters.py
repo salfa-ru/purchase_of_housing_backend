@@ -153,11 +153,26 @@ class RealtyFilter(django_filters.FilterSet):
         method='filter_no_commission',
         label='Без комиссии'
     )
-    pub_date = django_filters.OrderingFilter(
-        fields=('published_at',),
-    )
-    price_ordrering = django_filters.OrderingFilter(
-        fields=('price',),
+    # pub_date = django_filters.OrderingFilter(
+    #     fields=('published_at',),
+    # )
+    # price_ordrering = django_filters.OrderingFilter(
+    #     fields=('price',),
+    # )
+    ordering = django_filters.OrderingFilter(
+        fields={
+            'published_at': 'published_at',  # Сортировка по дате публикации
+            'price': 'price',  # Сортировка по цене
+        },
+        field_labels={
+            'published_at': 'Дата публикации',
+            'price': 'Цена',
+        },
+        label='Сортировка',
+        help_text='Выберите порядок сортировки: '
+                  '"published_at" - сначала новые, '
+                  '"price" - по возрастанию цены, '
+                  '"-price" - по убыванию цены.',
     )
 
     class Meta:
