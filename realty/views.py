@@ -1,7 +1,7 @@
 from django.utils import timezone
 
 from django_filters.rest_framework import DjangoFilterBackend
-from drf_spectacular.utils import extend_schema  # , OpenApiParameter
+from drf_spectacular.utils import extend_schema, extend_schema_view  # , OpenApiParameter
 from drf_spectacular.helpers import forced_singular_serializer
 from rest_framework import generics, permissions, viewsets
 from rest_framework.response import Response
@@ -44,8 +44,21 @@ class RealtyBaseViewSet(BaseViewSet):
         return realty_serializers.RealtyBaseSerializer
 
 
-@extend_schema(
-    summary='Создание объявления о продаже недвижимости.')
+@extend_schema(tags=[("Управление объявлениями о продаже недвижимости.")])
+@extend_schema_view(
+    partial_update=extend_schema(
+        summary=('Частичное изменение объявления о продаже недвижимости.'),
+    ),
+    retrieve=extend_schema(
+        summary=('Просмотр информации объявления о продаже по id записи.'),
+    ),
+    create=extend_schema(
+        summary=('Создание объявления о продаже недвижимости.'),
+    ),
+    list=extend_schema(
+        summary=('Просмотр списка объявлений о продаже недвижимости.'),
+    ),
+)
 class SaleViewSet(BaseViewSet):
     """Sale Viewset."""
 
@@ -53,17 +66,26 @@ class SaleViewSet(BaseViewSet):
     http_method_names = ['get', 'post', 'patch']
 
     def get_serializer_class(self):
-        if self.action == "create":
-            return realty_serializers.SaleCreateSerializer
-        elif self.action == "update" or self.action == "partial_update":
-            return realty_serializers.SaleCreateSerializer
-        #     elif self.action == "destroy":
-        #         return realty_serializers.SaleDeleteSerializer
-        return realty_serializers.SaleReadSerializer
+        if self.action in ('list', 'retrieve'):
+            return realty_serializers.SaleReadSerializer
+        return realty_serializers.SaleCreateSerializer
 
 
-@extend_schema(
-    summary='Создание объявления об аренде недвижимости.')
+@extend_schema(tags=[("Управление объявлениями об аренде недвижимости.")])
+@extend_schema_view(
+    partial_update=extend_schema(
+        summary=('Частичное изменение объявления об аренде недвижимости.'),
+    ),
+    retrieve=extend_schema(
+        summary=('Просмотр информации объявления об аренде по id записи.'),
+    ),
+    create=extend_schema(
+        summary=('Создание объявления об аренде недвижимости.'),
+    ),
+    list=extend_schema(
+        summary=('Просмотр списка объявлений об аренде недвижимости.'),
+    ),
+)
 class RentViewSet(BaseViewSet):
     """Rent Viewset."""
 
@@ -71,14 +93,9 @@ class RentViewSet(BaseViewSet):
     http_method_names = ['get', 'post', 'patch']
 
     def get_serializer_class(self):
-
-        if self.action == "create":
-            return realty_serializers.RentCreateSerializer
-        elif self.action == "update" or self.action == "partial_update":
-            return realty_serializers.RentCreateSerializer
-        #     elif self.action == "destroy":
-        #         return realty_serializers.RentDeleteSerializer
-        return realty_serializers.RentReadSerializer
+        if self.action in ('list', 'retrieve'):
+            return realty_serializers.RentReadSerializer
+        return realty_serializers.RentCreateSerializer
 
     # на будущее для доб в избранное
     # @staticmethod
