@@ -72,23 +72,20 @@ class SaleReadSerializer(serializers.ModelSerializer):
     """Sale Read Serializer."""
 
     realty = RealtyBaseSerializer()
-    sales_parameters = specif_serializers.SalesParametersSerializer()
 
     class Meta:
         model = realty_models.Sale
-        fields = "__all__"
+        exclude = ('sales_parameters',)
 
 
 class RentReadSerializer(serializers.ModelSerializer):
     """Rent Read Serializer."""
 
     realty = RealtyBaseSerializer()
-    rental_features = specif_serializers.RentalFeaturesSerilalizer()
-    lease_payments = specif_serializers.LeasePaymentsSerializer()
 
     class Meta:
         model = realty_models.Rent
-        fields = "__all__"
+        exclude = ('rental_features', 'lease_payments',)
 
 
 class RealtyCreateSerializer(serializers.ModelSerializer):
