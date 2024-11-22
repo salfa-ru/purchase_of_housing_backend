@@ -8,7 +8,7 @@ from rest_framework.response import Response
 from rest_framework.pagination import LimitOffsetPagination
 
 from config import constants
-from realty.pagination import LimitRealtyPagination
+from realty.pagination import LimitRealtyPagination, MyRealtyPagination
 from realty_displays.models import DisplayFullInfo, DisplayInSearch
 from realty_displays.utils import increment_counter
 from realty import models as realty_models
@@ -241,6 +241,7 @@ class RealtyLKListView(generics.ListAPIView):
 
     serializer_class = realty_serializers.RealtyLKSerializer
     permission_classes = [permissions.IsAuthenticated]
+    pagination_class = MyRealtyPagination
 
     def get_queryset(self):
         owner = self.request.user
