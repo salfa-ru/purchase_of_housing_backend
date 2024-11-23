@@ -5,6 +5,7 @@ from config import constants
 from notifications.utils import create_notification
 from realty import models as realty_models
 from .models import Realty, Sale, Rent
+from realty_photos.models import RealtyPhoto
 from realty_values import models as values_models
 from realty_specificities import models as specificities_models
 from realty_addresses import serializers as address_serializers
@@ -128,6 +129,15 @@ class RealtyCreateSerializer(serializers.ModelSerializer):
         queryset=values_models.CommunicationMethod.objects.all(),
         required=True,
     )
+    photos = RealtyPhotoSerializer(
+        many=True, read_only=True
+    )
+    uploaded_photos = serializers.ListField(
+        child=serializers.ImageField(
+         max_length=1000000,
+         allow_empty_file=False,
+         use_url=False), write_only=True
+    )
 
     class Meta:
         model = realty_models.Realty
@@ -144,6 +154,8 @@ class RealtyCreateSerializer(serializers.ModelSerializer):
             "commission",
             "owner_type",
             "communication_method",
+            "photos",
+            "uploaded_photos",
         ]
 
     def validate_price(self, price):
@@ -164,6 +176,8 @@ class RealtyCreateSerializer(serializers.ModelSerializer):
         common_characteristics_data = validated_data.pop(
             "common_characteristics", None
         )
+        # photos_data = validated_data.pop('photos', None)
+        uploaded_photos = validated_data.pop("uploaded_photos", None)
 
         if address_data:
             address_serializer = address_serializers.AddressCreateSerializer(
@@ -194,6 +208,12 @@ class RealtyCreateSerializer(serializers.ModelSerializer):
             validated_data["realty_status"] = default_status
 
         realty = realty_models.Realty.objects.create(**validated_data)
+
+        # if photos_data:
+        #     photos_data['realty'] = realty
+        #     RealtyPhoto.objects.create(**photos_data)
+        for photo in uploaded_photos:
+            RealtyPhoto.objects.create(realty=realty, image=photo)
 
         # Отправка уведомления после успешного создания записи
         # Проверка статуса после создания записи, если запись на модерации - отправить уведомление.
