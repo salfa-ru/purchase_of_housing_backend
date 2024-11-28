@@ -1,6 +1,8 @@
 from rest_framework import serializers
 from rest_framework.relations import SlugRelatedField
 
+import base64
+
 from config import constants
 from notifications.utils import create_notification
 from realty import models as realty_models
@@ -14,6 +16,7 @@ from realty_displays import serializers as displays_serializers
 from realty_photos.serializers import RealtyPhotoSerializer
 from users.serializers import UserDataSerializer, UserContactsSerializer
 from django.core.exceptions import ValidationError
+from django.core.files.base import ContentFile
 from realty_addresses import models as address_models
 
 
@@ -37,6 +40,9 @@ class RealtyBaseSerializer(serializers.ModelSerializer):
     communication_method = SlugRelatedField(
         slug_field="method",
         queryset=values_models.CommunicationMethod.objects.all(),
+    )
+    photos = RealtyPhotoSerializer(
+        many=True, source="realty_photos"
     )
     sale = serializers.SerializerMethodField()
     rent = serializers.SerializerMethodField()
@@ -89,6 +95,37 @@ class RentReadSerializer(serializers.ModelSerializer):
         exclude = ('rental_features', 'lease_payments',)
 
 
+# class Base64ImageField(serializers.ImageField):
+#     """base64 images convert to file Serializer."""
+
+#     def to_internal_value(self, data):
+#         if isinstance(data, list):
+#             return [self._decode_image(image) for image in data]
+#         elif isinstance(data, str) and data.startswith('data:image'):
+#             return [self._decode_image(data)]
+#         else:
+#             raise serializers.ValidationError('invalid image data')
+
+#     def _decode_image(self, data):
+#         format, img = data.split(';base64,')
+#         ext = format.split('/')[-1]
+#         return ContentFile(base64.b64decode(img), name='temp.' + ext)
+
+
+class Base64ImageField(serializers.ImageField):
+
+    def to_internal_value(self, data):
+        if isinstance(data, str) and data.startswith('data:image'):
+            return self._decode_image(data)
+        else:
+            raise serializers.ValidationError('invalid image data')
+
+    def _decode_image(self, data):
+        format, img = data.split(';base64,')
+        ext = format.split('/')[-1]
+        return ContentFile(base64.b64decode(img), name='img.' + ext)
+
+
 class RealtyCreateSerializer(serializers.ModelSerializer):
     """Realty Create Serializer."""
 
@@ -129,14 +166,22 @@ class RealtyCreateSerializer(serializers.ModelSerializer):
         queryset=values_models.CommunicationMethod.objects.all(),
         required=True,
     )
-    photos = RealtyPhotoSerializer(
-        many=True, read_only=True
+    # uploaded_photos = serializers.ListField(
+    #     required=False,
+    #     child=serializers.ImageField(
+    #      max_length=1000000,
+    #      allow_empty_file=False,
+    #      use_url=False), write_only=True
+    # )
+    # uploaded_photos = Base64ImageField()
+    uploaded_photos = serializers.ListSerializer(
+        child=Base64ImageField(),
     )
-    uploaded_photos = serializers.ListField(
-        child=serializers.ImageField(
-         max_length=1000000,
-         allow_empty_file=False,
-         use_url=False), write_only=True
+    uploaded_photos_to_remove = serializers.ListField(
+        child=serializers.IntegerField(),
+        required=False,
+        write_only=True,  # Поле только для записи
+        help_text="Список ID фотографий, которые нужно удалить"
     )
 
     class Meta:
@@ -154,8 +199,8 @@ class RealtyCreateSerializer(serializers.ModelSerializer):
             "commission",
             "owner_type",
             "communication_method",
-            "photos",
             "uploaded_photos",
+            "uploaded_photos_to_remove",
         ]
 
     def validate_price(self, price):
@@ -176,13 +221,24 @@ class RealtyCreateSerializer(serializers.ModelSerializer):
         common_characteristics_data = validated_data.pop(
             "common_characteristics", None
         )
-        # photos_data = validated_data.pop('photos', None)
         uploaded_photos = validated_data.pop("uploaded_photos", None)
 
         if address_data:
             address_serializer = address_serializers.AddressCreateSerializer(
                 data=address_data
             )
+            city = address_data['street']['city']
+            address_data['street']['city'] = city.id
+
+            zone = address_data['street']['zone']
+            address_data['street']['zone'] = zone.id
+
+            district = address_data['street']['district']
+            address_data['street']['district'] = district.id
+
+            metro = address_data['metro']
+            address_data['metro'] = metro.id
+
             address_serializer.is_valid(raise_exception=True)
             address = address_serializer.save()
             validated_data["address"] = address
@@ -209,17 +265,51 @@ class RealtyCreateSerializer(serializers.ModelSerializer):
 
         realty = realty_models.Realty.objects.create(**validated_data)
 
-        # if photos_data:
-        #     photos_data['realty'] = realty
-        #     RealtyPhoto.objects.create(**photos_data)
-        for photo in uploaded_photos:
-            RealtyPhoto.objects.create(realty=realty, image=photo)
+        # for photo in uploaded_photos:
+        #     RealtyPhoto.objects.create(realty=realty, image=photo)
+        if uploaded_photos:
+            for photo in uploaded_photos:
+                RealtyPhoto.objects.create(
+                        realty=realty,
+                        image=photo
+                    )
 
         # Отправка уведомления после успешного создания записи
         # Проверка статуса после создания записи, если запись на модерации - отправить уведомление.
         if realty.realty_status.status == constants.REALTY_STATUS:
             create_notification(realty, "on_moderation")
         return realty
+
+    def update(self, instance, validated_data):
+        uploaded_photos_to_remove = validated_data.pop("uploaded_photos_to_remove", [])
+        realty_instance = instance.realty if hasattr(instance, 'realty') else instance
+
+    # Удаление указанных фото
+        if uploaded_photos_to_remove:
+            realty_instance.realty_photos.filter(id__in=uploaded_photos_to_remove).delete()
+
+
+        # Обновление других данных
+        # address_data = validated_data.pop("address", None)
+        # about_building_data = validated_data.pop("about_building", None)
+        # about_apartment_data = validated_data.pop("about_apartment", None)
+        # common_characteristics_data = validated_data.pop("common_characteristics", None)
+        uploaded_photos = validated_data.pop("uploaded_photos", None)
+
+        # Логика обновления связей...
+        # (Повторяет существующий код)
+
+        # Добавление новых фото
+        if uploaded_photos:
+            for photo in uploaded_photos:
+                RealtyPhoto.objects.create(realty=instance, image=photo)
+
+        return super().update(instance, validated_data)
+
+    # def to_representation(self, instance):
+    #     return RealtyBaseSerializer(
+    #         instance
+    #     ).data
 
 
 class RentCreateSerializer(serializers.ModelSerializer):
@@ -356,26 +446,28 @@ class RentCreateSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
 
-class SaleCreateSerializer(serializers.ModelSerializer):
+class SaleCreateSerializer(RealtyCreateSerializer):
     """Sale Create Serializer."""
 
-    realty = RealtyCreateSerializer(required=True)
+    # realty = RealtyCreateSerializer(required=True)
 
-    class Meta:
-        model = realty_models.Sale
-        exclude = [
-            "sales_parameters",
-        ]
+    # class Meta:
+    #     model = realty_models.Sale
+    #     exclude = [
+    #         "sales_parameters",
+    #     ]
 
     def create(self, validated_data):
-        realty_data = validated_data.pop("realty", None)
+        realty = super().create(validated_data)
+        validated_data['realty'] = realty
+        # realty_data = validated_data.pop("realty", None)
 
-        if realty_data:
-            realty_data["owner"] = self.context["request"].user
-            realty = RealtyCreateSerializer(
-                context=self.context
-            )._create_realty(realty_data)
-            validated_data["realty"] = realty
+        # if realty_data:
+        #     realty_data["owner"] = self.context["request"].user
+        #     realty = RealtyCreateSerializer(
+        #         context=self.context
+        #     )._create_realty(realty_data)
+        #     validated_data["realty"] = realty
 
         if "sales_parameters" not in validated_data:
             housing_type, _ = values_models.HousingType.objects.get_or_create(
@@ -392,8 +484,12 @@ class SaleCreateSerializer(serializers.ModelSerializer):
             validated_data["sales_parameters"] = sales_parameters
 
         validated_data.pop("owner", None)
-        sale = realty_models.Sale.objects.create(**validated_data)
-        return sale
+        validated_data = {
+            'realty': realty,
+            'sales_parameters': sales_parameters
+        }
+        realty_models.Sale.objects.create(**validated_data)
+        return realty
 
     def update(self, instance, validated_data):
         if "realty" in validated_data:
@@ -467,6 +563,20 @@ class SaleCreateSerializer(serializers.ModelSerializer):
                 related_instance_realty.save()
 
         return super().update(instance, validated_data)
+
+    def to_representation(self, instance):
+        if isinstance(instance, Sale):
+            return SaleReadSerializer(
+                instance
+            ).data
+        elif isinstance(instance, Realty):
+            return RealtyBaseSerializer(
+                instance
+            ).data
+
+        # return SaleReadSerializer(
+        #     instance
+        # ).data
 
 
 class ShortRealtySerializer(serializers.ModelSerializer):

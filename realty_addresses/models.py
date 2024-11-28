@@ -116,6 +116,7 @@ class Address(models.Model):
         verbose_name="Улица",
         on_delete=models.PROTECT,
         related_name="addresses",
+        **constants.NULLABLE_FIELD,  # не забыть вернуть к обязательному!
     )
     corpus = models.CharField(
         max_length=constants.CHAR_LENGTH,

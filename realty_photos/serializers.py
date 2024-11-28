@@ -13,4 +13,7 @@ class RealtyPhotoSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = RealtyPhoto
-        fields = ("image",)
+        fields = (
+            "id",
+            "image",
+            )

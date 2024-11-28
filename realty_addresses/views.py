@@ -1,16 +1,18 @@
 from django.db.models import Q
 from django_filters.rest_framework import DjangoFilterBackend
+
 from drf_spectacular.utils import extend_schema
-from rest_framework import status, filters, generics, serializers
+from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
+
+from config import constants
 from realty.filters import RealtyFilter
 from realty.models import Realty
-from realty.pagination import LimitRealtyPagination
-from realty.serializers import ShortRealtySerializer
-from realty_addresses.serializers import MapPointsSerializer, MapPointsRequestSerializer, \
-    GetAnnouncementsInMapPointRequestSerializer
-from config import constants
+from realty.serializers.serializers_realty import ShortRealtySerializer
+from realty_addresses.serializers import (
+    MapPointsSerializer, MapPointsRequestSerializer,
+    GetAnnouncementsInMapPointRequestSerializer)
 from realty_values import models as models_values
 
 
@@ -42,7 +44,8 @@ class GetlistMapPointsAPIView(APIView):
         bottom_right_longitude = request.data.get('bottom_right_longitude')
 
         # получаем ID статуса объявления со значением Активно
-        realty_status = models_values.RealtyAdvStatus.objects.get(status="Активно").pk
+        realty_status = models_values.RealtyAdvStatus.objects.get(
+            status="Активно").pk
 
         queryset = Realty.objects.filter(
             Q(address__latitude__gte=bottom_right_latitude) &
@@ -52,10 +55,12 @@ class GetlistMapPointsAPIView(APIView):
             Q(realty_status=realty_status)
         )
 
-        filterset = self.filterset_class(request.query_params, queryset=queryset)
+        filterset = self.filterset_class(
+            request.query_params, queryset=queryset)
 
         if not filterset.is_valid():
-            return Response(filterset.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                filterset.errors, status=status.HTTP_400_BAD_REQUEST)
         queryset = filterset.qs
 
         response_serializer = MapPointsSerializer(queryset, many=True)
@@ -82,7 +87,8 @@ class GetListAnnouncementsInMapPoint(APIView):
     filterset_class = RealtyFilter
 
     def post(self, request, *args, **kwargs):
-        serializer = GetAnnouncementsInMapPointRequestSerializer(data=request.data)
+        serializer = GetAnnouncementsInMapPointRequestSerializer(
+            data=request.data)
         serializer.is_valid(raise_exception=True)
 
         latitude = request.data.get('latitude')
@@ -94,7 +100,8 @@ class GetListAnnouncementsInMapPoint(APIView):
                 status=status.HTTP_400_BAD_REQUEST)
 
         # получаем ID статуса объявления со значением Активно
-        realty_status = models_values.RealtyAdvStatus.objects.get(status="Активно").pk
+        realty_status = models_values.RealtyAdvStatus.objects.get(
+            status="Активно").pk
 
         queryset = Realty.objects.filter(
             Q(address__latitude=latitude) &
@@ -102,10 +109,12 @@ class GetListAnnouncementsInMapPoint(APIView):
             Q(realty_status=realty_status)
         )
 
-        filterset = self.filterset_class(request.query_params, queryset=queryset)
+        filterset = self.filterset_class(
+            request.query_params, queryset=queryset)
 
         if not filterset.is_valid():
-            return Response(filterset.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                filterset.errors, status=status.HTTP_400_BAD_REQUEST)
 
         queryset = filterset.qs
 

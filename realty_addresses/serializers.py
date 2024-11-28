@@ -75,26 +75,30 @@ class StreetCreateSerializer(serializers.ModelSerializer):
         queryset=address_models.City.objects.all(),
         required=True)
 
-    def create(self, validated_data):
-        zone_data = validated_data.pop("zone", None)
-        district_data = validated_data.pop("district", None)
-        city_data = validated_data.pop("city", None)
+    # def create(self, validated_data):
+    #     zone_data = validated_data.pop("zone", None)
+    #     district_data = validated_data.pop("district", None)
+    #     city_data = validated_data.pop("city", None)
 
-        zone = (address_models.Zone.objects.create(
-            **zone_data) if zone_data else None)
-        validated_data["zone"] = zone
+    #     zone = (address_models.Zone.objects.create(
+    #         **zone_data) if zone_data else None)
+    #     validated_data["zone"] = zone
 
-        district = (address_models.District.objects.create(
-            **district_data) if district_data else None)
-        validated_data["district"] = district
+    #     district = (address_models.District.objects.create(
+    #         **district_data) if district_data else None)
+    #     validated_data["district"] = district
 
-        if city_data:
-            city, _ = address_models.City.objects.get_or_create(**city_data)
-            validated_data["city"] = city
-        street, _ = address_models.Street.objects.get_or_create(
-            **validated_data
-        )
-        return street
+    #     if city_data:
+    #     #     city, _ = address_models.City.objects.get_or_create(**city_data)
+    #     #     validated_data["city"] = city
+    #     # street, _ = address_models.Street.objects.get_or_create(
+    #     #     **validated_data
+    #     # )
+    #         validated_data["city"] = city_data
+    #     street, _ = address_models.Street.objects.get_or_create(
+    #         **validated_data
+    #     )
+    #     return street
 
     class Meta:
         model = address_models.Street
@@ -191,15 +195,25 @@ class AddressCreateSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         street_data = validated_data.pop("street", None)
-        metro = validated_data.pop("metro", None)
+        # metro = validated_data.pop("metro", None)
 
         if street_data:
             street_serializer = StreetCreateSerializer(data=street_data)
+            city = street_data['city']
+            street_data['city'] = city.id
+
+            zone = street_data['zone']
+            street_data['zone'] = zone.id
+
+            district = street_data['district']
+            street_data['district'] = district.id
+
             street_serializer.is_valid(raise_exception=True)
+
             street = street_serializer.save()
             validated_data["street"] = street
 
-        validated_data["metro"] = metro  # Связываем метро по id
+        # validated_data["metro"] = metro  # Связываем метро по id
 
         address, _ = address_models.Address.objects.get_or_create(
             **validated_data
