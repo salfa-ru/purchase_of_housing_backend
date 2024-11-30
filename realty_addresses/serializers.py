@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from realty import models as realty_models
-# from .models import City, Metro, Street, Address
+from .models import City, Metro, Street, Address
 
 from realty_addresses import models as address_models
 from config import constants
@@ -75,12 +75,38 @@ class StreetCreateSerializer(serializers.ModelSerializer):
         queryset=address_models.City.objects.all(),
         required=True)
 
+    # def create(self, validated_data):  # DONE
+    #     city_data = validated_data.pop("city", None)
+    #     zone_data = validated_data.pop("zone", None)
+    #     district_data = validated_data.pop("district", None)
+
+    #     if city_data:
+    #         city = address_models.Street.objects.get(id=city['id'])
+    #     else:
+    #         city = None
+
+    #     if zone_data:
+    #         zone = address_models.Zone.objects.get(id=zone_data['id'])
+    #     else:
+    #         zone = None
+
+    #     if district_data:
+    #         district = address_models.District.objects.get(id=district_data['id'])
+    #     else:
+    #         district = None
+
+    #     street = address_models.Street.objects.create(
+    #         zone=zone,
+    #         district=district,
+    #         city=city)
+    #     return street
+
     # def create(self, validated_data):
     #     zone_data = validated_data.pop("zone", None)
     #     district_data = validated_data.pop("district", None)
     #     city_data = validated_data.pop("city", None)
 
-    #     zone = (address_models.Zone.objects.create(
+    #     zone, _ = (address_models.Zone.objects.get_or_create(
     #         **zone_data) if zone_data else None)
     #     validated_data["zone"] = zone
 
@@ -173,14 +199,17 @@ class AddressCreateSerializer(serializers.ModelSerializer):
     corpus = serializers.CharField(
         max_length=constants.CHAR_LENGTH,
         required=False,
+        allow_null=True,
     )
     building = serializers.CharField(
         max_length=constants.CHAR_LENGTH,
         required=False,
+        allow_null=True,
     )
     ownership = serializers.CharField(
         max_length=constants.CHAR_LENGTH,
         required=False,
+        allow_null=True,
     )
     latitude = serializers.FloatField(
         required=True, )
@@ -195,25 +224,35 @@ class AddressCreateSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         street_data = validated_data.pop("street", None)
-        # metro = validated_data.pop("metro", None)
+        metro = validated_data.pop("metro", None)
 
         if street_data:
             street_serializer = StreetCreateSerializer(data=street_data)
-            city = street_data['city']
-            street_data['city'] = city.id
 
-            zone = street_data['zone']
-            street_data['zone'] = zone.id
+            if "city" in street_data:
+                city = street_data["city"]
+                street_data["city"] = city.id
+            if "zone" in street_data and street_data["zone"] is not None:
+                zone = street_data["zone"]
+                street_data["zone"] = zone.id
+            if "district" in street_data and street_data["district"] is not None:
+                district = street_data["district"]
+                street_data["district"] = district.id
 
-            district = street_data['district']
-            street_data['district'] = district.id
+            # city = street_data['city']
+            # street_data['city'] = city.id
+
+            # zone = street_data['zone']
+            # street_data['zone'] = zone.id
+
+            # district = street_data['district']
+            # street_data['district'] = district.id
 
             street_serializer.is_valid(raise_exception=True)
-
             street = street_serializer.save()
             validated_data["street"] = street
 
-        # validated_data["metro"] = metro  # Связываем метро по id
+        validated_data["metro"] = metro  # Связываем метро по id
 
         address, _ = address_models.Address.objects.get_or_create(
             **validated_data

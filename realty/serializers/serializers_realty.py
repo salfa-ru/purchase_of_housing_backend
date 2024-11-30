@@ -8,6 +8,7 @@ from config import constants
 from notifications.utils import create_notification
 from realty import models as realty_models
 from realty_photos.models import RealtyPhoto
+from realty_addresses import models as address_models
 from realty_values import models as values_models
 from realty_specificities import models as specificities_models
 from realty_addresses import serializers as address_serializers
@@ -133,6 +134,7 @@ class RealtyCreateSerializer(serializers.ModelSerializer):
     # )
     # uploaded_photos = Base64ImageField()
     uploaded_photos = serializers.ListSerializer(
+        required=False,
         child=Base64ImageField(),
     )
     uploaded_photos_to_remove = serializers.ListField(
@@ -185,17 +187,32 @@ class RealtyCreateSerializer(serializers.ModelSerializer):
             address_serializer = address_serializers.AddressCreateSerializer(
                 data=address_data
             )
-            city = address_data['street']['city']
-            address_data['street']['city'] = city.id
+            if "street" in address_data:
+                street_data = address_data["street"]
+                if "city" in street_data:
+                    city = street_data["city"]
+                    street_data["city"] = city.id
+                if "zone" in street_data and street_data["zone"] is not None:
+                    zone = street_data["zone"]
+                    street_data["zone"] = zone.id
+                if "district" in street_data and street_data["district"] is not None:
+                    district = street_data["district"]
+                    street_data["district"] = district.id
 
-            zone = address_data['street']['zone']
-            address_data['street']['zone'] = zone.id
+            if "metro" in address_data and address_data["metro"] is not None:
+                metro = address_data["metro"]
+                address_data["metro"] = metro.id
+            # city = address_data['street']['city']
+            # address_data['street']['city'] = city.id
 
-            district = address_data['street']['district']
-            address_data['street']['district'] = district.id
+            # zone = address_data['street']['zone']
+            # address_data['street']['zone'] = zone.id
 
-            metro = address_data['metro']
-            address_data['metro'] = metro.id
+            # district = address_data['street']['district']
+            # address_data['street']['district'] = district.id
+
+            # metro = address_data['metro']
+            # address_data['metro'] = metro.id
 
             address_serializer.is_valid(raise_exception=True)
             address = address_serializer.save()
@@ -241,6 +258,56 @@ class RealtyCreateSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         uploaded_photos_to_remove = validated_data.pop("uploaded_photos_to_remove", [])
         realty_instance = instance.realty if hasattr(instance, 'realty') else instance
+        address_data = validated_data.pop("address", None)
+        # related_instance_realty = instance.realty
+
+        if address_data:
+                # street_data = address_data.pop("street", None)
+                # metro_data = address_data.pop("metro", None)
+
+            address_date_serializer = address_serializers.AddressCreateSerializer(
+                instance=instance.realty.address,
+                data=address_data,
+                partial=True
+            )
+
+            if "street" in address_data:
+                street_data = address_data["street"]
+                if "city" in street_data:
+                    city = street_data["city"]
+                    street_data["city"] = city.id
+                if "zone" in street_data and street_data["zone"] is not None:
+                    zone = street_data["zone"]
+                    street_data["zone"] = zone.id
+                if "district" in street_data and street_data["district"] is not None:
+                    district = street_data["district"]
+                    street_data["district"] = district.id
+
+            if "metro" in address_data and address_data["metro"] is not None:
+                metro = address_data["metro"]
+                address_data["metro"] = metro.id
+
+            address_date_serializer.is_valid(raise_exception=True)
+            address_date_serializer.save()
+
+                # обновление поля street
+                # if street_data:
+                #     obj_instance = instance.realty.address.street
+                #     name = street_data.pop("name", obj_instance.name)
+                #     zone = street_data.pop("zone", obj_instance.zone)
+                #     district = street_data.pop("district", obj_instance.district)
+                #     city = street_data.pop("city", obj_instance.city)
+
+                #     street_data = {"name": name, "zone": zone, "district": district, "city": city}
+
+                #     obj_street, create = address_models.Street.objects.get_or_create(**street_data)
+                #     related_instance_realty.address.street = obj_street
+
+                # # обновление поля metro
+                # if metro_data and related_instance_realty.address.metro:
+                #     related_instance_realty.address.metro = metro_data
+
+                # related_instance_realty.address.save()
 
     # Удаление указанных фото
         if uploaded_photos_to_remove:
