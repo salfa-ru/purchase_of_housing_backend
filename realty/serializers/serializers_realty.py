@@ -202,17 +202,6 @@ class RealtyCreateSerializer(serializers.ModelSerializer):
             if "metro" in address_data and address_data["metro"] is not None:
                 metro = address_data["metro"]
                 address_data["metro"] = metro.id
-            # city = address_data['street']['city']
-            # address_data['street']['city'] = city.id
-
-            # zone = address_data['street']['zone']
-            # address_data['street']['zone'] = zone.id
-
-            # district = address_data['street']['district']
-            # address_data['street']['district'] = district.id
-
-            # metro = address_data['metro']
-            # address_data['metro'] = metro.id
 
             address_serializer.is_valid(raise_exception=True)
             address = address_serializer.save()
@@ -262,33 +251,77 @@ class RealtyCreateSerializer(serializers.ModelSerializer):
         # related_instance_realty = instance.realty
 
         if address_data:
-                # street_data = address_data.pop("street", None)
-                # metro_data = address_data.pop("metro", None)
+            
+            # metro_data = address_data.pop("metro", None)
+            print("address_data:", address_data)
+
+            if "street" in address_data:
+                street_data = validated_data.pop("street", None)
+                # street_data = address_data["street"]
+                print("Street data:", street_data)
+                # if "city" in street_data:
+                #     city = street_data["city"]
+                #     street_data["city"] = city.id
+                #     print("city data:", street_data)
+                # street_data = validated_data.pop("street", None)
+                # street_instance = (
+                #     realty_instance.address.street
+                #     if realty_instance.address and hasattr(realty_instance.address, 'street')
+                #     else None
+                # )
+                street_serializer = address_serializers.StreetCreateSerializer(
+                    instance=realty_instance.address.street,
+                    data=street_data,
+                    partial=True
+                )
+                street_serializer.is_valid(raise_exception=True)
+                street_serializer.save()
+
+                # street_data = address_data["street"]
+                # if "city" in street_data:
+                #     street_data["city"] = street_data["city"].id  # Преобразуем объект City в его id
+                # if "zone" in street_data and street_data["zone"] is not None:
+                #     street_data["zone"] = street_data["zone"].id
+                # if "district" in street_data and street_data["district"] is not None:
+                #     street_data["district"] = street_data["district"].id
 
             address_date_serializer = address_serializers.AddressCreateSerializer(
-                instance=instance.realty.address,
+                instance=realty_instance.address,
                 data=address_data,
                 partial=True
             )
-
-            if "street" in address_data:
-                street_data = address_data["street"]
-                if "city" in street_data:
-                    city = street_data["city"]
-                    street_data["city"] = city.id
-                if "zone" in street_data and street_data["zone"] is not None:
-                    zone = street_data["zone"]
-                    street_data["zone"] = zone.id
-                if "district" in street_data and street_data["district"] is not None:
-                    district = street_data["district"]
-                    street_data["district"] = district.id
-
-            if "metro" in address_data and address_data["metro"] is not None:
-                metro = address_data["metro"]
-                address_data["metro"] = metro.id
-
             address_date_serializer.is_valid(raise_exception=True)
             address_date_serializer.save()
+        
+
+        # if address_data:
+        #         # street_data = address_data.pop("street", None)
+        #         # metro_data = address_data.pop("metro", None)
+
+        #     address_date_serializer = address_serializers.AddressCreateSerializer(
+        #         instance=instance.realty.address,
+        #         data=address_data,
+        #         partial=True
+        #     )
+
+        #     if "street" in address_data:
+        #         street_data = address_data["street"]
+        #         if "city" in street_data:
+        #             city = street_data["city"]
+        #             street_data["city"] = city.id
+        #         if "zone" in street_data and street_data["zone"] is not None:
+        #             zone = street_data["zone"]
+        #             street_data["zone"] = zone.id
+        #         if "district" in street_data and street_data["district"] is not None:
+        #             district = street_data["district"]
+        #             street_data["district"] = district.id
+
+        #     if "metro" in address_data and address_data["metro"] is not None:
+        #         metro = address_data["metro"]
+        #         address_data["metro"] = metro.id
+
+        #     address_date_serializer.is_valid(raise_exception=True)
+        #     address_date_serializer.save()
 
                 # обновление поля street
                 # if street_data:
