@@ -248,21 +248,21 @@ class RealtyCreateSerializer(serializers.ModelSerializer):
         uploaded_photos_to_remove = validated_data.pop("uploaded_photos_to_remove", [])
         realty_instance = instance.realty if hasattr(instance, 'realty') else instance
         address_data = validated_data.pop("address", None)
+        print(realty_instance)
         # related_instance_realty = instance.realty
 
         if address_data:
-            
             # metro_data = address_data.pop("metro", None)
             print("address_data:", address_data)
 
             if "street" in address_data:
-                street_data = validated_data.pop("street", None)
+                street_data = address_data.pop("street", None)
                 # street_data = address_data["street"]
                 print("Street data:", street_data)
-                # if "city" in street_data:
-                #     city = street_data["city"]
-                #     street_data["city"] = city.id
-                #     print("city data:", street_data)
+                if "city" in street_data:
+                    city = street_data["city"]
+                    street_data["city"] = city.id
+                    print("city data:", street_data)
                 # street_data = validated_data.pop("street", None)
                 # street_instance = (
                 #     realty_instance.address.street
@@ -361,7 +361,7 @@ class RealtyCreateSerializer(serializers.ModelSerializer):
             for photo in uploaded_photos:
                 RealtyPhoto.objects.create(realty=instance, image=photo)
 
-        return super().update(instance, validated_data)
+        return super().update(realty_instance, validated_data)
 
     # def to_representation(self, instance):
     #     return RealtyBaseSerializer(
