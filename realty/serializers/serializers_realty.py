@@ -229,8 +229,6 @@ class RealtyCreateSerializer(serializers.ModelSerializer):
 
         realty = realty_models.Realty.objects.create(**validated_data)
 
-        # for photo in uploaded_photos:
-        #     RealtyPhoto.objects.create(realty=realty, image=photo)
         if uploaded_photos:
             for photo in uploaded_photos:
                 RealtyPhoto.objects.create(
@@ -248,21 +246,18 @@ class RealtyCreateSerializer(serializers.ModelSerializer):
         uploaded_photos_to_remove = validated_data.pop("uploaded_photos_to_remove", [])
         realty_instance = instance.realty if hasattr(instance, 'realty') else instance
         address_data = validated_data.pop("address", None)
-        print(realty_instance)
         # related_instance_realty = instance.realty
+        about_building_data = validated_data.pop("about_building", None)
+        about_apartment_data = validated_data.pop("about_apartment", None)
 
         if address_data:
-            # metro_data = address_data.pop("metro", None)
-            print("address_data:", address_data)
 
             if "street" in address_data:
                 street_data = address_data.pop("street", None)
-                # street_data = address_data["street"]
-                print("Street data:", street_data)
+
                 if "city" in street_data:
                     city = street_data["city"]
                     street_data["city"] = city.id
-                    print("city data:", street_data)
 
                 if "zone" in street_data and street_data["zone"] is not None:
                     zone = street_data["zone"]
@@ -276,12 +271,6 @@ class RealtyCreateSerializer(serializers.ModelSerializer):
                 else:
                     street_data["district"] = None
 
-                # street_data = validated_data.pop("street", None)
-                # street_instance = (
-                #     realty_instance.address.street
-                #     if realty_instance.address and hasattr(realty_instance.address, 'street')
-                #     else None
-                # )
                 street_serializer = address_serializers.StreetCreateSerializer(
                     instance=realty_instance.address.street,
                     data=street_data,
@@ -296,14 +285,6 @@ class RealtyCreateSerializer(serializers.ModelSerializer):
             else:
                 address_data["metro"] = None
 
-                # street_data = address_data["street"]
-                # if "city" in street_data:
-                #     street_data["city"] = street_data["city"].id  # Преобразуем объект City в его id
-                # if "zone" in street_data and street_data["zone"] is not None:
-                #     street_data["zone"] = street_data["zone"].id
-                # if "district" in street_data and street_data["district"] is not None:
-                #     street_data["district"] = street_data["district"].id
-
             address_date_serializer = address_serializers.AddressCreateSerializer(
                 instance=realty_instance.address,
                 data=address_data,
@@ -311,6 +292,35 @@ class RealtyCreateSerializer(serializers.ModelSerializer):
             )
             address_date_serializer.is_valid(raise_exception=True)
             address_date_serializer.save()
+
+        if about_building_data:
+
+            if "type" in about_building_data:
+                type = about_building_data["type"]
+                about_building_data["type"] = type.id
+
+            about_building_serializer = specif_serializers.AboutBuildingCreateSerializer(
+                instance=realty_instance.about_building,
+                data=about_building_data,
+                partial=True
+            )
+            about_building_serializer.is_valid(raise_exception=True)
+            about_building_serializer.save()
+
+        if about_apartment_data:
+
+            if "number_of_rooms" in about_apartment_data:
+                number_of_rooms = about_apartment_data["number_of_rooms"]
+                about_apartment_data["number_of_rooms"] = number_of_rooms.id
+
+            about_apartment_serializer = specif_serializers.AboutApartmentCreateSerializer(
+                instance=realty_instance.about_apartment,
+                data=about_apartment_data,
+                partial=True
+            )
+            about_apartment_serializer.is_valid(raise_exception=True)
+            about_apartment_serializer.save()
+
 
         # if address_data:
         #         # street_data = address_data.pop("street", None)
