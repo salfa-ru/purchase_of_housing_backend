@@ -68,9 +68,18 @@ class AboutApartmentCreateSerializer(serializers.ModelSerializer):
     def validate(self, data):
         floor = data.get('floor')
         floors_number = data.get('floors_number')
-        if floor > floors_number:
+
+        if self.instance:
+            if floor is None:
+                floor = self.instance.floor
+            if floors_number is None:
+                floors_number = self.instance.floors_number
+
+        if floor and floors_number and floor > floors_number:
             raise ValidationError(
-                'Этаж не может быть больше, чем общая этажность здания!')
+                'Этаж не может быть больше, чем общая этажность здания!'
+            )
+
         return data
 
 
