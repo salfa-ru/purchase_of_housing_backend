@@ -8,7 +8,6 @@ from config import constants
 from notifications.utils import create_notification
 from realty import models as realty_models
 from realty_photos.models import RealtyPhoto
-from realty_addresses import models as address_models
 from realty_values import models as values_models
 from realty_specificities import models as specificities_models
 from realty_addresses import serializers as address_serializers
@@ -115,7 +114,7 @@ class RealtyCreateSerializer(serializers.ModelSerializer):
         required=True,
     )
     commission = serializers.IntegerField(
-        required=False,
+        required=False, allow_null=True,
     )
     owner_type = serializers.PrimaryKeyRelatedField(
         queryset=values_models.TradeParticipant.objects.all(),
@@ -134,7 +133,6 @@ class RealtyCreateSerializer(serializers.ModelSerializer):
     # )
     # uploaded_photos = Base64ImageField()
     uploaded_photos = serializers.ListSerializer(
-        required=False,
         child=Base64ImageField(),
     )
     uploaded_photos_to_remove = serializers.ListField(
@@ -170,6 +168,20 @@ class RealtyCreateSerializer(serializers.ModelSerializer):
             )
 
         return price
+
+    # TODO validate_uploaded_photos_to_remove
+
+    # def validate_uploaded_photos_to_remove(self, uploaded_photos_to_remove):
+    #     if not self.instance:
+    #         raise ValidationError("Объект не существует для проверки связанных фотографий.")
+    #     existing_photo_ids = set(self.instance.realty_photos.values_list('id', flat=True))
+    #     invalid_photo_ids = [photo_id for photo_id in uploaded_photos_to_remove if photo_id not in existing_photo_ids]
+
+    #     if invalid_photo_ids:
+    #         raise ValidationError(
+    #             f"Следующие фотографии не связаны с этим объявлением: {', '.join(map(str, invalid_photo_ids))}"
+    #         )
+    #     return uploaded_photos_to_remove
 
     def create(self, validated_data):
         return self._create_realty(validated_data)
@@ -246,12 +258,12 @@ class RealtyCreateSerializer(serializers.ModelSerializer):
         uploaded_photos_to_remove = validated_data.pop("uploaded_photos_to_remove", [])
         realty_instance = instance.realty if hasattr(instance, 'realty') else instance
         address_data = validated_data.pop("address", None)
-        # related_instance_realty = instance.realty
         about_building_data = validated_data.pop("about_building", None)
         about_apartment_data = validated_data.pop("about_apartment", None)
+        common_characteristics_data = validated_data.pop("common_characteristics", None)
+        uploaded_photos = validated_data.pop("uploaded_photos", None)
 
         if address_data:
-
             if "street" in address_data:
                 street_data = address_data.pop("street", None)
 
@@ -294,7 +306,6 @@ class RealtyCreateSerializer(serializers.ModelSerializer):
             address_date_serializer.save()
 
         if about_building_data:
-
             if "type" in about_building_data:
                 type = about_building_data["type"]
                 about_building_data["type"] = type.id
@@ -308,7 +319,6 @@ class RealtyCreateSerializer(serializers.ModelSerializer):
             about_building_serializer.save()
 
         if about_apartment_data:
-
             if "number_of_rooms" in about_apartment_data:
                 number_of_rooms = about_apartment_data["number_of_rooms"]
                 about_apartment_data["number_of_rooms"] = number_of_rooms.id
@@ -321,80 +331,31 @@ class RealtyCreateSerializer(serializers.ModelSerializer):
             about_apartment_serializer.is_valid(raise_exception=True)
             about_apartment_serializer.save()
 
+        if common_characteristics_data:
+            if "repair_type" in common_characteristics_data:
+                repair_type = common_characteristics_data["repair_type"]
+                common_characteristics_data["repair_type"] = repair_type.id
 
-        # if address_data:
-        #         # street_data = address_data.pop("street", None)
-        #         # metro_data = address_data.pop("metro", None)
+            if "bathroom" in common_characteristics_data:
+                bathroom = common_characteristics_data["bathroom"]
+                common_characteristics_data["bathroom"] = bathroom.id
 
-        #     address_date_serializer = address_serializers.AddressCreateSerializer(
-        #         instance=instance.realty.address,
-        #         data=address_data,
-        #         partial=True
-        #     )
+            common_characteristics_serializer = specif_serializers.CommonCharacteristicsCreateSerializer(
+                instance=realty_instance.common_characteristics,
+                data=common_characteristics_data,
+                partial=True
+            )
+            common_characteristics_serializer.is_valid(raise_exception=True)
+            common_characteristics_serializer.save()
 
-        #     if "street" in address_data:
-        #         street_data = address_data["street"]
-        #         if "city" in street_data:
-        #             city = street_data["city"]
-        #             street_data["city"] = city.id
-        #         if "zone" in street_data and street_data["zone"] is not None:
-        #             zone = street_data["zone"]
-        #             street_data["zone"] = zone.id
-        #         if "district" in street_data and street_data["district"] is not None:
-        #             district = street_data["district"]
-        #             street_data["district"] = district.id
-
-        #     if "metro" in address_data and address_data["metro"] is not None:
-        #         metro = address_data["metro"]
-        #         address_data["metro"] = metro.id
-
-        #     address_date_serializer.is_valid(raise_exception=True)
-        #     address_date_serializer.save()
-
-                # обновление поля street
-                # if street_data:
-                #     obj_instance = instance.realty.address.street
-                #     name = street_data.pop("name", obj_instance.name)
-                #     zone = street_data.pop("zone", obj_instance.zone)
-                #     district = street_data.pop("district", obj_instance.district)
-                #     city = street_data.pop("city", obj_instance.city)
-
-                #     street_data = {"name": name, "zone": zone, "district": district, "city": city}
-
-                #     obj_street, create = address_models.Street.objects.get_or_create(**street_data)
-                #     related_instance_realty.address.street = obj_street
-
-                # # обновление поля metro
-                # if metro_data and related_instance_realty.address.metro:
-                #     related_instance_realty.address.metro = metro_data
-
-                # related_instance_realty.address.save()
-
-    # Удаление указанных фото
         if uploaded_photos_to_remove:
             realty_instance.realty_photos.filter(id__in=uploaded_photos_to_remove).delete()
 
-        # Обновление других данных
-        # address_data = validated_data.pop("address", None)
-        # about_building_data = validated_data.pop("about_building", None)
-        # about_apartment_data = validated_data.pop("about_apartment", None)
-        # common_characteristics_data = validated_data.pop("common_characteristics", None)
-        uploaded_photos = validated_data.pop("uploaded_photos", None)
-
-        # Логика обновления связей...
-        # (Повторяет существующий код)
-
-        # Добавление новых фото
         if uploaded_photos:
             for photo in uploaded_photos:
-                RealtyPhoto.objects.create(realty=instance, image=photo)
+                RealtyPhoto.objects.create(realty=realty_instance, image=photo)
 
         return super().update(realty_instance, validated_data)
-
-    # def to_representation(self, instance):
-    #     return RealtyBaseSerializer(
-    #         instance
-    #     ).data
 
 
 class ShortRealtySerializer(serializers.ModelSerializer):
