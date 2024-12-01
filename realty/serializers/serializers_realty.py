@@ -263,6 +263,19 @@ class RealtyCreateSerializer(serializers.ModelSerializer):
                     city = street_data["city"]
                     street_data["city"] = city.id
                     print("city data:", street_data)
+
+                if "zone" in street_data and street_data["zone"] is not None:
+                    zone = street_data["zone"]
+                    street_data["zone"] = zone.id
+                else:
+                    street_data["zone"] = None
+
+                if "district" in street_data and street_data["district"] is not None:
+                    district = street_data["district"]
+                    street_data["district"] = district.id
+                else:
+                    street_data["district"] = None
+
                 # street_data = validated_data.pop("street", None)
                 # street_instance = (
                 #     realty_instance.address.street
@@ -276,6 +289,12 @@ class RealtyCreateSerializer(serializers.ModelSerializer):
                 )
                 street_serializer.is_valid(raise_exception=True)
                 street_serializer.save()
+
+            if "metro" in address_data and address_data["metro"] is not None:
+                metro = address_data["metro"]
+                address_data["metro"] = metro.id
+            else:
+                address_data["metro"] = None
 
                 # street_data = address_data["street"]
                 # if "city" in street_data:
@@ -292,7 +311,6 @@ class RealtyCreateSerializer(serializers.ModelSerializer):
             )
             address_date_serializer.is_valid(raise_exception=True)
             address_date_serializer.save()
-        
 
         # if address_data:
         #         # street_data = address_data.pop("street", None)

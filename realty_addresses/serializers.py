@@ -66,11 +66,12 @@ class StreetCreateSerializer(serializers.ModelSerializer):
     )
     zone = serializers.PrimaryKeyRelatedField(
         queryset=address_models.Zone.objects.all(),
-        required=False
+        required=False, allow_null=True,
     )
     district = serializers.PrimaryKeyRelatedField(
         queryset=address_models.District.objects.all(),
-        required=False)
+        required=False, allow_null=True,
+    )
     city = serializers.PrimaryKeyRelatedField(
         queryset=address_models.City.objects.all(),
         required=True)
@@ -220,6 +221,7 @@ class AddressCreateSerializer(serializers.ModelSerializer):
     metro = serializers.PrimaryKeyRelatedField(
         queryset=address_models.Metro.objects.all(),
         required=False,  # Необязательно для создания/обновления
+        allow_null=True,
     )
 
     def create(self, validated_data):
@@ -235,18 +237,13 @@ class AddressCreateSerializer(serializers.ModelSerializer):
             if "zone" in street_data and street_data["zone"] is not None:
                 zone = street_data["zone"]
                 street_data["zone"] = zone.id
+            else:
+                street_data["zone"] = None
             if "district" in street_data and street_data["district"] is not None:
                 district = street_data["district"]
                 street_data["district"] = district.id
-
-            # city = street_data['city']
-            # street_data['city'] = city.id
-
-            # zone = street_data['zone']
-            # street_data['zone'] = zone.id
-
-            # district = street_data['district']
-            # street_data['district'] = district.id
+            else:
+                street_data["district"] = None
 
             street_serializer.is_valid(raise_exception=True)
             street = street_serializer.save()
@@ -276,6 +273,8 @@ class AddressCreateSerializer(serializers.ModelSerializer):
         # Обновление метро
         if metro is not None:
             instance.metro = metro
+        else:
+            instance.metro = None
 
         # Обновление остальных полей Address
         for attr, value in validated_data.items():
