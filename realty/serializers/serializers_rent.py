@@ -53,95 +53,30 @@ class RentCreateSerializer(serializers.ModelSerializer):
         return rent
 
     def update(self, instance, validated_data):
-        print(f"Это Instance 111 : {instance.realty_id}")
-        print(f"Это Instance 2 : {instance.realty.__dict__}")
-        print(f"Это validated_data : {validated_data}")
 
         # Обновление модели realty через модель Rent
         if "realty" in validated_data:
             realty_data = validated_data.pop("realty", None)
-            # instance.realty = super().update(instance.realty, realty_data)
+            realty_data["realty_type"] = realty_data["realty_type"].pk
+            realty_data["address"]["street"]["zone"] = realty_data["address"]["street"]["zone"].pk
+            realty_data["address"]["street"]["district"] = realty_data["address"]["street"]["district"].pk
+            realty_data["address"]["street"]["city"] = realty_data["address"]["street"]["city"].pk
+            realty_data["address"]["metro"] = realty_data["address"]["metro"].pk
+            realty_data["about_building"]["type"] = realty_data["about_building"]["type"].pk
+            realty_data["about_apartment"]["number_of_rooms"] = realty_data["about_apartment"]["number_of_rooms"].pk
+            realty_data["common_characteristics"]["repair_type"] = realty_data["common_characteristics"][
+                "repair_type"].pk
+            realty_data["common_characteristics"]["bathroom"] = realty_data["common_characteristics"]["bathroom"].pk
+            realty_data["owner_type"] = realty_data["owner_type"].pk
+            realty_data["communication_method"] = realty_data["communication_method"].pk
 
             realty_serializer = realty_serializers.RealtyCreateSerializer(
                 instance=instance.realty,
                 data=realty_data,
                 partial=True
             )
-
-            instance.realty = realty_serializer.instance
-            instance.realty.save()
-
-            # realty_serializer.is_valid(raise_exception=True)
-            # realty_serializer.save()
-            print(f"Это Instance 222  : {instance.realty.__dict__}")
-
-            # присваиваем полученные аргументы переменным
-
-            # related_instance_realty = instance.realty
-            # address_data = realty_data.pop("address", None)
-            # about_building_data = realty_data.pop("about_building", None)
-            # about_apartment_data = realty_data.pop("about_apartment", None)
-            # common_characteristics_data = realty_data.pop("common_characteristics", None)
-            #
-            # # обновление поля address в модели realty
-            # if address_data and related_instance_realty.address:
-            #     street_data = address_data.pop("street", None)
-            #     metro_data = address_data.pop("metro", None)
-            #
-            #     address_date_serializer = address_serializers.AddressCreateSerializer(
-            #         instance=instance.realty.address,
-            #         data=address_data,
-            #         partial=True
-            #     )
-            #     address_date_serializer.is_valid(raise_exception=True)
-            #     address_date_serializer.save()
-            #
-            #     # обновление поля street
-            #     if street_data and related_instance_realty.address.street:
-            #         obj_instance = instance.realty.address.street
-            #         name = street_data.pop("name", obj_instance.name)
-            #         zone = street_data.pop("zone", obj_instance.zone)
-            #         district = street_data.pop("district", obj_instance.district)
-            #         city = street_data.pop("city", obj_instance.city)
-            #
-            #         street_data = {"name": name, "zone": zone, "district": district, "city": city}
-            #
-            #         obj_street, create = address_models.Street.objects.get_or_create(**street_data)
-            #         related_instance_realty.address.street = obj_street
-            #
-            #     # обновление поля metro
-            #     if metro_data and related_instance_realty.address.metro:
-            #         related_instance_realty.address.metro = metro_data
-            #
-            #     related_instance_realty.address.save()
-            #
-            # # обновление поля about_building в модели realty
-            # if about_building_data and related_instance_realty.about_building:
-            #
-            #     for attr, value in about_building_data.items():
-            #         setattr(related_instance_realty.about_building, attr, value)
-            #     related_instance_realty.about_building.save()
-            #
-            # # обновление поля about_apartment в модели realty
-            # if about_apartment_data and related_instance_realty.about_apartment:
-            #
-            #     for attr, value in about_apartment_data.items():
-            #         setattr(related_instance_realty.about_apartment, attr, value)
-            #     related_instance_realty.about_apartment.save()
-            #
-            # # обновление поля common_characteristics в модели realty
-            # if common_characteristics_data and related_instance_realty.common_characteristics:
-            #
-            #     for attr, value in common_characteristics_data.items():
-            #         setattr(related_instance_realty.common_characteristics, attr, value)
-            #     related_instance_realty.common_characteristics.save()
-            #
-            # # обновление полей не имеющих dict значений в модели realty
-            # if realty_data and related_instance_realty:
-            #
-            #     for attr, value in realty_data.items():
-            #         setattr(related_instance_realty, attr, value)
-            #     related_instance_realty.save()
+            realty_serializer.is_valid(raise_exception=True)
+            realty_serializer.save()
 
         # Обновление поля rental_features
         if "rental_features" in validated_data:
@@ -152,7 +87,7 @@ class RentCreateSerializer(serializers.ModelSerializer):
                 for attr, value in rental_features_data.items():
                     setattr(instance.rental_features, attr, value)
                 related_instance_rental_features.save()
-        print("3")
+
         # Обновление поля lease_payments
         if "lease_payments" in validated_data:
             lease_payments_data = validated_data.pop('lease_payments', None)
@@ -162,10 +97,19 @@ class RentCreateSerializer(serializers.ModelSerializer):
                 for attr, value in lease_payments_data.items():
                     setattr(related_instance_lease_payments, attr, value)
                 related_instance_lease_payments.save()
-        print("4")
-        print(f"instance :   {instance}")
 
         return instance
+
+    def to_representation(self, instance):
+
+        if isinstance(instance, realty_models.Rent):
+            return RentReadSerializer(
+                instance
+            ).data
+        elif isinstance(instance, realty_models.Realty):
+            return realty_serializers.RealtyBaseSerializer(
+                instance
+            ).data
 
     class Meta:
         model = realty_models.Rent
