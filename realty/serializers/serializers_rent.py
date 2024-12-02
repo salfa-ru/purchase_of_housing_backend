@@ -53,21 +53,27 @@ class RentCreateSerializer(serializers.ModelSerializer):
         return rent
 
     def update(self, instance, validated_data):
+        print(f"Это Instance 111 : {instance.realty_id}")
         print(f"Это Instance 2 : {instance.realty.__dict__}")
         print(f"Это validated_data : {validated_data}")
 
         # Обновление модели realty через модель Rent
         if "realty" in validated_data:
             realty_data = validated_data.pop("realty", None)
+            # instance.realty = super().update(instance.realty, realty_data)
+
             realty_serializer = realty_serializers.RealtyCreateSerializer(
                 instance=instance.realty,
                 data=realty_data,
                 partial=True
             )
-            realty_serializer.is_valid(raise_exception=True)
-            realty_serializer.save()
-            print(f"Это Instance : {instance.realty.__dict__}")
 
+            instance.realty = realty_serializer.instance
+            instance.realty.save()
+
+            # realty_serializer.is_valid(raise_exception=True)
+            # realty_serializer.save()
+            print(f"Это Instance 222  : {instance.realty.__dict__}")
 
             # присваиваем полученные аргументы переменным
 
@@ -145,8 +151,8 @@ class RentCreateSerializer(serializers.ModelSerializer):
             if related_instance_rental_features:
                 for attr, value in rental_features_data.items():
                     setattr(instance.rental_features, attr, value)
-                # related_instance_rental_features.save()
-
+                related_instance_rental_features.save()
+        print("3")
         # Обновление поля lease_payments
         if "lease_payments" in validated_data:
             lease_payments_data = validated_data.pop('lease_payments', None)
@@ -156,7 +162,7 @@ class RentCreateSerializer(serializers.ModelSerializer):
                 for attr, value in lease_payments_data.items():
                     setattr(related_instance_lease_payments, attr, value)
                 related_instance_lease_payments.save()
-        instance.save()
+        print("4")
         print(f"instance :   {instance}")
 
         return instance
