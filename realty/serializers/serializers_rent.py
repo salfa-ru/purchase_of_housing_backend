@@ -57,18 +57,38 @@ class RentCreateSerializer(serializers.ModelSerializer):
         # Обновление модели realty через модель Rent
         if "realty" in validated_data:
             realty_data = validated_data.pop("realty", None)
-            realty_data["realty_type"] = realty_data["realty_type"].pk
-            realty_data["address"]["street"]["zone"] = realty_data["address"]["street"]["zone"].pk
-            realty_data["address"]["street"]["district"] = realty_data["address"]["street"]["district"].pk
-            realty_data["address"]["street"]["city"] = realty_data["address"]["street"]["city"].pk
-            realty_data["address"]["metro"] = realty_data["address"]["metro"].pk
-            realty_data["about_building"]["type"] = realty_data["about_building"]["type"].pk
-            realty_data["about_apartment"]["number_of_rooms"] = realty_data["about_apartment"]["number_of_rooms"].pk
-            realty_data["common_characteristics"]["repair_type"] = realty_data["common_characteristics"][
-                "repair_type"].pk
-            realty_data["common_characteristics"]["bathroom"] = realty_data["common_characteristics"]["bathroom"].pk
-            realty_data["owner_type"] = realty_data["owner_type"].pk
-            realty_data["communication_method"] = realty_data["communication_method"].pk
+            # realty_data["realty_type"] = realty_data["realty_type"].pk
+            # realty_data["address"]["street"]["zone"] = realty_data["address"]["street"]["zone"].pk
+            # realty_data["address"]["street"]["district"] = realty_data["address"]["street"]["district"].pk
+            # realty_data["address"]["street"]["city"] = realty_data["address"]["street"]["city"].pk
+            # realty_data["address"]["metro"] = realty_data["address"]["metro"].pk
+            # realty_data["about_building"]["type"] = realty_data["about_building"]["type"].pk
+            # realty_data["about_apartment"]["number_of_rooms"] = realty_data["about_apartment"]["number_of_rooms"].pk
+            # realty_data["common_characteristics"]["repair_type"] = realty_data["common_characteristics"][
+            #     "repair_type"].pk
+            # realty_data["common_characteristics"]["bathroom"] = realty_data["common_characteristics"]["bathroom"].pk
+            # realty_data["owner_type"] = realty_data["owner_type"].pk
+            # realty_data["communication_method"] = realty_data["communication_method"].pk
+            fields_to_convert = [
+                ("realty_type",),
+                ("address", "street", "zone"),
+                ("address", "street", "district"),
+                ("address", "street", "city"),
+                ("address", "metro"),
+                ("about_building", "type"),
+                ("about_apartment", "number_of_rooms"),
+                ("common_characteristics", "repair_type"),
+                ("common_characteristics", "bathroom"),
+                ("owner_type",),
+                ("communication_method",)
+            ]
+
+            # Преобразование каждого поля в ID
+            for field in fields_to_convert:
+                current_data = realty_data
+                for key in field[:-1]:
+                    current_data = current_data.get(key, {})
+                current_data[field[-1]] = getattr(current_data.get(field[-1]), 'pk', None)
 
             realty_serializer = realty_serializers.RealtyCreateSerializer(
                 instance=instance.realty,
