@@ -2,6 +2,7 @@ from rest_framework import serializers
 
 from notifications.models import Notification, NotificationTemplate
 from realty.models import Realty
+from realty.utils import get_apartment_short_info
 
 
 class NotificationTemplateSerializer(serializers.ModelSerializer):
@@ -51,6 +52,9 @@ class NotificationSerializer(serializers.ModelSerializer):
     template = serializers.SerializerMethodField()
 
 
+
+
+
     class Meta:
         model = Notification
         fields = [
@@ -65,9 +69,13 @@ class NotificationSerializer(serializers.ModelSerializer):
         # Получаем оригинальные темплейты из стандартного сериализатора
         template_data = NotificationTemplateSerializer(obj.template).data
 
+        # Get brief realty info
+        realty_brief_info = get_apartment_short_info(obj.realty)
+
         # Вставляем номер объявление вместо подчеркивания - ищем его только в первой части
         if '№___' in template_data['part1']:
-            template_data['part1'] = template_data['part1'].replace('№___', "№"+str(obj.realty.id))
+            template_data['part1'] = (template_data['part1'].
+                                      replace('№___', f"№{str(obj.realty.id)} ({realty_brief_info})"))
 
         return template_data
 
