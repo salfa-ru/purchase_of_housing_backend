@@ -78,25 +78,17 @@ class RentCreateSerializer(serializers.ModelSerializer):
             realty_serializer.is_valid(raise_exception=True)
             realty_serializer.save()
 
-        # Обновление поля rental_features
-        if "rental_features" in validated_data:
-            rental_features_data = validated_data.pop('rental_features', None)
-            related_instance_rental_features = instance.rental_features
+        def update_related(instance_field, related_data):
+            if instance_field and related_data:
+                for attr, value in related_data.items():
+                    setattr(instance_field, attr, value)
+                instance_field.save()
 
-            if related_instance_rental_features:
-                for attr, value in rental_features_data.items():
-                    setattr(instance.rental_features, attr, value)
-                related_instance_rental_features.save()
+        # Обновление rental_features
+        update_related(instance.rental_features, validated_data.pop("rental_features", None))
 
-        # Обновление поля lease_payments
-        if "lease_payments" in validated_data:
-            lease_payments_data = validated_data.pop('lease_payments', None)
-            related_instance_lease_payments = instance.lease_payments
-
-            if related_instance_lease_payments:
-                for attr, value in lease_payments_data.items():
-                    setattr(related_instance_lease_payments, attr, value)
-                related_instance_lease_payments.save()
+        # Обновление lease_payments
+        update_related(instance.lease_payments, validated_data.pop("lease_payments", None))
 
         return instance
 
