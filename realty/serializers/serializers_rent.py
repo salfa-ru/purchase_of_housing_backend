@@ -57,7 +57,8 @@ class RentCreateSerializer(serializers.ModelSerializer):
         # Обновление модели realty через модель Rent
         if "realty" in validated_data:
             realty_data = validated_data.pop("realty", None)
-            # realty_data["realty_type"] = realty_data["realty_type"].pk
+
+            # realty_data["realty_type"] = realty_data["realty_type"].pk if realty_data.get("realty_type") else
             # realty_data["address"]["street"]["zone"] = realty_data["address"]["street"]["zone"].pk
             # realty_data["address"]["street"]["district"] = realty_data["address"]["street"]["district"].pk
             # realty_data["address"]["street"]["city"] = realty_data["address"]["street"]["city"].pk
@@ -69,6 +70,7 @@ class RentCreateSerializer(serializers.ModelSerializer):
             # realty_data["common_characteristics"]["bathroom"] = realty_data["common_characteristics"]["bathroom"].pk
             # realty_data["owner_type"] = realty_data["owner_type"].pk
             # realty_data["communication_method"] = realty_data["communication_method"].pk
+
             fields_to_convert = [
                 ("realty_type",),
                 ("address", "street", "zone"),
@@ -83,24 +85,37 @@ class RentCreateSerializer(serializers.ModelSerializer):
                 ("communication_method",)
             ]
 
-            # Преобразование каждого поля в ID
             for field in fields_to_convert:
-                current_data = realty_data
-                for key in field[:-1]:
-                    if not isinstance(current_data, dict) or key not in current_data:
-                        # Если ключ отсутствует на текущем уровне, пропускаем это поле
-                        break
-                    current_data = current_data[key]
+                # print(field)
 
-                # Проверяем последний ключ только если текущие данные допустимы
-                if isinstance(current_data, dict) and field[-1] in current_data:
-                    current_data[field[-1]] = getattr(current_data[field[-1]], 'pk', None)
+                current_data = realty_data
+
+                for key in field[:-1]:
+                    print(current_data)
+                    # print(key)
+
+                    if not isinstance(current_data, dict) or key not in current_data:
+                        # print(f"brake : {key}")
+                        break
+                    # print(f"No brake : {key}")
+                    current_data = current_data[key]
+                    # print(f" проходит : {current_data}")
+
+                if (
+                        isinstance(current_data, dict)
+                        and field[-1] in current_data
+                        and hasattr(current_data[field[-1]], 'pk')
+                ):
+                    print(field[-1])
+                    current_data[field[-1]] = current_data[field[-1]].pk
+                    # print(current_data)
 
             realty_serializer = realty_serializers.RealtyCreateSerializer(
                 instance=instance.realty,
                 data=realty_data,
                 partial=True
             )
+            print("2")
             realty_serializer.is_valid(raise_exception=True)
             realty_serializer.save()
 
