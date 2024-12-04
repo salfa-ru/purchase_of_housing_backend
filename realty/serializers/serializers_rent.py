@@ -87,8 +87,14 @@ class RentCreateSerializer(serializers.ModelSerializer):
             for field in fields_to_convert:
                 current_data = realty_data
                 for key in field[:-1]:
-                    current_data = current_data.get(key, {})
-                current_data[field[-1]] = getattr(current_data.get(field[-1]), 'pk', None)
+                    if not isinstance(current_data, dict) or key not in current_data:
+                        # Если ключ отсутствует на текущем уровне, пропускаем это поле
+                        break
+                    current_data = current_data[key]
+
+                # Проверяем последний ключ только если текущие данные допустимы
+                if isinstance(current_data, dict) and field[-1] in current_data:
+                    current_data[field[-1]] = getattr(current_data[field[-1]], 'pk', None)
 
             realty_serializer = realty_serializers.RealtyCreateSerializer(
                 instance=instance.realty,
