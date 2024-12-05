@@ -86,36 +86,45 @@ class RentCreateSerializer(serializers.ModelSerializer):
             ]
 
             for field in fields_to_convert:
-                # print(field)
 
                 current_data = realty_data
+                if "address" in current_data:
+                    # Обработка metro
+                    current_data["address"]["metro"] = current_data["address"].get(
+                        "metro", instance.realty.address.metro.pk if instance.realty.address.metro else None
+                    )
+
+                    if "street" in current_data["address"]:
+                        # Обработка street
+                        street_data = current_data["address"]["street"]
+
+                        street_data["zone"] = street_data.get(
+                            "zone",
+                            instance.realty.address.street.zone.pk if instance.realty.address.street.zone else None
+                        )
+                        street_data["district"] = street_data.get(
+                            "district",
+                            instance.realty.address.street.district.pk if instance.realty.address.street.district else None
+                        )
 
                 for key in field[:-1]:
-                    print(current_data)
-                    # print(key)
 
                     if not isinstance(current_data, dict) or key not in current_data:
-                        # print(f"brake : {key}")
                         break
-                    # print(f"No brake : {key}")
                     current_data = current_data[key]
-                    # print(f" проходит : {current_data}")
 
                 if (
                         isinstance(current_data, dict)
                         and field[-1] in current_data
                         and hasattr(current_data[field[-1]], 'pk')
                 ):
-                    print(field[-1])
                     current_data[field[-1]] = current_data[field[-1]].pk
-                    # print(current_data)
 
             realty_serializer = realty_serializers.RealtyCreateSerializer(
                 instance=instance.realty,
                 data=realty_data,
                 partial=True
             )
-            print("2")
             realty_serializer.is_valid(raise_exception=True)
             realty_serializer.save()
 
