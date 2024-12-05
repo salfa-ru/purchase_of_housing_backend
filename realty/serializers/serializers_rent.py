@@ -58,19 +58,6 @@ class RentCreateSerializer(serializers.ModelSerializer):
         if "realty" in validated_data:
             realty_data = validated_data.pop("realty", None)
 
-            # realty_data["realty_type"] = realty_data["realty_type"].pk if realty_data.get("realty_type") else
-            # realty_data["address"]["street"]["zone"] = realty_data["address"]["street"]["zone"].pk
-            # realty_data["address"]["street"]["district"] = realty_data["address"]["street"]["district"].pk
-            # realty_data["address"]["street"]["city"] = realty_data["address"]["street"]["city"].pk
-            # realty_data["address"]["metro"] = realty_data["address"]["metro"].pk
-            # realty_data["about_building"]["type"] = realty_data["about_building"]["type"].pk
-            # realty_data["about_apartment"]["number_of_rooms"] = realty_data["about_apartment"]["number_of_rooms"].pk
-            # realty_data["common_characteristics"]["repair_type"] = realty_data["common_characteristics"][
-            #     "repair_type"].pk
-            # realty_data["common_characteristics"]["bathroom"] = realty_data["common_characteristics"]["bathroom"].pk
-            # realty_data["owner_type"] = realty_data["owner_type"].pk
-            # realty_data["communication_method"] = realty_data["communication_method"].pk
-
             fields_to_convert = [
                 ("realty_type",),
                 ("address", "street", "zone"),
