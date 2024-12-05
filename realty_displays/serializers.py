@@ -20,7 +20,10 @@ class CounterViewsSerializer(serializers.Serializer):
         search_count = search_count_obj.count if search_count_obj else None
         representation['shown_in_search'] = search_count
 
-        last_30_days = timezone.now() - timedelta(days=30)
+        # из-за фильтра data_gte добавляется +день к поиску!
+        # так что устанавливаю 29 а не 30
+        last_30_days = timezone.now() - timedelta(days=29)
+
         views_30_days = instance.display_full_info.filter(
             date__gte=last_30_days).aggregate(total=Sum('count'))['total']
         representation['full_views_in_30_days'] = views_30_days if views_30_days is not None else None
