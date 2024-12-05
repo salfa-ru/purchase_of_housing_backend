@@ -51,10 +51,6 @@ class NotificationSerializer(serializers.ModelSerializer):
     # метод, подставляющий номер объявления
     template = serializers.SerializerMethodField()
 
-
-
-
-
     class Meta:
         model = Notification
         fields = [

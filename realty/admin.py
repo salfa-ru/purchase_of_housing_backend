@@ -78,12 +78,9 @@ class RealtyAdmin(admin.ModelAdmin):
         return FormWithRequest
 
 
-
     def apartment(self, obj):
         """ Выдача инфо о квартире короткой строкой"""
-
         return get_apartment_short_info(obj)
-
 
 
     def address_short(self, obj):
