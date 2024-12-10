@@ -1,10 +1,7 @@
 from rest_framework import serializers
-
 from realty import models as realty_models
-from realty_addresses import models as address_models
 from realty_specificities import models as specificities_models
 from realty.serializers import serializers_realty as realty_serializers
-from realty_addresses import serializers as address_serializers
 from realty_specificities import serializers as specif_serializers
 
 
@@ -28,6 +25,10 @@ class RentCreateSerializer(serializers.ModelSerializer):
     lease_payments = specif_serializers.LeasePaymentsCreateSerializer(
         required=False
     )
+
+    class Meta:
+        model = realty_models.Rent
+        fields = "__all__"
 
     def create(self, validated_data):
         realty_data = validated_data.pop("realty", None)
@@ -53,67 +54,13 @@ class RentCreateSerializer(serializers.ModelSerializer):
         return rent
 
     def update(self, instance, validated_data):
+        realty_data = validated_data.pop("realty", None)
+        print(realty_data)
+        realty_instance = instance.realty
 
-        # Обновление модели realty через модель Rent
-        if "realty" in validated_data:
-            realty_data = validated_data.pop("realty", None)
-
-            fields_to_convert = [
-                ("realty_type",),
-                ("address", "street", "zone"),
-                ("address", "street", "district"),
-                ("address", "street", "city"),
-                ("address", "metro"),
-                ("about_building", "type"),
-                ("about_apartment", "number_of_rooms"),
-                ("common_characteristics", "repair_type"),
-                ("common_characteristics", "bathroom"),
-                ("owner_type",),
-                ("communication_method",)
-            ]
-
-            for field in fields_to_convert:
-
-                current_data = realty_data
-                if "address" in current_data:
-                    # Обработка metro
-                    current_data["address"]["metro"] = current_data["address"].get(
-                        "metro", instance.realty.address.metro.pk if instance.realty.address.metro else None
-                    )
-
-                    if "street" in current_data["address"]:
-                        # Обработка street
-                        street_data = current_data["address"]["street"]
-
-                        street_data["zone"] = street_data.get(
-                            "zone",
-                            instance.realty.address.street.zone.pk if instance.realty.address.street.zone else None
-                        )
-                        street_data["district"] = street_data.get(
-                            "district",
-                            instance.realty.address.street.district.pk if instance.realty.address.street.district else None
-                        )
-
-                for key in field[:-1]:
-
-                    if not isinstance(current_data, dict) or key not in current_data:
-                        break
-                    current_data = current_data[key]
-
-                if (
-                        isinstance(current_data, dict)
-                        and field[-1] in current_data
-                        and hasattr(current_data[field[-1]], 'pk')
-                ):
-                    current_data[field[-1]] = current_data[field[-1]].pk
-
-            realty_serializer = realty_serializers.RealtyCreateSerializer(
-                instance=instance.realty,
-                data=realty_data,
-                partial=True
-            )
-            realty_serializer.is_valid(raise_exception=True)
-            realty_serializer.save()
+        if realty_data:
+            realty_serializer = realty_serializers.RealtyCreateSerializer(context=self.context)
+            realty_serializer._update_realty(realty_instance, realty_data)
 
         def update_related(instance_field, related_data):
             if instance_field and related_data:
