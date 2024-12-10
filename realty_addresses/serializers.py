@@ -224,6 +224,19 @@ class AddressCreateSerializer(serializers.ModelSerializer):
         allow_null=True,
     )
 
+    minutes_to_metro = serializers.IntegerField(
+        required=False,
+        allow_null=True
+    )
+
+    def validate_minutes_to_metro(self, value):
+        """Валидация для minutes_to_metro, чтобы значение было <= 59."""
+        if value is not None and value > 59:
+            raise serializers.ValidationError(
+                "Значение 'minutes_to_metro' не может быть больше 59."
+            )
+        return value
+
     def create(self, validated_data):
         street_data = validated_data.pop("street", None)
         metro = validated_data.pop("metro", None)
