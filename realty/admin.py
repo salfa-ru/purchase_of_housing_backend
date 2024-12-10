@@ -2,6 +2,7 @@ from django.contrib import admin
 
 from .forms import RealtyForm
 from .models import Realty, Sale, Rent
+from .utils import get_apartment_short_info
 
 
 class SaleInline(admin.StackedInline):
@@ -77,13 +78,10 @@ class RealtyAdmin(admin.ModelAdmin):
         return FormWithRequest
 
 
-
     def apartment(self, obj):
-        return (f'{obj.about_apartment.number_of_rooms.number_of_rooms}'
-                f'{"-комн." if len(obj.about_apartment.number_of_rooms.number_of_rooms) <= 2 else ""} '
-                f'{obj.realty_type.type}, '
-                f'{obj.about_apartment.area} м.кв., '
-                f'{obj.about_apartment.floor}/{obj.about_apartment.floors_number} этаж')
+        """ Выдача инфо о квартире короткой строкой"""
+        return get_apartment_short_info(obj)
+
 
     def address_short(self, obj):
         return (
