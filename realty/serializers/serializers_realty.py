@@ -255,6 +255,9 @@ class RealtyCreateSerializer(serializers.ModelSerializer):
         return realty
 
     def update(self, instance, validated_data):
+        return self._update_realty(instance, validated_data)
+
+    def _update_realty(self, instance, validated_data):
         uploaded_photos_to_remove = validated_data.pop("uploaded_photos_to_remove", [])
         realty_instance = instance.realty if hasattr(instance, 'realty') else instance
         address_data = validated_data.pop("address", None)
