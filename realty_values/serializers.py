@@ -2,6 +2,7 @@ from rest_framework import serializers
 from rest_framework.relations import SlugRelatedField
 
 from realty_values import models as values_models
+from realty_values.models import RealtyType
 
 
 class BuildingTypeSerializer(serializers.ModelSerializer):
@@ -58,3 +59,21 @@ class SaleTypeSerializer(serializers.ModelSerializer):
     class Meta:
         model = values_models.SaleType
         fields = "__all__"
+
+
+class RealtyTypeSerializer(serializers.ModelSerializer):  # создал собственный сериализатор
+    class Meta:
+        model = values_models.RealtyType
+        fields = ["id", "type"]
+
+
+class OwnerTypeSerializer(serializers.ModelSerializer):  # создал собственный сериализатор
+    class Meta:
+        model = values_models.TradeParticipant
+        fields = ["id", "participant"]
+
+
+class CommunicationMethodSerializer(serializers.ModelSerializer):  # создал собственный сериализатор
+    class Meta:
+        model = values_models.CommunicationMethod
+        fields = ["id", "method"]
