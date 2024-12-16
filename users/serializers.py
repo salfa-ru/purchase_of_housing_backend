@@ -200,3 +200,9 @@ class UserContactsSerializer(UserBaseSerializer):
                   'first_name',
                   'phone_qr_code'
                   )
+
+
+class UserReadRealtySerializer(serializers.ModelSerializer): # создал сериализатор для вывода фронтенду id, username
+    class Meta:
+        model = User
+        fields = ["id", "username"]
