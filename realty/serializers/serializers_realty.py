@@ -13,6 +13,8 @@ from realty_specificities import models as specificities_models
 from realty_addresses import serializers as address_serializers
 from realty_specificities import serializers as specif_serializers
 from realty_photos.serializers import RealtyPhotoSerializer
+from users.serializers import UserReadRealtySerializer
+from realty_values import serializers as realty_values_serializers
 
 
 class Base64ImageField(serializers.ImageField):
@@ -32,24 +34,28 @@ class Base64ImageField(serializers.ImageField):
 class RealtyBaseSerializer(serializers.ModelSerializer):
     """Realty Base Read Serializer."""
 
-    owner = SlugRelatedField(slug_field="username", read_only=True)
-    realty_type = SlugRelatedField(
-        slug_field="type", queryset=values_models.RealtyType.objects.all()
-    )
+    # owner = SlugRelatedField(slug_field="username", read_only=True)
+    owner = UserReadRealtySerializer()  # создал сериализатор в User
+    # realty_type = SlugRelatedField(
+    #     slug_field="type", queryset=values_models.RealtyType.objects.all()
+    # )
+    realty_type = realty_values_serializers.RealtyTypeSerializer()  # создал сериализатор и обращаюсь через него
     address = address_serializers.AddressReadSerializer()
     about_building = specif_serializers.AboutBuildingSerializer()
     about_apartment = specif_serializers.AboutApartmentSerializer()
     common_characteristics = (
         specif_serializers.CommonCharacteristicsSerializer()
     )
-    owner_type = SlugRelatedField(
-        slug_field="participant",
-        queryset=values_models.TradeParticipant.objects.all(),
-    )
-    communication_method = SlugRelatedField(
-        slug_field="method",
-        queryset=values_models.CommunicationMethod.objects.all(),
-    )
+    # owner_type = SlugRelatedField(
+    #     slug_field="participant",
+    #     queryset=values_models.TradeParticipant.objects.all(),
+    # )
+    owner_type = realty_values_serializers.OwnerTypeSerializer()  # создал сериализатор и обращаюсь через него
+    # communication_method = SlugRelatedField(
+    #     slug_field="method",
+    #     queryset=values_models.CommunicationMethod.objects.all(),
+    # )
+    communication_method = realty_values_serializers.CommunicationMethodSerializer()  # создал сериализатор и обращаюсь через него
     photos = RealtyPhotoSerializer(
         many=True, source="realty_photos"
     )
@@ -82,6 +88,117 @@ class RealtyBaseSerializer(serializers.ModelSerializer):
                 ).data
             }
         return None
+
+
+# class RealtyReadSerializer(serializers.ModelSerializer):
+#     owner = serializers.SerializerMethodField()
+#     realty_type = serializers.SerializerMethodField()
+#     address = serializers.SerializerMethodField()
+#     about_building = serializers.SerializerMethodField()
+#     about_apartment = serializers.SerializerMethodField()
+#     common_characteristics = serializers.SerializerMethodField()
+#     owner_type = serializers.SerializerMethodField()
+#     communication_method = serializers.SerializerMethodField()
+#     photos = serializers.SerializerMethodField()
+#     sale = serializers.SerializerMethodField()
+#     rent = serializers.SerializerMethodField()
+#
+#     class Meta:
+#         model = realty_models.Realty
+#         exclude = ["changed_at", "realty_status"]
+#
+#     def get_owner(self, obj):
+#         """Return owner with ID."""
+#         return {
+#             "id": obj.owner.id,
+#             "username": obj.owner.username
+#         } if obj.owner else None
+#
+#     def get_realty_type(self, obj):
+#         """Return realty type with ID."""
+#         return {
+#             "id": obj.realty_type.id,
+#             "type": obj.realty_type.type
+#         } if obj.realty_type else None
+#
+#     def get_address(self, obj):
+#         """Return address with ID."""
+#         return {
+#             "id": obj.address.id,
+#             **address_serializers.AddressReadSerializer(obj.address).data
+#         } if obj.address else None
+#
+#     def get_about_building(self, obj):
+#         """Return about building with ID."""
+#         return {
+#             "id": obj.about_building.id,
+#             **specif_serializers.AboutBuildingSerializer(obj.about_building).data
+#         } if obj.about_building else None
+#
+#     def get_about_apartment(self, obj):
+#         """Return about apartment with ID."""
+#         return {
+#             "id": obj.about_apartment.id,
+#             **specif_serializers.AboutApartmentSerializer(obj.about_apartment).data
+#         } if obj.about_apartment else None
+#
+#     def get_common_characteristics(self, obj):
+#         """Return common characteristics with ID."""
+#         return {
+#             "id": obj.common_characteristics.id,
+#             **specif_serializers.CommonCharacteristicsSerializer(obj.common_characteristics).data
+#         } if obj.common_characteristics else None
+#
+#     def get_owner_type(self, obj):
+#         """Return owner type with ID."""
+#         return {
+#             "id": obj.owner_type.id,
+#             "participant": obj.owner_type.participant
+#         } if obj.owner_type else None
+#
+#     def get_communication_method(self, obj):
+#         """Return communication method with ID."""
+#         return {
+#             "id": obj.communication_method.id,
+#             "method": obj.communication_method.method
+#         } if obj.communication_method else None
+#
+#     def get_photos(self, obj):
+#         """Return photos with ID."""
+#         return [
+#             {
+#                 "id": photo.id,
+#                 **RealtyPhotoSerializer(photo).data
+#             } for photo in obj.realty_photos.all()
+#         ]
+#
+#     def get_sale(self, obj):
+#         """Return sales parameters with ID."""
+#         if hasattr(obj, 'sale_profile'):
+#             sales_parameters = specif_serializers.SalesParametersSerializer(
+#                 obj.sale_profile.sales_parameters
+#             ).data
+#             return {
+#                 "id": obj.sale_profile.id,
+#                 "sales_parameters": sales_parameters
+#             }
+#         return None
+#
+#     def get_rent(self, obj):
+#         """Return rental features with ID."""
+#         if hasattr(obj, 'rent_profile'):
+#             rental_features = specif_serializers.RentalFeaturesSerializer(
+#                 obj.rent_profile.rental_features
+#             ).data
+#             lease_payments = specif_serializers.LeasePaymentsSerializer(
+#                 obj.rent_profile.lease_payments
+#             ).data
+#             return {
+#                 "id": obj.rent_profile.id,
+#                 "rental_features": rental_features,
+#                 "lease_payments": lease_payments
+#             }
+#         return None
 
 
 class RealtyCreateSerializer(serializers.ModelSerializer):
@@ -244,9 +361,9 @@ class RealtyCreateSerializer(serializers.ModelSerializer):
         if uploaded_photos:
             for photo in uploaded_photos:
                 RealtyPhoto.objects.create(
-                        realty=realty,
-                        image=photo
-                    )
+                    realty=realty,
+                    image=photo
+                )
 
         # Отправка уведомления после успешного создания записи
         # Проверка статуса после создания записи, если запись на модерации - отправить уведомление.
