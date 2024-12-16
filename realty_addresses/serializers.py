@@ -16,7 +16,7 @@ class ZoneSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = address_models.Zone
-        fields = ["name"]
+        fields = ["id", "name"]  # добавил id
 
 
 class DistrictSerializer(serializers.ModelSerializer):
@@ -29,7 +29,7 @@ class DistrictSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = address_models.District
-        fields = ["name"]
+        fields = ["id", "name"]  # добавил id
 
 
 class CitySerializer(serializers.ModelSerializer):
@@ -42,7 +42,7 @@ class CitySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = address_models.City
-        fields = ["name"]
+        fields = ["id", "name"]  # добавил id
 
 
 class StreetReadSerializer(serializers.ModelSerializer):
