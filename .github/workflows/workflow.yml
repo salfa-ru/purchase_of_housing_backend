@@ -74,5 +74,6 @@ jobs:
             python manage.py makemigrations &&
             python manage.py migrate &&
             python manage.py collectstatic --no-input"
-            sudo docker compose exec -T backend python manage.py fix_moderator_permissions
-            sudo docker compose exec -T backend python manage.py qcluster
+            sudo docker compose exec -T backend bash -c "
+            python manage.py fix_moderator_permissions &&
+            python manage.py qcluster"
