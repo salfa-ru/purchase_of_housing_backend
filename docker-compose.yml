@@ -14,15 +14,16 @@ services:  # Определение всех сервисов, которые б
     restart: always  # Автоматический перезапуск контейнера, если он завершится с ошибкой.
 
   backend:  # Сервис для основного backend-приложения.
-    build: ./  # Сборка backend-контейнера из образа.
-    restart: always  # Автоматический перезапуск контейнера при сбоях.
+    # build: ./  # Сборка backend-контейнера из образа.
+    image: akatosphere/purchase_of_housing_backend:latest
+    env_file: .env # Использование файла окружения .env для конфигурации.
     volumes:
       - static_data:/app/static  # Том для хранения статических файлов приложения.
       - media_data:/app/media  # Том для хранения медиафайлов приложения.
     depends_on:
       db:
         condition: service_healthy  # Ожидание готовности сервиса `db` перед запуском backend.
-    env_file: .env  # Использование файла окружения .env для конфигурации.
+    restart: always  # Автоматический перезапуск контейнера при сбоях.
 
   nginx:  # Сервис для Nginx, который выполняет роль веб-сервера.
     image: nginx:latest  # Использование последнего образа Nginx.
