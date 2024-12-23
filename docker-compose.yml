@@ -17,6 +17,13 @@ services:  # Определение всех сервисов, которые б
     # build: ./  # Сборка backend-контейнера из образа.
     image: akatosphere/purchase_of_housing_backend:latest
     env_file: .env # Использование файла окружения .env для конфигурации.
+    command: >
+      sh -c "python django_app.py makemigrations &&
+      python django_app.py migrate &&
+      python django_app.py collectstatic --noinput &&
+      cp -r ./admin_panel/collected_static /backend_static &&
+      cp -r ./admin_panel/static /backend_static &&
+      gunicorn --bind 0.0.0.0:8000 admin_panel.django_settings.wsgi:application --chdir=/app/admin_panel"
     volumes:
       - static_data:/app/static  # Том для хранения статических файлов приложения.
       - media_data:/app/media  # Том для хранения медиафайлов приложения.
