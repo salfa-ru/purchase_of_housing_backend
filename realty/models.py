@@ -1,7 +1,6 @@
 from django.db import models
 from django.core.validators import (
-    MinValueValidator,
-    MaxValueValidator
+    MinValueValidator
 )
 
 from users import models as user_models
@@ -168,6 +167,3 @@ class Rent(models.Model):
     class Meta:
         verbose_name = "Аренда"
         verbose_name_plural = "Аренда"
-
-
-# Отправка уведомлений и создание задач на деактивацию объявлений - в Сигналах + Тасках

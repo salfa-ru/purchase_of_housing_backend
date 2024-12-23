@@ -42,6 +42,7 @@ class ChatAdminForm(ModelForm):
 class ChatAdmin(admin.ModelAdmin):
     list_display = (
         '__str__',
+        'id',
         'user_from',
         'user_to',
         'is_new',

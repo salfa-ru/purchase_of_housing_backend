@@ -1,7 +1,7 @@
 from django.utils import timezone
 from django_filters.rest_framework import DjangoFilterBackend
 
-from drf_spectacular.utils import extend_schema, extend_schema_view  # , OpenApiParameter
+from drf_spectacular.utils import extend_schema, extend_schema_view
 from drf_spectacular.helpers import forced_singular_serializer
 from rest_framework import generics, permissions, viewsets
 from rest_framework.response import Response
@@ -160,7 +160,6 @@ class RealtyListView(generics.ListAPIView):
         """ Запуск увеличения счетчика показа в поиске
         с защитой от накрутки."""
 
-        # Call the original list method to get the paginated response
         response = super().list(request, *args, **kwargs)
         realty_ids = [realty_data['id'] for realty_data in response.data['results']]
         realties = realty_models.Realty.objects.filter(id__in=realty_ids)

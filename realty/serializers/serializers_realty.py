@@ -124,14 +124,6 @@ class RealtyCreateSerializer(serializers.ModelSerializer):
         queryset=values_models.CommunicationMethod.objects.all(),
         required=True,
     )
-    # uploaded_photos = serializers.ListField(
-    #     required=False,
-    #     child=serializers.ImageField(
-    #      max_length=1000000,
-    #      allow_empty_file=False,
-    #      use_url=False), write_only=True
-    # )
-    # uploaded_photos = Base64ImageField()
     uploaded_photos = serializers.ListSerializer(
         child=Base64ImageField(),
     )
@@ -381,6 +373,14 @@ class ShortRealtySerializer(serializers.ModelSerializer):
     building = serializers.ReadOnlyField(source='address.building')
     ownership = serializers.ReadOnlyField(source='address.ownership')
     metro = serializers.ReadOnlyField(source='address.metro.name')
+    owner_name = serializers.ReadOnlyField(source='owner.first_name')
+    owner_type = serializers.ReadOnlyField(source='owner_type.participant')
+    communication_method = SlugRelatedField(
+        slug_field="method",
+        queryset=values_models.CommunicationMethod.objects.all(),
+    )
+    floors_number = serializers.SerializerMethodField()
+    rent = serializers.SerializerMethodField()
 
     class Meta:
         model = realty_models.Realty
@@ -395,4 +395,25 @@ class ShortRealtySerializer(serializers.ModelSerializer):
                   "corpus",
                   "building",
                   "ownership",
-                  "metro")
+                  "metro",
+                  "owner_name",
+                  "owner_type",
+                  "communication_method",
+                  "floors_number",
+                  "published_at",
+                  "commission",
+                  "rent",
+                  )
+
+    def get_floors_number(self, obj):
+        return f"{obj.about_apartment.floor}/{obj.about_apartment.floors_number} этаж"
+
+    def get_rent(self, obj):
+        """Return rental_features."""
+        if hasattr(obj, 'rent_profile'):
+            return {
+                "lease_payments": specif_serializers.LeasePaymentsSerializer(
+                    obj.rent_profile.lease_payments
+                ).data
+            }
+        return None
