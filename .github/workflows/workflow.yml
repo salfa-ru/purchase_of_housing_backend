@@ -60,13 +60,13 @@ jobs:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USER }}
           # key: ${{ secrets.SSH_KEY }}
+          # sudo docker pull ${{ secrets.DOCKER_USERNAME }}/purchase_of_housing_backend:latest
           password: ${{ secrets.PASSPHRASE }}
           script: |
             cd purchase_of_housing_backend
             sudo docker compose -f docker-compose.yml down
             sudo docker image prune -af
             sudo docker compose -f docker-compose.yml pull
-            # sudo docker pull ${{ secrets.DOCKER_USERNAME }}/purchase_of_housing_backend:latest
             rm -f .env
             touch .env
             echo POSTGRES_DB=${{ secrets.POSTGRES_DB }} >> .env
