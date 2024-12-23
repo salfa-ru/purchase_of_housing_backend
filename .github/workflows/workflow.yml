@@ -78,7 +78,7 @@ jobs:
             echo HOST_IP="${{ secrets.HOST_IP }}" >> .env
             echo DOMAIN="${{ secrets.DOMAIN }}" >> .env
             echo DEBUG=${{ secrets.DEBUG }} >> .env
-            sudo docker-compose up -d --build
+            sudo docker compose up -d --build
             sudo docker compose exec -T backend bash -c "
             python manage.py makemigrations &&
             python manage.py migrate &&
