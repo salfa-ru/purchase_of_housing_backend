@@ -37,14 +37,14 @@ jobs:
     steps:
       - name: Checkout repo
         uses: actions/checkout@v3
-      # - name: Copy Dockerfile via ssh
-      #   uses: appleboy/scp-action@master
-      #   with:
-      #     host: ${{ secrets.HOST }}
-      #     username: ${{ secrets.USER }}
-      #     password: ${{ secrets.PASSPHRASE }}
-      #     source: "Dockerfile"
-      #     target: "purchase_of_housing_backend"
+      - name: Copy nginx.conf via ssh
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USER }}
+          password: ${{ secrets.PASSPHRASE }}
+          source: "nginx.conf"
+          target: "purchase_of_housing_backend"
       - name: Copy docker-compose.yml via ssh
         uses: appleboy/scp-action@master
         with:
@@ -60,7 +60,6 @@ jobs:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USER }}
           # key: ${{ secrets.SSH_KEY }}
-          # sudo docker pull ${{ secrets.DOCKER_USERNAME }}/purchase_of_housing_backend:latest
           password: ${{ secrets.PASSPHRASE }}
           script: |
             cd purchase_of_housing_backend
