@@ -4,8 +4,7 @@ from django.urls import include, path
 from .views import (RealtyListView, LastRealtyListView, RealtyDetailView,
                     RealtyCountView, RealtyOwnerContactsView,
                     RealtyOwnerDataView, RealtyLKListView, SaleViewSet,
-                    RentViewSet, ChangeStatusUpdateAPIView)
-
+                    RentViewSet, ChangeStatusUpdateAPIView, RealtyFilterOptionsView)
 
 app_name = "realty"
 
@@ -24,4 +23,5 @@ urlpatterns = [
     path('<int:pk>/contacts/', RealtyOwnerContactsView.as_view(), name='owner-contacts'),
     path('<int:pk>/status/', ChangeStatusUpdateAPIView.as_view(), name='change-status'),
     path("", include(router.urls)),
+    path('filter-options/', RealtyFilterOptionsView.as_view(), name='realty-filter-options')
 ]
