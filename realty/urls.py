@@ -23,5 +23,5 @@ urlpatterns = [
     path('<int:pk>/contacts/', RealtyOwnerContactsView.as_view(), name='owner-contacts'),
     path('<int:pk>/status/', ChangeStatusUpdateAPIView.as_view(), name='change-status'),
     path("", include(router.urls)),
-    path('filter-options/', RealtyFilterOptionsView.as_view(), name='realty-filter-options')
+    path('filter-options/', RealtyFilterOptionsView.as_view(), name='filter-options')
 ]
