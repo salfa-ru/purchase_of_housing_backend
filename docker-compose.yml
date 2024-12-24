@@ -5,7 +5,7 @@ services:  # Определение всех сервисов, которые б
     env_file:
       - .env  # Файл окружения (.env) с настройками, такими как POSTGRES_USER и POSTGRES_DB.
     volumes:
-      - ./database/pg_data:/var/lib/postgresql/data  # Монтирование тома для сохранения данных базы на хосте.
+      - pg_data:/var/lib/postgresql/data  # Монтирование тома для сохранения данных базы на хосте.
     healthcheck:
       test: [ "CMD-SHELL", "sh -c 'pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB'" ]  # Проверка готовности PostgreSQL к работе.
       interval: 5s  # Интервал между проверками (5 секунд).
