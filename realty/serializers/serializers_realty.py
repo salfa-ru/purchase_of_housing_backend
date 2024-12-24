@@ -423,4 +423,3 @@ class ShortRealtySerializer(serializers.ModelSerializer):
                 ).data
             }
         return None
->>>>>>> dev
