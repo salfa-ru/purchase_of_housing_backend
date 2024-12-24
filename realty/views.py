@@ -3,12 +3,13 @@ from django_filters.rest_framework import DjangoFilterBackend
 
 from drf_spectacular.utils import extend_schema, extend_schema_view  # , OpenApiParameter
 from drf_spectacular.helpers import forced_singular_serializer
-from rest_framework import generics, permissions, viewsets
+from rest_framework import generics, permissions, viewsets, views
 from rest_framework.response import Response
 from rest_framework.pagination import LimitOffsetPagination
 
 from config import constants
 from realty.pagination import LimitRealtyPagination, MyRealtyPagination
+from realty_addresses import models as realty_addresses_models
 from realty_displays.models import DisplayFullInfo, DisplayInSearch
 from realty_displays.utils import increment_counter
 from realty import models as realty_models
@@ -17,6 +18,8 @@ from realty.serializers import serializers_rent as rent_serializers
 from realty.serializers import serializers_sale as sale_serializers
 from realty.serializers import serializers_common as common_serializers
 from realty.filters import RealtyFilter
+from realty_specificities import models as realty_specificities_models
+from realty_values import models as realty_values_models
 
 
 class BaseViewSet(viewsets.ModelViewSet):
@@ -267,3 +270,101 @@ class ChangeStatusUpdateAPIView(generics.UpdateAPIView):
 
     def perform_update(self, serializer):
         serializer.save()
+
+
+@extend_schema(
+    summary='получение данных для фронта.')
+class RealtyFilterOptionsView(views.APIView):
+    """
+    API для получения всех возможных значений фильтров.
+    """
+
+    def get(self, request, *args, **kwargs):
+        # Получаем данные
+        data = {
+            "realty_type": [{"id": rt.id, "type": rt.type} for rt in
+                            realty_values_models.RealtyType.objects.all()
+                            ],
+            "address": {
+                "street": {
+                    "zone": [
+                        {"id": bt.id, "name": bt.name} for bt in
+                        realty_addresses_models.Zone.objects.all()
+                    ],
+                    "district": [
+                        {"id": bt.id, "name": bt.name} for bt in
+                        realty_addresses_models.District.objects.all()
+                    ],
+                    "city": [
+                        {"id": bt.id, "name": bt.name} for bt in
+                        realty_addresses_models.City.objects.all()
+                    ],
+
+                },
+                "metro": [
+                    {"id": bt.id, "name": bt.name} for bt in
+                    realty_addresses_models.Metro.objects.all()
+                ]
+            },
+
+            "about_building": {
+                "type": [{"id": bt.id, "type": bt.type} for bt in
+                         realty_values_models.BuildingType.objects.all()
+                         ]
+            },
+            "about_apartment": {"rooms_number": [
+                {"id": apt.id, "number_of_rooms": apt.number_of_rooms, }
+                for apt in realty_values_models.RoomsNumber.objects.all()
+            ]},
+            "common_characteristics": {
+                "repair_types": [{"id": rt.id, "type": rt.type} for rt in
+                                 realty_values_models.RepairType.objects.all()
+                                 ],
+                "bathroom_types": [{"id": bt.id, "type": bt.type} for bt in
+                                   realty_values_models.BathroomType.objects.all()],
+            },
+            "owner_type": {
+                "trade_participant": [
+                    {"id": apt.id, "participant": apt.participant, }
+                    for apt in realty_values_models.TradeParticipant.objects.all()
+                ]
+            },
+            "communication_method": [
+                {"id": apt.id, "method": apt.method, }
+                for apt in realty_values_models.CommunicationMethod.objects.all()
+            ],
+            "realty_status": {
+                "realty_adv_status": [
+                    {"id": apt.id, "status": apt.status, }
+                    for apt in realty_values_models.RealtyAdvStatus.objects.all()
+                ]
+            },
+
+            "sales_parameters": {
+                "housing_type": [
+                    {"id": apt.id, "type": apt.type}
+                    for apt in realty_values_models.HousingType.objects.all()
+                ],
+                "sale_type": [
+                    {"id": apt.id, "type": apt.type}
+                    for apt in realty_values_models.SaleType.objects.all()
+                ]
+            },
+            "rent": {
+                "lease_payments": {
+                    "counters_payment": {
+                        "trade_participant": [
+                            {"id": apt.id, "participant": apt.participant, }
+                            for apt in realty_values_models.TradeParticipant.objects.all()
+                        ]
+                    },
+                    "communal_payment": {
+                        "trade_participant": [
+                            {"id": apt.id, "participant": apt.participant, }
+                            for apt in realty_values_models.TradeParticipant.objects.all()
+                        ]
+                    }
+                }
+            }
+        }
+        return Response(data)
