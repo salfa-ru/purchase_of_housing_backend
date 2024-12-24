@@ -1,25 +1,19 @@
 import django_filters
 from django.db.models import F, Q
-from django.utils.functional import lazy
 
 from config import constants
 from .models import Realty
-from realty_values.models import BathroomType
-
-
-def get_bathroom_type_choices():
-    return [(bt.type, bt.type) for bt in BathroomType.objects.all()]
 
 
 class RealtyFilter(django_filters.FilterSet):
     """Custom filterset for Realty model."""
 
-    BATHROOM_TYPE_CHOICES = lazy(get_bathroom_type_choices, list)()
-
-    bathroom_type = django_filters.MultipleChoiceFilter(
-        choices=BATHROOM_TYPE_CHOICES,
+    bathroom_type = django_filters.BaseInFilter(
         field_name='common_characteristics__bathroom__type',
-        label='Тип санузла'
+        lookup_expr='in',
+        help_text='Тип санузла (Раздельный или Совмещенный). (Значения вводить с учетом регистра! '
+                  'Можно ввести несколько значений, через запятую без пробелов '
+                  'или добавить значение в новый строковый элемент.)'
     )
     trade_type = django_filters.CharFilter(
         method='filter_trade_type',
@@ -153,16 +147,10 @@ class RealtyFilter(django_filters.FilterSet):
         method='filter_no_commission',
         label='Без комиссии'
     )
-    # pub_date = django_filters.OrderingFilter(
-    #     fields=('published_at',),
-    # )
-    # price_ordrering = django_filters.OrderingFilter(
-    #     fields=('price',),
-    # )
     ordering = django_filters.OrderingFilter(
         fields={
-            'published_at': 'published_at',  # Сортировка по дате публикации
-            'price': 'price',  # Сортировка по цене
+            'published_at': 'published_at',
+            'price': 'price',
         },
         field_labels={
             'published_at': 'Дата публикации',
