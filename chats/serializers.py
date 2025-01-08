@@ -77,6 +77,8 @@ class MessageSerializer(serializers.ModelSerializer):
             'id',
             'message',
             'datetime',
+            'user_from',
+            'user_to'
         ]
 
 
