@@ -63,10 +63,10 @@ jobs:
           password: ${{ secrets.PASSPHRASE }}
           script: |
             cd purchase_of_housing_backend
-            sudo docker compose stop
-            sudo docker compose rm backend
-            sudo docker image prune -af
-            sudo docker pull ${{ secrets.DOCKER_USERNAME }}/purchase_of_housing_backend:latest
+            sudo docker compose -f docker-compose.yml pull
+            sudo docker compose -f docker-compose.yml down
+            sudo docker compose -f docker-compose.yml up -d
+            sudo docker system prune -af
             rm -f .env
             touch .env
             echo POSTGRES_DB=${{ secrets.POSTGRES_DB }} >> .env
