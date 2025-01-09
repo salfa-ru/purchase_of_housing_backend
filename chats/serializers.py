@@ -207,6 +207,9 @@ class CreateChatResponseSerializer(serializers.ModelSerializer):
         if is_blocked:
             msg = "Chat blocked."
             raise exceptions.PermissionDenied(detail=msg)
+        # проверка на отправку сообщения самому себе
+        if data.get("user_from") == data.get("user_to"):
+            raise exceptions.ValidationError("You cannot send a message to yourself.")
 
         return data
 
