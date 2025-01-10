@@ -66,7 +66,13 @@ jobs:
             sudo docker compose -f docker-compose.yml pull
             sudo docker compose -f docker-compose.yml down
             sudo docker compose -f docker-compose.yml up -d
-            sudo docker system prune -af
+            
+            # Раньше удаляли все "ненужные файлы" 
+            # sudo docker system prune -af
+            
+            # Теперь удаляем все, КРОМЕ тома БД
+            sudo docker system prune -af --volumes --filter "volume!=purchase_housing_pgdata"
+            
             rm -f .env
             touch .env
             echo POSTGRES_DB=${{ secrets.POSTGRES_DB }} >> .env
@@ -83,8 +89,23 @@ jobs:
             python manage.py makemigrations &&
             python manage.py migrate &&
             python manage.py collectstatic --no-input"
+            
             sudo docker compose exec -T backend bash -c "
-            python manage.py loaddata data.json &&
+            # ---- Проверяем, есть ли данные в базе. Если данных нет, загружаем их из data.json
+            if ! python manage.py dumpdata --exclude auth.permission --exclude contenttypes | grep -q .; then
+              python manage.py loaddata data.json
+            fi &&
+            # ---- В любом случае переустанавливаем разрешения модераторов!
             python manage.py fix_moderator_permissions &&
             nohup python manage.py qcluster > /dev/null 2>&1 &"
-            
+
+          # интересный момент
+          # -- ПРИ ПЕРВОМ запуске скрипта, старый том с базой данных будет удален - так как еще не имеет названия,
+          #    но к концу скрипта именованный том уже будет заполнен тестовыми данными из DATA.JSON
+          # -- ПРИ ВТОРОМ запуске скрипта том уже будет существовать, а вот тестовые данные уже загружать не надо!
+
+          # Для обхода этой особенности заменим код на код с условиями, а старый пока сохраним тут:
+          # python manage.py loaddata data.json &&
+          # python manage.py fix_moderator_permissions &&
+          # nohup python manage.py qcluster > /dev/null 2>&1 &"
+
