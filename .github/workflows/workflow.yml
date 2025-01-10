@@ -84,5 +84,7 @@ jobs:
             python manage.py migrate &&
             python manage.py collectstatic --no-input"
             sudo docker compose exec -T backend bash -c "
+            python manage.py loaddata data.json &&
             python manage.py fix_moderator_permissions &&
             nohup python manage.py qcluster > /dev/null 2>&1 &"
+            
