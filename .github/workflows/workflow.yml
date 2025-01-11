@@ -102,7 +102,7 @@ jobs:
             
             # Проверяем наличие данных в базе и загружаем их, если база пуста
             echo "Checking if database is empty..."
-            RECORD_COUNT=$(sudo docker compose exec -T backend python manage.py shell -c "from django.contrib.auth.models import User; print(User.objects.count())")
+            RECORD_COUNT=$(sudo docker compose exec -T backend python manage.py shell -c "from users.models import User; print(User.objects.count())")
             
             if [ "$RECORD_COUNT" = "0" ]; then
               echo "Database is empty, loading initial data..."
