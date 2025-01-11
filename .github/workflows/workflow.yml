@@ -109,8 +109,7 @@ jobs:
               sudo docker compose exec -T backend python manage.py loaddata data.json
             fi
             
-            
-            # В любом случае обновляем разрешения модераторов
+            # В любом случае обновляем разрешения модераторов!
             echo "Updating moderator permissions..."
             sudo docker compose exec -T backend python manage.py fix_moderator_permissions
                         
