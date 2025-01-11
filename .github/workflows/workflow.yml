@@ -63,9 +63,9 @@ jobs:
           password: ${{ secrets.PASSPHRASE }}
           script: |
             
-            if ! docker volume inspect pgdata_alfa >/dev/null 2>&1; then
-              docker volume create pgdata_alfa
-            fi
+            #  if ! docker volume inspect pgdata_alfa >/dev/null 2>&1; then
+            #    docker volume create pgdata_alfa
+            # fi
     
             cd purchase_of_housing_backend
             
@@ -80,6 +80,11 @@ jobs:
             echo HOST_IP="${{ secrets.HOST_IP }}" >> .env
             echo DOMAIN="${{ secrets.DOMAIN }}" >> .env
             echo DEBUG=${{ secrets.DEBUG }} >> .env
+            
+            # Добавьте эти команды перед docker compose pull
+            echo "=== Checking postgres data directory ==="
+            sudo ls -la /opt/postgres_data
+            echo "=== Directory contents before deployment ==="
              
             # Подтягиваем новые образы       
             sudo docker compose pull # Сначала pull
@@ -89,6 +94,22 @@ jobs:
 
             # Запускаем сервисы
             sudo docker compose up -d
+            
+            # После docker compose up -d добавьте:
+            echo "=== Checking postgres data directory after deployment ==="
+            sudo ls -la /opt/postgres_data
+            echo "=== Directory contents after deployment ==="
+            
+            echo "=== Checking PostgreSQL logs ==="
+            sudo docker compose logs db
+            
+            echo "=== Database state ==="
+            sudo docker compose exec -T backend python manage.py shell -c "
+            from users.models import User
+            print(f'User count: {User.objects.count()}')
+            print(f'User IDs: {list(User.objects.values_list("id", flat=True))}')
+            "
+            
             
             # Ждем, пока база данных будет готова
             echo "Waiting for database to be ready..."
@@ -108,7 +129,7 @@ jobs:
             if [ "$RECORD_COUNT" = "0" ]
             then
               echo "========  Database is empty, loading initial data... ========"
-              # --------------------- sudo docker compose exec -T backend python manage.py loaddata data.json
+              sudo docker compose exec -T backend python manage.py loaddata data.json
             else
               echo "++++++++  SOMETHING IN THE DATABASE!!!!              ++++++++"
             fi

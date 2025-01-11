@@ -10,6 +10,8 @@ services:  # Определение всех сервисов, которые б
       - type: bind
         source: /opt/postgres_data # Путь на хосте
         target: /var/lib/postgresql/data
+        bind:
+          create_host_path: true
     healthcheck:
       test: [ "CMD-SHELL", "sh -c 'pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB'" ]  # Проверка готовности PostgreSQL к работе.
       interval: 5s  # Интервал между проверками (5 секунд).
