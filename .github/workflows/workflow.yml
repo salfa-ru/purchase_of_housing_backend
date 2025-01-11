@@ -62,24 +62,17 @@ jobs:
           # key: ${{ secrets.SSH_KEY }}
           password: ${{ secrets.PASSPHRASE }}
           script: |
-            cd purchase_of_housing_backend
-            # Удаляем старые контейнеры, но не удаляем тома данных
-            sudo docker compose -f docker-compose.yml pull
-            sudo docker compose -f docker-compose.yml down --volumes=false
-            
-            # ------- Обновление контейнеры без перезаписи томов
-            sudo docker compose -f docker-compose.yml up -d --build
-            
-            # ------- Раньше удаляли все "ненужные файлы" 
-            # ------- sudo docker system prune -af
-            
-            # ------- Теперь удаляем все, КРОМЕ тома БД - и это не сработало - ошибка -   
-            # ------- Error response from daemon: invalid filter 'volume!'
-            # ------- sudo docker system prune -af --volumes --filter "volume!=purchase_housing_pgdata"
-            
-            # Удаляем все тома, кроме тома БД
-            sudo docker volume prune -f --filter "label!=keep"
-            sudo docker volume create --label keep pgdata_alfa
+              cd purchase_of_housing_backend
+              sudo docker compose -f docker-compose.yml pull
+              sudo docker compose -f docker-compose.yml down --volumes=false
+              sudo docker compose -f docker-compose.yml up -d --build
+              
+              sudo docker volume prune -f --filter "label!=keep" # Очищаем ненужные тома
+              
+              # Проверяем существует ли том с данными. Если нет - создаем.
+              if ! docker volume inspect pgdata_alfa > /dev/null 2>&1; then
+                sudo docker volume create --driver local --label keep=true pgdata_alfa
+              fi
             
             rm -f .env
             touch .env
@@ -93,22 +86,24 @@ jobs:
             echo DOMAIN="${{ secrets.DOMAIN }}" >> .env
             echo DEBUG=${{ secrets.DEBUG }} >> .env
             sudo docker compose up -d --build
-            sudo docker compose exec -T backend bash -c "
-            python manage.py makemigrations &&
-            python manage.py migrate &&
-            python manage.py collectstatic --no-input"
-            
             
             sudo docker compose exec -T backend bash -c "
+              python manage.py makemigrations &&
+              python manage.py migrate &&
+              python manage.py collectstatic --no-input" 
+            
             echo "Проверка пустая ли база"
-            # ---- КАЖЕТСЯ ЭТА ЧАСТЬ НЕ РАБОТАЕТ!!!
-            # ---- Проверяем, есть ли данные в базе. Если данных нет, загружаем их из data.json
-            if ! python manage.py dumpdata --exclude auth.permission --exclude contenttypes | grep -q .; then
-              python manage.py loaddata data.json
-            fi &&
-            # ---- В любом случае переустанавливаем разрешения модераторов!
-            python manage.py fix_moderator_permissions &&
-            nohup python manage.py qcluster > /dev/null 2>&1 &"
+            
+            sudo docker compose exec -T backend bash -c "
+              echo "Проверка пустая ли база"
+              # ---- КАЖЕТСЯ ЭТА ЧАСТЬ НЕ РАБОТАЕТ!!!
+              # ---- Проверяем, есть ли данные в базе. Если данных нет, загружаем их из data.json
+              if ! python manage.py dumpdata --exclude auth.permission --exclude contenttypes | grep -q .; then
+                python manage.py loaddata data.json
+              fi &&
+              # ---- В любом случае переустанавливаем разрешения модераторов!
+              python manage.py fix_moderator_permissions &&
+              nohup python manage.py qcluster > /dev/null 2>&1 &"
 
           # интересный момент
           # -- ПРИ ПЕРВОМ запуске скрипта, старый том с базой данных будет удален - так как еще не имеет названия,
