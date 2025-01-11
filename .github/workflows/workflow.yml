@@ -129,7 +129,7 @@ jobs:
             if [ "$RECORD_COUNT" = "0" ]
             then
               echo "========  Database is empty, loading initial data... ========"
-              sudo docker compose exec -T backend python manage.py loaddata data.json
+              # sudo docker compose exec -T backend python manage.py loaddata data.json
             else
               echo "++++++++  SOMETHING IN THE DATABASE!!!!              ++++++++"
             fi
