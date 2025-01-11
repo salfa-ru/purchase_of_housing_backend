@@ -70,8 +70,13 @@ jobs:
             # Раньше удаляли все "ненужные файлы" 
             # sudo docker system prune -af
             
-            # Теперь удаляем все, КРОМЕ тома БД
-            sudo docker system prune -af --volumes --filter "volume!=purchase_housing_pgdata"
+            # Теперь удаляем все, КРОМЕ тома БД - и это не сработало - ошибка -   
+            # Error response from daemon: invalid filter 'volume!'
+            # sudo docker system prune -af --volumes --filter "volume!=purchase_housing_pgdata"
+            
+            # Удаляем все тома, кроме тома БД (перечисление)
+            sudo docker volume prune -f --filter "label!=keep"
+            sudo docker volume create --label keep purchase_housing_pgdata
             
             rm -f .env
             touch .env
