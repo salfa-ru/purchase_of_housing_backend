@@ -107,11 +107,17 @@ jobs:
               sudo docker compose exec -T backend python manage.py loaddata data.json
             fi
             
-            # В любом случае обновляем разрешения модераторов!!
+            # В любом случае обновляем разрешения модераторов!!!
             echo "Updating moderator permissions..."
             sudo docker compose exec -T backend python manage.py fix_moderator_permissions
                         
             # Запускаем qcluster!
             sudo docker compose exec -T backend bash -c "
               nohup python manage.py qcluster > /dev/null 2>&1 &"
-            
+          
+
+# Изменил права на папку pgdata:
+# ls -ld /var/lib/docker/volumes/pgdata_alfa/_data
+# drwx------ 19 lxd zabbix 4096
+# ls -ld /var/lib/docker/volumes/pgdata_alfa/_data
+# drwxrwx--- 19 root docker 4096
