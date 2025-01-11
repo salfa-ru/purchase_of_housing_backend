@@ -63,18 +63,21 @@ jobs:
           password: ${{ secrets.PASSPHRASE }}
           script: |
             cd purchase_of_housing_backend
+            # Удаляем старые контейнеры, но не удаляем тома данных
             sudo docker compose -f docker-compose.yml pull
-            sudo docker compose -f docker-compose.yml down
-            sudo docker compose -f docker-compose.yml up -d
+            sudo docker compose -f docker-compose.yml down --volumes=false
             
-            # Раньше удаляли все "ненужные файлы" 
-            # sudo docker system prune -af
+            # ------- Обновление контейнеры без перезаписи томов
+            sudo docker compose -f docker-compose.yml up -d --build
             
-            # Теперь удаляем все, КРОМЕ тома БД - и это не сработало - ошибка -   
-            # Error response from daemon: invalid filter 'volume!'
-            # sudo docker system prune -af --volumes --filter "volume!=purchase_housing_pgdata"
+            # ------- Раньше удаляли все "ненужные файлы" 
+            # ------- sudo docker system prune -af
             
-            # Удаляем все тома, кроме тома БД (перечисление)
+            # ------- Теперь удаляем все, КРОМЕ тома БД - и это не сработало - ошибка -   
+            # ------- Error response from daemon: invalid filter 'volume!'
+            # ------- sudo docker system prune -af --volumes --filter "volume!=purchase_housing_pgdata"
+            
+            # Удаляем все тома, кроме тома БД
             sudo docker volume prune -f --filter "label!=keep"
             sudo docker volume create --label keep purchase_housing_pgdata
             
