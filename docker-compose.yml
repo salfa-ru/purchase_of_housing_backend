@@ -42,7 +42,7 @@ services:  # Определение всех сервисов, которые б
 volumes:  # Определение всех используемых томов.
   pgdata: # Single, persistent volume for PostgreSQL data
     name: pgdata_alfa
-    # external: true  # Use the existing external volume
+    external: true  # Use the existing external volume
     # pgdata_alfa:  # Том для хранения данных PostgreSQL.
     # name: pgdata_alfa  # Указание имени тома для базы данных
     # было следующее предупреждение:

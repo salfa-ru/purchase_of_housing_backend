@@ -62,6 +62,11 @@ jobs:
           # key: ${{ secrets.SSH_KEY }}
           password: ${{ secrets.PASSPHRASE }}
           script: |
+            
+            if ! docker volume inspect pgdata_alfa >/dev/null 2>&1; then
+              docker volume create pgdata_alfa
+            fi
+    
             cd purchase_of_housing_backend
             
             
@@ -80,8 +85,8 @@ jobs:
             # Подтягиваем новые образы       
             sudo docker compose pull # Сначала pull
             
-            # Останавливаем текущие контейнеры
-            sudo docker compose down # Потом down (без --volumes=false)
+            # Останавливаем текущие контейнеры, сохраняя volumes
+            sudo docker compose down --volumes=false
 
             # Запускаем сервисы
             sudo docker compose up -d
@@ -104,7 +109,7 @@ jobs:
             
             if [ "$RECORD_COUNT" = "0" ]; then
               echo "========  Database is empty, loading initial data... ========"
-              # ---------- sudo docker compose exec -T backend python manage.py loaddata data.json
+              sudo docker compose exec -T backend python manage.py loaddata data.json
             fi
             
             # В любом случае обновляем разрешения модераторов!!!
@@ -121,3 +126,6 @@ jobs:
 # drwx------ 19 lxd zabbix 4096
 # ls -ld /var/lib/docker/volumes/pgdata_alfa/_data
 # drwxrwx--- 19 root docker 4096
+
+# sudo chown -R root:docker /var/lib/docker/volumes/pgdata_alfa/_data
+# sudo chmod -R 760 /var/lib/docker/volumes/pgdata_alfa/_data
