@@ -69,7 +69,6 @@ jobs:
     
             cd purchase_of_housing_backend
             
-            
             rm -f .env
             touch .env
             echo POSTGRES_DB=${{ secrets.POSTGRES_DB }} >> .env
@@ -91,12 +90,9 @@ jobs:
             # Запускаем сервисы
             sudo docker compose up -d
             
-
-            
             # Ждем, пока база данных будет готова
             echo "Waiting for database to be ready..."
             sleep 10
-            
             
             # Выполняем миграции
             sudo docker compose exec -T backend python manage.py makemigrations
@@ -134,3 +130,12 @@ jobs:
 
 # sudo chown -R root:docker /var/lib/docker/volumes/pgdata_alfa/_data
 # sudo chmod -R 760 /var/lib/docker/volumes/pgdata_alfa/_data
+
+# НОВИНКА
+# sudo mkdir /opt/postgres_data
+# sudo chown :docker /opt/postgres_data
+# sudo chmod g+rw /opt/postgres_data
+
+# docker exec -it 280910ed824b id postgres
+# uid=999(postgres) gid=999(postgres) groups=999(postgres),101(ssl-cert)
+# sudo chown 999:999 /opt/postgres_data
