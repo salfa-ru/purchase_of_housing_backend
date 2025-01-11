@@ -107,9 +107,14 @@ jobs:
             echo "========  Checking if database is empty...           ========="
             RECORD_COUNT=$(sudo docker compose exec -T backend python manage.py shell -c "from users.models import User; print(User.objects.count())")
             
-            if [ "$RECORD_COUNT" = "0" ]; then
+            # показывает 4 пользователя из командной строки после запуска приложения!
+            
+            if [ "$RECORD_COUNT" = "0" ]
+            then
               echo "========  Database is empty, loading initial data... ========"
-              sudo docker compose exec -T backend python manage.py loaddata data.json
+              # sudo docker compose exec -T backend python manage.py loaddata data.json
+            else
+              echo "++++++++  SOMETHING IN THE DATABASE!!!!              ++++++++"
             fi
             
             # В любом случае обновляем разрешения модераторов!!!
