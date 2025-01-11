@@ -81,8 +81,8 @@ jobs:
             echo DOMAIN="${{ secrets.DOMAIN }}" >> .env
             echo DEBUG=${{ secrets.DEBUG }} >> .env
             
-            # Останавливаем текущие контейнеры, но сохраняем тома
-            sudo docker compose down --volumes=false
+            # Останавливаем текущие контейнеры, # и не сохраняем тома (--volumes=false)
+            sudo docker compose down 
             
             # Подтягиваем новые образы
             sudo docker compose pull
@@ -101,13 +101,13 @@ jobs:
             sudo docker compose exec -T backend python manage.py collectstatic --no-input
             
             # Проверяем наличие данных в базе и загружаем их, если база пуста
-            # ----- echo "Checking if database is empty..."
-            # ----- RECORD_COUNT=$(sudo docker compose exec -T backend python manage.py shell -c "from users.models import User; print(User.objects.count())")
+            echo "========== Checking if database is empty...          ========="
+            RECORD_COUNT=$(sudo docker compose exec -T backend python manage.py shell -c "from users.models import User; print(User.objects.count())")
             
-            # ----- if [ "$RECORD_COUNT" = "0" ]; then
-            # -----   echo "Database is empty, loading initial data..."
-            # -----   sudo docker compose exec -T backend python manage.py loaddata data.json
-            # ----- fi
+            if [ "$RECORD_COUNT" = "0" ]; then
+              echo "======== Database is empty, loading initial data... ========"
+              sudo docker compose exec -T backend python manage.py loaddata data.json
+            fi
             
             # В любом случае обновляем разрешения модераторов!
             echo "Updating moderator permissions..."
