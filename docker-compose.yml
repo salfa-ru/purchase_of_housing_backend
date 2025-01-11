@@ -1,12 +1,3 @@
-volumes:  # Определение всех используемых томов.
-  pgdata_alfa:  # Том для хранения данных PostgreSQL.
-    # name: pgdata_alfa  # Указание имени тома для базы данных
-    # было следующее предупреждение:
-    # "volume \"pgdata_alfa\" already exists but was not created
-    # by Docker Compose. Use `external: true` to use an existing volume"
-    external: true  # Use an existing volume instead of creating a new one.
-  static_data:  # Том для хранения статических файлов.
-  media_data:  # Том для хранения медиафайлов.
 
 services:  # Определение всех сервисов, которые будут запускаться.
 
@@ -47,3 +38,13 @@ services:  # Определение всех сервисов, которые б
       - backend  # Ожидание запуска backend перед запуском Nginx.
     restart: always  # Автоматический перезапуск контейнера Nginx при сбоях.
 
+
+volumes:  # Определение всех используемых томов.
+  pgdata_alfa:  # Том для хранения данных PostgreSQL.
+    # name: pgdata_alfa  # Указание имени тома для базы данных
+    # было следующее предупреждение:
+    # "volume \"pgdata_alfa\" already exists but was not created
+    # by Docker Compose. Use `external: true` to use an existing volume"
+    # external: true  # Use an existing volume instead of creating a new one.
+  static_data:  # Том для хранения статических файлов.
+  media_data:  # Том для хранения медиафайлов.
