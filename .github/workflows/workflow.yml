@@ -62,17 +62,17 @@ jobs:
           # key: ${{ secrets.SSH_KEY }}
           password: ${{ secrets.PASSPHRASE }}
           script: |
-              cd purchase_of_housing_backend
-              sudo docker compose -f docker-compose.yml pull
-              sudo docker compose -f docker-compose.yml down --volumes=false
-              sudo docker compose -f docker-compose.yml up -d --build
-              
-              sudo docker volume prune -f --filter "label!=keep" # Очищаем ненужные тома
-              
-              # Проверяем существует ли том с данными. Если нет - создаем.
-              if ! docker volume inspect pgdata_alfa > /dev/null 2>&1; then
-                sudo docker volume create --driver local --label keep=true pgdata_alfa
-              fi
+            cd purchase_of_housing_backend
+            sudo docker compose -f docker-compose.yml pull
+            sudo docker compose -f docker-compose.yml down --volumes=false
+            sudo docker compose -f docker-compose.yml up -d --build
+            
+            sudo docker volume prune -f --filter "label!=keep" # Очищаем ненужные тома
+            
+            # Проверяем существует ли том с данными. Если нет - создаем.
+            if ! docker volume inspect pgdata_alfa > /dev/null 2>&1; then
+              sudo docker volume create --driver local --label keep=true pgdata_alfa
+            fi
             
             rm -f .env
             touch .env
