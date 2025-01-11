@@ -101,13 +101,13 @@ jobs:
             sudo docker compose exec -T backend python manage.py collectstatic --no-input
             
             # Проверяем наличие данных в базе и загружаем их, если база пуста
-            echo "Checking if database is empty..."
-            RECORD_COUNT=$(sudo docker compose exec -T backend python manage.py shell -c "from users.models import User; print(User.objects.count())")
+            # ----- echo "Checking if database is empty..."
+            # ----- RECORD_COUNT=$(sudo docker compose exec -T backend python manage.py shell -c "from users.models import User; print(User.objects.count())")
             
-            if [ "$RECORD_COUNT" = "0" ]; then
-              echo "Database is empty, loading initial data..."
-              sudo docker compose exec -T backend python manage.py loaddata data.json
-            fi
+            # ----- if [ "$RECORD_COUNT" = "0" ]; then
+            # -----   echo "Database is empty, loading initial data..."
+            # -----   sudo docker compose exec -T backend python manage.py loaddata data.json
+            # ----- fi
             
             # В любом случае обновляем разрешения модераторов!
             echo "Updating moderator permissions..."
