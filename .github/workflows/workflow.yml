@@ -127,5 +127,5 @@ jobs:
             sudo docker compose exec -T backend bash -c "
               nohup python manage.py qcluster > /dev/null 2>&1 &"
             
-            # Очищаем неиспользуемые тома
+            # Очищаем неиспользуемые  тома
             # sudo docker volume prune -f --filter "label!=keep"
