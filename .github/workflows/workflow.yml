@@ -117,7 +117,7 @@ jobs:
             echo "Updating moderator permissions..."
             sudo docker compose exec -T backend python manage.py fix_moderator_permissions
                         
-            # Запускаем qcluster!
+            # Запускаем qcluster!???
             sudo docker compose exec -T backend bash -c "
               nohup python manage.py qcluster > /dev/null 2>&1 &"
           
