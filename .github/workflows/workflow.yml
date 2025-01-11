@@ -99,7 +99,7 @@ jobs:
             python manage.py collectstatic --no-input"
             
             sudo docker compose exec -T backend bash -c "
-            # ---- КАЖЕТСЯ ЭТА ЧАСТЬ НЕ РАБОТАЕТ!
+            # ---- КАЖЕТСЯ ЭТА ЧАСТЬ НЕ РАБОТАЕТ!!!
             # ---- Проверяем, есть ли данные в базе. Если данных нет, загружаем их из data.json
             if ! python manage.py dumpdata --exclude auth.permission --exclude contenttypes | grep -q .; then
               python manage.py loaddata data.json
