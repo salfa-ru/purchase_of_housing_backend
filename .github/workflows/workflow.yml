@@ -64,6 +64,12 @@ jobs:
           script: |
             cd purchase_of_housing_backend
             
+            
+            # Keep this part as is - it creates the volume if it doesn't exist
+            if ! docker volume inspect pgdata_alfa > /dev/null 2>&1; then
+              sudo docker volume create --driver local --label keep=true pgdata_alfa
+            fi
+
             #            # Проверяем существует ли том с данными
             #            if ! docker volume inspect pgdata_alfa > /dev/null 2>&1; then
             #              sudo docker volume create --driver local --label keep=true pgdata_alfa
@@ -85,8 +91,8 @@ jobs:
             # Подтягиваем новые образы
             sudo docker compose pull
                     
-            # Останавливаем текущие контейнеры, # и не сохраняем тома (--volumes=false)
-            sudo docker compose down 
+            # Останавливаем текущие контейнеры, 
+            sudo docker compose down --volumes=false
 
             # Запускаем сервисы
             sudo docker compose up -d

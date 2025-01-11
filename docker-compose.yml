@@ -6,7 +6,7 @@ services:  # Определение всех сервисов, которые б
     env_file:
       - .env  # Файл окружения (.env) с настройками, такими как POSTGRES_USER и POSTGRES_DB.
     volumes:
-      - pgdata_alfa:/var/lib/postgresql/data  # Монтирование тома для сохранения данных базы на хосте.
+      - pgdata:/var/lib/postgresql/data  # Монтирование тома для сохранения данных базы на хосте.
     healthcheck:
       test: [ "CMD-SHELL", "sh -c 'pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB'" ]  # Проверка готовности PostgreSQL к работе.
       interval: 5s  # Интервал между проверками (5 секунд).
@@ -40,7 +40,10 @@ services:  # Определение всех сервисов, которые б
 
 
 volumes:  # Определение всех используемых томов.
-  pgdata_alfa:  # Том для хранения данных PostgreSQL.
+  pgdata: # Single, persistent volume for PostgreSQL data
+    name: pgdata_alfa
+    external: true  # Use the existing external volume
+    # pgdata_alfa:  # Том для хранения данных PostgreSQL.
     # name: pgdata_alfa  # Указание имени тома для базы данных
     # было следующее предупреждение:
     # "volume \"pgdata_alfa\" already exists but was not created
