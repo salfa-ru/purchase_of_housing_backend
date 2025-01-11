@@ -63,13 +63,8 @@ jobs:
           password: ${{ secrets.PASSPHRASE }}
           script: |
             cd purchase_of_housing_backend
-            sudo docker compose -f docker-compose.yml pull
-            sudo docker compose -f docker-compose.yml down --volumes=false
-            sudo docker compose -f docker-compose.yml up -d --build
             
-            sudo docker volume prune -f --filter "label!=keep" # Очищаем ненужные тома
-            
-            # Проверяем существует ли том с данными. Если нет - создаем.
+            # Проверяем существует ли том с данными
             if ! docker volume inspect pgdata_alfa > /dev/null 2>&1; then
               sudo docker volume create --driver local --label keep=true pgdata_alfa
             fi
@@ -85,35 +80,43 @@ jobs:
             echo HOST_IP="${{ secrets.HOST_IP }}" >> .env
             echo DOMAIN="${{ secrets.DOMAIN }}" >> .env
             echo DEBUG=${{ secrets.DEBUG }} >> .env
-            sudo docker compose up -d --build
             
+            # Останавливаем текущие контейнеры, но сохраняем тома
+            sudo docker compose down --volumes=false
+            
+            # Подтягиваем новые образы
+            sudo docker compose pull
+            
+            # Запускаем сервисы
+            sudo docker compose up -d
+            
+            # Ждем, пока база данных будет готова
+            echo "Waiting for database to be ready..."
+            sleep 10
+            
+            
+            # Выполняем миграции
+            sudo docker compose exec -T backend python manage.py makemigrations
+            sudo docker compose exec -T backend python manage.py migrate
+            sudo docker compose exec -T backend python manage.py collectstatic --no-input
+            
+            # Проверяем наличие данных в базе и загружаем их, если база пуста
+            echo "Checking if database is empty..."
+            RECORD_COUNT=$(sudo docker compose exec -T backend python manage.py shell -c "from django.contrib.auth.models import User; print(User.objects.count())")
+            
+            if [ "$RECORD_COUNT" = "0" ]; then
+              echo "Database is empty, loading initial data..."
+              sudo docker compose exec -T backend python manage.py loaddata data.json
+            fi
+            
+            
+            # В любом случае обновляем разрешения модераторов
+            echo "Updating moderator permissions..."
+            sudo docker compose exec -T backend python manage.py fix_moderator_permissions
+                        
+            # Запускаем qcluster
             sudo docker compose exec -T backend bash -c "
-              python manage.py makemigrations &&
-              python manage.py migrate &&
-              python manage.py collectstatic --no-input" 
-            
-            echo "Проверка пустая ли база 1"
-            
-            # не автозаполнилась база + не появились модераторы!
-            
-            sudo docker compose exec -T backend bash -c "
-              echo "Проверка пустая ли база 2"
-              # ---- КАЖЕТСЯ ЭТА ЧАСТЬ НЕ РАБОТАЕТ!!!
-              # ---- Проверяем, есть ли данные в базе. Если данных нет, загружаем их из data.json
-              if ! python manage.py dumpdata --exclude auth.permission --exclude contenttypes | grep -q .; then
-                python manage.py loaddata data.json
-              fi &&
-              # ---- В любом случае переустанавливаем разрешения модераторов!
-              python manage.py fix_moderator_permissions &&
               nohup python manage.py qcluster > /dev/null 2>&1 &"
-
-          # интересный момент
-          # -- ПРИ ПЕРВОМ запуске скрипта, старый том с базой данных будет удален - так как еще не имеет названия,
-          #    но к концу скрипта именованный том уже будет заполнен тестовыми данными из DATA.JSON
-          # -- ПРИ ВТОРОМ запуске скрипта том уже будет существовать, а вот тестовые данные уже загружать не надо!
-
-          # Для обхода этой особенности заменим код на код с условиями, а старый пока сохраним тут:
-          # python manage.py loaddata data.json &&
-          # python manage.py fix_moderator_permissions &&
-          # nohup python manage.py qcluster > /dev/null 2>&1 &"
-
+            
+            # Очищаем неиспользуемые тома
+            sudo docker volume prune -f --filter "label!=keep"
