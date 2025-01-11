@@ -92,10 +92,12 @@ jobs:
               python manage.py migrate &&
               python manage.py collectstatic --no-input" 
             
-            echo "Проверка пустая ли база"
+            echo "Проверка пустая ли база 1"
+            
+            # не автозаполнилась база + не появились модераторы!
             
             sudo docker compose exec -T backend bash -c "
-              echo "Проверка пустая ли база"
+              echo "Проверка пустая ли база 2"
               # ---- КАЖЕТСЯ ЭТА ЧАСТЬ НЕ РАБОТАЕТ!!!
               # ---- Проверяем, есть ли данные в базе. Если данных нет, загружаем их из data.json
               if ! python manage.py dumpdata --exclude auth.permission --exclude contenttypes | grep -q .; then
