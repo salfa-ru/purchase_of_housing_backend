@@ -64,10 +64,10 @@ jobs:
           script: |
             cd purchase_of_housing_backend
             
-#            # Проверяем существует ли том с данными
-#            if ! docker volume inspect pgdata_alfa > /dev/null 2>&1; then
-#              sudo docker volume create --driver local --label keep=true pgdata_alfa
-#            fi
+            #            # Проверяем существует ли том с данными
+            #            if ! docker volume inspect pgdata_alfa > /dev/null 2>&1; then
+            #              sudo docker volume create --driver local --label keep=true pgdata_alfa
+            #            fi
             
             rm -f .env
             touch .env
