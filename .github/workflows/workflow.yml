@@ -103,12 +103,37 @@ jobs:
             echo "=== Checking PostgreSQL logs ==="
             sudo docker compose logs db
             
+            echo "=== Checking Environment Variables ==="
+            sudo docker compose exec -T backend env | grep -E "POSTGRES|DB_"
+            
+            echo "=== Checking Database Connection ==="
+            sudo docker compose exec -T backend python manage.py shell -c "
+            from django.db import connections
+            from django.db.utils import OperationalError
+            try:
+                connections['default'].cursor()
+                print('Database connection successful')
+            except OperationalError as e:
+                print(f'Database connection failed: {e}')"
+            
+            echo "=== PostgreSQL Configuration ==="
+            sudo docker compose exec -T db psql -U $POSTGRES_USER -d $POSTGRES_DB -c "\l+"
+    
             echo "=== Database state ==="
             sudo docker compose exec -T backend python manage.py shell -c "
-            from users.models import User
-            print(f'User count: {User.objects.count()}')
-            print(f'User IDs: {list(User.objects.values_list("id", flat=True))}')
-            "
+            import os
+            print(f'Database settings:')
+            print(f'ENGINE: {os.environ.get('DB_ENGINE', 'Not set')}')
+            print(f'NAME: {os.environ.get('POSTGRES_DB', 'Not set')}')
+            print(f'HOST: {os.environ.get('DB_HOST', 'Not set')}')
+            print(f'PORT: {os.environ.get('DB_PORT', 'Not set')}')
+            from django.db import connection
+            print(f'Using backend: {connection.vendor}')
+            try:
+                from users.models import User
+                print(f'User count: {User.objects.count()}')
+            except Exception as e:
+                print(f'Error: {str(e)}')"
             
             
             # Ждем, пока база данных будет готова
@@ -129,7 +154,7 @@ jobs:
             if [ "$RECORD_COUNT" = "0" ]
             then
               echo "========  Database is empty, loading initial data... ========"
-              # sudo docker compose exec -T backend python manage.py loaddata data.json
+              sudo docker compose exec -T backend python manage.py loaddata data.json
             else
               echo "++++++++  SOMETHING IN THE DATABASE!!!!              ++++++++"
             fi
