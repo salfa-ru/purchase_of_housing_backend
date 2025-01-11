@@ -65,16 +65,6 @@ jobs:
             cd purchase_of_housing_backend
             
             
-            # Keep this part as is - it creates the volume if it doesn't exist
-            if ! docker volume inspect pgdata_alfa > /dev/null 2>&1; then
-              sudo docker volume create --driver local --label keep=true pgdata_alfa
-            fi
-
-            #            # Проверяем существует ли том с данными
-            #            if ! docker volume inspect pgdata_alfa > /dev/null 2>&1; then
-            #              sudo docker volume create --driver local --label keep=true pgdata_alfa
-            #            fi
-            
             rm -f .env
             touch .env
             echo POSTGRES_DB=${{ secrets.POSTGRES_DB }} >> .env
@@ -86,19 +76,17 @@ jobs:
             echo HOST_IP="${{ secrets.HOST_IP }}" >> .env
             echo DOMAIN="${{ secrets.DOMAIN }}" >> .env
             echo DEBUG=${{ secrets.DEBUG }} >> .env
-                    
-                    
-            # Подтягиваем новые образы
-            sudo docker compose pull
-                    
-            # Останавливаем текущие контейнеры, 
-            sudo docker compose down --volumes=false
+             
+            # Подтягиваем новые образы       
+            sudo docker compose pull # Сначала pull
+            
+            # Останавливаем текущие контейнеры
+            sudo docker compose down # Потом down (без --volumes=false)
 
             # Запускаем сервисы
             sudo docker compose up -d
             
-            # Может удалить и нужные ресурсы        
-            sudo docker system prune -af
+
             
             # Ждем, пока база данных будет готова
             echo "Waiting for database to be ready..."
@@ -127,5 +115,3 @@ jobs:
             sudo docker compose exec -T backend bash -c "
               nohup python manage.py qcluster > /dev/null 2>&1 &"
             
-            # Очищаем неиспользуемые  тома
-            # sudo docker volume prune -f --filter "label!=keep"
