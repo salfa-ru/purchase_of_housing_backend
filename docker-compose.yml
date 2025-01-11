@@ -1,3 +1,9 @@
+volumes:  # Определение всех используемых томов.
+  pg_data:  # Том для хранения данных PostgreSQL.
+    name: pgdata_alfa  # Именуем его для того, чтобы сохранять при деплоях
+  static_data:  # Том для хранения статических файлов.
+  media_data:  # Том для хранения медиафайлов.
+
 services:  # Определение всех сервисов, которые будут запускаться.
 
   db:  # Настройка сервиса для базы данных PostgreSQL.
@@ -5,7 +11,7 @@ services:  # Определение всех сервисов, которые б
     env_file:
       - .env  # Файл окружения (.env) с настройками, такими как POSTGRES_USER и POSTGRES_DB.
     volumes:
-      - pg_data:/var/lib/postgresql/data  # Монтирование тома для сохранения данных базы на хосте.
+      - pgdata_alfa:/var/lib/postgresql/data  # Монтирование тома для сохранения данных базы на хосте.
     healthcheck:
       test: [ "CMD-SHELL", "sh -c 'pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB'" ]  # Проверка готовности PostgreSQL к работе.
       interval: 5s  # Интервал между проверками (5 секунд).
@@ -37,8 +43,3 @@ services:  # Определение всех сервисов, которые б
       - backend  # Ожидание запуска backend перед запуском Nginx.
     restart: always  # Автоматический перезапуск контейнера Nginx при сбоях.
 
-volumes:  # Определение всех используемых томов.
-  pg_data:  # Том для хранения данных PostgreSQL.
-    name: purchase_housing_pgdata  # Именуем его для того, чтобы сохранять при деплоях
-  static_data:  # Том для хранения статических файлов.
-  media_data:  # Том для хранения медиафайлов.

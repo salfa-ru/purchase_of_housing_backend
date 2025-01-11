@@ -79,7 +79,7 @@ jobs:
             
             # Удаляем все тома, кроме тома БД
             sudo docker volume prune -f --filter "label!=keep"
-            sudo docker volume create --label keep purchase_housing_pgdata
+            sudo docker volume create --label keep pgdata_alfa
             
             rm -f .env
             touch .env
@@ -98,7 +98,9 @@ jobs:
             python manage.py migrate &&
             python manage.py collectstatic --no-input"
             
+            
             sudo docker compose exec -T backend bash -c "
+            echo "Проверка пустая ли база"
             # ---- КАЖЕТСЯ ЭТА ЧАСТЬ НЕ РАБОТАЕТ!!!
             # ---- Проверяем, есть ли данные в базе. Если данных нет, загружаем их из data.json
             if ! python manage.py dumpdata --exclude auth.permission --exclude contenttypes | grep -q .; then
