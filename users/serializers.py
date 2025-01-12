@@ -154,6 +154,8 @@ class UserDataSerializer(UserBaseSerializer):
                   'last_name',
                   'registered_for',
                   'avatar',
+                  "phone_number",
+                  "phone_qr_code",
                   )
 
     def get_registered_for(self, obj):
