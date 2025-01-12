@@ -3,7 +3,7 @@ from datetime import datetime
 from django.core.validators import FileExtensionValidator
 from rest_framework import serializers
 
-from config.constants import IMAGE_EXTENSIONS
+from config.constants import IMAGE_EXTENSIONS, MAX_AVATAR_SIZE
 from users.models import User, validate_avatar_size
 
 
@@ -19,10 +19,14 @@ class UserBaseSerializer(serializers.ModelSerializer):
     )
 
     def to_internal_value(self, data):
-        if isinstance(data, dict) and data.get('email'):
-            new_data = data.copy()  # Create a new dictionary
-            new_data['email'] = new_data['email'].lower()
-            return super().to_internal_value(new_data)
+        # Проверяем, что data - это словарь и что ключ 'email' присутствует и имеет значение
+        if isinstance(data, dict) and 'email' in data and data['email']:
+            # Приводим email к нижнему регистру
+            data['email'] = data['email'].lower()
+            # Вызываем родительский метод с измененными данными
+            return super().to_internal_value(data)
+
+        # Если условие не выполнено, вызываем родительский метод с исходными данными
         return super().to_internal_value(data)
 
     class Meta:
