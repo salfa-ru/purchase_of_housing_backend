@@ -79,7 +79,9 @@ jobs:
             echo SECRET_KEY="${{ secrets.SECRET_KEY }}" >> .env
             echo HOST_IP="${{ secrets.HOST_IP }}" >> .env
             echo DOMAIN="${{ secrets.DOMAIN }}" >> .env
-            echo DEBUG=${{ secrets.DEBUG }} >> .env
+            
+            # echo DEBUG=${{ secrets.DEBUG }} >> .env
+            echo DEBUG=False >> .env
             
             # Добавьте эти команды перед docker compose pull
             echo "=== Checking postgres data directory ==="
