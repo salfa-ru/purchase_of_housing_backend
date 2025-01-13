@@ -54,25 +54,25 @@ class RealtyBaseViewSet(BaseViewSet):
     partial_update=extend_schema(
         summary=('Частичное изменение объявления о продаже недвижимости.'),
     ),
-    retrieve=extend_schema(
-        summary=('Просмотр информации объявления о продаже по id записи.'),
-    ),
+    # retrieve=extend_schema(
+    #     summary=('Просмотр информации объявления о продаже по id записи.'),
+    # ),
     create=extend_schema(
         summary=('Создание объявления о продаже недвижимости.'),
     ),
-    list=extend_schema(
-        summary=('Просмотр списка объявлений о продаже недвижимости.'),
-    ),
+    # list=extend_schema(
+    #     summary=('Просмотр списка объявлений о продаже недвижимости.'),
+    # ),
 )
 class SaleViewSet(BaseViewSet):
     """Sale Viewset."""
 
     queryset = realty_models.Sale.objects.all()
-    http_method_names = ['get', 'post', 'patch']
+    http_method_names = ['post', 'patch']
 
     def get_serializer_class(self):
-        if self.action in ('list', 'retrieve'):
-            return sale_serializers.SaleReadSerializer
+        # if self.action in ('list', 'retrieve'):
+        #     return sale_serializers.SaleReadSerializer
         return sale_serializers.SaleCreateSerializer
 
 
@@ -81,25 +81,25 @@ class SaleViewSet(BaseViewSet):
     partial_update=extend_schema(
         summary=('Частичное изменение объявления об аренде недвижимости.'),
     ),
-    retrieve=extend_schema(
-        summary=('Просмотр информации объявления об аренде по id записи.'),
-    ),
+    # retrieve=extend_schema(
+    #     summary=('Просмотр информации объявления об аренде по id записи.'),
+    # ),
     create=extend_schema(
         summary=('Создание объявления об аренде недвижимости.'),
     ),
-    list=extend_schema(
-        summary=('Просмотр списка объявлений об аренде недвижимости.'),
-    ),
+    # list=extend_schema(
+    #     summary=('Просмотр списка объявлений об аренде недвижимости.'),
+    # ),
 )
 class RentViewSet(BaseViewSet):
     """Rent Viewset."""
 
     queryset = realty_models.Rent.objects.all()
-    http_method_names = ['get', 'post', 'patch']
+    http_method_names = ['post', 'patch']
 
     def get_serializer_class(self):
-        if self.action in ('list', 'retrieve'):
-            return rent_serializers.RentReadSerializer
+        # if self.action in ('list', 'retrieve'):
+        #     return rent_serializers.RentReadSerializer
         return rent_serializers.RentCreateSerializer
 
     # на будущее для доб в избранное
