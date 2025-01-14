@@ -15,8 +15,8 @@ DEBUG = os.getenv('DEBUG', 'False') == 'True'
 # 1 версия - не сработало:
 # USE_SQLITE = os.getenv('USE_SQLITE', 'False') == 'True'
 
-# 2 версия:
-USE_SQLITE = os.getenv('USE_SQLITE', 'True').lower() in ('true', '1', 'yes')
+# 2 версия: (база работает, CORS а Ани не работает!)
+# USE_SQLITE = os.getenv('USE_SQLITE', 'True').lower() in ('true', '1', 'yes')
 
 DOMAIN = os.getenv('DOMAIN')
 
@@ -88,8 +88,9 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'config.wsgi.application'
 
-# if DEBUG:
-if USE_SQLITE:
+
+# if USE_SQLITE:
+if DEBUG:
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
@@ -235,8 +236,3 @@ CORS_ALLOW_CREDENTIALS = True
 
 CORS_ALLOW_ALL_LOCALHOST = True
 
-
-# Информация о том, какая база используется
-print("=== Debug: DB_HOST:", os.getenv('DB_HOST'))
-print("=== Debug: POSTGRES_DB:", os.getenv('POSTGRES_DB'))
-print("=== Debug: Using PostgreSQL:", bool(os.getenv('DB_HOST')))

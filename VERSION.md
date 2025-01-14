@@ -7,5 +7,6 @@ v4 - 14 Jan 2025 09:52 (Paris time) - Вернул все взад - прост�
 v5 - 14 Jan 2025 13:35 (Paris time) - Попытался вернуть Postgres (после одного мержа Дениса) \
 v6 - 14 Jan 2025 14:14 (Paris time) - доработка 
 ``USE_SQLITE = os.getenv('USE_SQLITE', 'True').lower() in ('true', '1', 'yes')`` \
-м7 - 14 Jan 2025 14:30 (Paris time) - возвращаю `USE_SQLITE=True` - потому что у Ани не работает аутентификация 
+v7 - 14 Jan 2025 14:30 (Paris time) - возвращаю `USE_SQLITE=True` - потому что у Ани не работает аутентификация \
+v8 - 14 Jan 2025 14:47 (Paris time) - убрал USE_SQLITE и DEBUG = OFF вообще, чтобы у Ани все заработало.
 
