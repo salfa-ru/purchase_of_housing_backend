@@ -63,7 +63,9 @@ class RealtyBaseSerializer(serializers.ModelSerializer):
     def get_sale(self, obj):
         """Return sales parameters."""
         if hasattr(obj, 'sale_profile'):
+            sale_profile = obj.sale_profile
             return {
+                "id": sale_profile.id,
                 "sales_parameters": specif_serializers.SalesParametersSerializer(
                     obj.sale_profile.sales_parameters
                 ).data
@@ -73,7 +75,9 @@ class RealtyBaseSerializer(serializers.ModelSerializer):
     def get_rent(self, obj):
         """Return rental_features."""
         if hasattr(obj, 'rent_profile'):
+            rent_profile = obj.rent_profile
             return {
+                "id": rent_profile.id,
                 "rental_features": specif_serializers.RentalFeaturesSerializer(
                     obj.rent_profile.rental_features
                 ).data,
@@ -236,9 +240,9 @@ class RealtyCreateSerializer(serializers.ModelSerializer):
         if uploaded_photos:
             for photo in uploaded_photos:
                 RealtyPhoto.objects.create(
-                        realty=realty,
-                        image=photo
-                    )
+                    realty=realty,
+                    image=photo
+                )
 
         # Отправка уведомления после успешного создания записи
         # Проверка статуса после создания записи, если запись на модерации - отправить уведомление.
