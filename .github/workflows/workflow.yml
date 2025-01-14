@@ -83,6 +83,7 @@ jobs:
             # echo DEBUG=${{ secrets.DEBUG }} >> .env
             # echo DEBUG=False >> .env
             echo DEBUG=True >> .env
+            echo USE_SQLITE=False >> .env
             
             # Добавьте эти команды перед docker compose pull
             echo "=== Checking postgres data directory ==="

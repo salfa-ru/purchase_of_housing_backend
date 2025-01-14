@@ -11,6 +11,8 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = os.getenv('SECRET_KEY', 'default_key')
 
 DEBUG = os.getenv('DEBUG', 'False') == 'True'
+# пусть на сервере всегда работает postgres!
+USE_SQLITE = os.getenv('USE_SQLITE', 'False') == 'True'
 
 DOMAIN = os.getenv('DOMAIN')
 
@@ -82,7 +84,8 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'config.wsgi.application'
 
-if DEBUG:
+# if DEBUG:
+if USE_SQLITE:
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
@@ -148,7 +151,7 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-
+# Старые настройки, когда не работала Аутентификация при выключенном DEBUG
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'users.backends.CustomAuthentication',
@@ -160,6 +163,16 @@ if DEBUG:
     REST_FRAMEWORK['DEFAULT_AUTHENTICATION_CLASSES'].append(
         'rest_framework.authentication.TokenAuthentication'
     )
+
+# Предлагаемые настройки, чтобы аутентификация работала с выключенным DEBUG
+# REST_FRAMEWORK = {
+#     'DEFAULT_AUTHENTICATION_CLASSES': [
+#         'users.backends.CustomAuthentication',
+#         'rest_framework.authentication.TokenAuthentication',
+#     ],
+#     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+# }
+# Стоит проверить, все ли тут работает
 
 
 SPECTACULAR_SETTINGS = {
