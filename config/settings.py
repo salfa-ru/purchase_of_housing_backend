@@ -12,7 +12,11 @@ SECRET_KEY = os.getenv('SECRET_KEY', 'default_key')
 
 DEBUG = os.getenv('DEBUG', 'False') == 'True'
 # пусть на сервере всегда работает postgres!
-USE_SQLITE = os.getenv('USE_SQLITE', 'False') == 'True'
+# 1 версия - не сработало:
+# USE_SQLITE = os.getenv('USE_SQLITE', 'False') == 'True'
+
+# 2 версия:
+USE_SQLITE = os.getenv('USE_SQLITE', 'True').lower() in ('true', '1', 'yes')
 
 DOMAIN = os.getenv('DOMAIN')
 
@@ -230,3 +234,9 @@ CORS_ALLOW_HEADERS = [
 CORS_ALLOW_CREDENTIALS = True
 
 CORS_ALLOW_ALL_LOCALHOST = True
+
+
+# Информация о том, какая база используется
+print("=== Debug: DB_HOST:", os.getenv('DB_HOST'))
+print("=== Debug: POSTGRES_DB:", os.getenv('POSTGRES_DB'))
+print("=== Debug: Using PostgreSQL:", bool(os.getenv('DB_HOST')))
