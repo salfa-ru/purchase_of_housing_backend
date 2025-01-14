@@ -81,7 +81,8 @@ jobs:
             echo DOMAIN="${{ secrets.DOMAIN }}" >> .env
             
             # echo DEBUG=${{ secrets.DEBUG }} >> .env
-            echo DEBUG=False >> .env
+            # echo DEBUG=False >> .env
+            echo DEBUG=True >> .env
             
             # Добавьте эти команды перед docker compose pull
             echo "=== Checking postgres data directory ==="
