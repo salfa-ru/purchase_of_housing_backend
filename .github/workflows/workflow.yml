@@ -4,10 +4,12 @@ on:
   push:
     branches:
       - dev
-  pull_request:
-    branches:
-      - dev
-    types: [closed]
+
+#  Отключаем деплой закрытых бранчей, только изменения в ДЕВ
+#  pull_request:
+#    branches:
+#      - dev
+#    types: [closed]
 
 jobs:
   build_and_push_to_docker_hub:
@@ -18,10 +20,12 @@ jobs:
     # Запускаться должен только один раз
     # -- либо при прямом пуше, но это он и так делал один раз без условия ниже
     # -- либо при мерже, но один раз!!!! А не деплой на dev и на закрытую ветку!
+    # if: |
+    #   (github.event_name == 'push' && github.ref == 'refs/heads/dev') ||
+    #   (github.event_name == 'pull_request' && github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'dev')
 
-    if: |
-      (github.event_name == 'push' && github.ref == 'refs/heads/dev') ||
-      (github.event_name == 'pull_request' && github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'dev')
+    # Условие: запускаем только при пуше в dev
+    if: github.ref == 'refs/heads/dev'
 
     steps:
       - name: Check out the repo
