@@ -1,5 +1,4 @@
 import os
-
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -139,11 +138,9 @@ AUTH_PASSWORD_VALIDATORS = [
 
 
 LANGUAGE_CODE = 'ru-ru'
-
 TIME_ZONE = 'Europe/Moscow'
 
 USE_I18N = True
-
 USE_TZ = True
 
 
@@ -157,27 +154,28 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Старые настройки, когда не работала Аутентификация при выключенном DEBUG
-REST_FRAMEWORK = {
-    'DEFAULT_AUTHENTICATION_CLASSES': [
-        'users.backends.CustomAuthentication',
-    ],
-    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
-}
-
-if DEBUG:
-    REST_FRAMEWORK['DEFAULT_AUTHENTICATION_CLASSES'].append(
-        'rest_framework.authentication.TokenAuthentication'
-    )
-
-# Предлагаемые настройки, чтобы аутентификация работала с выключенным DEBUG
 # REST_FRAMEWORK = {
 #     'DEFAULT_AUTHENTICATION_CLASSES': [
 #         'users.backends.CustomAuthentication',
-#         'rest_framework.authentication.TokenAuthentication',
 #     ],
 #     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
 # }
-# Стоит проверить, все ли тут работает
+#
+# if DEBUG:
+#     REST_FRAMEWORK['DEFAULT_AUTHENTICATION_CLASSES'].append(
+#         'rest_framework.authentication.TokenAuthentication'
+#     )
+
+
+# НОВЫЕ Настройки, CORS должен работать в любом случае!
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'users.backends.CustomAuthentication',
+        'rest_framework.authentication.TokenAuthentication',
+    ],
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+}
 
 
 SPECTACULAR_SETTINGS = {
@@ -233,6 +231,4 @@ CORS_ALLOW_HEADERS = [
 ]
 
 CORS_ALLOW_CREDENTIALS = True
-
 CORS_ALLOW_ALL_LOCALHOST = True
-

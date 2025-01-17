@@ -10,6 +10,15 @@ on:
     types: [closed]
 
 jobs:
+  # Добавляем условие, когда джоб должен запускаться.
+  # Запускаться должен только один раз
+  # -- либо при прямом пуше, но это он и так делал один раз без условия ниже
+  # -- либо при мерже, но один раз!!!! А не деплой на dev и на закрытую ветку!
+
+  if: |
+    (github.event_name == 'push' && github.ref == 'refs/heads/dev') ||
+    (github.event_name == 'pull_request' && github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'dev')
+
   build_and_push_to_docker_hub:
     name: Push Docker image to Docker Hub
     runs-on: ubuntu-latest
