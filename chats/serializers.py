@@ -60,6 +60,8 @@ class ChatSerializer(serializers.ModelSerializer):
             'message',
             'datetime',
             'is_new',
+            'user_from',
+            'user_to',
         ]
 
 
