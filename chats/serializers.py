@@ -241,3 +241,15 @@ class BlockingSerializer(serializers.ModelSerializer):
             'user_who',
             'user_whom',
         ]
+
+
+class UnblockingSerializer(serializers.ModelSerializer):
+    ids = serializers.ListField(
+        child=serializers.IntegerField(),
+        allow_empty=False,
+        help_text="Список ID чатов для разблокировки"
+    )
+
+    def validate_ids(self, value):
+        if not Chat.objects.filter(id__in=value).exists():
+            raise serializers.ValidationError("Некоторые из переданных чатов не существуют.")

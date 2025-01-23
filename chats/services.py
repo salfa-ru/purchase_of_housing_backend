@@ -116,3 +116,14 @@ def create_blocking(current_user, chats):
     )
 
     return blocking_list
+
+
+def remove_blocking(current_user, chats):
+    unblock_users = set()
+    for chat in chats:
+        user = chat.user_from if chat.user_from != current_user else chat.user_to
+        unblock_users.add(user)
+    unblocking_list = Blocking.objects.filter(user_who=current_user, user_whom__in=unblock_users)
+    blocking_count, _ = unblocking_list.delete()
+
+    return blocking_count

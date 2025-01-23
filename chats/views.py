@@ -2,6 +2,8 @@ from drf_spectacular.utils import extend_schema, inline_serializer
 from rest_framework import generics, status, serializers
 from rest_framework import permissions
 from rest_framework.response import Response
+from chats import models as chats_models
+from rest_framework.views import APIView
 
 from chats.paginations import ChatPagination
 from chats.serializers import (ChatSerializer,
@@ -11,13 +13,13 @@ from chats.serializers import (ChatSerializer,
                                CreateChatRequestSerializer,
                                CreateChatResponseSerializer,
                                IdsListSerializer,
-                               BlockingSerializer, )
+                               BlockingSerializer, UnblockingSerializer, )
 from chats.services import (get_chats,
                             get_chat_by_id,
                             get_realty_by_id,
                             multiple_delete_chats,
                             get_chats_by_ids,
-                            create_blocking, )
+                            create_blocking, remove_blocking, )
 
 
 @extend_schema(summary='Получение списка переписок')
@@ -170,3 +172,27 @@ class ChatsBlockingCreateAPIView(generics.CreateAPIView):
 
         serializer = self.get_serializer(blocking_list, many=True)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+@extend_schema(
+    summary='Разблокировка чата',
+    request=IdsListSerializer,
+    responses={200: MessagesListPASerializer},
+)
+class ChatRemoveBlocking(APIView):
+    queryset = chats_models.Blocking
+    permission_classes = [permissions.IsAuthenticated, ]
+    serializer_class = UnblockingSerializer
+
+    def post(self, request, *args, **kwargs):
+        queryset, _ = get_chats_by_ids(
+            current_user=self.request.user,
+            data=self.request.data
+        )
+        remove_blocking(
+            current_user=self.request.user,
+            chats=queryset
+        )
+
+        return Response({"detail": 'Чаты успешно разблокированы.'})
+

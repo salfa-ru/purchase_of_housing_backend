@@ -8,7 +8,7 @@ from chats.views import (
     ChatPACreateAPIView,
     ChatRealtyCreateAPIView,
     ChatsDestroyAPIView,
-    ChatsBlockingCreateAPIView,
+    ChatsBlockingCreateAPIView, ChatRemoveBlocking,
 )
 
 app_name = ChatsConfig.name
@@ -21,4 +21,5 @@ urlpatterns = [
     path('new/realty/', ChatRealtyCreateAPIView.as_view(), name='create-realty'),
     path('multiple-del/', ChatsDestroyAPIView.as_view(), name='destroy'),
     path('block/', ChatsBlockingCreateAPIView.as_view(), name='blocking'),
+    path('unblock/', ChatRemoveBlocking.as_view(), name='unblocking'),
 ]
