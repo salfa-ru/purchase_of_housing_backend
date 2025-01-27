@@ -8,7 +8,7 @@ from rest_framework.response import Response
 from rest_framework.pagination import LimitOffsetPagination
 
 from config import constants
-from realty.pagination import LimitRealtyPagination, MyRealtyPagination
+from realty.pagination import LimitRealtyPagination, MyRealtyPagination, PaginatedResponseSerializer
 from realty_addresses import models as realty_addresses_models
 from realty_values import models as realty_values_models
 from realty_displays.models import DisplayFullInfo, DisplayInSearch
@@ -246,8 +246,11 @@ class RealtyOwnerContactsView(generics.RetrieveAPIView):
         OpenApiParameter(
             name='page_size',
             type=int,
-            description=f'Количество объявлений на странице (по умолчанию {constants.MY_REALTY_PAGESIZE_DEFAULT}, '
-                        f'максимум {constants.MY_REALTY_PAGESIZE_MAX}, оба значения задаются в constants.py)',
+            description=(
+                f'Количество объявлений на странице (по умолчанию '
+                f'{constants.MY_REALTY_PAGESIZE_DEFAULT}, максимум '
+                f'{constants.MY_REALTY_PAGESIZE_MAX})'
+            ),
             required=False
         ),
         OpenApiParameter(
@@ -256,7 +259,8 @@ class RealtyOwnerContactsView(generics.RetrieveAPIView):
             description='Номер страницы',
             required=False
         )
-    ]
+    ],
+    responses={200: PaginatedResponseSerializer}
 )
 class RealtyLKListView(generics.ListAPIView):
     """
@@ -264,8 +268,8 @@ class RealtyLKListView(generics.ListAPIView):
     <h3> Структура ответа: </h3>
     <ul>
     <li> <b>count:</b> общее количество объявлений
-    <li> <b>pages_total:</b> общее количество страниц
     <li> <b>page_size:</b> количество объявлений на странице
+    <li> <b>pages_total:</b> общее количество страниц
     <li> <b>current_page:</b> номер текущей страницы
     <li> <b>next:</b> ссылка на следующую страницу
     <li> <b>previous:</b> ссылка на предыдущую страницу
@@ -276,10 +280,12 @@ class RealtyLKListView(generics.ListAPIView):
     pagination_class = MyRealtyPagination
 
     def get_queryset(self):
-        owner = self.request.user
-        queryset = realty_models.Realty.objects.filter(owner_id=owner).order_by('-published_at')
+        return (
+            realty_models.Realty.objects
+            .filter(owner_id=self.request.user)
+            .order_by('-published_at')
+        )
 
-        return queryset
 
 
 @extend_schema(
