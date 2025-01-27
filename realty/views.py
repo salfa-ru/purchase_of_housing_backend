@@ -1,14 +1,14 @@
 from django.utils import timezone
 from django_filters.rest_framework import DjangoFilterBackend
 
-from drf_spectacular.utils import extend_schema, extend_schema_view
+from drf_spectacular.utils import extend_schema, extend_schema_view, OpenApiParameter
 from drf_spectacular.helpers import forced_singular_serializer
 from rest_framework import generics, permissions, viewsets, views
 from rest_framework.response import Response
 from rest_framework.pagination import LimitOffsetPagination
 
 from config import constants
-from realty.pagination import LimitRealtyPagination, MyRealtyPagination
+from realty.pagination import LimitRealtyPagination, MyRealtyPagination, PaginatedResponseSerializer
 from realty_addresses import models as realty_addresses_models
 from realty_values import models as realty_values_models
 from realty_displays.models import DisplayFullInfo, DisplayInSearch
@@ -49,16 +49,16 @@ class RealtyBaseViewSet(BaseViewSet):
         return realty_serializers.RealtyBaseSerializer
 
 
-@extend_schema(tags=[("Управление объявлениями о продаже недвижимости.")])
+@extend_schema(tags=["Управление объявлениями о продаже недвижимости"])
 @extend_schema_view(
     partial_update=extend_schema(
-        summary=('Частичное изменение объявления о продаже недвижимости.'),
+        summary='Частичное изменение объявления о продаже недвижимости.',
     ),
     # retrieve=extend_schema(
     #     summary=('Просмотр информации объявления о продаже по id записи.'),
     # ),
     create=extend_schema(
-        summary=('Создание объявления о продаже недвижимости.'),
+        summary='Создание объявления о продаже недвижимости.',
     ),
     # list=extend_schema(
     #     summary=('Просмотр списка объявлений о продаже недвижимости.'),
@@ -76,16 +76,16 @@ class SaleViewSet(BaseViewSet):
         return sale_serializers.SaleCreateSerializer
 
 
-@extend_schema(tags=[("Управление объявлениями об аренде недвижимости.")])
+@extend_schema(tags=["Управление объявлениями об аренде недвижимости"])
 @extend_schema_view(
     partial_update=extend_schema(
-        summary=('Частичное изменение объявления об аренде недвижимости.'),
+        summary='Частичное изменение объявления об аренде недвижимости.',
     ),
     # retrieve=extend_schema(
     #     summary=('Просмотр информации объявления об аренде по id записи.'),
     # ),
     create=extend_schema(
-        summary=('Создание объявления об аренде недвижимости.'),
+        summary='Создание объявления об аренде недвижимости.',
     ),
     # list=extend_schema(
     #     summary=('Просмотр списка объявлений об аренде недвижимости.'),
@@ -159,8 +159,7 @@ class RealtyListView(generics.ListAPIView):
     filterset_class = RealtyFilter
 
     def list(self, request, *args, **kwargs):
-        """ Запуск увеличения счетчика показа в поиске
-        с защитой от накрутки."""
+        """ Запуск увеличения счетчика показа в поиске с защитой от накрутки."""
 
         response = super().list(request, *args, **kwargs)
         realty_ids = [realty_data['id'] for realty_data in response.data['results']]
@@ -242,20 +241,51 @@ class RealtyOwnerContactsView(generics.RetrieveAPIView):
 
 
 @extend_schema(
-    summary='Показ всех объявлений пользователя в ЛК - со счетчиками и статусом.')
+    summary='Показ всех объявлений пользователя в ЛК - со счетчиками и статусом.',
+    parameters=[
+        OpenApiParameter(
+            name='page_size',
+            type=int,
+            description=(
+                f'Количество объявлений на странице (по умолчанию '
+                f'{constants.MY_REALTY_PAGESIZE_DEFAULT}, максимум '
+                f'{constants.MY_REALTY_PAGESIZE_MAX})'
+            ),
+            required=False
+        ),
+        OpenApiParameter(
+            name='page',
+            type=int,
+            description='Номер страницы',
+            required=False
+        )
+    ],
+    responses={200: PaginatedResponseSerializer}
+)
 class RealtyLKListView(generics.ListAPIView):
-    """Viewing Realty objects queryset with view counts."""
+    """
+    <p> Возвращает список объявлений с пагинацией, по умолчанию - 10 объявлений на странице.<br>
+    <h3> Структура ответа: </h3>
+    <ul>
+    <li> <b>count:</b> общее количество объявлений
+    <li> <b>page_size:</b> количество объявлений на странице
+    <li> <b>pages_total:</b> общее количество страниц
+    <li> <b>current_page:</b> номер текущей страницы
+    <li> <b>next:</b> ссылка на следующую страницу
+    <li> <b>previous:</b> ссылка на предыдущую страницу
+    <li> <b>results:</b> массив объявлений </p>"""
 
     serializer_class = common_serializers.RealtyLKSerializer
     permission_classes = [permissions.IsAuthenticated]
     pagination_class = MyRealtyPagination
 
     def get_queryset(self):
-        owner = self.request.user
-        queryset = realty_models.Realty.objects.filter(
-            owner_id=owner).order_by('-published_at')
+        return (
+            realty_models.Realty.objects
+            .filter(owner_id=self.request.user)
+            .order_by('-published_at')
+        )
 
-        return queryset
 
 
 @extend_schema(
@@ -268,7 +298,6 @@ class ChangeStatusUpdateAPIView(generics.UpdateAPIView):
 
     def perform_update(self, serializer):
         serializer.save()
-
 
 
 @extend_schema(
