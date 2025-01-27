@@ -68,6 +68,11 @@ COUNTER_VIEW_IN_SEARCH_MIN_TIME_INTERVAL = timedelta(hours=0, minutes=0, seconds
 MAX_LISTING_DURATION = timedelta(days=30, hours=0, minutes=0, seconds=0)
 
 
+# Показ собственных объявлений в Личном кабинете, настройки Пагинации
+MY_REALTY_PAGESIZE_DEFAULT = 10
+MY_REALTY_PAGESIZE_MAX = 50
+
+
 class ConstantsAuth:
     """Constants for custom authentication"""
 
