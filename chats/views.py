@@ -4,7 +4,6 @@ from rest_framework import permissions
 from rest_framework.response import Response
 from chats import models as chats_models
 from rest_framework.views import APIView
-
 from chats.paginations import ChatPagination
 from chats.serializers import (ChatSerializer,
                                MessagesListPASerializer,
@@ -30,7 +29,23 @@ class ChatListAPIView(generics.ListAPIView):
     pagination_class = ChatPagination
 
     def get_queryset(self):
-        return get_chats(self.request.user)
+        chats = get_chats(self.request.user)
+        filtered_queryset = []
+        is_blacklist = self.kwargs.get("blacklist", False)
+
+        if is_blacklist:
+            for chat in chats:
+                if chats_models.Blocking.objects.filter(user_who=chat.user_from,
+                                                        user_whom=chat.user_to):
+                    filtered_queryset.append(chat)
+            return filtered_queryset
+
+        else:
+            for chat in chats:
+                if not chats_models.Blocking.objects.filter(user_who=self.request.user,
+                                                            user_whom=chat.user_to):
+                    filtered_queryset.append(chat)
+            return filtered_queryset
 
 
 @extend_schema(
@@ -195,4 +210,3 @@ class ChatRemoveBlocking(APIView):
         )
 
         return Response({"detail": 'Чаты успешно разблокированы.'})
-
