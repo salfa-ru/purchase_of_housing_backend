@@ -15,6 +15,7 @@ app_name = ChatsConfig.name
 
 urlpatterns = [
     path('', ChatListAPIView.as_view(), name='list'),
+    path('blacklist/', ChatListAPIView.as_view(), {"blacklist": True}, name='chat-blacklist'),
     path('talk/', MessagesListPAAPIView.as_view(), name='msg-list-pa'),
     path('realty/msgs/', MessagesListRealtyAPIView.as_view(), name='msg-list-realty'),
     path('new/pa/', ChatPACreateAPIView.as_view(), name='create-pa'),
