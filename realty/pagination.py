@@ -59,17 +59,3 @@ class MyRealtyPagination(PageNumberPagination):
             ('results', data)
         ]))
 
-    # Старая Пагинация (Кости), выдавала 3 или 4 на странице
-    # Филипп: я вообще не понимаю логики 3/4, причем активных объявлений
-    # from realty.models import Realty
-    # def get_page_size(self, request):
-    #     owner = request.user
-    #     active_realties_count = Realty.objects.filter(
-    #         owner=owner,
-    #         realty_status__status='Активно').count()
-    #     print(active_realties_count)
-    #     if active_realties_count <= 1:
-    #         return 4
-    #     elif active_realties_count > 2:
-    #         return 3
-    #     return 4
