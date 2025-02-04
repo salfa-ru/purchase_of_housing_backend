@@ -21,7 +21,7 @@ from chats.services import (get_chats,
                             create_blocking, remove_blocking, )
 
 
-@extend_schema(summary='Получение списка переписок')
+@extend_schema(summary='Получение списка ВСЕХ переписок. Только заблокированные - через эндпойнт /blacklist')
 class ChatListAPIView(generics.ListAPIView):
     """Получение списка переписок пользователя."""
     serializer_class = ChatSerializer
@@ -30,22 +30,42 @@ class ChatListAPIView(generics.ListAPIView):
 
     def get_queryset(self):
         chats = get_chats(self.request.user)
-        filtered_queryset = []
         is_blacklist = self.kwargs.get("blacklist", False)
 
         if is_blacklist:
+            filtered_chats = []
+
             for chat in chats:
-                if chats_models.Blocking.objects.filter(user_who=chat.user_from,
+                if chats_models.Blocking.objects.filter(user_who=self.request.user,
                                                         user_whom=chat.user_to):
-                    filtered_queryset.append(chat)
-            return filtered_queryset
+                    filtered_chats.append(chat)
+            return filtered_chats
 
         else:
-            for chat in chats:
-                if not chats_models.Blocking.objects.filter(user_who=self.request.user,
-                                                            user_whom=chat.user_to):
-                    filtered_queryset.append(chat)
-            return filtered_queryset
+            return chats
+
+    # serializer_class = ChatSerializer
+    # permission_classes = [permissions.IsAuthenticated]
+    # pagination_class = ChatPagination
+    #
+    # def get_queryset(self):
+    #     chats = get_chats(self.request.user)
+    #     filtered_queryset = []
+    #     is_blacklist = self.kwargs.get("blacklist", False)
+    #
+    #     if is_blacklist:
+    #         for chat in chats:
+    #             if chats_models.Blocking.objects.filter(user_who=self.request.user,
+    #                                                     user_whom=chat.user_to):
+    #                 filtered_queryset.append(chat)
+    #         return filtered_queryset
+    #
+    #     else:
+    #         for chat in chats:
+    #             if not chats_models.Blocking.objects.filter(user_who=self.request.user,
+    #                                                         user_whom=chat.user_to):
+    #                 filtered_queryset.append(chat)
+    #         return filtered_queryset
 
 
 @extend_schema(

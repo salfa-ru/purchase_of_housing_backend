@@ -48,6 +48,38 @@ class ChatSerializer(serializers.ModelSerializer):
     """Сериализатор для получения списка переписок"""
     realty = RealtyForChatSerializer()
     is_new = serializers.SerializerMethodField()
+    # is_blocked = serializers.SerializerMethodField()  # 2025-Feb-04 - добавляем инфу о блокировке чата
+    is_blocked_i_block_them = serializers.SerializerMethodField()
+    is_blocked_they_block_me = serializers.SerializerMethodField()
+
+    """ 2025-Feb-04 - Оригинал в MessagesListBaseSerializer(serializers.ModelSerializer): """
+    # def get_is_blocked(self, obj) -> bool:
+    #     """Определяем, заблокировал ли текущий пользователь  другого."""
+    #     current_user = self.context['request'].user
+    #     other_user = obj.user_from if obj.user_from != current_user else obj.user_to
+    #     is_blocked = Blocking.objects.filter(
+    #         user_who=current_user,
+    #         user_whom=other_user,
+    #     ).exists()
+    #     return is_blocked
+    #
+    def get_is_blocked_i_block_them(self, obj) -> bool:
+        """Определяем, заблокировал ли текущий пользователь другого."""
+        current_user = self.context['request'].user
+        other_user = obj.user_from if obj.user_from != current_user else obj.user_to
+        return Blocking.objects.filter(
+            user_who=current_user,
+            user_whom=other_user,
+        ).exists()
+
+    def get_is_blocked_they_block_me(self, obj) -> bool:
+        """Определяем, заблокировал ли другой пользователь текущего."""
+        current_user = self.context['request'].user
+        other_user = obj.user_from if obj.user_from != current_user else obj.user_to
+        return Blocking.objects.filter(
+            user_who=other_user,
+            user_whom=current_user,
+        ).exists()
 
     def get_is_new(self, obj):
         return obj.user_to == self.context['request'].user and obj.is_new
@@ -59,6 +91,9 @@ class ChatSerializer(serializers.ModelSerializer):
             'realty',
             'message',
             'datetime',
+            # 'is_blocked',  # 2025-Feb-04 - добавляем инфу о блокировке чата
+            'is_blocked_i_block_them',
+            'is_blocked_they_block_me',
             'is_new',
             'user_from',
             'user_to',
@@ -87,17 +122,37 @@ class MessageSerializer(serializers.ModelSerializer):
 class MessagesListBaseSerializer(serializers.ModelSerializer):
     """Базовый сериализатор цепочки сообщений (для наследования от него)"""
     realty = None
-    is_blocked = serializers.SerializerMethodField()
+    # is_blocked = serializers.SerializerMethodField()
+    is_blocked_i_block_them = serializers.SerializerMethodField()
+    is_blocked_they_block_me = serializers.SerializerMethodField()
     messages = serializers.SerializerMethodField()
 
-    def get_is_blocked(self, obj) -> bool:
-        """Определяем, заблокировали ли текущего пользователя"""
+    # def get_is_blocked(self, obj) -> bool:
+    #     """Определяем, заблокировали ли текущего пользователя"""
+    #     current_user, second_user, realty = self.get_chat_data(obj)
+    #     is_blocked = Blocking.objects.filter(
+    #         user_who=second_user,
+    #         user_whom=current_user,
+    #     ).exists()
+    #     return is_blocked
+
+    def get_is_blocked_i_block_them(self, obj) -> bool:
+        """Определяем, заблокировал ли текущий пользователь другого."""
         current_user, second_user, realty = self.get_chat_data(obj)
-        is_blocked = Blocking.objects.filter(
+        is_blocked_i_block_them = Blocking.objects.filter(
+            user_who=current_user,
+            user_whom=second_user,
+        ).exists()
+        return is_blocked_i_block_them
+
+    def get_is_blocked_they_block_me(self, obj) -> bool:
+        """Определяем, заблокировал ли другой пользователь текущего."""
+        current_user, second_user, realty = self.get_chat_data(obj)
+        is_blocked_they_block_me = Blocking.objects.filter(
             user_who=second_user,
             user_whom=current_user,
         ).exists()
-        return is_blocked
+        return is_blocked_they_block_me
 
     def get_messages(self, obj) -> MessageSerializer(many=True):
         """Получаем список сообщений в цепочке.
@@ -130,8 +185,7 @@ class MessagesListBaseSerializer(serializers.ModelSerializer):
 
     def get_chat_data(self, obj):
         """Получение данных по объекту сериализатора
-        (переписке или объявлению),
-         будет переопределено в наследуюемых классах"""
+        (переписке или объявлению), будет переопределено в наследуемых классах"""
         current_user = None
         second_user = None
         realty = None
@@ -140,7 +194,9 @@ class MessagesListBaseSerializer(serializers.ModelSerializer):
     class Meta:
         fields = [
             'realty',
-            'is_blocked',
+            # 'is_blocked',
+            'is_blocked_i_block_them',
+            'is_blocked_they_block_me',
             'messages',
         ]
 
@@ -229,10 +285,8 @@ class IdsListSerializer(serializers.Serializer):
 
 class BlockingSerializer(serializers.ModelSerializer):
     """Сериализатор блокировки чатов пользователя"""
-    user_who = serializers.SlugRelatedField(read_only=True,
-                                            slug_field='username')
-    user_whom = serializers.SlugRelatedField(read_only=True,
-                                             slug_field='username')
+    user_who = serializers.SlugRelatedField(read_only=True, slug_field='username')
+    user_whom = serializers.SlugRelatedField(read_only=True, slug_field='username')
 
     class Meta:
         model = Blocking
