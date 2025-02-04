@@ -35,7 +35,7 @@ class ChatListAPIView(generics.ListAPIView):
 
         if is_blacklist:
             for chat in chats:
-                if chats_models.Blocking.objects.filter(user_who=chat.user_from,
+                if chats_models.Blocking.objects.filter(user_who=self.request.user,
                                                         user_whom=chat.user_to):
                     filtered_queryset.append(chat)
             return filtered_queryset
