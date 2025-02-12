@@ -5,26 +5,29 @@ from realty import models as realty_models
 from users import models as users_models
 
 
-class Chat(models.Model):
-    """Chat model."""
+class Message(models.Model):
+    """ Message - переименованная модель Chat. Остатки можно найти в коде увидев упоминание Zhat """
 
+    # Добавляю вместо неявного, но часто использующегося id
+
+    msg_id = models.AutoField(primary_key=True, verbose_name='Message ID')
     user_from = models.ForeignKey(
         users_models.User,
         on_delete=models.PROTECT,
         verbose_name='От кого',
-        related_name='chats_from_me',
+        related_name='zhats_from_me',
     )
     user_to = models.ForeignKey(
         users_models.User,
         on_delete=models.PROTECT,
         verbose_name='Кому',
-        related_name='chats_to_me',
+        related_name='zhats_to_me',
     )
     realty = models.ForeignKey(
         realty_models.Realty,
         on_delete=models.CASCADE,
         verbose_name='Недвижимость',
-        related_name='chats',
+        related_name='zhats',
     )
     datetime = models.DateTimeField(
         auto_now_add=True, verbose_name='Дата+Время'

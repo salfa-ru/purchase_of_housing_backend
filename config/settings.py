@@ -171,7 +171,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
-        'users.backends.CustomAuthentication',
+        # 'users.backends.CustomAuthentication',   # отключил, так как не пользуемся ИССОЙ!
         'rest_framework.authentication.TokenAuthentication',
     ],
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
@@ -184,6 +184,11 @@ SPECTACULAR_SETTINGS = {
     'VERSION': '1.0.0',
     'SERVE_INCLUDE_SCHEMA': False,
     'COMPONENT_SPLIT_REQUEST': True,
+    'SWAGGER_UI_SETTINGS': {
+        'defaultModelsExpandDepth': 0,  # Hides schemas by default, -1 --> removes
+        'filter': True,
+        "persistAuthorization": True,
+    },
 }
 
 # Настройки Django Q2 для деактивации устаревших объявлений

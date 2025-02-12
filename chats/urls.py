@@ -2,25 +2,25 @@ from django.urls import path
 
 from chats.apps import ChatsConfig
 from chats.views import (
-    ChatListAPIView,
-    MessagesListPAAPIView,
-    MessagesListRealtyAPIView,
-    ChatPACreateAPIView,
-    ChatRealtyCreateAPIView,
-    ChatsDestroyAPIView,
-    ChatsBlockingCreateAPIView, ChatRemoveBlocking,
+    ZhatListAPIView,
+    MassagesListPAAPIView,
+    MassagesListRealtyAPIView,
+    ZhatPACreateAPIView,
+    ZhatRealtyCreateAPIView,
+    ZhatsDestroyAPIView,
+    ZhatsBlockingCreateAPIView, ZhatRemoveBlocking,
 )
 
 app_name = ChatsConfig.name
 
 urlpatterns = [
-    path('', ChatListAPIView.as_view(), name='list'),
-    path('blacklist/', ChatListAPIView.as_view(), {"blacklist": True}, name='chat-blacklist'),
-    path('talk/', MessagesListPAAPIView.as_view(), name='msg-list-pa'),
-    path('realty/msgs/', MessagesListRealtyAPIView.as_view(), name='msg-list-realty'),
-    path('new/pa/', ChatPACreateAPIView.as_view(), name='create-pa'),
-    path('new/realty/', ChatRealtyCreateAPIView.as_view(), name='create-realty'),
-    path('multiple-del/', ChatsDestroyAPIView.as_view(), name='destroy'),
-    path('block/', ChatsBlockingCreateAPIView.as_view(), name='blocking'),
-    path('unblock/', ChatRemoveBlocking.as_view(), name='unblocking'),
+    path('', ZhatListAPIView.as_view(), name='list'),
+    path('blacklist/', ZhatListAPIView.as_view(), {"blacklist": True}, name='zhat-blacklist'),
+    path('talk/', MassagesListPAAPIView.as_view(), name='msg-list-pa'),
+    path('realty/msgs/', MassagesListRealtyAPIView.as_view(), name='msg-list-realty'),
+    path('new/pa/', ZhatPACreateAPIView.as_view(), name='create-pa'),
+    path('new/realty/', ZhatRealtyCreateAPIView.as_view(), name='create-realty'),
+    path('multiple-del/', ZhatsDestroyAPIView.as_view(), name='destroy'),
+    path('block/', ZhatsBlockingCreateAPIView.as_view(), name='blocking'),
+    path('unblock/', ZhatRemoveBlocking.as_view(), name='unblocking'),
 ]

@@ -1,11 +1,11 @@
 from django.db.models import Q
 from rest_framework import serializers, exceptions
 
-from chats.models import Chat, Blocking
+from chats.models import Message, Blocking
 from realty.models import Realty
 
 
-class RealtyForChatSerializer(serializers.ModelSerializer):
+class RealtyForZhatSerializer(serializers.ModelSerializer):
     """Сериализатор информации об объявлении.
     Для показа переписок и цепочек сообщений."""
     owner = serializers.CharField(source='owner.first_name')
@@ -14,16 +14,12 @@ class RealtyForChatSerializer(serializers.ModelSerializer):
         slug_field='type',
         read_only=True,
     )
-    number_of_rooms = serializers.CharField(
-        source='about_apartment.number_of_rooms.number_of_rooms'
-    )
+    number_of_rooms = serializers.CharField(source='about_apartment.number_of_rooms.number_of_rooms')
     area = serializers.FloatField(source='about_apartment.area')
     floor = serializers.IntegerField(source='about_apartment.floor')
-    floors_number = serializers.IntegerField(
-        source='about_apartment.floors_number'
-    )
+    floors_number = serializers.IntegerField(source='about_apartment.floors_number')
 
-    def get_photo(self, obj):
+    def get_photo(self, obj) -> str | None:
         photo = obj.realty_photos.first()
         if photo:
             return photo.image.url
@@ -44,25 +40,15 @@ class RealtyForChatSerializer(serializers.ModelSerializer):
         ]
 
 
-class ChatSerializer(serializers.ModelSerializer):
+class ZhatSerializer(serializers.ModelSerializer):
     """Сериализатор для получения списка переписок"""
-    realty = RealtyForChatSerializer()
+    msg_id = serializers.IntegerField()
+    realty = RealtyForZhatSerializer()
     is_new = serializers.SerializerMethodField()
-    # is_blocked = serializers.SerializerMethodField()  # 2025-Feb-04 - добавляем инфу о блокировке чата
+    # is_blocked = serializers.SerializerMethodField()  # 2025-Feb-04 - добавляем инфу о блокировке 4ата
     is_blocked_i_block_them = serializers.SerializerMethodField()
     is_blocked_they_block_me = serializers.SerializerMethodField()
 
-    """ 2025-Feb-04 - Оригинал в MessagesListBaseSerializer(serializers.ModelSerializer): """
-    # def get_is_blocked(self, obj) -> bool:
-    #     """Определяем, заблокировал ли текущий пользователь  другого."""
-    #     current_user = self.context['request'].user
-    #     other_user = obj.user_from if obj.user_from != current_user else obj.user_to
-    #     is_blocked = Blocking.objects.filter(
-    #         user_who=current_user,
-    #         user_whom=other_user,
-    #     ).exists()
-    #     return is_blocked
-    #
     def get_is_blocked_i_block_them(self, obj) -> bool:
         """Определяем, заблокировал ли текущий пользователь другого."""
         current_user = self.context['request'].user
@@ -81,17 +67,17 @@ class ChatSerializer(serializers.ModelSerializer):
             user_whom=current_user,
         ).exists()
 
-    def get_is_new(self, obj):
+    def get_is_new(self, obj) -> bool:
         return obj.user_to == self.context['request'].user and obj.is_new
 
     class Meta:
-        model = Chat
+        model = Message
         fields = [
-            'id',
+            'msg_id',
             'realty',
             'message',
             'datetime',
-            # 'is_blocked',  # 2025-Feb-04 - добавляем инфу о блокировке чата
+            # 'is_blocked',  # 2025-Feb-04 - добавляем инфу о блокировке 4ата
             'is_blocked_i_block_them',
             'is_blocked_they_block_me',
             'is_new',
@@ -105,13 +91,13 @@ class IdSerializer(serializers.Serializer):
     id_from = serializers.IntegerField(min_value=1)
 
 
-class MessageSerializer(serializers.ModelSerializer):
+class MassageSerializer(serializers.ModelSerializer):
     """Сериализатор одного сообщения внутри цепочки сообщений."""
 
     class Meta:
-        model = Chat
+        model = Message
         fields = [
-            'id',
+            'msg_id',
             'message',
             'datetime',
             'user_from',
@@ -119,7 +105,7 @@ class MessageSerializer(serializers.ModelSerializer):
         ]
 
 
-class MessagesListBaseSerializer(serializers.ModelSerializer):
+class MassagesListBaseSerializer(serializers.ModelSerializer):
     """Базовый сериализатор цепочки сообщений (для наследования от него)"""
     realty = None
     # is_blocked = serializers.SerializerMethodField()
@@ -129,7 +115,7 @@ class MessagesListBaseSerializer(serializers.ModelSerializer):
 
     # def get_is_blocked(self, obj) -> bool:
     #     """Определяем, заблокировали ли текущего пользователя"""
-    #     current_user, second_user, realty = self.get_chat_data(obj)
+    #     current_user, second_user, realty = self.get_zhat_data(obj)
     #     is_blocked = Blocking.objects.filter(
     #         user_who=second_user,
     #         user_whom=current_user,
@@ -138,7 +124,7 @@ class MessagesListBaseSerializer(serializers.ModelSerializer):
 
     def get_is_blocked_i_block_them(self, obj) -> bool:
         """Определяем, заблокировал ли текущий пользователь другого."""
-        current_user, second_user, realty = self.get_chat_data(obj)
+        current_user, second_user, realty = self.get_zhat_data(obj)
         is_blocked_i_block_them = Blocking.objects.filter(
             user_who=current_user,
             user_whom=second_user,
@@ -147,20 +133,20 @@ class MessagesListBaseSerializer(serializers.ModelSerializer):
 
     def get_is_blocked_they_block_me(self, obj) -> bool:
         """Определяем, заблокировал ли другой пользователь текущего."""
-        current_user, second_user, realty = self.get_chat_data(obj)
+        current_user, second_user, realty = self.get_zhat_data(obj)
         is_blocked_they_block_me = Blocking.objects.filter(
             user_who=second_user,
             user_whom=current_user,
         ).exists()
         return is_blocked_they_block_me
 
-    def get_messages(self, obj) -> MessageSerializer(many=True):
+    def get_messages(self, obj) -> MassageSerializer(many=True):
         """Получаем список сообщений в цепочке.
         Сравнение по текущему пользователю, собеседнику и объявлению.
         Удаленные сообщения не включаем."""
-        current_user, second_user, realty = self.get_chat_data(obj)
+        current_user, second_user, realty = self.get_zhat_data(obj)
 
-        queryset = Chat.objects.filter(
+        queryset = Message.objects.filter(
             Q(
                 user_from=current_user,
                 is_deleted_from=False,
@@ -180,10 +166,10 @@ class MessagesListBaseSerializer(serializers.ModelSerializer):
             user_to=current_user, is_new=True
         ).all().update(is_new=False)
 
-        serializer = MessageSerializer(queryset, many=True)
+        serializer = MassageSerializer(queryset, many=True)
         return serializer.data
 
-    def get_chat_data(self, obj):
+    def get_zhat_data(self, obj):
         """Получение данных по объекту сериализатора
         (переписке или объявлению), будет переопределено в наследуемых классах"""
         current_user = None
@@ -201,15 +187,15 @@ class MessagesListBaseSerializer(serializers.ModelSerializer):
         ]
 
 
-class MessagesListPASerializer(MessagesListBaseSerializer):
+class MassagesListPASerializer(MassagesListBaseSerializer):
     """Сериализатор цепочки сообщений для личного кабинета."""
 
-    realty = RealtyForChatSerializer()
+    realty = RealtyForZhatSerializer()
 
-    class Meta(MessagesListBaseSerializer.Meta):
-        model = Chat
+    class Meta(MassagesListBaseSerializer.Meta):
+        model = Message
 
-    def get_chat_data(self, obj):
+    def get_zhat_data(self, obj):
         """Получение данных по сообщению (из ЛК):
         текущий пользователь, собеседник, объявление"""
         current_user = getattr(self.context.get('request'), 'user', None)
@@ -218,15 +204,15 @@ class MessagesListPASerializer(MessagesListBaseSerializer):
         return current_user, second_user, realty
 
 
-class MessagesListRealtySerializer(MessagesListBaseSerializer):
+class MassagesListRealtySerializer(MassagesListBaseSerializer):
     """Сериализатор цепочки сообщений из объявления."""
 
-    realty = RealtyForChatSerializer(source='*')
+    realty = RealtyForZhatSerializer(source='*')
 
-    class Meta(MessagesListBaseSerializer.Meta):
+    class Meta(MassagesListBaseSerializer.Meta):
         model = Realty
 
-    def get_chat_data(self, obj):
+    def get_zhat_data(self, obj):
         """Получение данных по объявлению:
         текущий пользователь, собеседник, объявление"""
         current_user = getattr(self.context.get('request'), 'user', None)
@@ -235,19 +221,19 @@ class MessagesListRealtySerializer(MessagesListBaseSerializer):
         return current_user, second_user, realty
 
 
-class CreateChatRequestSerializer(serializers.Serializer):
+class CreateZhatRequestSerializer(serializers.Serializer):
     """Сериализатор тела запроса при создании нового сообщения"""
     id_from = serializers.IntegerField(min_value=1, write_only=True)
     message = serializers.CharField(max_length=255)
 
 
-class CreateChatResponseSerializer(serializers.ModelSerializer):
+class CreateZhatResponseSerializer(serializers.ModelSerializer):
     """Сериализатор тела ответа при создании нового сообщения"""
 
     class Meta:
-        model = Chat
+        model = Message
         fields = [
-            'id',
+            'msg_id',
             'message',
             'user_from',
             'user_to',
@@ -265,7 +251,7 @@ class CreateChatResponseSerializer(serializers.ModelSerializer):
             user_whom=data.get('user_from'),
         ).exists()
         if is_blocked:
-            msg = "Chat blocked."
+            msg = "Zhat blocked."
             raise exceptions.PermissionDenied(detail=msg)
         # проверка на отправку сообщения самому себе
         if data.get("user_from") == data.get("user_to"):
@@ -284,7 +270,7 @@ class IdsListSerializer(serializers.Serializer):
 
 
 class BlockingSerializer(serializers.ModelSerializer):
-    """Сериализатор блокировки чатов пользователя"""
+    """Сериализатор блокировки 4атов пользователя"""
     user_who = serializers.SlugRelatedField(read_only=True, slug_field='username')
     user_whom = serializers.SlugRelatedField(read_only=True, slug_field='username')
 
@@ -301,9 +287,9 @@ class UnblockingSerializer(serializers.ModelSerializer):
     ids = serializers.ListField(
         child=serializers.IntegerField(),
         allow_empty=False,
-        help_text="Список ID чатов для разблокировки"
+        help_text="Список ID 4атов для разблокировки"
     )
 
     def validate_ids(self, value):
-        if not Chat.objects.filter(id__in=value).exists():
-            raise serializers.ValidationError("Некоторые из переданных чатов не существуют.")
+        if not Message.objects.filter(id__in=value).exists():
+            raise serializers.ValidationError("Некоторые из переданных 4атов не существуют.")

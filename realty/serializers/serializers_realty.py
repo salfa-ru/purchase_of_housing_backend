@@ -409,7 +409,7 @@ class ShortRealtySerializer(serializers.ModelSerializer):
                   "rent",
                   )
 
-    def get_floors_number(self, obj):
+    def get_floors_number(self, obj) -> str:
         return f"{obj.about_apartment.floor}/{obj.about_apartment.floors_number} этаж"
 
     def get_rent(self, obj):

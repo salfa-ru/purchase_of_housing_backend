@@ -1,3 +1,5 @@
+from typing import Dict, Optional
+
 from rest_framework import serializers
 
 from notifications.models import Notification, NotificationTemplate
@@ -61,7 +63,8 @@ class NotificationSerializer(serializers.ModelSerializer):
             'is_new',
         ]
 
-    def get_template(self, obj):
+    def get_template(self, obj) -> Dict[str, Optional[str]]:  # внутри output-а могут быть строки или ничего
+
         # Получаем оригинальные темплейты из стандартного сериализатора
         template_data = NotificationTemplateSerializer(obj.template).data
 
@@ -76,7 +79,7 @@ class NotificationSerializer(serializers.ModelSerializer):
         return template_data
 
 
-class IdsListSerializer(serializers.Serializer):
+class IdsNotifListSerializer(serializers.Serializer):
     """Сериализатор списка id-шников.
     Используется в множественном удалении и смене статуса"""
     ids = serializers.ListField(

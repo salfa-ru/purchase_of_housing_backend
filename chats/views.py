@@ -2,84 +2,63 @@ from drf_spectacular.utils import extend_schema, inline_serializer
 from rest_framework import generics, status, serializers
 from rest_framework import permissions
 from rest_framework.response import Response
-from chats import models as chats_models
+from chats import models as zhats_models
 from rest_framework.views import APIView
-from chats.paginations import ChatPagination
-from chats.serializers import (ChatSerializer,
-                               MessagesListPASerializer,
+from chats.paginations import ZhatPagination
+from chats.serializers import (ZhatSerializer,
+                               MassagesListPASerializer,
                                IdSerializer,
-                               MessagesListRealtySerializer,
-                               CreateChatRequestSerializer,
-                               CreateChatResponseSerializer,
+                               MassagesListRealtySerializer,
+                               CreateZhatRequestSerializer,
+                               CreateZhatResponseSerializer,
                                IdsListSerializer,
                                BlockingSerializer, UnblockingSerializer, )
-from chats.services import (get_chats,
-                            get_chat_by_id,
+from chats.services import (get_zhats,
+                            get_zhat_by_id,
                             get_realty_by_id,
-                            multiple_delete_chats,
-                            get_chats_by_ids,
+                            multiple_delete_zhats,
+                            get_zhats_by_ids,
                             create_blocking, remove_blocking, )
 
 
 @extend_schema(summary='Получение списка ВСЕХ переписок. Только заблокированные - через эндпойнт /blacklist')
-class ChatListAPIView(generics.ListAPIView):
+class ZhatListAPIView(generics.ListAPIView):
     """Получение списка переписок пользователя."""
-    serializer_class = ChatSerializer
+    serializer_class = ZhatSerializer
     permission_classes = [permissions.IsAuthenticated]
-    pagination_class = ChatPagination
+    pagination_class = ZhatPagination
 
     def get_queryset(self):
-        chats = get_chats(self.request.user)
+        zhats = get_zhats(self.request.user)
         is_blacklist = self.kwargs.get("blacklist", False)
 
         if is_blacklist:
-            filtered_chats = []
+            filtered_zhats = []
 
-            for chat in chats:
-                if chats_models.Blocking.objects.filter(user_who=self.request.user,
-                                                        user_whom=chat.user_to):
-                    filtered_chats.append(chat)
-            return filtered_chats
+            for zhat in zhats:
+                if zhats_models.Blocking.objects.filter(user_who=self.request.user,
+                                                        user_whom=zhat.user_to):
+                    filtered_zhats.append(zhat)
+            return filtered_zhats
 
         else:
-            return chats
+            return zhats
 
-    # serializer_class = ChatSerializer
-    # permission_classes = [permissions.IsAuthenticated]
-    # pagination_class = ChatPagination
-    #
-    # def get_queryset(self):
-    #     chats = get_chats(self.request.user)
-    #     filtered_queryset = []
-    #     is_blacklist = self.kwargs.get("blacklist", False)
-    #
-    #     if is_blacklist:
-    #         for chat in chats:
-    #             if chats_models.Blocking.objects.filter(user_who=self.request.user,
-    #                                                     user_whom=chat.user_to):
-    #                 filtered_queryset.append(chat)
-    #         return filtered_queryset
-    #
-    #     else:
-    #         for chat in chats:
-    #             if not chats_models.Blocking.objects.filter(user_who=self.request.user,
-    #                                                         user_whom=chat.user_to):
-    #                 filtered_queryset.append(chat)
-    #         return filtered_queryset
+
 
 
 @extend_schema(
     summary='Получение списка сообщений в ЛК',
     request=IdSerializer,
-    responses={200: MessagesListPASerializer},
+    responses={200: MassagesListPASerializer},
 )
-class MessagesListPAAPIView(generics.CreateAPIView):
+class MassagesListPAAPIView(generics.CreateAPIView):
     """Получение списка сообщений в переписке (ЛК)."""
-    serializer_class = MessagesListPASerializer
+    serializer_class = MassagesListPASerializer
     permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request, *args, **kwargs):
-        queryset = get_chat_by_id(
+        queryset = get_zhat_by_id(
             user=self.request.user,
             data=self.request.data
         )
@@ -91,11 +70,11 @@ class MessagesListPAAPIView(generics.CreateAPIView):
 @extend_schema(
     summary='Получение списка сообщений в объявлении',
     request=IdSerializer,
-    responses={200: MessagesListRealtySerializer},
+    responses={200: MassagesListRealtySerializer},
 )
-class MessagesListRealtyAPIView(generics.CreateAPIView):
+class MassagesListRealtyAPIView(generics.CreateAPIView):
     """Получение списка сообщений при запросе из объявления."""
-    serializer_class = MessagesListRealtySerializer
+    serializer_class = MassagesListRealtySerializer
     permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request, *args, **kwargs):
@@ -109,37 +88,37 @@ class MessagesListRealtyAPIView(generics.CreateAPIView):
 
 @extend_schema(
     summary='Создание сообщения (из ЛК)',
-    request=CreateChatRequestSerializer,
+    request=CreateZhatRequestSerializer,
 )
-class ChatPACreateAPIView(generics.CreateAPIView):
+class ZhatPACreateAPIView(generics.CreateAPIView):
     """Создание сообщения из цепочки сообщений в личном кабинете.
     В id_from передается id переписки (или любого сообщения из цепочки)"""
-    serializer_class = CreateChatResponseSerializer
+    serializer_class = CreateZhatResponseSerializer
     permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request, *args, **kwargs):
-        chat = get_chat_by_id(
+        zhat = get_zhat_by_id(
             user=self.request.user,
             data=self.request.data
         )
-        user_to = chat.user_from if chat.user_from != self.request.user else chat.user_to
+        user_to = zhat.user_from if zhat.user_from != self.request.user else zhat.user_to
 
         self.request.data.update({
             'user_from': self.request.user.pk,
             'user_to': user_to.pk,
-            'realty': chat.realty.pk,
+            'realty': zhat.realty.pk,
         })
         return super().post(request, *args, **kwargs)
 
 
 @extend_schema(
     summary='Создание сообщения (из объявления)',
-    request=CreateChatRequestSerializer,
+    request=CreateZhatRequestSerializer,
 )
-class ChatRealtyCreateAPIView(generics.CreateAPIView):
+class ZhatRealtyCreateAPIView(generics.CreateAPIView):
     """Создание сообщения из цепочки сообщений в объявления.
     В id_from передается id объявления, по которому идет переписка"""
-    serializer_class = CreateChatResponseSerializer
+    serializer_class = CreateZhatResponseSerializer
     permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request, *args, **kwargs):
@@ -158,29 +137,30 @@ class ChatRealtyCreateAPIView(generics.CreateAPIView):
     request=IdsListSerializer,
     summary='Множественное удаление сообщений',
     responses={200: inline_serializer(
-        name='NotificationDestroy',
+        # TODO - Проверить, здесб было NotificationDestroy/NotificationDelete? работает ли оно еще
+        name='MassageExNotificationDelete',
         fields={
             'detail': serializers.CharField(),
         }
     )},
 )
-class ChatsDestroyAPIView(generics.CreateAPIView):
+class ZhatsDestroyAPIView(generics.CreateAPIView):
     """Множественное удаление сообщений.
     На вход нужно подать список id-шников переписок.
     Удаляются все существующие сообщения, входящие в переписки."""
     permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request, *args, **kwargs):
-        queryset, ids = get_chats_by_ids(
+        queryset, ids = get_zhats_by_ids(
             current_user=self.request.user,
             data=self.request.data
         )
-        multiple_delete_chats(
+        multiple_delete_zhats(
             current_user=self.request.user,
-            chats=queryset
+            zhats=queryset
         )
 
-        msg = f'{ids} chats deleted'
+        msg = f'Сообщения {ids} удалены'
         return Response({'detail': msg}, status=status.HTTP_200_OK)
 
 
@@ -189,20 +169,20 @@ class ChatsDestroyAPIView(generics.CreateAPIView):
     summary='Блокировка переписок',
     responses=BlockingSerializer(many=True)
 )
-class ChatsBlockingCreateAPIView(generics.CreateAPIView):
+class ZhatsBlockingCreateAPIView(generics.CreateAPIView):
     """В теле запроса передается список id.
     Блокируются собеседники из переписок с указанными id."""
     permission_classes = [permissions.IsAuthenticated, ]
     serializer_class = BlockingSerializer
 
     def post(self, request, *args, **kwargs):
-        queryset, _ = get_chats_by_ids(
+        queryset, _ = get_zhats_by_ids(
             current_user=self.request.user,
             data=self.request.data
         )
         blocking_list = create_blocking(
             current_user=self.request.user,
-            chats=queryset
+            zhats=queryset
         )
 
         serializer = self.get_serializer(blocking_list, many=True)
@@ -210,23 +190,23 @@ class ChatsBlockingCreateAPIView(generics.CreateAPIView):
 
 
 @extend_schema(
-    summary='Разблокировка чата',
+    summary='Разблокировка 4ата',
     request=IdsListSerializer,
-    responses={200: MessagesListPASerializer},
+    responses={200: MassagesListPASerializer},
 )
-class ChatRemoveBlocking(APIView):
-    queryset = chats_models.Blocking
+class ZhatRemoveBlocking(APIView):
+    queryset = zhats_models.Blocking
     permission_classes = [permissions.IsAuthenticated, ]
     serializer_class = UnblockingSerializer
 
     def post(self, request, *args, **kwargs):
-        queryset, _ = get_chats_by_ids(
+        queryset, _ = get_zhats_by_ids(
             current_user=self.request.user,
             data=self.request.data
         )
         remove_blocking(
             current_user=self.request.user,
-            chats=queryset
+            zhats=queryset
         )
 
-        return Response({"detail": 'Чаты успешно разблокированы.'})
+        return Response({"detail": '4аты успешно разблокированы.'})

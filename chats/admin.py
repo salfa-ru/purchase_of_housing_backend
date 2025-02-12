@@ -1,24 +1,24 @@
 from django.contrib import admin
 
-from chats.models import Chat, Blocking
+from chats.models import Message, Blocking
 
 from django.forms import ModelForm
 
 
-class ChatAdminForm(ModelForm):
+class ZhatAdminForm(ModelForm):
     """ Переопределенная форма, ограничивающая выбор отправителя в сообщениях
     --- Отправитель нового сообщения - его создатель
     --- Запрещено (не суперюзеру) менять отправителя """
 
     class Meta:
-        model = Chat
+        model = Message
         fields = '__all__'
 
     def __init__(self, *args, **kwargs):
         self.request = kwargs.pop('request', None)
         super().__init__(*args, **kwargs)
 
-
+        ...
         if self.request and not self.request.user.is_superuser:
             if self.instance.pk:  # Существующая запись - запрет на изменение отправителя!
                 self.fields['user_from'].queryset = self.fields['user_from'].queryset.filter(
@@ -38,11 +38,11 @@ class ChatAdminForm(ModelForm):
             self.fields['user_from'].empty_label = None  # запрет на выбор ПУСТОГО отправителя
 
 
-@admin.register(Chat)
-class ChatAdmin(admin.ModelAdmin):
+@admin.register(Message)
+class ZhatAdmin(admin.ModelAdmin):
     list_display = (
         '__str__',
-        'id',
+        'msg_id',
         'user_from',
         'user_to',
         'is_new',
@@ -52,7 +52,7 @@ class ChatAdmin(admin.ModelAdmin):
         'datetime',
     )
 
-    form = ChatAdminForm
+    form = ZhatAdminForm
 
     def get_form(self, request, obj=None, **kwargs):
         admin_form = super().get_form(request, obj, **kwargs)
@@ -69,7 +69,6 @@ class ChatAdmin(admin.ModelAdmin):
         if 'user_from' in fields:
             fields = ('user_from',) + tuple(f for f in fields if f != 'user_from')
         return fields
-
 
 
 @admin.register(Blocking)
