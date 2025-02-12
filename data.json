@@ -2786,7 +2786,7 @@
       "user_from": 3,
       "user_to": 2,
       "realty": 1,
-      "datetime": "2024-08-20T20:52:05.147Z",
+      "created_at": "2024-08-20T20:52:05.147Z",
       "message": "Привет! Когда можно посмотреть квартиру?",
       "is_new": true,
       "is_deleted_from": false,
@@ -2800,7 +2800,7 @@
       "user_from": 2,
       "user_to": 3,
       "realty": 1,
-      "datetime": "2024-08-20T20:52:54.693Z",
+      "created_at": "2024-08-20T20:52:54.693Z",
       "message": "Можно подъехать завтра с 14 до 18.",
       "is_new": true,
       "is_deleted_from": false,
@@ -2824,7 +2824,7 @@
       "template": 1,
       "user_to": 2,
       "realty": 2,
-      "datetime": "2024-08-20T21:03:11.397Z",
+      "created_at": "2024-08-20T21:03:11.397Z",
       "is_new": true
     }
   },
@@ -2835,7 +2835,7 @@
       "template": 2,
       "user_to": 3,
       "realty": 3,
-      "datetime": "2024-08-20T21:03:41.371Z",
+      "created_at": "2024-08-20T21:03:41.371Z",
       "is_new": true
     }
   },

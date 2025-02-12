@@ -1,47 +1,55 @@
 from django.db.models import Q
 from rest_framework import exceptions
 
-from chats.models import Message, Blocking
+from chats.models import Message, Blocking, Chat
 from chats.serializers import IdSerializer, IdsListSerializer
 from realty.models import Realty
 
 
-def get_zhats(current_user):
-    """Получение списка переписок текущего пользователя
-    (не удаленных, без дубликатов)"""
-    queryset = Message.objects.filter(
-        Q(user_from=current_user, is_deleted_from=False) |
-        Q(user_to=current_user, is_deleted_to=False)
-    ).order_by('-datetime').all()
+# TODO - Удалить
+# def get_zhats(current_user):
+#     """Получение списка переписок текущего пользователя
+#     (не удаленных, без дубликатов)"""
+#     queryset = Message.objects.filter(
+#         Q(user_from=current_user, is_deleted_from=False) |
+#         Q(user_to=current_user, is_deleted_to=False)
+#     ).order_by('-created_at').all()
+#
+#     unique_pairs = []
+#     filtered_queryset = []
+#     for zhat in queryset:
+#         user = zhat.user_from if zhat.user_from != current_user else zhat.user_to
+#         if (user, zhat.realty) not in unique_pairs:
+#             unique_pairs.append((user, zhat.realty))
+#             filtered_queryset.append(zhat)
+#
+#     return filtered_queryset
 
-    unique_pairs = []
-    filtered_queryset = []
-    for zhat in queryset:
-        user = zhat.user_from if zhat.user_from != current_user else zhat.user_to
-        if (user, zhat.realty) not in unique_pairs:
-            unique_pairs.append((user, zhat.realty))
-            filtered_queryset.append(zhat)
 
-    return filtered_queryset
+def get_chats(current_user):
+    """Получение списка чатов текущего пользователя."""
+    queryset = Chat.objects.filter(
+        Q(owner=current_user) | Q(client=current_user)
+    ).order_by('-created_at')
+    return queryset
 
 
-def get_zhat_by_id(user, data):
-    """Получение сообщения по id из запроса,
-    включает валидацию данных в запросе
-    и проверку существования такого 4ата у текущего пользователя"""
+def get_chat_by_id(user, data):
+    """Получение чата по id из запроса."""
     serializer = IdSerializer(data=data)
     serializer.is_valid(raise_exception=True)
 
-    zhat_id = serializer.validated_data.get('id_from')
-    zhat = Message.objects.filter(
-        Q(user_from=user) | Q(user_to=user)
-    ).filter(msg_id=zhat_id).first()
+    chat_id = serializer.validated_data.get('id_from')
+    chat = Chat.objects.filter(
+        Q(owner=user) | Q(client=user)
+    ).filter(chat_id=chat_id).first()
 
-    if not zhat:
-        msg = f'Zhat with pk={zhat_id} not found for current user'
+    if not chat:
+        msg = f'Chat with pk={chat_id} not found for current user'
         raise exceptions.NotFound(detail=msg)
 
-    return zhat
+    return chat
+
 
 
 def get_realty_by_id(data):
@@ -61,15 +69,32 @@ def get_realty_by_id(data):
     return realty
 
 
+# def get_zhat_by_id(user, data):
+#     """Получение сообщения по id из запроса,
+#     включает валидацию данных в запросе
+#     и проверку существования такого 4ата у текущего пользователя"""
+#     serializer = IdSerializer(data=data)
+#     serializer.is_valid(raise_exception=True)
+#
+#     zhat_id = serializer.validated_data.get('id_from')
+#     zhat = Message.objects.filter(
+#         Q(user_from=user) | Q(user_to=user)
+#     ).filter(msg_id=zhat_id).first()
+#
+#     if not zhat:
+#         msg = f'Zhat with pk={zhat_id} not found for current user'
+#         raise exceptions.NotFound(detail=msg)
+#
+#     return zhat
+
+
 def get_zhats_by_ids(current_user, data):
-    """Получение списка сообщений по данным из запроса,
-    включает валидацию данных в запросе"""
+    """Получение списка сообщений по данным из запроса."""
     serializer = IdsListSerializer(data=data)
     serializer.is_valid(raise_exception=True)
 
     ids = serializer.validated_data.get('ids')
     zhats = Message.objects.filter(
-        # иначе позволял "удалять" сообщения, которых не был видно!
         Q(user_from=current_user, is_deleted_from=False) | Q(user_to=current_user, is_deleted_to=False)
     ).filter(msg_id__in=ids).all()
 
@@ -83,7 +108,6 @@ def get_zhats_by_ids(current_user, data):
 
 def multiple_delete_zhats(current_user, zhats):
     """Удаление всех сообщений в цепочках переданных переписок."""
-
     for zhat in zhats:
         second_user = zhat.user_from if zhat.user_from != current_user else zhat.user_to
         realty = zhat.realty
@@ -103,7 +127,6 @@ def multiple_delete_zhats(current_user, zhats):
 
 def create_blocking(current_user, zhats):
     """Создание записей о блокировке."""
-
     blocking_users = set()
     for zhat in zhats:
         user = zhat.user_from if zhat.user_from != current_user else zhat.user_to
@@ -120,6 +143,7 @@ def create_blocking(current_user, zhats):
 
 
 def remove_blocking(current_user, zhats):
+    """Удаление блокировок"""
     unblock_users = set()
     for zhat in zhats:
         user = zhat.user_from if zhat.user_from != current_user else zhat.user_to
@@ -128,3 +152,48 @@ def remove_blocking(current_user, zhats):
     blocking_count, _ = unblocking_list.delete()
 
     return blocking_count
+
+
+def create_message(user_from, message_text, realty=None, chat=None):
+    """Создает новое сообщение, при необходимости создает чат."""
+
+    if chat is None:
+        # Создание чата, если он не передан
+        if realty is None:
+            raise ValueError("Either 'realty' or 'chat' must be provided.")
+        user_to = realty.owner
+
+        # Check for self-message BEFORE creating the chat
+        if user_from == user_to:
+            raise exceptions.ValidationError("You cannot send a message to yourself.")
+
+        chat, created = Chat.objects.get_or_create(
+            realty=realty,
+            owner=realty.owner,
+            client=user_from,
+        )
+    else:
+        other_user = chat.owner if user_from == chat.client else chat.client
+
+        # Check for self-message BEFORE creating the message
+        if user_from == other_user:
+            raise exceptions.ValidationError("You cannot send a message to yourself.")
+        user_to = other_user
+        realty = chat.realty
+
+    # проверка на блокировку - BEFORE MESSAGE CREATED
+    is_blocked_by_other = Blocking.objects.filter(user_who=user_to, user_whom=user_from).exists()
+    if is_blocked_by_other:
+        raise exceptions.PermissionDenied(detail="Пользователь вас заблокировал, вы не можете ему писать")
+    is_blocked_by_yourself = Blocking.objects.filter(user_who=user_from, user_whom=user_to).exists()
+    if is_blocked_by_yourself:
+        raise exceptions.PermissionDenied(detail="Вы заблокировали этого пользователя и не можете ему писать")
+
+
+    message = Message.objects.create(
+        chat=chat,
+        user_from=user_from,
+        user_to=user_to,
+        message=message_text,
+    )
+    return message

@@ -1,8 +1,60 @@
 from django.db import models
+from django.db.models import Q, UniqueConstraint
+
+from datetime import datetime
 
 from config.constants import SHORT_STR_LENGTH
 from realty import models as realty_models
 from users import models as users_models
+
+
+""" НОВАЯ ЧАСТЬ МОДЕЛЕЙ """
+
+
+class Chat(models.Model):
+    """
+    Модель чата между владельцем недвижимости и потенциальным клиентом.
+    Чат может быть создан только клиентом.
+    """
+    chat_id = models.AutoField(primary_key=True)
+    realty = models.ForeignKey(
+        realty_models.Realty,
+        on_delete=models.CASCADE,
+        verbose_name='Объект недвижимости',
+        related_name='chats'
+    )
+    owner = models.ForeignKey(
+        users_models.User,
+        on_delete=models.PROTECT,
+        verbose_name='Владелец недвижимости',
+        related_name='owner_chats'
+    )
+    client = models.ForeignKey(
+        users_models.User,
+        on_delete=models.PROTECT,
+        verbose_name='Клиент',
+        related_name='client_chats'
+    )
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name='Дата создания чата'
+    )
+
+    class Meta:
+        verbose_name = 'Чат'
+        verbose_name_plural = 'Чаты'
+        constraints = [
+            UniqueConstraint(
+                fields=['realty', 'owner', 'client'],
+                name='unique_chat_participants'
+            )
+        ]
+
+    def __str__(self):
+        return f'Чат {self.chat_id}: {self.client} → {self.owner} -- {self.realty}'
+
+""" СТАРАЯ ЧАСТЬ МОДЕЛЕЙ """
+
 
 
 class Message(models.Model):
@@ -11,35 +63,38 @@ class Message(models.Model):
     # Добавляю вместо неявного, но часто использующегося id
 
     msg_id = models.AutoField(primary_key=True, verbose_name='Message ID')
+    chat = models.ForeignKey(
+        Chat,
+        on_delete=models.CASCADE,
+        related_name='messages',
+        verbose_name='Чат',
+        # default=0, # только для первой миграции
+    )
     user_from = models.ForeignKey(
         users_models.User,
         on_delete=models.PROTECT,
-        verbose_name='От кого',
-        related_name='zhats_from_me',
+        verbose_name='Отправитель',
+        related_name='messages_sent'
     )
     user_to = models.ForeignKey(
         users_models.User,
         on_delete=models.PROTECT,
-        verbose_name='Кому',
-        related_name='zhats_to_me',
+        verbose_name='Получатель',
+        related_name='messages_received'
     )
-    realty = models.ForeignKey(
-        realty_models.Realty,
-        on_delete=models.CASCADE,
-        verbose_name='Недвижимость',
-        related_name='zhats',
+    message = models.TextField(verbose_name='Сообщение')
+    created_at = models.DateTimeField(
+        verbose_name='Дата + Время создания',
+        auto_now_add=True,
+        # default=datetime.now()  # только для первой миграции
     )
-    datetime = models.DateTimeField(
-        auto_now_add=True, verbose_name='Дата+Время'
-    )
-    message = models.TextField(verbose_name='Сообщение',)
-    is_new = models.BooleanField(default=True, verbose_name='Новое')
-    is_deleted_from = models.BooleanField(
-        default=False, verbose_name='Удалил (от кого)'
-    )
-    is_deleted_to = models.BooleanField(
-        default=False, verbose_name='Удалил (кому)'
-    )
+
+    is_new = models.BooleanField(default=True, verbose_name='Не прочитано')
+
+    is_deleted_from = models.BooleanField(default=False, verbose_name='Удалено отправителем')
+    is_deleted_to = models.BooleanField(default=False, verbose_name='Удалено получателем')
+
+    sender_is_owner = models.BooleanField(verbose_name='отправлено владельцем')
 
     class Meta:
         verbose_name = 'Сообщение'
@@ -48,6 +103,13 @@ class Message(models.Model):
     def __str__(self):
         return (f'{self.message[:SHORT_STR_LENGTH]}'
                 f'{"..." if len(self.message) > SHORT_STR_LENGTH else ""} ')
+
+    """ Что то совсем новенькое """
+    def save(self, *args, **kwargs):
+        # Автоматически устанавливаем sender_is_owner при сохранении
+        if not self.pk:  # Только для новых сообщений
+            self.sender_is_owner = (self.user_from == self.chat.owner)
+        super().save(*args, **kwargs)
 
 
 class Blocking(models.Model):
