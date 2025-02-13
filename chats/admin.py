@@ -59,8 +59,6 @@ class ZhatAdmin(admin.ModelAdmin):
 
     form = ZhatAdminForm
 
-
-
     def str_link(self, obj):
         """
         Creates a clickable link to the object's change form.
@@ -69,9 +67,8 @@ class ZhatAdmin(admin.ModelAdmin):
         url = reverse(f'admin:{obj._meta.app_label}_{obj._meta.model_name}_change', args=[obj.pk])
         return format_html('<a href="{}">{}</a>', url, str(obj))  # Safely inject HTML
 
-    str_link.short_description = 'Сообщение' # Optional:  Nice column header
-    str_link.admin_order_field = '__str__'  # OPTIONAL: Enable sorting (if __str__ is sortable)
-
+    str_link.short_description = 'Сообщение'  # Optional: Nice column header
+    str_link.admin_order_field = '__str__'    # Optional: Enable sorting (if __str__ is sortable)
 
     def get_form(self, request, obj=None, **kwargs):
         admin_form = super().get_form(request, obj, **kwargs)
@@ -100,6 +97,7 @@ class BlockingAdmin(admin.ModelAdmin):
     search_fields = ('user_who__username', 'user_whom__username')
     # raw_id_fields = ('user_who', 'user_whom')
 
+
 @admin.register(Chat)
 class ChatAdmin(admin.ModelAdmin):
     list_display = ('chat_id', 'realty', 'owner', 'client', 'created_at')
@@ -108,5 +106,3 @@ class ChatAdmin(admin.ModelAdmin):
     search_fields = ('realty__address', 'owner__username', 'client__username')  # Example search fields
     # raw_id_fields = ('realty', 'owner', 'client')  # Use raw_id_fields for ForeignKey fields
     readonly_fields = ('created_at',)  # Make created_at read-only
-
-

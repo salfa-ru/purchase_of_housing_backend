@@ -1,14 +1,9 @@
 from django.db import models
-from django.db.models import Q, UniqueConstraint
-
-from datetime import datetime
+from django.db.models import UniqueConstraint
 
 from config.constants import SHORT_STR_LENGTH
 from realty import models as realty_models
 from users import models as users_models
-
-
-""" НОВАЯ ЧАСТЬ МОДЕЛЕЙ """
 
 
 class Chat(models.Model):
@@ -53,14 +48,9 @@ class Chat(models.Model):
     def __str__(self):
         return f'Чат {self.chat_id}: {self.client} → {self.owner} -- {self.realty}'
 
-""" СТАРАЯ ЧАСТЬ МОДЕЛЕЙ """
-
-
 
 class Message(models.Model):
     """ Message - переименованная модель Chat. Остатки можно найти в коде увидев упоминание Zhat """
-
-    # Добавляю вместо неявного, но часто использующегося id
 
     msg_id = models.AutoField(primary_key=True, verbose_name='Message ID')
     chat = models.ForeignKey(

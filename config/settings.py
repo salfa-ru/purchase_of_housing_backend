@@ -179,6 +179,9 @@ REST_FRAMEWORK = {
 
 
 SPECTACULAR_SETTINGS = {
+    # 'SORT_ENDPOINTS': True,  # отключает сортировку эндпойнтов
+    # 'SORT_OPERATIONS': False,  # отключает сортировку операций внутри эндпойнта
+
     'TITLE': 'purchase_of_housing_backend',
     'DESCRIPTION': 'Документация для приложения purchase_of_housing_backend',
     'VERSION': '1.0.0',
