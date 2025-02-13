@@ -7,7 +7,7 @@ from chats.models import Message, Blocking, Chat
 from django.forms import ModelForm
 
 
-class ZhatAdminForm(ModelForm):
+class MessageAdminForm(ModelForm):
     """ Переопределенная форма, ограничивающая выбор отправителя в сообщениях
     --- Отправитель нового сообщения - его создатель
     --- Запрещено (не суперюзеру) менять отправителя """
@@ -41,7 +41,7 @@ class ZhatAdminForm(ModelForm):
 
 
 @admin.register(Message)
-class ZhatAdmin(admin.ModelAdmin):
+class MessageAdmin(admin.ModelAdmin):
     list_display = (
         'msg_id',
         # '__str__',
@@ -57,7 +57,7 @@ class ZhatAdmin(admin.ModelAdmin):
     )
     list_filter = ('chat', 'user_from', 'user_to', 'created_at', 'is_new')
 
-    form = ZhatAdminForm
+    form = MessageAdminForm
 
     def str_link(self, obj):
         """
@@ -100,9 +100,6 @@ class BlockingAdmin(admin.ModelAdmin):
 
 @admin.register(Chat)
 class ChatAdmin(admin.ModelAdmin):
-    list_display = ('chat_id', 'realty', 'owner', 'client', 'created_at')
-    # list_filter = ('realty', 'owner', 'client', 'created_at')
-    list_filter = ('owner', 'client', 'created_at')
-    search_fields = ('realty__address', 'owner__username', 'client__username')  # Example search fields
-    # raw_id_fields = ('realty', 'owner', 'client')  # Use raw_id_fields for ForeignKey fields
-    readonly_fields = ('created_at',)  # Make created_at read-only
+    list_display = ('chat_id', 'realty', 'owner', 'client')
+    list_filter = ('owner', 'client')
+    search_fields = ('realty__address', 'owner__username', 'client__username')

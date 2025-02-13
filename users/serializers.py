@@ -103,11 +103,11 @@ class UserESAProfileSerializer(UserBaseSerializer):
 class UserPersonalAccountSerializer(serializers.ModelSerializer):
     """Краткая информацию по пользователю. Используется в ЛК."""
 
-    new_zhats_count = serializers.SerializerMethodField()
+    new_messages_count = serializers.SerializerMethodField()
     new_notifications_count = serializers.SerializerMethodField()
 
-    def get_new_zhats_count(self, instance) -> int:
-        return instance.zhats_to_me.filter(is_new=True).count()
+    def get_new_messages_count(self, instance) -> int:
+        return instance.messages_received.filter(is_new=True).count()
 
     def get_new_notifications_count(self, instance) -> int:
         return instance.notifications.filter(is_new=True).count()
@@ -119,7 +119,7 @@ class UserPersonalAccountSerializer(serializers.ModelSerializer):
             'first_name',
             'last_name',
             'avatar',
-            'new_zhats_count',
+            'new_messages_count',
             'new_notifications_count',
         ]
 
@@ -131,7 +131,7 @@ class UserNewMsgsSerializer(serializers.ModelSerializer):
 
     def get_have_new_msgs(self, instance) -> bool:
         return bool(
-            instance.zhats_to_me.filter(is_new=True).count() +
+            instance.messages_received.filter(is_new=True).count() +
             instance.notifications.filter(is_new=True).count()
         )
 

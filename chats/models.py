@@ -30,10 +30,6 @@ class Chat(models.Model):
         verbose_name='Клиент',
         related_name='client_chats'
     )
-    created_at = models.DateTimeField(
-        auto_now_add=True,
-        verbose_name='Дата создания чата'
-    )
 
     class Meta:
         verbose_name = 'Чат'
