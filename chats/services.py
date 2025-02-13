@@ -103,7 +103,7 @@ def create_message(user_from, message_text, realty_id=None, chat_id=None):
         user_to = realty.owner
 
         if user_from == user_to:
-            raise exceptions.ValidationError("Вы не можете отправить сообщение самому себе.")
+            raise exceptions.ValidationError(detail="Вы не можете отправить сообщение самому себе.")
 
         check_blocking(user_from, user_to)
 

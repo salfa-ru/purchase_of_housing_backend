@@ -28,7 +28,7 @@ class CreateMessageRequestSerializer(serializers.Serializer):
         """Проверяем, что передан либо chat_id, либо realty_id, но не оба"""
         if ('chat_id' not in data and 'realty_id' not in data) or \
            ('chat_id' in data and 'realty_id' in data):
-            raise serializers.ValidationError(
+            raise serializers.ValidationError(detail=
                 "Должен быть передан либо chat_id, либо realty_id"
             )
         return data
