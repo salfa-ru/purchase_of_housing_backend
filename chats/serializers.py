@@ -18,6 +18,13 @@ class RealtyIdSerializer(serializers.Serializer):
     realty_id = serializers.IntegerField(min_value=1)
 
 
+class RealtyNestedIdSerializer(serializers.ModelSerializer):
+    """Serializer for just the Realty ID."""
+    class Meta:
+        model = Realty
+        fields = ['id']
+
+
 class CreateMessageRequestSerializer(serializers.Serializer):
     """Сериализатор для создания нового сообщения"""
     chat_id = serializers.IntegerField(min_value=1, required=False)
@@ -98,7 +105,7 @@ class MessageSerializer(serializers.ModelSerializer):
 
 
 class ChatMessagesSerializer(serializers.ModelSerializer):
-    """Сериализатор для отображения чата с сообщениями - в краткой форме и в полной форме!"""
+    """Сериализатор для отображения чата с сообщениями - в краткой или в полной форме!"""
     me = serializers.SerializerMethodField()
     user = serializers.SerializerMethodField()
     user_is_owner = serializers.SerializerMethodField()
@@ -194,10 +201,22 @@ class ChatMessagesSerializer(serializers.ModelSerializer):
             Q(user_to=current_user, is_deleted_to=False)
         ).order_by('-created_at')  # <--- СОРТИРОВКА СООБЩЕНИЙ.  Newest first  <---
 
-        # Mark unread messages as read
-        messages.filter(user_to=current_user, is_new=True).update(is_new=False)
+        # # Mark unread messages as read
+        # messages.filter(user_to=current_user, is_new=True).update(is_new=False)
+        #
+        # return MessageSerializer(messages, many=True, context=self.context).data
 
-        return MessageSerializer(messages, many=True, context=self.context).data
+        ''' Важное исправление - сначала показываем, что сообщения новые 
+        и только делаем прочитанными (все равно будучи не уверенными, что пользователь их прочитает) '''
+        # Serialize the messages *before* marking them as read.
+        serialized_messages = MessageSerializer(messages, many=True, context=self.context).data
+
+        # *Now* mark unread messages as read, after serialization.
+        unread_message_ids = messages.filter(user_to=current_user, is_new=True).values_list('msg_id', flat=True)
+        Message.objects.filter(msg_id__in=unread_message_ids).update(is_new=False)
+
+        return serialized_messages
+
 
     def get_is_blocked_i_block_them(self, obj):
         current_user = self.context['request'].user
@@ -215,34 +234,79 @@ class ChatMessagesSerializer(serializers.ModelSerializer):
             user_whom=current_user
         ).exists()
 
+'''
+# class MassageSerializer(serializers.ModelSerializer):
+#     """Сериализатор одного сообщения внутри цепочки сообщений."""
+#
+#     class Meta:
+#         model = Message
+#         fields = [
+#             'msg_id',
+#             'message',
+#             'created_at',
+#             'user_from',
+#             'user_to'
+#         ]
+'''
 
-class MassageSerializer(serializers.ModelSerializer):
-    """Сериализатор одного сообщения внутри цепочки сообщений."""
 
-    class Meta:
-        model = Message
-        fields = [
-            'msg_id',
-            'message',
-            'created_at',
-            'user_from',
-            'user_to'
-        ]
+# class CreateMessageResponseSerializer(serializers.ModelSerializer):
+#     """Сериализатор тела ответа при создании нового сообщения"""
+#     class Meta:
+#         model = Message
+#         fields = [
+#             'msg_id',
+#             'message',
+#             'user_from',
+#             'user_to',
+#             'created_at',
+#             'is_deleted_from',
+#             'is_deleted_to',
+#         ]
 
 
 class CreateMessageResponseSerializer(serializers.ModelSerializer):
     """Сериализатор тела ответа при создании нового сообщения"""
+    chat_id = serializers.IntegerField(source='chat.chat_id')
+    realty = RealtyNestedIdSerializer(source='chat.realty')  # Nested, only ID
+    me = serializers.SerializerMethodField()
+    user = serializers.SerializerMethodField()
+    user_is_owner = serializers.SerializerMethodField()
+    direction = serializers.SerializerMethodField()
+    is_new = serializers.BooleanField(read_only=True, required=False)
+
     class Meta:
         model = Message
         fields = [
+            'chat_id',
+            'realty',
+            'me',
+            'user',
+            'user_is_owner',
             'msg_id',
             'message',
-            'user_from',
-            'user_to',
             'created_at',
-            'is_deleted_from',
-            'is_deleted_to',
+            'direction',
+            'is_new',
+            # 'user_from',
+            # 'user_to',
+
+            # 'is_deleted_from',
+            # 'is_deleted_to',
         ]
+
+    def get_me(self, obj):
+        return UserInfoSerializer(obj.user_from).data
+
+    def get_user(self, obj):
+        return UserInfoSerializer(obj.user_to).data
+
+    def get_user_is_owner(self, obj):
+        return obj.user_from == obj.chat.owner
+
+    def get_direction(self, obj) -> str:
+        current_user = self.context['request'].user
+        return "in" if obj.user_to == current_user else "out"
 
 
 class IdsListSerializer(serializers.Serializer):

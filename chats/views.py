@@ -3,9 +3,8 @@ from drf_spectacular.utils import extend_schema, inline_serializer
 from rest_framework import generics, status, serializers
 from rest_framework import permissions
 from rest_framework.response import Response
-
+from rest_framework import exceptions
 from rest_framework.views import APIView
-
 
 from chats.models import Chat, Blocking, Message
 from chats.paginations import ZhatPagination
@@ -68,45 +67,58 @@ class ChatListAPIView(generics.ListAPIView):
         return Response(serializer.data)
 
 
-class ChatMessagesBaseAPIView(generics.CreateAPIView):  # <----- Базовый класс
-    """Базовый класс для получения сообщений чата."""
-    serializer_class = ChatMessagesSerializer  # <----- Используем ChatMessagesSerializer
+
+@extend_schema(
+    summary='Получение списка сообщений в чате по chat_id ИЛИ realty_id',
+    request=inline_serializer(  # Use inline_serializer for combined request
+        name='ChatOrRealtyId',
+        fields={
+            'chat_id': serializers.IntegerField(min_value=1, required=False),
+            'realty_id': serializers.IntegerField(min_value=1, required=False),
+        }
+    ),
+    responses={200: ChatMessagesSerializer},
+)
+class ChatMessagesAPIView(generics.CreateAPIView):  # <----- No longer inherits
+    """Получение списка сообщений в чате по chat_id ИЛИ realty_id"""
+    serializer_class = ChatMessagesSerializer
     permission_classes = [permissions.IsAuthenticated]
 
-    def get_chat(self):
-        """Получение чата в зависимости от переданных параметров (chat_id или realty_id)."""
-        # Этот метод должен быть переопределен в дочерних классах
-        raise NotImplementedError("Метод get_chat должен быть переопределен.")
+    def get_chat(self, request):
+        """Получение чата по chat_id или realty_id."""
+        chat_id = request.data.get('chat_id')
+        realty_id = request.data.get('realty_id')
+
+        if (chat_id is not None and realty_id is not None) or (chat_id is None and realty_id is None):
+            raise exceptions.ValidationError(detail="Нужен либо chat_id либо realty_id, а не оба (или ни одного)")
+
+        if chat_id:
+            return get_chat_by_chat_id(user=request.user, chat_id=chat_id)
+        elif realty_id:
+            realty = get_realty_by_realty_id(realty_id=realty_id)
+            chat, created = Chat.objects.get_or_create(
+                realty=realty,
+                owner=realty.owner,
+                client=request.user
+            )
+            return chat
 
     def post(self, request, *args, **kwargs):
         """Получение и возврат данных чата."""
-        chat = self.get_chat()
+        try:
+            chat = self.get_chat(request)
+        except exceptions.ValidationError as e:
+            return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
         # Проверка наличия неудаленных сообщений
         if not chat.messages.filter(
                 Q(user_from=request.user, is_deleted_from=False) |
                 Q(user_to=request.user, is_deleted_to=False)
         ).exists():
-            return Response({"detail": "Чат пуст"}, status=status.HTTP_404_NOT_FOUND)  # <----- Возвращаем 404, если чат пуст
+            return Response({"detail": "Чат пуст"}, status=status.HTTP_404_NOT_FOUND)
 
         serializer = self.get_serializer(chat)
         return Response(serializer.data)
-
-
-@extend_schema(
-    summary='Получение списка сообщений в чате',
-    request=ChatIdSerializer,
-    responses={200: ChatMessagesSerializer},
-)
-class ChatMessagesAPIView(ChatMessagesBaseAPIView):  # <----- Наследуемся от ChatMessagesBaseAPIView
-    """Получение списка сообщений в чате по chat_id"""
-
-    def get_chat(self):
-        """Получение чата по chat_id."""
-        return get_chat_by_chat_id(
-            user=self.request.user,
-            chat_id=self.request.data.get('chat_id')
-        )
 
 
 @extend_schema(
@@ -135,28 +147,6 @@ class MessageCreateAPIView(generics.CreateAPIView):
         response_serializer = self.get_serializer(message)
         return Response(response_serializer.data, status=status.HTTP_201_CREATED)
 
-
-@extend_schema(
-    summary='Получение чата по объявлению',
-    request=RealtyIdSerializer,
-    responses={200: ChatMessagesSerializer},  # <----- Используем ChatMessagesSerializer
-)
-class RealtyMessagesAPIView(ChatMessagesBaseAPIView):  # <----- Наследуемся от ChatMessagesBaseAPIView
-    """Получение чата по realty_id"""
-    # serializer_class = RealtyMessagesSerializer   <-----  Удалено. Используем ChatMessagesSerializer
-
-    def get_chat(self):
-        """Получение или создание чата по realty_id."""
-        realty = get_realty_by_realty_id(
-            realty_id=self.request.data.get('realty_id')
-        )
-        # Получаем или создаем чат
-        chat, created = Chat.objects.get_or_create(
-            realty=realty,
-            owner=realty.owner,
-            client=self.request.user
-        )
-        return chat
 
 
 
