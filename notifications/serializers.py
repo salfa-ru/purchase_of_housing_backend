@@ -57,7 +57,7 @@ class NotificationSerializer(serializers.ModelSerializer):
         model = Notification
         fields = [
             'id',
-            'datetime',
+            'created_at',
             'template',
             'realty',
             'is_new',

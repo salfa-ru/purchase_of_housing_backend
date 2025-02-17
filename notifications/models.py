@@ -47,7 +47,7 @@ class Notification(models.Model):
         verbose_name='Недвижимость',
         related_name='notifications',
     )
-    datetime = models.DateTimeField(
+    created_at = models.DateTimeField(
         auto_now_add=True,
         verbose_name='Дата+Время'
     )
@@ -56,7 +56,7 @@ class Notification(models.Model):
     class Meta:
         verbose_name = 'Уведомление'
         verbose_name_plural = 'Уведомления'
-        ordering = ['-datetime', ]
+        ordering = ['-created_at', ]
 
     def __str__(self):
         return f'{self.template} --- {self.realty}'

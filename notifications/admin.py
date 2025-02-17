@@ -10,5 +10,5 @@ class NotificationTemplateAdmin(admin.ModelAdmin):
 
 @admin.register(models.Notification)
 class NotificationAdmin(admin.ModelAdmin):
-    list_display = ('template', 'user_to', 'realty', 'datetime', 'is_new',)
+    list_display = ('template', 'user_to', 'realty', 'created_at', 'is_new',)
     list_filter = ('template', 'is_new',)
