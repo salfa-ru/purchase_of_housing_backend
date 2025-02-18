@@ -1,7 +1,5 @@
 from rest_framework.pagination import PageNumberPagination
-
 from rest_framework.response import Response
-
 
 
 class ConfigurablePagination(PageNumberPagination):
@@ -10,7 +8,7 @@ class ConfigurablePagination(PageNumberPagination):
     based on provided parameters.
     """
     page_size_query_param = 'page_size'  # Parameter to control page size
-    page_query_param = 'page'       # Standard page parameter
+    page_query_param = 'page'            # Standard page parameter
 
     def __init__(self, pagesize_default=10, pagesize_max=50, pagination_config_name="ITEMS"):
         """
@@ -32,8 +30,8 @@ class ConfigurablePagination(PageNumberPagination):
 
     def get_page_size(self, request):
         """
-        Determines the page size, handling exceeding the maximum.  Overrides the
-        base class to handle max_page_size.
+        Determines the page size, handling exceeding the maximum.
+        Overrides the base class to handle max_page_size.
         """
         if self.page_size_query_param:
             try:

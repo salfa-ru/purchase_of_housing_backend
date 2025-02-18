@@ -1,9 +1,10 @@
 from django.db import models
 from django.db.models import UniqueConstraint
 
-from config.constants import SHORT_STR_LENGTH
 from realty import models as realty_models
 from users import models as users_models
+
+from config.constants import SHORT_STR_LENGTH
 
 
 class Chat(models.Model):
@@ -46,7 +47,7 @@ class Chat(models.Model):
 
 
 class Message(models.Model):
-    """ Message - переименованная модель Chat. Остатки можно найти в коде увидев упоминание Zhat """
+    """ Message - переименованная модель, ранее была названа Chat """
 
     msg_id = models.AutoField(primary_key=True, verbose_name='Message ID')
     chat = models.ForeignKey(
@@ -69,11 +70,8 @@ class Message(models.Model):
         related_name='messages_received'
     )
     message = models.TextField(verbose_name='Сообщение')
-    created_at = models.DateTimeField(
-        verbose_name='Дата + Время создания',
-        auto_now_add=True,
-        # default=datetime.now()  # только для первой миграции
-    )
+    created_at = models.DateTimeField(verbose_name='Дата + Время создания', auto_now_add=True)
+    read_at = models.DateTimeField(verbose_name='Дата + Время прочтения', null=True, blank=True)
 
     is_new = models.BooleanField(default=True, verbose_name='Не прочитано')
 

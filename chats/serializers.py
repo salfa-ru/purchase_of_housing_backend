@@ -1,23 +1,11 @@
 from django.db.models import Q
-from rest_framework import serializers
-from rest_framework import exceptions
+from django.utils import timezone
 
-
-from rest_framework import fields
+from rest_framework import serializers, fields
 
 from chats.models import Message, Blocking, Chat
 from realty.models import Realty
 from users.models import User
-
-
-class ChatIdSerializer(serializers.Serializer):
-    """Сериализатор для передачи chat_id в теле запроса"""
-    chat_id = serializers.IntegerField(min_value=1)
-
-
-class RealtyIdSerializer(serializers.Serializer):
-    """Сериализатор для передачи realty_id в теле запроса"""
-    realty_id = serializers.IntegerField(min_value=1)
 
 
 class RealtyNestedIdSerializer(serializers.ModelSerializer):
@@ -37,18 +25,14 @@ class CreateMessageRequestSerializer(serializers.Serializer):
         """Проверяем, что передан либо chat_id, либо realty_id, но не оба"""
         if ('chat_id' not in data and 'realty_id' not in data) or \
            ('chat_id' in data and 'realty_id' in data):
-            # Некрасиво покаызывается как
-            # {
-            #     "detail": "[ErrorDetail(string='Нужен либо chat_id либо realty_id, а не оба (или ни одного)', code='invalid')]"
-            # }
+
+            # Ужасно выглядит: "[ErrorDetail(string='Нужен либо chat_id либо realty_id...', code='invalid')]"
             raise serializers.ValidationError(detail="Должен быть передан либо chat_id, либо realty_id")
 
-            # А это показывается как 500
-            # raise exceptions.APIException(detail="Должен быть передан либо chat_id, либо realty_id")
         return data
 
 
-class RealtyForZhatSerializer(serializers.ModelSerializer):
+class RealtyForChatSerializer(serializers.ModelSerializer):
     """Сериализатор информации об объявлении.
     Для показа переписок и цепочек сообщений."""
     owner = serializers.CharField(source='owner.first_name')
@@ -95,6 +79,7 @@ class UserInfoSerializer(serializers.ModelSerializer):
 class MessageSerializer(serializers.ModelSerializer):
     """Сериализатор одного сообщения внутри чата"""
     direction = serializers.SerializerMethodField()
+    read_at = serializers.DateTimeField(read_only=True, required=False)  # Add read_at
 
     class Meta:
         model = Message
@@ -102,8 +87,10 @@ class MessageSerializer(serializers.ModelSerializer):
             'msg_id',
             'message',
             'created_at',
-            'direction',  # True если сообщение входящее дял текущего пользователя
-            'is_new'
+            'direction',  # in / out
+            'is_new',     # для получателя
+            'read_at',    # получателем
+
         ]
 
     def get_direction(self, obj) -> str:
@@ -116,16 +103,17 @@ class ChatMessagesSerializer(serializers.ModelSerializer):
     me = serializers.SerializerMethodField()
     user = serializers.SerializerMethodField()
     user_is_owner = serializers.SerializerMethodField()
-    realty = RealtyForZhatSerializer()
+    realty = RealtyForChatSerializer()
     messages = serializers.SerializerMethodField()
-    is_blocked_i_block_them = serializers.SerializerMethodField()
-    is_blocked_they_block_me = serializers.SerializerMethodField()
+    i_block = serializers.SerializerMethodField()
+    i_am_blocked = serializers.SerializerMethodField()
 
     # Fields for flattened last message info
     message = serializers.CharField(read_only=True, required=False)
     direction = serializers.CharField(read_only=True, required=False)
     created_at = serializers.DateTimeField(read_only=True, required=False)
     is_new = serializers.BooleanField(read_only=True, required=False)
+    read_at = serializers.DateTimeField(read_only=True, required=False)  # Add read_at
 
     class Meta:
         model = Chat
@@ -135,13 +123,14 @@ class ChatMessagesSerializer(serializers.ModelSerializer):
             'user',
             'user_is_owner',
             'realty',
-            'is_blocked_i_block_them',
-            'is_blocked_they_block_me',
+            'i_block',
+            'i_am_blocked',
             'messages',  # останется либо список, либо одно сообщение <-----
             'message',
             'direction',
             'created_at',
-            'is_new'
+            'is_new',
+            'read_at',  # Add read at
         ]
 
     def to_representation(self, instance):
@@ -170,6 +159,7 @@ class ChatMessagesSerializer(serializers.ModelSerializer):
                 # Use DRF's DateTimeField to format the date.
                 date_field = fields.DateTimeField()
                 data['created_at'] = date_field.to_representation(last_message.created_at)
+                data['read_at'] = date_field.to_representation(last_message.read_at)  # Add read_at
 
                 data['is_new'] = last_message.is_new if last_message.user_to == current_user else False
         else:
@@ -178,6 +168,7 @@ class ChatMessagesSerializer(serializers.ModelSerializer):
             data.pop('direction', None)
             data.pop('created_at', None)
             data.pop('is_new', None)
+            data.pop('read_at', None)  # Remove read_at
 
         return data
 
@@ -208,24 +199,27 @@ class ChatMessagesSerializer(serializers.ModelSerializer):
             Q(user_to=current_user, is_deleted_to=False)
         ).order_by('-created_at')  # <--- СОРТИРОВКА СООБЩЕНИЙ.  Newest first  <---
 
-        # # Mark unread messages as read
-        # messages.filter(user_to=current_user, is_new=True).update(is_new=False)
-        #
-        # return MessageSerializer(messages, many=True, context=self.context).data
+        """ Важное исправление - сначала показываем, что сообщения новые 
+        и только делаем прочитанными (все равно будучи не уверенными, что пользователь их прочитает) """
 
-        ''' Важное исправление - сначала показываем, что сообщения новые 
-        и только делаем прочитанными (все равно будучи не уверенными, что пользователь их прочитает) '''
+        # TODO - ПРОВЕРИТЬ - Установка даты чтения сообщения получателем (место 2 из 2)
+        print("ПРОВЕРИТЬ - Установка даты чтения сообщения получателем (место 2 из 2)!")
+
         # Serialize the messages *before* marking them as read.
         serialized_messages = MessageSerializer(messages, many=True, context=self.context).data
 
         # *Now* mark unread messages as read, after serialization.
         unread_message_ids = messages.filter(user_to=current_user, is_new=True).values_list('msg_id', flat=True)
-        Message.objects.filter(msg_id__in=unread_message_ids).update(is_new=False)
+        Message.objects.filter(msg_id__in=unread_message_ids).update(
+            is_new=False,
+            read_at=timezone.now()  # Add this line to set read_at timestamp
+        )
 
         return serialized_messages
 
+    ...
 
-    def get_is_blocked_i_block_them(self, obj) -> bool:
+    def get_i_block(self, obj) -> bool:
         current_user = self.context['request'].user
         other_user = obj.client if current_user == obj.owner else obj.owner
         return Blocking.objects.filter(
@@ -233,43 +227,13 @@ class ChatMessagesSerializer(serializers.ModelSerializer):
             user_whom=other_user
         ).exists()
 
-    def get_is_blocked_they_block_me(self, obj) -> bool:
+    def get_i_am_blocked(self, obj) -> bool:
         current_user = self.context['request'].user
         other_user = obj.client if current_user == obj.owner else obj.owner
         return Blocking.objects.filter(
             user_who=other_user,
             user_whom=current_user
         ).exists()
-
-'''
-# class MassageSerializer(serializers.ModelSerializer):
-#     """Сериализатор одного сообщения внутри цепочки сообщений."""
-#
-#     class Meta:
-#         model = Message
-#         fields = [
-#             'msg_id',
-#             'message',
-#             'created_at',
-#             'user_from',
-#             'user_to'
-#         ]
-'''
-
-
-# class CreateMessageResponseSerializer(serializers.ModelSerializer):
-#     """Сериализатор тела ответа при создании нового сообщения"""
-#     class Meta:
-#         model = Message
-#         fields = [
-#             'msg_id',
-#             'message',
-#             'user_from',
-#             'user_to',
-#             'created_at',
-#             'is_deleted_from',
-#             'is_deleted_to',
-#         ]
 
 
 class CreateMessageResponseSerializer(serializers.ModelSerializer):
@@ -281,6 +245,7 @@ class CreateMessageResponseSerializer(serializers.ModelSerializer):
     user_is_owner = serializers.SerializerMethodField()
     direction = serializers.SerializerMethodField()
     is_new = serializers.BooleanField(read_only=True, required=False)
+    read_at = serializers.DateTimeField(read_only=True, required=False)  # Add read at - но вообще-то не нужно
 
     class Meta:
         model = Message
@@ -295,6 +260,7 @@ class CreateMessageResponseSerializer(serializers.ModelSerializer):
             'created_at',
             'direction',
             'is_new',
+            'read_at',  # Add read at - но вообще-то не нужно
             # 'user_from',
             # 'user_to',
 

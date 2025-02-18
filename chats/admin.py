@@ -1,10 +1,9 @@
 from django.contrib import admin
 from django.urls import reverse
 from django.utils.html import format_html
+from django.forms import ModelForm
 
 from chats.models import Message, Blocking, Chat
-
-from django.forms import ModelForm
 
 
 class MessageAdminForm(ModelForm):
@@ -49,8 +48,9 @@ class MessageAdmin(admin.ModelAdmin):
         'user_from',
         'user_to',
         'sender_is_owner',
-        'is_new',
         'created_at',
+        'is_new',
+        'read_at',
         'is_deleted_from',
         'is_deleted_to',
 

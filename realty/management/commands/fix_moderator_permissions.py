@@ -38,14 +38,14 @@ class Command(BaseCommand):
             self.stdout.write(self.style.HTTP_SUCCESS(f'{realty_permissions}'))
 
             # Добавляем все права на таблицу Сообщение
-            zhat_content_type = ContentType.objects.get_for_model(Message)
-            zhat_permissions = Permission.objects.filter(
-                content_type=zhat_content_type,
-            #    codename__in=['zhat']
+            message_content_type = ContentType.objects.get_for_model(Message)
+            message_permissions = Permission.objects.filter(
+                content_type=message_content_type,
+            #    codename__in=['message']
             )
-            group.permissions.add(*zhat_permissions)
+            group.permissions.add(*message_permissions)
             self.stdout.write(self.style.HTTP_INFO(f'Добавлены права на Сообщения: '))
-            self.stdout.write(self.style.HTTP_SUCCESS(f'{zhat_permissions}'))
+            self.stdout.write(self.style.HTTP_SUCCESS(f'{message_permissions}'))
 
 
             # Убираем все права на таблицы django_q
