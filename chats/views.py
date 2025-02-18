@@ -20,6 +20,13 @@ from chats.services import (
 from config import constants
 
 
+# TODO - Внимание! При пагинации сообщений в чате - может быть непрочитанные будут на предыдущей странице!
+# I came up with this approach: well, I have paginator there, and so while I am asking for "the last page"
+# of messages, I can forcely show not the last one but the page where the "oldest" unread message is!
+# (thus I am on let's say page 2 of messages, but when I will scroll down, i will have to download page 1 of messages
+# (as the last ones are one the first pages). what do you think?
+
+
 class ChatsPagination(ConfigurablePagination):
     """Pagination for Chat lists (/chats/ and /chats/blacklist/)."""
     page_size = constants.CHATS_PAGESIZE_DEFAULT
