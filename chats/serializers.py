@@ -110,6 +110,7 @@ class ChatMessagesSerializer(serializers.ModelSerializer):
 
     # Fields for flattened last message info
     message = serializers.CharField(read_only=True, required=False)
+    msg_id = serializers.IntegerField(read_only=True, required=False)
     direction = serializers.CharField(read_only=True, required=False)
     created_at = serializers.DateTimeField(read_only=True, required=False)
     is_new = serializers.BooleanField(read_only=True, required=False)
@@ -126,6 +127,7 @@ class ChatMessagesSerializer(serializers.ModelSerializer):
             'i_block',
             'i_am_blocked',
             'messages',  # останется либо список, либо одно сообщение <-----
+            'msg_id',
             'message',
             'direction',
             'created_at',
@@ -152,6 +154,7 @@ class ChatMessagesSerializer(serializers.ModelSerializer):
 
             if last_message:
                 # Add flattened last message info
+                data['msg_id'] = last_message.msg_id
                 data['message'] = last_message.message
                 data['direction'] = "in" if last_message.user_to == current_user else "out"
 
@@ -164,6 +167,7 @@ class ChatMessagesSerializer(serializers.ModelSerializer):
                 data['is_new'] = last_message.is_new if last_message.user_to == current_user else False
         else:
             # Remove the flattened fields for other endpoints
+            data.pop('msg_id', None)
             data.pop('message', None)
             data.pop('direction', None)
             data.pop('created_at', None)
