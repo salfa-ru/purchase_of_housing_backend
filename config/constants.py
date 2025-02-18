@@ -72,6 +72,12 @@ MAX_LISTING_DURATION = timedelta(days=30, hours=0, minutes=0, seconds=0)
 MY_REALTY_PAGESIZE_DEFAULT = 10
 MY_REALTY_PAGESIZE_MAX = 50
 
+# Настройка Пагинации Чатов, и сообщений внутри Чатов
+CHATS_PAGESIZE_DEFAULT = 10
+CHATS_PAGESIZE_MAX = 50
+MESSAGES_PAGESIZE_DEFAULT = 10
+MESSAGES_PAGESIZE_MAX = 50
+
 
 class ConstantsAuth:
     """Constants for custom authentication"""

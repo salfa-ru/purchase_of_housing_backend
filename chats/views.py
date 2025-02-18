@@ -1,5 +1,5 @@
 from django.db.models import Q
-from drf_spectacular.utils import extend_schema, inline_serializer
+from drf_spectacular.utils import extend_schema, inline_serializer, OpenApiParameter
 from rest_framework import generics, status, serializers
 from rest_framework import permissions
 from rest_framework.response import Response
@@ -7,27 +7,49 @@ from rest_framework import exceptions
 from rest_framework.views import APIView
 
 from chats.models import Chat, Blocking, Message
-from chats.paginations import ZhatPagination
+from chats.paginations import (
+    ConfigurablePagination)
 from chats.serializers import (
     ChatMessagesSerializer, CreateMessageResponseSerializer, IdsListSerializer,
     BlockingSerializer, UnblockingSerializer, ChatIdSerializer, CreateMessageRequestSerializer, RealtyIdSerializer,
+    MessageSerializer,
 )
 from chats.services import (
     create_message, get_chats_by_ids, get_chat_by_chat_id, get_realty_by_realty_id, get_chats_sorted,
 )
+from config import constants
 
 
-@extend_schema(summary='Получение списка чатов пользователя. Только заблокированные - через эндпойнт /blacklist')
+class ChatsPagination(ConfigurablePagination):
+    """Pagination for Chat lists (/chats/ and /chats/blacklist/)."""
+    page_size = constants.CHATS_PAGESIZE_DEFAULT
+    max_page_size = constants.CHATS_PAGESIZE_MAX
+    pagination_config_name = "CHATS"
+
+class MessagesPagination(ConfigurablePagination):
+    """Pagination for messages within a chat (/chats/show-chat/)."""
+    page_size = constants.MESSAGES_PAGESIZE_DEFAULT
+    max_page_size = constants.MESSAGES_PAGESIZE_MAX
+    pagination_config_name = "MESSAGES"
+
+
+@extend_schema(
+    summary='Получение списка чатов пользователя. Только заблокированные - через эндпойнт /blacklist',
+    parameters=[
+        OpenApiParameter(name='page', type=int, location=OpenApiParameter.QUERY, description='Номер страницы'),
+        OpenApiParameter(name='page_size', type=int, location=OpenApiParameter.QUERY,
+                         description=f'Количество объектов на странице (по умолчанию {constants.CHATS_PAGESIZE_DEFAULT}, максимум {constants.CHATS_PAGESIZE_MAX}), настраивается константами CHATS_PAGESIZE'),
+    ],
+)
 class ChatListAPIView(generics.ListAPIView):
     """Получение списка чатов пользователя.
     Самые свежие Чаты идут первыми."""
-    serializer_class = ChatMessagesSerializer  # <----- Use the same serializer
+    serializer_class = ChatMessagesSerializer
     permission_classes = [permissions.IsAuthenticated]
-    pagination_class = ZhatPagination
+    pagination_class = ChatsPagination
 
     def get_queryset(self):
         user = self.request.user
-        # chats = get_chats(user)
         chats = get_chats_sorted(user)
 
         is_blacklist = self.kwargs.get("blacklist", False)
@@ -37,14 +59,11 @@ class ChatListAPIView(generics.ListAPIView):
             for chat in chats:
                 other_user = chat.owner if chat.client == user else chat.client
                 if Blocking.objects.filter(user_who=user, user_whom=other_user):
-                    # Check for visible messages before adding  <----- Added this check
                     if chat.messages.filter(
                             Q(user_from=user, is_deleted_from=False) |
                             Q(user_to=user, is_deleted_to=False)
                     ).exists():
                         filtered_chats.append(chat)
-
-
         else:
             filtered_chats = []
             for chat in chats:
@@ -55,41 +74,38 @@ class ChatListAPIView(generics.ListAPIView):
                     filtered_chats.append(chat)
         return filtered_chats
 
-    def list(self, request, *args, **kwargs):  # <----- Added this method
-        queryset = self.filter_queryset(self.get_queryset())
-
-        page = self.paginate_queryset(queryset)
-        if page is not None:
-            serializer = self.get_serializer(page, many=True)
-            return self.get_paginated_response(serializer.data)
-
-        serializer = self.get_serializer(queryset, many=True)
-        return Response(serializer.data)
-
-
 
 @extend_schema(
     summary='Получение списка сообщений в чате по chat_id ИЛИ realty_id',
-    request=inline_serializer(  # Use inline_serializer for combined request
+    request=inline_serializer(
         name='ChatOrRealtyId',
         fields={
             'chat_id': serializers.IntegerField(min_value=1, required=False),
             'realty_id': serializers.IntegerField(min_value=1, required=False),
         }
     ),
+    parameters=[
+        OpenApiParameter(name='page', type=int, location=OpenApiParameter.QUERY, description='Номер страницы'),
+        OpenApiParameter(name='page_size', type=int, location=OpenApiParameter.QUERY,
+                         description=f'Количество объектов на странице (по умолчанию {constants.MESSAGES_PAGESIZE_DEFAULT}, максимум {constants.MESSAGES_PAGESIZE_MAX}), настраивается константами MESSAGES_PAGESIZE'),
+    ],
     responses={200: ChatMessagesSerializer},
 )
-class ChatMessagesAPIView(generics.CreateAPIView):  # <----- No longer inherits
+class ChatMessagesAPIView(generics.CreateAPIView):
     """Получение списка сообщений в чате по chat_id ИЛИ realty_id"""
     serializer_class = ChatMessagesSerializer
     permission_classes = [permissions.IsAuthenticated]
+    pagination_class = MessagesPagination
 
     def get_chat(self, request):
-        """Получение чата по chat_id или realty_id."""
         chat_id = request.data.get('chat_id')
         realty_id = request.data.get('realty_id')
 
         if (chat_id is not None and realty_id is not None) or (chat_id is None and realty_id is None):
+            # Error 500
+            # raise exceptions.APIException(detail="Нужен либо chat_id либо realty_id, а не оба (или ни одного)")
+
+            # А эта некрасиво показывается
             raise exceptions.ValidationError(detail="Нужен либо chat_id либо realty_id, а не оба (или ни одного)")
 
         if chat_id:
@@ -104,21 +120,35 @@ class ChatMessagesAPIView(generics.CreateAPIView):  # <----- No longer inherits
             return chat
 
     def post(self, request, *args, **kwargs):
-        """Получение и возврат данных чата."""
         try:
             chat = self.get_chat(request)
         except exceptions.ValidationError as e:
             return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Проверка наличия неудаленных сообщений
-        if not chat.messages.filter(
-                Q(user_from=request.user, is_deleted_from=False) |
-                Q(user_to=request.user, is_deleted_to=False)
-        ).exists():
+        messages = chat.messages.filter(
+            Q(user_from=request.user, is_deleted_from=False) |
+            Q(user_to=request.user, is_deleted_to=False)
+        )
+        if not messages.exists():
             return Response({"detail": "Чат пуст"}, status=status.HTTP_404_NOT_FOUND)
 
-        serializer = self.get_serializer(chat)
-        return Response(serializer.data)
+        page = self.paginate_queryset(messages.order_by('-created_at'))
+        if page is not None:
+            serializer = ChatMessagesSerializer(instance=chat, context={'request': request})
+            paginated_messages = MessageSerializer(page, many=True, context={'request': request}).data
+            response_data = serializer.data
+            response_data['messages'] = paginated_messages
+
+            unread_message_ids = messages.filter(user_to=request.user, is_new=True).values_list('msg_id', flat=True)
+            Message.objects.filter(msg_id__in=unread_message_ids).update(is_new=False)
+
+            return self.get_paginated_response(response_data)
+        else:
+            serializer = ChatMessagesSerializer(instance=chat, context={'request': request})
+
+            unread_message_ids = messages.filter(user_to=request.user, is_new=True).values_list('msg_id', flat=True)
+            Message.objects.filter(msg_id__in=unread_message_ids).update(is_new=False)
+            return Response(serializer.data)
 
 
 @extend_schema(

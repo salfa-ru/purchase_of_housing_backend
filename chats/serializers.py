@@ -1,5 +1,7 @@
 from django.db.models import Q
 from rest_framework import serializers
+from rest_framework import exceptions
+
 
 from rest_framework import fields
 
@@ -35,9 +37,14 @@ class CreateMessageRequestSerializer(serializers.Serializer):
         """Проверяем, что передан либо chat_id, либо realty_id, но не оба"""
         if ('chat_id' not in data and 'realty_id' not in data) or \
            ('chat_id' in data and 'realty_id' in data):
-            raise serializers.ValidationError(detail=
-                "Должен быть передан либо chat_id, либо realty_id"
-            )
+            # Некрасиво покаызывается как
+            # {
+            #     "detail": "[ErrorDetail(string='Нужен либо chat_id либо realty_id, а не оба (или ни одного)', code='invalid')]"
+            # }
+            raise serializers.ValidationError(detail="Должен быть передан либо chat_id, либо realty_id")
+
+            # А это показывается как 500
+            # raise exceptions.APIException(detail="Должен быть передан либо chat_id, либо realty_id")
         return data
 
 
@@ -174,20 +181,20 @@ class ChatMessagesSerializer(serializers.ModelSerializer):
 
         return data
 
-    def get_me(self, obj):
+    def get_me(self, obj) -> dict:  # Type hint: Returns a dictionary
         current_user = self.context['request'].user
         return UserInfoSerializer(current_user).data
 
-    def get_user(self, obj):
+    def get_user(self, obj) -> dict:  # Type hint: Returns a dictionary
         current_user = self.context['request'].user
         other_user = obj.owner if current_user == obj.client else obj.client
         return UserInfoSerializer(other_user).data
 
-    def get_user_is_owner(self, obj):
+    def get_user_is_owner(self, obj) -> bool:
         current_user = self.context['request'].user
         return current_user != obj.owner
 
-    def get_messages(self, obj):
+    def get_messages(self, obj) -> list:
         """Get messages only for non-list endpoints"""
         request = self.context.get('request')
 
@@ -218,7 +225,7 @@ class ChatMessagesSerializer(serializers.ModelSerializer):
         return serialized_messages
 
 
-    def get_is_blocked_i_block_them(self, obj):
+    def get_is_blocked_i_block_them(self, obj) -> bool:
         current_user = self.context['request'].user
         other_user = obj.client if current_user == obj.owner else obj.owner
         return Blocking.objects.filter(
@@ -226,7 +233,7 @@ class ChatMessagesSerializer(serializers.ModelSerializer):
             user_whom=other_user
         ).exists()
 
-    def get_is_blocked_they_block_me(self, obj):
+    def get_is_blocked_they_block_me(self, obj) -> bool:
         current_user = self.context['request'].user
         other_user = obj.client if current_user == obj.owner else obj.owner
         return Blocking.objects.filter(
@@ -295,13 +302,13 @@ class CreateMessageResponseSerializer(serializers.ModelSerializer):
             # 'is_deleted_to',
         ]
 
-    def get_me(self, obj):
+    def get_me(self, obj) -> dict:  # Type hint: Returns a dictionary
         return UserInfoSerializer(obj.user_from).data
 
-    def get_user(self, obj):
+    def get_user(self, obj) -> dict:  # Type hint: Returns a dictionary
         return UserInfoSerializer(obj.user_to).data
 
-    def get_user_is_owner(self, obj):
+    def get_user_is_owner(self, obj) -> bool:
         return obj.user_from == obj.chat.owner
 
     def get_direction(self, obj) -> str:
