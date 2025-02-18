@@ -2859,7 +2859,7 @@
     "pk": 1,
     "fields": {
       "realty": 1,
-      "image": "realty_photos/img1.jpg"
+      "image": "realty_photos/img1-1.jpg"
     }
   },
   {
@@ -2867,7 +2867,247 @@
     "pk": 2,
     "fields": {
       "realty": 1,
+      "image": "realty_photos/img1-2.jpg"
+    }
+  },
+  {
+    "model": "realty_photos.realtyphoto",
+    "pk": 3,
+    "fields": {
+      "realty": 2,
       "image": "realty_photos/img2.jpg"
+    }
+  },
+  {
+    "model": "realty_photos.realtyphoto",
+    "pk": 4,
+    "fields": {
+      "realty": 3,
+      "image": "realty_photos/img3.jpg"
+    }
+  },
+  {
+    "model": "realty_photos.realtyphoto",
+    "pk": 5,
+    "fields": {
+      "realty": 4,
+      "image": "realty_photos/img4.jpg"
+    }
+  },
+  {
+    "model": "realty_photos.realtyphoto",
+    "pk": 6,
+    "fields": {
+      "realty": 5,
+      "image": "realty_photos/img5.jpg"
+    }
+  },
+  {
+    "model": "realty_photos.realtyphoto",
+    "pk": 7,
+    "fields": {
+      "realty": 6,
+      "image": "realty_photos/img6.jpg"
+    }
+  },
+  {
+    "model": "realty_photos.realtyphoto",
+    "pk": 8,
+    "fields": {
+      "realty": 7,
+      "image": "realty_photos/img7.jpg"
+    }
+  },
+  {
+    "model": "realty_photos.realtyphoto",
+    "pk": 9,
+    "fields": {
+      "realty": 8,
+      "image": "realty_photos/img8.jpg"
+    }
+  },
+  {
+    "model": "realty_photos.realtyphoto",
+    "pk": 10,
+    "fields": {
+      "realty": 9,
+      "image": "realty_photos/img9.jpg"
+    }
+  },
+  {
+    "model": "realty_photos.realtyphoto",
+    "pk": 11,
+    "fields": {
+      "realty": 10,
+      "image": "realty_photos/img10.jpg"
+    }
+  },
+  {
+    "model": "realty_photos.realtyphoto",
+    "pk": 12,
+    "fields": {
+      "realty": 11,
+      "image": "realty_photos/img11.jpg"
+    }
+  },
+  {
+    "model": "realty_photos.realtyphoto",
+    "pk": 13,
+    "fields": {
+      "realty": 12,
+      "image": "realty_photos/img12.jpg"
+    }
+  },
+  {
+    "model": "realty_photos.realtyphoto",
+    "pk": 14,
+    "fields": {
+      "realty": 13,
+      "image": "realty_photos/img13.jpg"
+    }
+  },
+  {
+    "model": "realty_photos.realtyphoto",
+    "pk": 15,
+    "fields": {
+      "realty": 14,
+      "image": "realty_photos/img14.jpg"
+    }
+  },
+  {
+    "model": "realty_photos.realtyphoto",
+    "pk": 16,
+    "fields": {
+      "realty": 15,
+      "image": "realty_photos/img15-1.jpg"
+    }
+  },
+  {
+    "model": "realty_photos.realtyphoto",
+    "pk": 17,
+    "fields": {
+      "realty": 15,
+      "image": "realty_photos/img15-2.jpg"
+    }
+  },
+  {
+    "model": "realty_photos.realtyphoto",
+    "pk": 18,
+    "fields": {
+      "realty": 16,
+      "image": "realty_photos/img16.jpg"
+    }
+  },
+    {
+    "model": "realty_photos.realtyphoto",
+    "pk": 19,
+    "fields": {
+      "realty": 17,
+      "image": "realty_photos/img17-1.jpg"
+    }
+  },
+  {
+    "model": "realty_photos.realtyphoto",
+    "pk": 20,
+    "fields": {
+      "realty": 17,
+      "image": "realty_photos/img17-2.jpg"
+    }
+  },
+  {
+    "model": "realty_photos.realtyphoto",
+    "pk": 21,
+    "fields": {
+      "realty": 18,
+      "image": "realty_photos/img18.jpg"
+    }
+  },
+  {
+    "model": "realty_photos.realtyphoto",
+    "pk": 22,
+    "fields": {
+      "realty": 19,
+      "image": "realty_photos/img19.jpg"
+    }
+  },
+    {
+    "model": "realty_photos.realtyphoto",
+    "pk": 23,
+    "fields": {
+      "realty": 20,
+      "image": "realty_photos/img20.jpg"
+    }
+  },
+  {
+    "model": "realty_photos.realtyphoto",
+    "pk": 24,
+    "fields": {
+      "realty": 21,
+      "image": "realty_photos/img21.jpg"
+    }
+  },
+    {
+    "model": "realty_photos.realtyphoto",
+    "pk": 25,
+    "fields": {
+      "realty": 22,
+      "image": "realty_photos/img22-1.jpg"
+    }
+  },
+  {
+    "model": "realty_photos.realtyphoto",
+    "pk": 26,
+    "fields": {
+      "realty": 22,
+      "image": "realty_photos/img22-2.jpg"
+    }
+  },
+    {
+    "model": "realty_photos.realtyphoto",
+    "pk": 27,
+    "fields": {
+      "realty": 23,
+      "image": "realty_photos/img23.jpg"
+    }
+  },
+  {
+    "model": "realty_photos.realtyphoto",
+    "pk": 28,
+    "fields": {
+      "realty": 24,
+      "image": "realty_photos/img24.jpg"
+    }
+  },
+  {
+    "model": "realty_photos.realtyphoto",
+    "pk": 29,
+    "fields": {
+      "realty": 25,
+      "image": "realty_photos/img25.jpg"
+    }
+  },
+    {
+    "model": "realty_photos.realtyphoto",
+    "pk": 30,
+    "fields": {
+      "realty": 26,
+      "image": "realty_photos/img26.jpg"
+    }
+  },
+    {
+    "model": "realty_photos.realtyphoto",
+    "pk": 31,
+    "fields": {
+      "realty": 27,
+      "image": "realty_photos/img27-1.jpg"
+    }
+  },
+  {
+    "model": "realty_photos.realtyphoto",
+    "pk": 32,
+    "fields": {
+      "realty": 27,
+      "image": "realty_photos/img27-2.jpg"
     }
   }
 ]
