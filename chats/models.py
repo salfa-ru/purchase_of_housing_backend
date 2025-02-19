@@ -55,7 +55,6 @@ class Message(models.Model):
         on_delete=models.CASCADE,
         related_name='messages',
         verbose_name='Чат',
-        # default=0, # только для первой миграции
     )
     user_from = models.ForeignKey(
         users_models.User,

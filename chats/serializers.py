@@ -2,6 +2,8 @@ from django.db.models import Q
 from django.utils import timezone
 
 from rest_framework import serializers, fields
+from rest_framework.exceptions import APIException
+from rest_framework import status
 
 from chats.models import Message, Blocking, Chat
 from realty.models import Realty
@@ -26,8 +28,7 @@ class CreateMessageRequestSerializer(serializers.Serializer):
         if ('chat_id' not in data and 'realty_id' not in data) or \
            ('chat_id' in data and 'realty_id' in data):
 
-            # Ужасно выглядит: "[ErrorDetail(string='Нужен либо chat_id либо realty_id...', code='invalid')]"
-            raise serializers.ValidationError(detail="Должен быть передан либо chat_id, либо realty_id")
+            raise ValidationCustomDetailError(detail="Должен быть передан либо chat_id, либо realty_id")
 
         return data
 
@@ -35,7 +36,7 @@ class CreateMessageRequestSerializer(serializers.Serializer):
 class RealtyForChatSerializer(serializers.ModelSerializer):
     """Сериализатор информации об объявлении.
     Для показа переписок и цепочек сообщений."""
-    owner = serializers.CharField(source='owner.first_name')
+    owner = serializers.CharField(source='owner.username')
     photo = serializers.SerializerMethodField()
     realty_type = serializers.SlugRelatedField(
         slug_field='type',
@@ -69,7 +70,7 @@ class RealtyForChatSerializer(serializers.ModelSerializer):
 
 class UserInfoSerializer(serializers.ModelSerializer):
     """Сериализатор для краткой информации о пользователе"""
-    name = serializers.CharField(source='first_name')
+    name = serializers.CharField(source='username')
 
     class Meta:
         model = User
@@ -310,10 +311,90 @@ class BlockingSerializer(serializers.ModelSerializer):
         ]
 
 
-class UnblockingSerializer(serializers.Serializer):
-    """Сериализатор разблокировки"""
-    chat_ids = serializers.ListField(  # Переименовано с 'ids' на 'chat_ids'
-        child=serializers.IntegerField(),
-        allow_empty=False,
-        help_text="Список ID чатов"
+""" Новая сложная блокировка / разблокировка по любому параметру """
+
+
+# region  Блокировка
+
+class UserInfoIdNameSerializer(serializers.Serializer):
+    """Serializer for user ID and name."""
+    id = serializers.IntegerField()
+    name = serializers.CharField(source='username')
+
+
+class BlockingRequestSerializer(serializers.Serializer):
+    """Serializer for blocking requests."""
+    chat_ids = serializers.ListField(
+        child=serializers.IntegerField(min_value=1),
+        required=False,
+        help_text="List of Chat IDs"
     )
+    user_ids = serializers.ListField(
+        child=serializers.IntegerField(min_value=1),
+        required=False,
+        help_text="List of User IDs"
+    )
+    realty_ids = serializers.ListField(
+        child=serializers.IntegerField(min_value=1),
+        required=False,
+        help_text="List of Realty IDs"
+    )
+
+    def validate(self, data):
+        """Ensure only one of chat_ids, user_ids, or realty_ids is provided."""
+        fields2 = ['chat_ids', 'user_ids', 'realty_ids']
+        provided_fields = [field for field in fields2 if data.get(field)]
+
+        if len(provided_fields) != 1:
+            raise ValidationCustomDetailError(
+                detail="Provide exactly one of: chat_ids, user_ids, or realty_ids."
+            )
+
+        return data
+
+
+class ValidationCustomDetailError(APIException):
+    status_code = status.HTTP_400_BAD_REQUEST
+    default_detail = "Validation error"
+    default_code = 'invalid'
+
+
+class UnblockingRequestSerializer(serializers.Serializer):
+    """Serializer for unblocking requests (same structure as blocking)."""
+    chat_ids = serializers.ListField(
+        child=serializers.IntegerField(min_value=1),
+        required=False,
+        help_text="List of Chat IDs"
+    )
+    user_ids = serializers.ListField(
+        child=serializers.IntegerField(min_value=1),
+        required=False,
+        help_text="List of User IDs"
+    )
+    realty_ids = serializers.ListField(
+        child=serializers.IntegerField(min_value=1),
+        required=False,
+        help_text="List of Realty IDs"
+    )
+
+    def validate(self, data):
+        """Ensure only one of chat_ids, user_ids, or realty_ids is provided."""
+        fields2 = ['chat_ids', 'user_ids', 'realty_ids']
+        provided_fields = [field for field in fields2 if data.get(field)]
+
+        if len(provided_fields) != 1:
+            raise ValidationCustomDetailError(
+                detail="Provide exactly one of: chat_ids, user_ids, or realty_ids."
+            )
+        return data
+
+
+class BlockingResponseSerializer(serializers.Serializer):
+    """Serializer for the blocking/unblocking response."""
+    current_user = serializers.CharField()
+    blocked_users = UserInfoIdNameSerializer(many=True)
+    blocked_chats = serializers.ListField(child=serializers.IntegerField())
+    blocked_realties = serializers.ListField(child=serializers.IntegerField())
+
+
+# endregion

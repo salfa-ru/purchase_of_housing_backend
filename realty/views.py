@@ -127,10 +127,13 @@ class LastRealtyListView(generics.ListAPIView):
     filterset_class = RealtyFilter
     pagination_class = LimitOffsetPagination
     pagination_class.default_limit = 3
+
     # TODO найти решение без пагинации. Требуется вывод последних 3х объектов.
     queryset = realty_models.Realty.objects.all().filter(
         realty_status__status=constants.ADVERTISMENT_STATUS
-    )  # .order_by('-published_at')
+    ).order_by('-published_at')
+
+    # TODO - 2025-02-19 - активировал обратно сортировку последних трех объявлений!.
 
     # TODO - Как насчет такого решения? Апдейт: заработало после отключения всех строк сверху
     # Работает, в том числе если:

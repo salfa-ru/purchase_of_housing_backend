@@ -22,4 +22,3 @@ urlpatterns = [
     path('block/', ChatsBlockingCreateAPIView.as_view(), name='blocking'),
     path('unblock/', ChatRemoveBlocking.as_view(), name='unblocking'),
 ]
-

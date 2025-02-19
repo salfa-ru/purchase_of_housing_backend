@@ -11,11 +11,13 @@ from chats.models import Chat, Blocking, Message
 from chats.paginations import ConfigurablePagination
 from chats.serializers import (
     ChatMessagesSerializer, CreateMessageResponseSerializer, IdsListSerializer,
-    BlockingSerializer, UnblockingSerializer, CreateMessageRequestSerializer, MessageSerializer,
+    BlockingSerializer, CreateMessageRequestSerializer, MessageSerializer,
+    BlockingRequestSerializer, UserInfoIdNameSerializer, BlockingResponseSerializer, UnblockingRequestSerializer,
 )
 from chats.services import (
     create_message, get_chats_by_ids, get_chat_by_chat_id,
-    get_realty_by_realty_id, get_chats_sorted,
+    get_realty_by_realty_id, get_chats_sorted, get_users_to_block_unblock, get_chats_from_users,
+    get_realties_from_users,
 )
 from config import constants
 
@@ -201,102 +203,176 @@ class MessageCreateAPIView(generics.CreateAPIView):
 @extend_schema(
     request=IdsListSerializer,
     summary='Множественное удаление сообщений по ID чатов',
-    responses={200: inline_serializer(
-        name='MessagesInChatsDelete',
-        fields={
-            'detail': serializers.CharField(),
-        }
-    )},
+    responses={
+        200: inline_serializer(  # Use inline_serializer for a custom response
+            name='MessagesInChatsDeleteResponse',
+            fields={
+                'deleted_chat_ids': serializers.ListField(child=serializers.IntegerField()),
+                'detail': serializers.CharField(),
+            }
+        ),
+        400: inline_serializer(
+            name='MessagesInChatsDeleteError',
+            fields={
+                'not_found_or_empty_chats': serializers.ListField(child=serializers.IntegerField()),
+                'found_chats': serializers.ListField(child=serializers.IntegerField()),
+                'detail': serializers.CharField(),
+            }
+        ),
+    },
 )
 class ChatsDeleteAPIView(generics.CreateAPIView):
     """Множественное удаление сообщений.
     На вход нужно подать список chat_id.
-    Удаляются все существующие сообщения, входящие в эти чаты."""
+    Удаляются все существующие сообщения, входящие в эти чаты.
+    Если хотя бы в одном из указанных чатов нет сообщений для удаления,
+    удаление не производится, и возвращается ошибка.
+    """
     permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request, *args, **kwargs):
         serializer = IdsListSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-
         chat_ids = serializer.validated_data['chat_ids']
 
-        chats = get_chats_by_ids(
-            current_user=request.user,
-            data=request.data
-        )
+        # 1. Получаем чаты, доступные пользователю, и проверяем их наличие.
+        try:
+            chats = get_chats_by_ids(
+                current_user=request.user,
+                data=request.data
+            )
+        except exceptions.NotFound as e:  # перехват ошибки, брошенной в get_chats_by_ids
+            return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
+        found_chat_ids = [chat.chat_id for chat in chats]
+        not_found_chat_ids = list(set(chat_ids) - set(found_chat_ids))
+
+        # 2. Проверяем, есть ли в каждом найденном чате сообщения для удаления.
+        chats_without_messages = []
+        for chat in chats:
+            has_messages = Message.objects.filter(
+                Q(chat=chat) &
+                (Q(user_from=request.user, is_deleted_from=False) |
+                 Q(user_to=request.user, is_deleted_to=False))
+            ).exists()
+            if not has_messages:
+                chats_without_messages.append(chat.chat_id)
+
+        # 3. Если есть чаты без сообщений ИЛИ не все чаты найдены, возвращаем ошибку.
+        if chats_without_messages or not_found_chat_ids:
+            response_data = {
+                'not_found_or_empty_chats': not_found_chat_ids + chats_without_messages,
+                'found_chats': [chat_id for chat_id in found_chat_ids if chat_id not in chats_without_messages],
+                'detail': 'Удаление не произошло.  '
+                          'Некоторые чаты не найдены или не содержат сообщений для удаления.'
+            }
+            return Response(response_data, status=status.HTTP_400_BAD_REQUEST)
+
+        # 4. Если все чаты найдены и содержат сообщения, удаляем.
         Message.objects.filter(chat__in=chats, user_from=request.user).update(is_deleted_from=True)
         Message.objects.filter(chat__in=chats, user_to=request.user).update(is_deleted_to=True)
 
-        msg = f'Сообщения в чатах {chat_ids} удалены'
-        return Response({'detail': msg}, status=status.HTTP_200_OK)
+        response_data = {
+            'deleted_chat_ids': found_chat_ids,
+            'detail': 'Чаты успешно удалены.'
+        }
+        return Response(response_data, status=status.HTTP_200_OK)
 
 
 @extend_schema(
-    request=IdsListSerializer,
-    summary='Блокировка пользователей по ID чатов',
-    responses=BlockingSerializer(many=True),
+    request=BlockingRequestSerializer,
+    summary='Block users by chat IDs, user IDs, or realty IDs',
+    responses={201: BlockingResponseSerializer},
 )
 class ChatsBlockingCreateAPIView(generics.CreateAPIView):
-    """В теле запроса передается список chat_id.
-    Блокируются собеседники из переписок с указанными id."""
-    permission_classes = [permissions.IsAuthenticated, ]
-    serializer_class = BlockingSerializer
+    """Block users based on chat_ids, user_ids, or realty_ids."""
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = BlockingSerializer  # For creating Blocking instances
 
     def post(self, request, *args, **kwargs):
-        # Получаем только чаты, к которым пользователь имеет доступ
-        chats = get_chats_by_ids(
-            current_user=request.user,
-            data=request.data
-        )
+        serializer = BlockingRequestSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        validated_data = serializer.validated_data
 
+        current_user = request.user
+        try:
+            users_to_block = get_users_to_block_unblock(
+                current_user,
+                chat_ids=validated_data.get('chat_ids'),
+                user_ids=validated_data.get('user_ids'),
+                realty_ids=validated_data.get('realty_ids')
+            )
+        except exceptions.NotFound as e:
+            return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Create Blocking instances
         blocking_list = []
-        for chat in chats:
-            current_user = request.user
-            other_user = chat.owner if chat.client == current_user else chat.client
-
+        for user in users_to_block:
             blocking, created = Blocking.objects.get_or_create(
                 user_who=current_user,
-                user_whom=other_user
+                user_whom=user
             )
-            if created:  # Only add to the list if it was newly created.
-                blocking_list.append(blocking)
+            blocking_list.append(blocking)  # add any way, created or not
 
-        serializer = self.get_serializer(blocking_list, many=True)
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+        blocked_chats = get_chats_from_users(current_user, users_to_block)
+        blocked_realties = get_realties_from_users(current_user, users_to_block)
+
+        response_data = {
+            'current_user_debug': f"#{current_user.id} - {current_user.first_name}",
+            "blocked_users": UserInfoIdNameSerializer(users_to_block, many=True).data,
+            "blocked_chat_ids": blocked_chats,
+            "blocked_realty_ids": blocked_realties
+        }
+
+        return Response(response_data, status=status.HTTP_201_CREATED)
 
 
 @extend_schema(
-    summary='Разблокировка чата',
-    request=UnblockingSerializer,
-    responses={200:  {"detail": 'Чаты успешно разблокированы.'}},
+    request=UnblockingRequestSerializer,
+    summary='Unblock users by chat IDs, user IDs, or realty IDs',
+    responses={200: BlockingResponseSerializer},
 )
 class ChatRemoveBlocking(APIView):
-    permission_classes = [permissions.IsAuthenticated, ]
-    serializer_class = UnblockingSerializer
+    """Unblock users based on chat_ids, user_ids, or realty_ids."""
+    permission_classes = [permissions.IsAuthenticated]
+    # serializer_class = UnblockingSerializer
 
     def post(self, request, *args, **kwargs):
-        # Получаем только чаты, к которым пользователь имеет доступ
-        chats = get_chats_by_ids(
-            current_user=request.user,
-            data=request.data
-        )
+        serializer = UnblockingRequestSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        validated_data = serializer.validated_data
+
+        current_user = request.user
+
+        try:
+            users_to_unblock = get_users_to_block_unblock(
+                current_user,
+                chat_ids=validated_data.get('chat_ids'),
+                user_ids=validated_data.get('user_ids'),
+                realty_ids=validated_data.get('realty_ids')
+            )
+        except exceptions.NotFound as e:
+            return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
         unblock_count = 0
-        for chat in chats:
-            current_user = request.user
-            other_user = chat.owner if chat.client == current_user else chat.client
-
+        for user in users_to_unblock:
             deleted_count, _ = Blocking.objects.filter(
                 user_who=current_user,
-                user_whom=other_user
+                user_whom=user
             ).delete()
             unblock_count += deleted_count
 
+        blocked_chats = get_chats_from_users(current_user, users_to_unblock)
+        blocked_realties = get_realties_from_users(current_user, users_to_unblock)
+
+        response_data = {
+            'current_user_debug': f"#{current_user.id} - {current_user.username}",
+            "unblocked_users": UserInfoIdNameSerializer(users_to_unblock, many=True).data,  # it shows users anyway
+            "unblocked_chats": blocked_chats,
+            "unblocked_realties": blocked_realties
+        }
+
         if unblock_count > 0:
-            return Response({"detail": f'Чаты успешно разблокированы.'})
+            return Response(response_data, status=status.HTTP_200_OK)  # response_data
         else:
-            return Response(
-                {"detail": f'Выбранные чаты не были заблокированы.'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
+            return Response(response_data, status=status.HTTP_200_OK)  # it's not an error
