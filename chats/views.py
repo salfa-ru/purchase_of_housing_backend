@@ -147,7 +147,7 @@ class ChatMessagesAPIView(generics.CreateAPIView):
             return Response({"detail": "Чат пуст"}, status=status.HTTP_404_NOT_FOUND)
 
         page = self.paginate_queryset(messages.order_by('-created_at'))
-        
+
         # TODO - ПРОВЕРИТЬ - Установка даты чтения сообщения получателем (место 1 из 2)
         print("ПРОВЕРИТЬ - Установка даты чтения сообщения получателем (место 1 из 2)!")
         if page is not None:
@@ -174,7 +174,7 @@ class ChatMessagesAPIView(generics.CreateAPIView):
 
 
 @extend_schema(
-    summary='Создание сообщения',
+    summary='Отправка сообщения',
     request=CreateMessageRequestSerializer,
     responses={201: CreateMessageResponseSerializer},
 )
@@ -281,11 +281,13 @@ class ChatsDeleteAPIView(generics.CreateAPIView):
 
 @extend_schema(
     request=BlockingRequestSerializer,
-    summary='Block users by chat IDs, user IDs, or realty IDs',
+    summary='Блокировка переписок',
     responses={201: BlockingResponseSerializer},
 )
 class ChatsBlockingCreateAPIView(generics.CreateAPIView):
-    """Block users based on chat_ids, user_ids, or realty_ids."""
+    """Блокировка переписок по chat_ids, user_ids, или realty_ids
+    <strong> (только по одному из трех параметров). </strong> Рекомендую в основном пользоваться chat_id.<br>
+    Блокировка не дает текущему пользователю написать тому, кого он заблокировал. Себя заблокировать нельзя. """
     permission_classes = [permissions.IsAuthenticated]
     serializer_class = BlockingSerializer  # For creating Blocking instances
 
@@ -303,6 +305,8 @@ class ChatsBlockingCreateAPIView(generics.CreateAPIView):
                 realty_ids=validated_data.get('realty_ids')
             )
         except exceptions.NotFound as e:
+            return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        except exceptions.ValidationError as e:  # Catch self-blocking attempt
             return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
         # Create Blocking instances
@@ -329,13 +333,15 @@ class ChatsBlockingCreateAPIView(generics.CreateAPIView):
 
 @extend_schema(
     request=UnblockingRequestSerializer,
-    summary='Unblock users by chat IDs, user IDs, or realty IDs',
+    summary='Разблокировка переписок',
     responses={200: BlockingResponseSerializer},
 )
 class ChatRemoveBlocking(APIView):
-    """Unblock users based on chat_ids, user_ids, or realty_ids."""
+    """Разблокировка переписок по chat_ids, user_ids, или realty_ids
+    <strong> (только по одному из трех параметров). </strong> Рекомендую в основном пользоваться chat_id.<br>
+    Разблокировка по realty_id или user_id может быть удобна для написания сообщений по новому объявлению
+    пользователя, который заблокирован в других чатах"""
     permission_classes = [permissions.IsAuthenticated]
-    # serializer_class = UnblockingSerializer
 
     def post(self, request, *args, **kwargs):
         serializer = UnblockingRequestSerializer(data=request.data)
@@ -352,6 +358,8 @@ class ChatRemoveBlocking(APIView):
                 realty_ids=validated_data.get('realty_ids')
             )
         except exceptions.NotFound as e:
+            return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        except exceptions.ValidationError as e:  # Catch self-unblocking attempt
             return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
         unblock_count = 0

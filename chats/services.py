@@ -2,7 +2,7 @@ from django.db.models import Q, OuterRef, Subquery
 from rest_framework import exceptions
 
 from chats.models import Message, Blocking, Chat
-from chats.serializers import IdsListSerializer
+from chats.serializers import IdsListSerializer, ValidationCustomDetailError
 from realty.models import Realty
 from users.models import User
 
@@ -125,16 +125,9 @@ def create_message(user_from, message_text, realty_id=None, chat_id=None):
 def validate_ids(model, id_list, id_field='id', error_message="Invalid IDs found"):
     """
     Validates a list of IDs against a given model.
-
-    Args:
-        model: The Django model to validate against.
-        id_list: The list of IDs to validate.
-        id_field: The name of the ID field in the model (default: 'id').
-        error_message:  Base error message.
-
-    Raises:
-        NotFound: If any of the IDs are not found in the model.
     """
+    if not id_list:  # Handle empty lists
+        return
     existing_ids = model.objects.filter(**{f'{id_field}__in': id_list}).values_list(id_field, flat=True)
     invalid_ids = list(set(id_list) - set(existing_ids))
     if invalid_ids:
@@ -147,7 +140,7 @@ def get_users_from_chats(current_user, chat_ids):
 
     chats = Chat.objects.filter(
         Q(owner=current_user) | Q(client=current_user),
-        chat_id__in=chat_ids  # Moved to after the Q object
+        chat_id__in=chat_ids
     )
 
     # check if user is a member of all chats
@@ -159,21 +152,22 @@ def get_users_from_chats(current_user, chat_ids):
     users_to_block = set()
     for chat in chats:
         other_user = chat.owner if chat.client == current_user else chat.client
-        users_to_block.add(other_user)
+        if other_user != current_user:  # Crucial: Exclude self
+            users_to_block.add(other_user)
     return list(users_to_block)
 
 
 def get_users_from_realties(current_user, realty_ids):
-    """Gets users to block/unblock from a list of realty IDs."""
+    """Gets users to block/unblock from a list of realty IDs.
+    Crucially changed to prevent blocking owners of own realties.
+    """
     validate_ids(Realty, realty_ids)
-    realties = Realty.objects.filter(id__in=realty_ids)
+    # Filter realties where the user is *NOT* the owner.  This is the key change.
+    realties = Realty.objects.filter(id__in=realty_ids).exclude(owner=current_user)
     users_to_block = set()
     for realty in realties:
-        if current_user == realty.owner:
-            # Can't block yourself, no users to block from this realty.  Skip.
-            continue
-        # Block the owner of the realty.  Implicitly prevents duplicate blocking entries.
-        users_to_block.add(realty.owner)
+        # Block the owner of the realty, only if you're not the owner.
+        users_to_block.add(realty.owner)  # Only add owner, no need to check again
     return list(users_to_block)
 
 
@@ -191,22 +185,23 @@ def get_chats_from_users(current_user, users_to_operate):
 def get_realties_from_users(current_user, users_to_operate):
     """Gets realties to block/unblock from a list of users IDs."""
     realties = Realty.objects.filter(
-        Q(owner=current_user) | Q(chats__client=current_user),  # Filter by current_user
+        Q(owner=current_user) | Q(chats__client=current_user),
         Q(owner__in=users_to_operate) | Q(chats__client__in=users_to_operate)
     ).distinct()
     return [realty.id for realty in realties]
 
 
 def get_users_to_block_unblock(current_user, chat_ids=None, user_ids=None, realty_ids=None):
-    """Unified function to get users based on different criteria."""
+    """Unified function to get users based on different criteria, with self-exclusion."""
 
     if chat_ids:
         return get_users_from_chats(current_user, chat_ids)
     elif user_ids:
         validate_ids(User, user_ids)
-        other_users = list(User.objects.filter(id__in=user_ids))
-        if current_user.id in user_ids:
-            other_users.remove(current_user)  # remove the user themselves from the list
+        # Exclude the current user directly in the query.
+        other_users = list(User.objects.filter(id__in=user_ids).exclude(id=current_user.id))
+        if not other_users:  # if list of user contains only your id
+            raise ValidationCustomDetailError(detail="You cannot block/unblock yourself.")
         return other_users
     elif realty_ids:
         return get_users_from_realties(current_user, realty_ids)
