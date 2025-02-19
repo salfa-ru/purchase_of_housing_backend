@@ -5,7 +5,7 @@ from rest_framework.response import Response
 
 from notifications.models import Notification
 from notifications.paginations import NotificationPagination
-from notifications.serializers import NotificationSerializer, IdsListSerializer
+from notifications.serializers import NotificationSerializer, IdsNotifListSerializer
 from notifications.utils import get_queryset_by_ids
 
 
@@ -21,7 +21,7 @@ class NotificationListAPIView(generics.ListAPIView):
 
 
 @extend_schema(
-    request=IdsListSerializer,
+    request=IdsNotifListSerializer,
     summary='Смена статуса уведомлений на "прочитано"'
 )
 class NotificationUpdateAPIView(generics.UpdateAPIView):
@@ -44,16 +44,16 @@ class NotificationUpdateAPIView(generics.UpdateAPIView):
 
 
 @extend_schema(
-    request=IdsListSerializer,
+    request=IdsNotifListSerializer,
     summary='Множественное удаление уведомлений',
     responses={200: inline_serializer(
-        name='NotificationDestroy',
+        name='NotificationDelete',
         fields={
             'detail': serializers.CharField(),
         }
     )},
 )
-class NotificationDestroyAPIView(generics.CreateAPIView):
+class NotificationDeleteAPIView(generics.CreateAPIView):
     """Множественное удаление уведомлений.
     На вход нужно подать список id-шников."""
     permission_classes = [IsAuthenticated, ]

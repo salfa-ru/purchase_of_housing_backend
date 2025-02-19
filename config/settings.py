@@ -1,6 +1,7 @@
 import os
 from dotenv import load_dotenv
 
+
 load_dotenv()
 
 
@@ -171,19 +172,28 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
-        'users.backends.CustomAuthentication',
+        # 'users.backends.CustomAuthentication',   # отключил, так как не пользуемся ИССОЙ!
         'rest_framework.authentication.TokenAuthentication',
     ],
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+    # 'EXCEPTION_HANDLER': 'config.exceptions.custom_exception_handler'
 }
 
 
 SPECTACULAR_SETTINGS = {
+    # 'SORT_ENDPOINTS': True,  # отключает сортировку эндпойнтов
+    # 'SORT_OPERATIONS': False,  # отключает сортировку операций внутри эндпойнта
+
     'TITLE': 'purchase_of_housing_backend',
     'DESCRIPTION': 'Документация для приложения purchase_of_housing_backend',
     'VERSION': '1.0.0',
     'SERVE_INCLUDE_SCHEMA': False,
     'COMPONENT_SPLIT_REQUEST': True,
+    'SWAGGER_UI_SETTINGS': {
+        'defaultModelsExpandDepth': 0,  # Hides schemas by default, -1 --> removes
+        'filter': True,
+        "persistAuthorization": True,
+    },
 }
 
 # Настройки Django Q2 для деактивации устаревших объявлений

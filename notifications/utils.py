@@ -1,13 +1,13 @@
 from rest_framework import exceptions
 
 from notifications.models import Notification, NotificationTemplate
-from notifications.serializers import IdsListSerializer
+from notifications.serializers import IdsNotifListSerializer
 
 
 def get_queryset_by_ids(user, data):
     """Получение списка уведомлений по данным из запроса,
     включает валидацию данных в запросе"""
-    serializer = IdsListSerializer(data=data)
+    serializer = IdsNotifListSerializer(data=data)
     serializer.is_valid(raise_exception=True)
 
     ids = serializer.validated_data.get('ids')

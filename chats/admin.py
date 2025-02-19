@@ -1,24 +1,25 @@
 from django.contrib import admin
-
-from chats.models import Chat, Blocking
-
+from django.urls import reverse
+from django.utils.html import format_html
 from django.forms import ModelForm
 
+from chats.models import Message, Blocking, Chat
 
-class ChatAdminForm(ModelForm):
+
+class MessageAdminForm(ModelForm):
     """ Переопределенная форма, ограничивающая выбор отправителя в сообщениях
     --- Отправитель нового сообщения - его создатель
     --- Запрещено (не суперюзеру) менять отправителя """
 
     class Meta:
-        model = Chat
+        model = Message
         fields = '__all__'
 
     def __init__(self, *args, **kwargs):
         self.request = kwargs.pop('request', None)
         super().__init__(*args, **kwargs)
 
-
+        ...
         if self.request and not self.request.user.is_superuser:
             if self.instance.pk:  # Существующая запись - запрет на изменение отправителя!
                 self.fields['user_from'].queryset = self.fields['user_from'].queryset.filter(
@@ -38,21 +39,36 @@ class ChatAdminForm(ModelForm):
             self.fields['user_from'].empty_label = None  # запрет на выбор ПУСТОГО отправителя
 
 
-@admin.register(Chat)
-class ChatAdmin(admin.ModelAdmin):
+@admin.register(Message)
+class MessageAdmin(admin.ModelAdmin):
     list_display = (
-        '__str__',
-        'id',
+        'msg_id',
+        # '__str__',
+        'str_link',
         'user_from',
         'user_to',
+        'sender_is_owner',
+        'created_at',
         'is_new',
-        'datetime',
+        'read_at',
         'is_deleted_from',
         'is_deleted_to',
-        'datetime',
-    )
 
-    form = ChatAdminForm
+    )
+    list_filter = ('chat', 'user_from', 'user_to', 'created_at', 'is_new')
+
+    form = MessageAdminForm
+
+    def str_link(self, obj):
+        """
+        Creates a clickable link to the object's change form.
+        Uses the object's __str__ representation as the link text.
+        """
+        url = reverse(f'admin:{obj._meta.app_label}_{obj._meta.model_name}_change', args=[obj.pk])
+        return format_html('<a href="{}">{}</a>', url, str(obj))  # Safely inject HTML
+
+    str_link.short_description = 'Сообщение'  # Optional: Nice column header
+    str_link.admin_order_field = '__str__'    # Optional: Enable sorting (if __str__ is sortable)
 
     def get_form(self, request, obj=None, **kwargs):
         admin_form = super().get_form(request, obj, **kwargs)
@@ -71,10 +87,19 @@ class ChatAdmin(admin.ModelAdmin):
         return fields
 
 
-
 @admin.register(Blocking)
 class BlockingAdmin(admin.ModelAdmin):
     list_display = (
         'user_who',
         'user_whom',
     )
+    list_filter = ('user_who', 'user_whom')
+    search_fields = ('user_who__username', 'user_whom__username')
+    # raw_id_fields = ('user_who', 'user_whom')
+
+
+@admin.register(Chat)
+class ChatAdmin(admin.ModelAdmin):
+    list_display = ('chat_id', 'realty', 'owner', 'client')
+    list_filter = ('owner', 'client')
+    search_fields = ('realty__address', 'owner__username', 'client__username')

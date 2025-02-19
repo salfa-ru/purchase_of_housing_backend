@@ -1,7 +1,5 @@
 from django.db import models
-from django.core.validators import (
-    MinValueValidator
-)
+from django.core.validators import MinValueValidator
 
 from users import models as user_models
 from realty_values import models as values_models

@@ -2,7 +2,7 @@ from django.core.management.base import BaseCommand
 from django.contrib.auth.models import Group, Permission
 from django.contrib.contenttypes.models import ContentType
 
-from chats.models import Chat
+from chats.models import Message
 from realty.models import Realty
 from users.models import User
 
@@ -38,14 +38,14 @@ class Command(BaseCommand):
             self.stdout.write(self.style.HTTP_SUCCESS(f'{realty_permissions}'))
 
             # Добавляем все права на таблицу Сообщение
-            chat_content_type = ContentType.objects.get_for_model(Chat)
-            chat_permissions = Permission.objects.filter(
-                content_type=chat_content_type,
-            #    codename__in=['chat']
+            message_content_type = ContentType.objects.get_for_model(Message)
+            message_permissions = Permission.objects.filter(
+                content_type=message_content_type,
+            #    codename__in=['message']
             )
-            group.permissions.add(*chat_permissions)
+            group.permissions.add(*message_permissions)
             self.stdout.write(self.style.HTTP_INFO(f'Добавлены права на Сообщения: '))
-            self.stdout.write(self.style.HTTP_SUCCESS(f'{chat_permissions}'))
+            self.stdout.write(self.style.HTTP_SUCCESS(f'{message_permissions}'))
 
 
             # Убираем все права на таблицы django_q
