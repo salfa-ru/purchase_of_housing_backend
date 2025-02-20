@@ -9,6 +9,9 @@ RUN pip install gunicorn==20.1.0
 
 COPY requirements.txt .
 
+# CHATS-Изменени!!!
+COPY ./media /app/media
+
 # Обновляем pip до последней версии
 RUN python -m pip install --upgrade pip
 
