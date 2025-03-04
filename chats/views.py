@@ -58,7 +58,8 @@ class ChatListAPIView(generics.ListAPIView):
     """Получение списка чатов пользователя.
     Самые свежие Чаты идут первыми.
     <ul>
-    <li><strong>unread_total</strong> - количество непрочитанных сообщений пользвателем ВООБЩЕ <font color="#ce591b"> - В схеме Swagger его не видно!</font></li>
+    <li><strong>unread_total</strong> - количество непрочитанных сообщений пользователем ВООБЩЕ
+    <font color="#ce591b"> - В схеме Swagger его не видно!</font></li>
     <li><strong>unread </strong>- количество непрочитанных сообщений в каждом чате</li></ul>
 
     Не смотрите не структуру "образца" JSON, смотрите на реально приходящий JSON! """
