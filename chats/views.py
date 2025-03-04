@@ -52,11 +52,16 @@ class MessagesPagination(ConfigurablePagination):
                                      f'(по умолчанию {constants.CHATS_PAGESIZE_DEFAULT}, '
                                      f'максимум {constants.CHATS_PAGESIZE_MAX}), '
                                      f'настраивается константами CHATS_PAGESIZE'),
-    ],
+    ]
 )
 class ChatListAPIView(generics.ListAPIView):
     """Получение списка чатов пользователя.
-    Самые свежие Чаты идут первыми."""
+    Самые свежие Чаты идут первыми.
+    <ul>
+    <li><strong>unread_total</strong> - количество непрочитанных сообщений пользвателем ВООБЩЕ <font color="#ce591b"> - В схеме Swagger его не видно!</font></li>
+    <li><strong>unread </strong>- количество непрочитанных сообщений в каждом чате</li></ul>
+
+    Не смотрите не структуру "образца" JSON, смотрите на реально приходящий JSON! """
     serializer_class = ChatMessagesSerializer
     permission_classes = [permissions.IsAuthenticated]
     pagination_class = ChatsPagination
@@ -87,6 +92,32 @@ class ChatListAPIView(generics.ListAPIView):
                     filtered_chats.append(chat)
         return filtered_chats
 
+    def list(self, request, *args, **kwargs):  # Переопределяем метод list ДЛЯ ПОЛУЧЕНИЯ UNREAD TOTAL
+        queryset = self.filter_queryset(self.get_queryset())
+        page = self.paginate_queryset(queryset)
+
+        # Считаем общее количество непрочитанных сообщений
+        unread_total = Message.objects.filter(
+            user_to=request.user,
+            is_new=True,
+            is_deleted_to=False
+        ).count()
+
+
+        if page is not None:
+            serializer = self.get_serializer(page, many=True, context={'request': request})
+            paginated_response = self.get_paginated_response(serializer.data)
+
+            # Создаем новый словарь и добавляем unread_total в начало  # <----------
+            new_data = {'unread_total': unread_total}
+            new_data.update(paginated_response.data)  # Добавляем остальные данные
+            paginated_response.data = new_data  # Заменяем данные
+            return paginated_response
+
+        serializer = self.get_serializer(queryset, many=True)
+        response_data = serializer.data
+        response_data.insert(0, {'unread_total': unread_total})
+        return Response(response_data)
 
 @extend_schema(
     summary='Получение списка сообщений в чате по chat_id ИЛИ realty_id',

@@ -1,5 +1,6 @@
 from django.db.models import Q
 from django.utils import timezone
+from drf_spectacular.utils import extend_schema_field
 
 from rest_framework import serializers, fields
 from rest_framework.exceptions import APIException
@@ -109,6 +110,9 @@ class ChatMessagesSerializer(serializers.ModelSerializer):
     i_block = serializers.SerializerMethodField()
     i_am_blocked = serializers.SerializerMethodField()
 
+    unread = serializers.SerializerMethodField() # Добавляем новое поле
+
+
     # Fields for flattened last message info
     message = serializers.CharField(read_only=True, required=False)
     msg_id = serializers.IntegerField(read_only=True, required=False)
@@ -134,6 +138,8 @@ class ChatMessagesSerializer(serializers.ModelSerializer):
             'created_at',
             'is_new',
             'read_at',  # Add read at
+
+            'unread'  # Добавляем новое поле
         ]
 
     def to_representation(self, instance):
@@ -175,12 +181,28 @@ class ChatMessagesSerializer(serializers.ModelSerializer):
             data.pop('is_new', None)
             data.pop('read_at', None)  # Remove read_at
 
+            data.pop('unread', None)  # UNREAD IN THREAD
+
         return data
 
+    def get_unread(self, obj) -> int | None:  # <------- Corrected type hint
+        """Считаем количество непрочитанных сообщений в чате."""
+        request = self.context.get('request')
+        if request and (request.path == '/chats/' or request.path == '/chats/blacklist/'):
+            current_user = request.user
+            return obj.messages.filter(
+                user_to=current_user,
+                is_new=True,
+                is_deleted_to=False
+            ).count()
+        return None
+
+    @extend_schema_field(UserInfoSerializer)  # <--- Use the decorator here!
     def get_me(self, obj) -> dict:  # Type hint: Returns a dictionary
         current_user = self.context['request'].user
         return UserInfoSerializer(current_user).data
 
+    @extend_schema_field(UserInfoSerializer)  # <--- Use the decorator here!
     def get_user(self, obj) -> dict:  # Type hint: Returns a dictionary
         current_user = self.context['request'].user
         other_user = obj.owner if current_user == obj.client else obj.client
