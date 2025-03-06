@@ -32,6 +32,7 @@ class Base64ImageField(serializers.ImageField):
 class RealtyBaseSerializer(serializers.ModelSerializer):
     """Realty Base Read Serializer."""
 
+    trade_type = serializers.SerializerMethodField()
     owner = SlugRelatedField(slug_field="username", read_only=True)
     realty_type = SlugRelatedField(
         slug_field="type", queryset=values_models.RealtyType.objects.all()
@@ -56,9 +57,17 @@ class RealtyBaseSerializer(serializers.ModelSerializer):
     sale = serializers.SerializerMethodField()
     rent = serializers.SerializerMethodField()
 
+
     class Meta:
         model = realty_models.Realty
         exclude = ["changed_at", "realty_status", ]
+
+    def get_trade_type(self, obj):
+        if hasattr(obj, "sale_profile"):
+            return "sale"
+        if hasattr(obj, "rent_profile"):
+            return "rent"
+        return "unknown"
 
     def get_sale(self, obj):
         """Return sales parameters."""
