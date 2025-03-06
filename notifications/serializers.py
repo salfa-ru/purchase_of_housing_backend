@@ -35,6 +35,7 @@ class RealtyForNotificationSerializer(serializers.ModelSerializer):
         model = Realty
         fields = [
             'id',
+            'trade_type',
             'number_of_rooms',
             'realty_type',
             'area',
