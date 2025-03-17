@@ -1,5 +1,7 @@
 from django.contrib import admin
 from django.utils.safestring import mark_safe
+from django.contrib.auth.models import Group
+from django.contrib.auth.admin import GroupAdmin
 
 from users.models import User
 
@@ -35,3 +37,21 @@ class UserAdmin(admin.ModelAdmin):
 
     preview_avatar.short_description = 'Превью'
     preview_phone_qr_code.short_description = 'Превью'
+
+
+# Удаляем Group из стандартной админки
+admin.site.unregister(Group)
+
+
+# Переопределяем Group, чтобы она была частью "users"
+class CustomGroup(Group):
+    class Meta:
+        proxy = True  # Делаем прокси-модель
+        app_label = "users"  # Переносим в приложение users
+        verbose_name = "Группа"
+        verbose_name_plural = "Группы"
+
+
+@admin.register(CustomGroup)
+class CustomGroupAdmin(GroupAdmin):
+    pass
