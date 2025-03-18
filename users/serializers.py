@@ -1,6 +1,7 @@
 from datetime import datetime
 
 from django.core.validators import FileExtensionValidator
+from django.core.exceptions import ValidationError
 from rest_framework import serializers
 
 from config.constants import IMAGE_EXTENSIONS, MAX_AVATAR_SIZE
@@ -33,6 +34,7 @@ class UserBaseSerializer(serializers.ModelSerializer):
         model = User
         fields = [
             'id',
+            'is_deleted',
             'first_name',
             'last_name',
             'email',
@@ -41,7 +43,29 @@ class UserBaseSerializer(serializers.ModelSerializer):
         ]
         extra_kwargs = {
             'id': {'read_only': True},
+            'is_deleted': {'default': False},
         }
+
+    def validate(self, data):  # <---xxx--- Добавляем валидацию на уникальность email и phone number
+        """
+        Проверяет, что email и phone_number не принадлежат удаленным пользователям.
+        """
+        email = data.get('email', getattr(self.instance, 'email', None))
+        phone_number = data.get('phone_number', getattr(self.instance, 'phone_number', None))
+
+        if email:
+            existing_user_email = User.objects.filter(email=email, is_deleted=True).first()
+            if existing_user_email and (not self.instance or self.instance != existing_user_email):
+                raise ValidationError(
+                    "Пользователь с таким адресом электронной почты уже существует и удален, обратитесь в поддержку для восстановления аккаунта или введите другой имейл.")
+
+        if phone_number:
+            existing_user_phone = User.objects.filter(phone_number=phone_number, is_deleted=True).first()
+            if existing_user_phone and (not self.instance or self.instance != existing_user_phone):
+                raise ValidationError(
+                    "Пользователь с таким номером телефона уже существует и удален, обратитесь в поддержку для восстановления аккаунта или введите другой номер телефона.")
+
+        return data
 
 
 class UserSelfProfileSerializer(UserBaseSerializer):

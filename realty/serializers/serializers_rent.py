@@ -1,3 +1,5 @@
+# realty/serializers/serializers_rent.py
+
 from rest_framework import serializers
 from realty import models as realty_models
 from realty_specificities import models as specificities_models

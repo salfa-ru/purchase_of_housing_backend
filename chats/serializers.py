@@ -69,13 +69,29 @@ class RealtyForChatSerializer(serializers.ModelSerializer):
         ]
 
 
+# class UserInfoSerializer(serializers.ModelSerializer):
+#     """Сериализатор для краткой информации о пользователе"""
+#     name = serializers.CharField(source='username')
+#
+#     class Meta:
+#         model = User
+#         fields = ['id', 'name']
+
+
 class UserInfoSerializer(serializers.ModelSerializer):
     """Сериализатор для краткой информации о пользователе"""
-    name = serializers.CharField(source='username')
+
+    name = serializers.SerializerMethodField()  # Используем SerializerMethodField
 
     class Meta:
         model = User
-        fields = ['id', 'name']
+        fields = ['id', 'name', 'is_deleted']
+
+    def get_name(self, obj):
+        """ Eсли is_deleted=True - возвращает username с добавкой (Пользователь удален) ."""
+        if obj.is_deleted:
+            return f"Заготовка - пользователь удален ({obj.username})"
+        return obj.username
 
 
 class MessageSerializer(serializers.ModelSerializer):

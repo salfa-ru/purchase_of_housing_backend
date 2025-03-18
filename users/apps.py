@@ -6,3 +6,6 @@ class UsersConfig(AppConfig):
     name = 'users'
     verbose_name = "Пользователи и группы"  # Задаём название вкладки
 
+    def ready(self):
+        import users.signals
+
