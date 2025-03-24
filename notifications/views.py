@@ -19,6 +19,33 @@ class NotificationListAPIView(generics.ListAPIView):
     def get_queryset(self):
         return Notification.objects.filter(user_to=self.request.user).all()
 
+    # Переопределяем метод list ДЛЯ ПОЛУЧЕНИЯ UNREAD TOTAL
+    def list(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())
+        page = self.paginate_queryset(queryset)
+
+        # Считаем общее количество непрочитанных сообщений
+        unread_total = Notification.objects.filter(
+            user_to=request.user,
+            is_new=True,
+        ).count()
+
+
+        if page is not None:
+            serializer = self.get_serializer(page, many=True, context={'request': request})
+            paginated_response = self.get_paginated_response(serializer.data)
+
+            # Создаем новый словарь и добавляем unread_total в начало  # <----------
+            new_data = {'unread_total': unread_total}
+            new_data.update(paginated_response.data)  # Добавляем остальные данные
+            paginated_response.data = new_data  # Заменяем данные
+            return paginated_response
+
+        serializer = self.get_serializer(queryset, many=True)
+        response_data = serializer.data
+        response_data.insert(0, {'unread_total': unread_total})
+        return Response(response_data)
+
 
 @extend_schema(
     request=IdsNotifListSerializer,
