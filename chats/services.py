@@ -1,3 +1,5 @@
+# chats/services.py
+
 from django.db.models import Q, OuterRef, Subquery
 from rest_framework import exceptions
 

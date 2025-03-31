@@ -1,3 +1,5 @@
+# chats/serializers.py
+
 from django.db.models import Q
 from django.utils import timezone
 from drf_spectacular.utils import extend_schema_field
