@@ -4,7 +4,7 @@ from django.utils import timezone
 from django_q.tasks import Schedule
 
 from realty.models import Realty
-from realty_values import models as values_models
+# from realty_values import models as values_models
 from notifications.utils import create_notification
 
 from config.constants import MAX_LISTING_DURATION
@@ -14,6 +14,8 @@ from config.constants import MAX_LISTING_DURATION
 """ Из документации Django:  SIGNALS CAN MAKE YOUR CODE HARDER TO MAINTAIN. 
 Consider implementing a helper method on a custom manager, to both update your models 
 and perform additional logic, or else overriding model methods before using model signals"""
+
+# TODO - Сохранение объявления - ДОБАВИТЬ ОПОВЕЩЕНИЕ ДЛЯ УДАЛЕНИЯ ОБЪЯВЛЕНИЯ
 
 
 @receiver(pre_save, sender=Realty)
@@ -55,6 +57,16 @@ def handle_realty_save(sender, instance, **kwargs):
         # old_instance = Realty.objects.get(id=instance.id)  # перенесено в try - выше
         old_status = old_instance.realty_status
         new_status = instance.realty_status
+
+        old_is_deleted = old_instance.is_deleted
+        new_is_deleted = instance.is_deleted
+
+        if old_is_deleted != new_is_deleted and new_is_deleted is True:
+            create_notification(instance, "deleted")
+            Schedule.objects.filter(func="realty.tasks.expire_realty", args=instance.id).delete()
+            print("Deleted, sent message to Host about it")
+
+        ...
 
         if new_status != old_status:
 

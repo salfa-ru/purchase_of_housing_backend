@@ -167,6 +167,12 @@ class RealtyFilter(django_filters.FilterSet):
         model = Realty
         fields = []
 
+    def __init__(self, *args, **kwargs):  # <-- YYY --- Добавлено для фильтрации по is_deleted и владельцу
+        super().__init__(*args, **kwargs)
+        # По умолчанию показывать только не удаленные объявления
+        self.queryset = self.queryset.filter(is_deleted=False,
+                                             owner__is_deleted=False)
+
     def filter_trade_type(self, queryset, name, value):
         if value.lower() == constants.SALE_TRADE_TYPE.lower():
             return queryset.filter(sale_profile__isnull=False)

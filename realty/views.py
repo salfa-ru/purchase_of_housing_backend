@@ -3,6 +3,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 
 from drf_spectacular.utils import extend_schema, extend_schema_view, OpenApiParameter
 from drf_spectacular.helpers import forced_singular_serializer
+from rest_framework import generics, permissions, viewsets, views, status  # <-- YYY --- realty_удаление v1
 from rest_framework import generics, permissions, viewsets, views
 from rest_framework.response import Response
 from rest_framework.pagination import LimitOffsetPagination
@@ -130,21 +131,12 @@ class LastRealtyListView(generics.ListAPIView):
 
     # TODO найти решение без пагинации. Требуется вывод последних 3х объектов.
     queryset = realty_models.Realty.objects.all().filter(
-        realty_status__status=constants.ADVERTISMENT_STATUS
+        realty_status__status=constants.ADVERTISMENT_STATUS,
+        is_deleted=False,
+        owner__is_deleted=False  # <-- YYY --- realty_удаление v1
     ).order_by('-published_at')
 
-    # TODO - 2025-02-19 - активировал обратно сортировку последних трех объявлений!.
 
-    # TODO - Как насчет такого решения? Апдейт: заработало после отключения всех строк сверху
-    # Работает, в том числе если:
-    # - объявлений находится меньше, чем надо показать
-    # - если объявлений больше, чем надо показать - показывает 3
-    # Да, при возвращении объектов не показывает их количество, как при пагинации
-
-    # Отдаем 3 последних объекта
-    # queryset = realty_models.Realty.objects.filter(
-    #     realty_status__status=constants.ADVERTISMENT_STATUS
-    # ).order_by('-published_at')[:3]
 
 
 @extend_schema(
@@ -153,13 +145,22 @@ class LastRealtyListView(generics.ListAPIView):
 class RealtyListView(generics.ListAPIView):
     """Viewing Realty objects queryset."""
 
-    queryset = realty_models.Realty.objects.all().filter(
-        realty_status__status=constants.ADVERTISMENT_STATUS
-    )  # .order_by('-published_at')
+    # УБРАНО В ПОЛЬЗУ QUERY SET при удалении объявлений
+    # queryset = realty_models.Realty.objects.all().filter(
+    #     realty_status__status=constants.ADVERTISMENT_STATUS
+    # )  # .order_by('-published_at')
+
     serializer_class = realty_serializers.ShortRealtySerializer
     filter_backends = (DjangoFilterBackend,)
     pagination_class = LimitRealtyPagination
     filterset_class = RealtyFilter
+
+    def get_queryset(self):  # <-- YYY --- Переопределяем get_queryset для фильтрации
+        return realty_models.Realty.objects.filter(
+            realty_status__status=constants.ADVERTISMENT_STATUS,
+            is_deleted=False,
+            owner__is_deleted=False  # Показывать только объявления активных владельцев
+        ).order_by('-published_at')
 
     def list(self, request, *args, **kwargs):
         """ Запуск увеличения счетчика показа в поиске с защитой от накрутки."""
@@ -185,10 +186,19 @@ class RealtyListView(generics.ListAPIView):
 class RealtyDetailView(generics.RetrieveAPIView):
     """Viewing Realty object by <id>."""
 
-    queryset = realty_models.Realty.objects.all().filter(
-        realty_status__status=constants.ADVERTISMENT_STATUS
-    )
+    # Переопределено для realty_удаление v1
+    # queryset = realty_models.Realty.objects.all().filter(
+    #     realty_status__status=constants.ADVERTISMENT_STATUS
+    # )
     serializer_class = realty_serializers.RealtyBaseSerializer
+
+    def get_queryset(self):  # <-- YYY --- Переопределяем get_queryset для фильтрации
+        return realty_models.Realty.objects.filter(
+            realty_status__status=constants.ADVERTISMENT_STATUS,
+            is_deleted=False,
+            owner__is_deleted=False  # Показывать только объявления активных владельцев
+        )
+
 
     def retrieve(self, request, *args, **kwargs):
         """ Увеличение счетчика полных просмотров """
@@ -212,7 +222,9 @@ class RealtyCountView(generics.ListAPIView):
     """Endpoint to get the count of filtered realty objects."""
 
     queryset = realty_models.Realty.objects.all().filter(
-        realty_status__status=constants.ADVERTISMENT_STATUS
+        realty_status__status=constants.ADVERTISMENT_STATUS,
+        is_deleted=False,
+        owner__is_deleted=False  # Показывать только объявления активных владельцев
     )
     serializer_class = common_serializers.CountRealtySerializer
     filter_backends = (DjangoFilterBackend,)
@@ -285,7 +297,10 @@ class RealtyLKListView(generics.ListAPIView):
     def get_queryset(self):
         return (
             realty_models.Realty.objects
-            .filter(owner_id=self.request.user)
+            .filter(owner_id=self.request.user,
+                    is_deleted=False,
+                    owner__is_deleted=False  # <-- YYY --- realty_удаление v1
+                    )
             .order_by('-published_at')
         )
 
@@ -399,3 +414,29 @@ class RealtyFilterOptionsView(views.APIView):
             }
         }
         return Response(data)
+
+
+@extend_schema(
+    summary='Удаление объявление (soft delete)')  # <-- YYY --- Добавлен эндпоинт soft delete - realty_удаление v1
+class RealtyDeleteView(generics.DestroyAPIView):
+    queryset = realty_models.Realty.objects.all()
+    permission_classes = [permissions.IsAuthenticated]
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        if instance.owner != request.user:
+            return Response(
+                {"detail": "У вас нет прав на удаление этого объявления."},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        if instance.is_deleted:  # <-- YYY --- Проверка на то, что объявление уже удалено
+            return Response(
+                {"detail": "Объявление уже удалено."},
+                status=status.HTTP_400_BAD_REQUEST  # <-- YYY --- realty_удаление v1
+            )
+
+        instance.is_deleted = True
+        instance.deleted_at = timezone.now()
+        instance.save()
+        return Response(status=status.HTTP_204_NO_CONTENT)

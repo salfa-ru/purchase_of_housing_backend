@@ -25,10 +25,13 @@ class RealtyAdmin(admin.ModelAdmin):
                     'price',
                     'trade_type_short',
                     'realty_status',
-                    'changed_at')
+                    'changed_at',
+                    'is_deleted',
+                    'owner_is_deleted')
     list_display_links = ('id', 'apartment',)
     list_filter = ('realty_status',
-                   'owner_type',)
+                   'owner_type',
+                   'is_deleted')
 
     class Media:
         """ Отключение кнопок "Сохранить", если никаких изменений еще не внесено """
@@ -41,7 +44,7 @@ class RealtyAdmin(admin.ModelAdmin):
 
         if request.user.is_superuser:
             # единственные read-only поля для админа:
-            return ['id', 'changed_at']
+            return ['id', 'changed_at', 'deleted_at']
         else:
             # для модератора - все поля read-only, кроме Статуса
             if obj:
@@ -76,6 +79,12 @@ class RealtyAdmin(admin.ModelAdmin):
                 super().__init__(*args, **form_kwargs)
 
         return FormWithRequest
+
+    def owner_is_deleted(self, obj):  # <-- YYY --- Создаем метод для отображения owner.is_deleted
+        return obj.owner.is_deleted
+
+    owner_is_deleted.boolean = True  # <-- YYY --- Отображать как флажок
+    owner_is_deleted.short_description = "Владелец удален"  # <-- YYY --- Задаем описание
 
 
     def apartment(self, obj):

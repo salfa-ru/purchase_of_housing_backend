@@ -55,10 +55,16 @@ class RealtyLKSerializer(serializers.Serializer):
     counter_views = displays_serializers.CounterViewsSerializer()
     realty_status = serializers.IntegerField(source='realty_status_id')
 
+    # FIXME - Зачем здесь это вообще - ведь здесь не будут показаны удаленные
+    is_deleted = serializers.BooleanField(read_only=True, source='short_realty_data.is_deleted')  # <-- YYY --- realty_удаление v1
+
     def to_representation(self, instance):
         representation = {
             'short_realty_data': realty_serializers.ShortRealtySerializer(instance).data,
-            'realty_status': instance.realty_status_id
+            'realty_status': instance.realty_status_id,
+
+            # FIXME - Зачем здесь это вообще - ведь здесь не будут показаны удаленные
+            'is_deleted': instance.is_deleted  # <-- YYY --- realty_удаление v1
         }
 
         # статусы из realty_values_realtyadvstatus
