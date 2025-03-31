@@ -1,6 +1,8 @@
 from django.db import models
 from django.core.validators import MinValueValidator
 
+from django.utils import timezone  # <---YYY--- realty_удаление v1
+
 from users import models as user_models
 from realty_values import models as values_models
 from realty_specificities import models as specificities_models
@@ -92,6 +94,11 @@ class Realty(models.Model):
         verbose_name="Последнее изменение",
     )
 
+    is_deleted = models.BooleanField(default=False,
+                                     verbose_name="Удалено")  # <-- YYY --- realty_удаление v1
+    deleted_at = models.DateTimeField(blank=True, null=True,
+                                      verbose_name="Дата удаления")  # <-- YYY --- realty_удаление v1
+
     @property
     def trade_type(self):
         if hasattr(self, "sale_profile"):
@@ -103,6 +110,20 @@ class Realty(models.Model):
     class Meta:
         verbose_name = "Недвижимость"
         verbose_name_plural = "Недвижимость"
+
+    def save(self, *args, **kwargs):    # <-- YYY --- realty_удаление v1
+        """ При сохранении - устанавливаем дату удаления если объявление удалилось! """
+
+        # FIXME - считаем, что объявление после удаление не меняется, поэтому не сравниваю со старым значением
+
+        if self.is_deleted and self.deleted_at is None:  # <-- YYY --- Если только что удалили
+            self.deleted_at = timezone.now()
+        elif not self.is_deleted:  # <-- YYY --- Если запись снова сделали "не удаленной"
+            self.deleted_at = None  # <-- YYY --- Убираем дату удаления, если она была
+
+        super().save(*args, **kwargs) # <-- YYY --- Сохраняем после манипуляций
+
+
 
     def __str__(self):
         return (

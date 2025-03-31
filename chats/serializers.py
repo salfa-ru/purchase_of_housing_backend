@@ -1,3 +1,5 @@
+# chats/serializers.py
+
 from django.db.models import Q
 from django.utils import timezone
 from drf_spectacular.utils import extend_schema_field
@@ -37,7 +39,18 @@ class CreateMessageRequestSerializer(serializers.Serializer):
 class RealtyForChatSerializer(serializers.ModelSerializer):
     """Сериализатор информации об объявлении.
     Для показа переписок и цепочек сообщений."""
-    owner = serializers.CharField(source='owner.username')
+
+    # realty_status = serializers.SlugRelatedField(
+    #     slug_field='status',
+    #     # <-- STATUS -- Указываем, какое поле из связанной модели RealtyAdvStatus использовать (это имя статуса)
+    #     source='realty_status',  # <-- STATUS -- Указываем, какое поле в модели Realty ссылается на RealtyAdvStatus
+    #     read_only=True,  # <-- STATUS -- Делаем поле только для чтения
+    # )
+
+    realty_status = serializers.SerializerMethodField()
+
+    # owner = serializers.CharField(source='owner.username')
+    owner = serializers.SerializerMethodField()  # <-- YYY --- Меняем на SerializerMethodField
     photo = serializers.SerializerMethodField()
     realty_type = serializers.SlugRelatedField(
         slug_field='type',
@@ -48,16 +61,42 @@ class RealtyForChatSerializer(serializers.ModelSerializer):
     floor = serializers.IntegerField(source='about_apartment.floor')
     floors_number = serializers.IntegerField(source='about_apartment.floors_number')
 
+    def get_realty_status(self, obj):
+        return obj.realty_status.status
+
+    def get_owner(self, obj):  # <-- YYY --- Добавляем метод get_owner
+        """Отображаем владельца в зависимости от его статуса."""
+        if obj.owner.is_active:  # <-- YYY --- Проверяем is_active, а не is_deleted
+            return obj.owner.username  # <-- YYY --- Возвращаем username, если владелец активен
+        else:
+            return "Пользователь удален"  # <-- YYY --- Возвращаем строку, если владелец удален
+
+
     def get_photo(self, obj) -> str | None:
         photo = obj.realty_photos.first()
         if photo:
             return photo.image.url
         return None
 
+    def to_representation(self, instance):
+        """Переопределяем метод to_representation."""
+        if instance.is_deleted:  # <-- YYY --- Если объявление удалено
+            return {
+                'id': instance.id,
+                'is_deleted': instance.is_deleted,
+                'owner': self.get_owner(instance)
+            }
+        else:
+            # Если объявление не удалено, возвращаем стандартное представление
+            return super().to_representation(instance)
+
+
     class Meta:
         model = Realty
         fields = [
             'id',
+            'is_deleted',
+            'realty_status',
             'owner',
             'photo',
             'number_of_rooms',
@@ -69,13 +108,31 @@ class RealtyForChatSerializer(serializers.ModelSerializer):
         ]
 
 
+# class UserInfoSerializer(serializers.ModelSerializer):
+#     """Сериализатор для краткой информации о пользователе"""
+#     name = serializers.CharField(source='username')
+#
+#     class Meta:
+#         model = User
+#         fields = ['id', 'name']
+
+
 class UserInfoSerializer(serializers.ModelSerializer):
     """Сериализатор для краткой информации о пользователе"""
-    name = serializers.CharField(source='username')
+
+    name = serializers.SerializerMethodField()  # Используем SerializerMethodField
 
     class Meta:
         model = User
-        fields = ['id', 'name']
+        fields = ['id', 'name', 'is_deleted']
+
+    # FIXME - Отдавать не email а имя!
+
+    def get_name(self, obj):
+        """ Eсли is_deleted=True - возвращает username с добавкой (Пользователь удален) ."""
+        if obj.is_deleted:
+            return f"Заготовка - пользователь удален ({obj.first_name})"
+        return obj.first_name
 
 
 class MessageSerializer(serializers.ModelSerializer):
@@ -267,8 +324,10 @@ class CreateMessageResponseSerializer(serializers.ModelSerializer):
     """Сериализатор тела ответа при создании нового сообщения"""
     chat_id = serializers.IntegerField(source='chat.chat_id')
     realty = RealtyNestedIdSerializer(source='chat.realty')  # Nested, only ID
-    me = serializers.SerializerMethodField()
-    user = serializers.SerializerMethodField()
+    # me = serializers.SerializerMethodField()
+    # user = serializers.SerializerMethodField()
+    me = UserInfoSerializer(source='user_from', read_only=True)
+    user = UserInfoSerializer(source='user_to', read_only=True)
     user_is_owner = serializers.SerializerMethodField()
     direction = serializers.SerializerMethodField()
     is_new = serializers.BooleanField(read_only=True, required=False)
@@ -295,11 +354,11 @@ class CreateMessageResponseSerializer(serializers.ModelSerializer):
             # 'is_deleted_to',
         ]
 
-    def get_me(self, obj) -> dict:  # Type hint: Returns a dictionary
-        return UserInfoSerializer(obj.user_from).data
-
-    def get_user(self, obj) -> dict:  # Type hint: Returns a dictionary
-        return UserInfoSerializer(obj.user_to).data
+    # def get_me(self, obj) -> dict:  # Type hint: Returns a dictionary
+    #     return UserInfoSerializer(obj.user_from).data
+    #
+    # def get_user(self, obj) -> dict:  # Type hint: Returns a dictionary
+    #     return UserInfoSerializer(obj.user_to).data
 
     def get_user_is_owner(self, obj) -> bool:
         return obj.user_from == obj.chat.owner

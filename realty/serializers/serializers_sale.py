@@ -1,3 +1,5 @@
+# realty/serializers/serializers_sale.py
+
 from rest_framework import serializers
 
 from config import constants

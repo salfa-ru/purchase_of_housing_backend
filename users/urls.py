@@ -8,6 +8,7 @@ from users.views import (
     UserProfileRetrieveUpdateAPIView,
     UserPersonalAccountRetrieveAPIView,
     UserNewMsgsRetrieveAPIView,
+    UserSoftDeleteAPIView,
 )
 
 app_name = UsersConfig.name
@@ -20,6 +21,9 @@ urlpatterns = [
     path('profile/', UserProfileRetrieveUpdateAPIView.as_view(), name='profile'),
     path('personal-account/', UserPersonalAccountRetrieveAPIView.as_view(), name='personal-account'),
     path('new-msgs/', UserNewMsgsRetrieveAPIView.as_view(), name='new-msgs'),
+
+    # <---xxx---  Добавляем URL для удаления профиля
+    path('dev/delete/<int:id>', UserSoftDeleteAPIView.as_view(), name='destroy'),
 ]
 
 # Пути для разработки: list, create, delete для User

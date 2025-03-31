@@ -39,6 +39,7 @@ def expire_realty(realty_id):
 
         # тут с дополнительными проверками - деактивируем только те, что нужно, а не перевыставленные
         realty = Realty.objects.get(
+            is_deleted=False,
             id=realty_id,
             realty_status=1,
             published_at__isnull=False,
@@ -65,6 +66,7 @@ def expire_all_outdated_realties():
     time_threshold = timezone.now() - MAX_LISTING_DURATION
 
     outdated_realties = Realty.objects.filter(
+        is_deleted=False,
         realty_status=1,
         published_at__isnull=False,
         published_at__lte=time_threshold

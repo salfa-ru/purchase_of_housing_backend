@@ -255,6 +255,15 @@
     }
   },
   {
+    "model": "notifications.notificationtemplate",
+    "pk": 404,
+    "fields": {
+      "code": "deleted",
+      "part1": "Ваше объявление №___ удалено.",
+      "part2": null
+    }
+  },
+  {
     "model": "questions.questiontype",
     "pk": 1,
     "fields": {

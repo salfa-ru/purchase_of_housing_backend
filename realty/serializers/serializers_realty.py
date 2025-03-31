@@ -1,3 +1,5 @@
+# realty/serializers/serializers_realty.py
+
 from django.core.files.base import ContentFile
 from rest_framework import serializers
 from rest_framework.relations import SlugRelatedField
@@ -31,6 +33,8 @@ class Base64ImageField(serializers.ImageField):
 
 class RealtyBaseSerializer(serializers.ModelSerializer):
     """Realty Base Read Serializer."""
+
+    is_deleted = serializers.BooleanField(read_only=True)   # <-- YYY --- realty_удаление v1
 
     trade_type = serializers.SerializerMethodField()
     owner = SlugRelatedField(slug_field="username", read_only=True)
@@ -100,6 +104,8 @@ class RealtyBaseSerializer(serializers.ModelSerializer):
 class RealtyCreateSerializer(serializers.ModelSerializer):
     """Realty Create Serializer."""
 
+    is_deleted = serializers.BooleanField(read_only=True)   # <-- YYY --- realty_удаление v1
+
     owner = SlugRelatedField(slug_field="email", read_only=True)
     realty_type = serializers.PrimaryKeyRelatedField(
         queryset=values_models.RealtyType.objects.all(),
@@ -151,6 +157,7 @@ class RealtyCreateSerializer(serializers.ModelSerializer):
         model = realty_models.Realty
         fields = [
             "id",
+            "is_deleted",
             "owner",
             "realty_type",
             "address",
@@ -398,6 +405,7 @@ class ShortRealtySerializer(serializers.ModelSerializer):
     class Meta:
         model = realty_models.Realty
         fields = ("id",
+                  "is_deleted",  # <-- YYY --- realty_удаление v1 ---- а почему нет в большом?
                   "photos",
                   "price",
                   "number_of_rooms",

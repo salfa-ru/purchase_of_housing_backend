@@ -1,3 +1,5 @@
+# chats/urls.py
+
 from django.urls import path
 
 from chats.apps import ChatsConfig

@@ -3,8 +3,9 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path, include
 from drf_spectacular.views import SpectacularSwaggerView, SpectacularRedocView, SpectacularAPIView
-from rest_framework.authtoken import views
+# from rest_framework.authtoken import views
 
+from users.views import CustomAuthToken
 from .settings import DEBUG
 
 
@@ -25,7 +26,9 @@ urlpatterns = [
 
 if DEBUG:
     urlpatterns += [
-        path('token-auth/', views.obtain_auth_token)
+        # path('token-auth/', views.obtain_auth_token)
+        path('token-auth/', CustomAuthToken.as_view(), name='api_token_auth'),  # Use the custom view
+
     ]
 
 # if settings.DEBUG:

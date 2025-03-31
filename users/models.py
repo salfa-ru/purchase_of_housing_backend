@@ -8,6 +8,7 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser, UserManager
 from django.db.models.signals import pre_save
 from django.dispatch import receiver
+from django.utils import timezone  # <---xxx--- для удаления пользователей
 
 from config import constants
 from config.constants import IMAGE_EXTENSIONS, MAX_AVATAR_SIZE
@@ -86,6 +87,11 @@ class User(AbstractUser):
         **constants.NULLABLE_FIELD,
     )
 
+    is_deleted = models.BooleanField(default=False, verbose_name='Удален',   # <---xxx---
+                                     help_text="<span style='color: DarkRed;'><strong>"  # DarkOrange
+                                               "Удаление</strong> (отключение) пользователя и его объявлений</span>")
+    deleted_at = models.DateTimeField(verbose_name='Дата удаления', null=True, blank=True)  # <---xxx---
+
     def clean(self):
         super().clean()
         if self.email:
@@ -123,7 +129,7 @@ class User(AbstractUser):
 
         # Создаем QR-код при создании пользователя или обновлении номера телефона,
         # старый при необходимости удаляем
-        if self._state.adding or self.phone_number != phone_number_previous:
+        if (self._state.adding or self.phone_number != phone_number_previous) and not self.is_deleted:  # <---xxx--- добавляем условие, что пользователь не удален
             img = create_qrcode(self.phone_number)
             file_name = f'{self.phone_number}.png'
             self.phone_qr_code.save(
@@ -131,7 +137,7 @@ class User(AbstractUser):
                 ContentFile(img.read()),
                 save=False,
             )
-            if user_previous:
+            if user_previous and not user_previous.is_deleted:  # <---xxx--- добавляем условие, что предыдущий пользователь не удален
                 user_previous.phone_qr_code.delete()
 
         # Удаляем старую аватарку при замене
@@ -139,6 +145,13 @@ class User(AbstractUser):
             user_previous.avatar.delete(save=False)
 
         return super().save(*args, **kwargs)
+
+    def soft_delete(self):   # <---xxx--- Передумал переопределять настоящее удаление!
+        self.is_active = False
+        self.is_deleted = True            # <---xxx---
+        self.deleted_at = timezone.now()  # <---xxx---
+        self.save()
+
 
 
 @receiver(pre_save, sender=User)

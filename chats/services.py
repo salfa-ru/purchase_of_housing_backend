@@ -1,3 +1,5 @@
+# chats/services.py
+
 from django.db.models import Q, OuterRef, Subquery
 from rest_framework import exceptions
 
@@ -73,6 +75,12 @@ def get_chats_by_ids(current_user, data):
     return chats
 
 
+def check_user_is_deleted(user):
+    """Проверяет, активен ли пользователь."""
+    if user.is_deleted:
+        raise exceptions.PermissionDenied(detail="Пользователь удален. Отправка сообщений невозможна.")
+
+
 def check_blocking(user_from, user_to):
     """Проверяет, существует ли блокировка между пользователями.
     Важно проверять именно направление блокировки! """
@@ -89,6 +97,7 @@ def create_message(user_from, message_text, realty_id=None, chat_id=None):
     if chat_id is not None:
         chat = get_chat_by_chat_id(user_from, chat_id)
         user_to = chat.owner if chat.client == user_from else chat.client
+        check_user_is_deleted(user_to)  # <-- YYY --- Проверяем, активен ли user_to
         check_blocking(user_from, user_to)
     elif realty_id is not None:
         realty = get_realty_by_realty_id(realty_id)
@@ -97,6 +106,7 @@ def create_message(user_from, message_text, realty_id=None, chat_id=None):
         if user_from == user_to:
             raise exceptions.ValidationError(detail="Вы не можете отправить сообщение самому себе.")
 
+        check_user_is_deleted(user_to)  # <-- YYY --- Проверяем, активен ли user_to
         check_blocking(user_from, user_to)
 
         chat, created = Chat.objects.get_or_create(

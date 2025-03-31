@@ -8,7 +8,7 @@ from users.models import User
 
 @admin.register(User)
 class UserAdmin(admin.ModelAdmin):
-    readonly_fields = ('id', 'uuid_esa', 'preview_avatar', 'preview_phone_qr_code',)
+    readonly_fields = ('id', 'uuid_esa', 'preview_avatar', 'preview_phone_qr_code', 'deleted_at')
     fields = [
         ('id', 'uuid_esa'),
         'username',
@@ -21,10 +21,33 @@ class UserAdmin(admin.ModelAdmin):
         'password',
         'is_superuser',
         'is_staff',
+        'is_deleted',
+        'deleted_at',
         'is_active',
         'groups',
         'user_permissions',
     ]
+
+    list_display = ('id',
+                    'username', 'first_name', 'last_name',
+                    'is_deleted',
+                    )
+    list_display_links = ('id', 'username',)
+
+    list_filter = ('is_active', 'is_deleted')  # <---xxx--- добавляем фильтрацию по статусу активности и удаленности
+    actions = ['hard_delete_users']            # <---xxx--- добавляем action для реального удаления
+
+    def get_queryset(self, request):
+        """Отображаем всех пользователей, включая удаленных"""
+        return self.model.objects.all()  # <---xxx---
+
+    def hard_delete_users(self, request, queryset):  # <---xxx--- action для реального удаления пользователей
+        for obj in queryset:
+            obj.hard_delete()
+
+    hard_delete_users.short_description = "Удалить выбранных пользователей навсегда"
+
+
 
     # По-человечески можно выбирать группы и права для пользователей.
     filter_horizontal = ('groups', 'user_permissions',)
@@ -33,6 +56,8 @@ class UserAdmin(admin.ModelAdmin):
         return mark_safe(f'<img src="{obj.avatar.url}" style="width: 100px">')
 
     def preview_phone_qr_code(self, obj):
+        if obj.is_deleted:  # <---xxx--- Не показываем QR-код для удаленных пользователей
+            return "Пользователь удален"
         return mark_safe(f'<img src="{obj.phone_qr_code.url}" style="width: 100px">')
 
     preview_avatar.short_description = 'Превью'

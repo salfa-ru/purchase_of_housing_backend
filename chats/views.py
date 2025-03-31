@@ -1,3 +1,5 @@
+# chats/views.py
+
 from django.db.models import Q
 from django.utils import timezone
 
@@ -5,7 +7,7 @@ from rest_framework import generics, status, serializers, permissions, exception
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from drf_spectacular.utils import extend_schema, inline_serializer, OpenApiParameter
+from drf_spectacular.utils import extend_schema, inline_serializer, OpenApiParameter, OpenApiResponse
 
 from chats.models import Chat, Blocking, Message
 from chats.paginations import ConfigurablePagination
@@ -208,8 +210,14 @@ class ChatMessagesAPIView(generics.CreateAPIView):
 @extend_schema(
     summary='Отправка сообщения',
     request=CreateMessageRequestSerializer,
-    responses={201: CreateMessageResponseSerializer},
-)
+    responses={201: CreateMessageResponseSerializer,
+               403: OpenApiResponse(response={
+                   "type": "object",
+                   "properties": {
+                       "detail": {"type": "string", "example": "Пользователь удален. Отправка сообщений невозможна."}
+                   }
+               })
+               })
 class MessageCreateAPIView(generics.CreateAPIView):
     """Универсальный эндпоинт создания сообщения.
     Принимает либо chat_id (для существующего чата),
