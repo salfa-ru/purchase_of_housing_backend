@@ -67,10 +67,9 @@ class RealtyForChatSerializer(serializers.ModelSerializer):
     def get_owner(self, obj):  # <-- YYY --- Добавляем метод get_owner
         """Отображаем владельца в зависимости от его статуса."""
         if obj.owner.is_active:  # <-- YYY --- Проверяем is_active, а не is_deleted
-            return obj.owner.username  # <-- YYY --- Возвращаем username, если владелец активен
+            return obj.owner.first_name  # <-- YYY --- Возвращаем username, если владелец активен
         else:
             return "Пользователь удален"  # <-- YYY --- Возвращаем строку, если владелец удален
-
 
     def get_photo(self, obj) -> str | None:
         photo = obj.realty_photos.first()
@@ -89,7 +88,6 @@ class RealtyForChatSerializer(serializers.ModelSerializer):
         else:
             # Если объявление не удалено, возвращаем стандартное представление
             return super().to_representation(instance)
-
 
     class Meta:
         model = Realty
@@ -129,7 +127,7 @@ class UserInfoSerializer(serializers.ModelSerializer):
     # FIXME - Отдавать не email а имя!
 
     def get_name(self, obj):
-        """ Eсли is_deleted=True - возвращает username с добавкой (Пользователь удален) ."""
+        """ Если is_deleted=True - возвращает username с добавкой (Пользователь удален) ."""
         if obj.is_deleted:
             return f"Заготовка - пользователь удален ({obj.first_name})"
         return obj.first_name
@@ -167,8 +165,7 @@ class ChatMessagesSerializer(serializers.ModelSerializer):
     i_block = serializers.SerializerMethodField()
     i_am_blocked = serializers.SerializerMethodField()
 
-    unread = serializers.SerializerMethodField() # Добавляем новое поле
-
+    unread = serializers.SerializerMethodField()  # Добавляем новое поле
 
     # Fields for flattened last message info
     message = serializers.CharField(read_only=True, required=False)

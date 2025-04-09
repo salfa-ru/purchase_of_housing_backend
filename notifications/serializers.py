@@ -31,10 +31,16 @@ class RealtyForNotificationSerializer(serializers.ModelSerializer):
     floors_number = serializers.IntegerField(
         source='about_apartment.floors_number')
 
+    realty_status = serializers.IntegerField(source='realty_status_id', read_only=True)
+    realty_status_full = serializers.CharField(source='realty_status.status', read_only=True)
+
     class Meta:
         model = Realty
         fields = [
             'id',
+            'realty_status',
+            'realty_status_full',
+            'is_deleted',
             'trade_type',
             'number_of_rooms',
             'realty_type',
