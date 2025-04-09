@@ -36,7 +36,11 @@ class RealtyBaseSerializer(serializers.ModelSerializer):
 
     is_deleted = serializers.BooleanField(read_only=True)   # <-- YYY --- realty_удаление v1
 
+    realty_status = serializers.IntegerField(source='realty_status_id', read_only=True)
+    realty_status_full = serializers.CharField(source='realty_status.status', read_only=True)
+
     trade_type = serializers.SerializerMethodField()
+    owner_id = serializers.IntegerField(read_only=True)
     owner = SlugRelatedField(slug_field="username", read_only=True)
     realty_type = SlugRelatedField(
         slug_field="type", queryset=values_models.RealtyType.objects.all()
@@ -61,10 +65,9 @@ class RealtyBaseSerializer(serializers.ModelSerializer):
     sale = serializers.SerializerMethodField()
     rent = serializers.SerializerMethodField()
 
-
     class Meta:
         model = realty_models.Realty
-        exclude = ["changed_at", "realty_status", ]
+        exclude = ["changed_at"]
 
     def get_trade_type(self, obj):
         if hasattr(obj, "sale_profile"):
@@ -402,9 +405,14 @@ class ShortRealtySerializer(serializers.ModelSerializer):
     floors_number = serializers.SerializerMethodField()
     rent = serializers.SerializerMethodField()
 
+    realty_status = serializers.IntegerField(source='realty_status_id', read_only=True)
+    realty_status_full = serializers.CharField(source='realty_status.status', read_only=True)
+
     class Meta:
         model = realty_models.Realty
         fields = ("id",
+                  'realty_status',
+                  'realty_status_full',
                   "is_deleted",  # <-- YYY --- realty_удаление v1 ---- а почему нет в большом?
                   "photos",
                   "price",

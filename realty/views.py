@@ -4,7 +4,6 @@ from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import extend_schema, extend_schema_view, OpenApiParameter
 from drf_spectacular.helpers import forced_singular_serializer
 from rest_framework import generics, permissions, viewsets, views, status  # <-- YYY --- realty_удаление v1
-from rest_framework import generics, permissions, viewsets, views
 from rest_framework.response import Response
 from rest_framework.pagination import LimitOffsetPagination
 
@@ -137,6 +136,7 @@ class LastRealtyListView(generics.ListAPIView):
     ).order_by('-published_at')
 
 
+...
 
 
 @extend_schema(
@@ -194,16 +194,22 @@ class RealtyDetailView(generics.RetrieveAPIView):
 
     def get_queryset(self):  # <-- YYY --- Переопределяем get_queryset для фильтрации
         return realty_models.Realty.objects.filter(
-            realty_status__status=constants.ADVERTISMENT_STATUS,
+            # FIXME - Отдаю ВСЕ объявления, важно чтобы Фронт фильтровал
+            #         и не показывал те, что смотреть нельзя!
+            #  realty_status__status=constants.ADVERTISMENT_STATUS,
             is_deleted=False,
             owner__is_deleted=False  # Показывать только объявления активных владельцев
         )
-
 
     def retrieve(self, request, *args, **kwargs):
         """ Увеличение счетчика полных просмотров """
 
         realty = self.get_object()
+
+        # Добавлено, что счетчик работает только на активных объявлениях!
+        if realty.realty_status.status != constants.ADVERTISMENT_STATUS:
+            return super().retrieve(request, *args, **kwargs)
+
         # Увеличиваем счетчик, передавая нужные параметры
         increment_counter(request, realty, DisplayFullInfo,
                           constants.COUNTER_FULL_VIEW_MIN_TIME_INTERVAL,
@@ -304,6 +310,8 @@ class RealtyLKListView(generics.ListAPIView):
             .order_by('-published_at')
         )
 
+
+...
 
 
 @extend_schema(
