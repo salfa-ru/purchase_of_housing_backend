@@ -69,6 +69,13 @@ class ConfigurablePagination(PageNumberPagination):
         return {
             'type': 'object',
             'properties': {
+                # --- ДОБАВЛЕНО ЭТО ПОЛЕ ---
+                'unread_total': {
+                    'type': 'integer',
+                    'description': 'Общее количество непрочитанных сообщений для пользователя во всех чатах.',
+                    'example': 5,
+                },
+                # --- КОНЕЦ ДОБАВЛЕНИЯ ---
                 'count': {
                     'type': 'integer',
                     'example': 123,
