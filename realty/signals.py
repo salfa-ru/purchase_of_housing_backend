@@ -111,6 +111,11 @@ def handle_realty_save(sender, instance, **kwargs):
                 elif old_status.id == 2:  # было на модерации, но отклонено Админом
                     create_notification(instance, "rejected")
 
+            """ НОВОЕ - Перенесено в Архив из Модерации"""
+            if new_status.id == 4:  # стало в Архиве
+                if old_status.id == 2:  # было на Модерации
+                    create_notification(instance, "archived")
+
             """ ВНИМАНИЕ! Уведомления о переносе АКТИВНЫХ объявлений В АРХИВ 
             отправляются только при истечении срока публикации деактивирующей функцией из tasks.py. 
             При ручном переносе объявлений в архив уведомления не отправляются. 
@@ -125,3 +130,4 @@ def handle_realty_save(sender, instance, **kwargs):
 # 3 - Отклонено             3 rejected
 # 4 - В архиве              4 expired
 # 5 - ЧЕРНОВИК (нет)        5 blocked
+#                           6 archived
