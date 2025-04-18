@@ -45,7 +45,8 @@ class User(AbstractUser):
     first_name = models.CharField(verbose_name='Имя',
                                   max_length=constants.CHAR_LENGTH)
     last_name = models.CharField(verbose_name='Фамилия',
-                                 max_length=constants.CHAR_LENGTH)
+                                 max_length=constants.CHAR_LENGTH,
+                                 **constants.NULLABLE_FIELD)
     email = models.EmailField(verbose_name='email', unique=True)
 
     uuid_esa = models.UUIDField(
