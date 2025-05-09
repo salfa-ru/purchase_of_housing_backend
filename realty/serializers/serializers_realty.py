@@ -41,7 +41,7 @@ class RealtyBaseSerializer(serializers.ModelSerializer):
 
     trade_type = serializers.SerializerMethodField()
     owner_id = serializers.IntegerField(read_only=True)
-    owner = SlugRelatedField(slug_field="username", read_only=True)
+    owner = SlugRelatedField(slug_field="first_name", read_only=True)
     realty_type = SlugRelatedField(
         slug_field="type", queryset=values_models.RealtyType.objects.all()
     )
