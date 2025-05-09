@@ -396,6 +396,7 @@ class ShortRealtySerializer(serializers.ModelSerializer):
     building = serializers.ReadOnlyField(source='address.building')
     ownership = serializers.ReadOnlyField(source='address.ownership')
     metro = serializers.ReadOnlyField(source='address.metro.name')
+    owner_id = serializers.ReadOnlyField(source='owner.id')
     owner_name = serializers.ReadOnlyField(source='owner.first_name')
     owner_type = serializers.ReadOnlyField(source='owner_type.participant')
     communication_method = SlugRelatedField(
@@ -425,6 +426,7 @@ class ShortRealtySerializer(serializers.ModelSerializer):
                   "building",
                   "ownership",
                   "metro",
+                  "owner_id",
                   "owner_name",
                   "owner_type",
                   "communication_method",
