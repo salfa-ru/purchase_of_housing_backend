@@ -258,7 +258,7 @@
     "model": "notifications.notificationtemplate",
     "pk": 6,
     "fields": {
-      "code": "blocked",
+      "code": "archived",
       "part1": "Ваше объявление №___ было перемещено в архив.",
       "part2": "Чтобы снова опубликовать объявление, нажмите «Опубликовать»."
     }
