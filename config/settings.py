@@ -183,9 +183,9 @@ SPECTACULAR_SETTINGS = {
     # 'SORT_ENDPOINTS': True,  # отключает сортировку эндпойнтов
     # 'SORT_OPERATIONS': False,  # отключает сортировку операций внутри эндпойнта
 
-    'TITLE': 'purchase_of_housing_backend',
+    'TITLE': 'Недвижимость',
     'DESCRIPTION': 'Документация для приложения purchase_of_housing_backend',
-    'VERSION': '1.0.0',
+    'VERSION': '1.0.1',
     'SERVE_INCLUDE_SCHEMA': False,
     'COMPONENT_SPLIT_REQUEST': True,
     'SWAGGER_UI_SETTINGS': {
