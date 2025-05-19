@@ -1698,108 +1698,5574 @@
     }
   },
   {
-    "model": "realty_addresses.metro",
+    "model": "realty_addresses.MetroLine",
     "pk": 1,
     "fields": {
-      "name": "Сокол"
+      "line_id": "1",
+      "name": "Сокольническая",
+      "name_full": "Сокольническая",
+      "city": "Москва",
+      "color": "E42313"
     }
   },
   {
-    "model": "realty_addresses.metro",
+    "model": "realty_addresses.MetroLine",
     "pk": 2,
     "fields": {
-      "name": "Университет"
+      "line_id": "2",
+      "name": "Замоскворецкая",
+      "name_full": "Замоскворецкая",
+      "city": "Москва",
+      "color": "4FB04F"
     }
   },
   {
-    "model": "realty_addresses.metro",
+    "model": "realty_addresses.MetroLine",
     "pk": 3,
     "fields": {
-      "name": "Люблино"
+      "line_id": "3",
+      "name": "Арбатско-Покровская",
+      "name_full": "Арбатско-Покровская",
+      "city": "Москва",
+      "color": "0072BA"
     }
   },
   {
-    "model": "realty_addresses.metro",
+    "model": "realty_addresses.MetroLine",
     "pk": 4,
     "fields": {
-      "name": "Сухаревская"
+      "line_id": "4",
+      "name": "Филёвская",
+      "name_full": "Филёвская",
+      "city": "Москва",
+      "color": "1EBCEF"
     }
   },
   {
-    "model": "realty_addresses.metro",
+    "model": "realty_addresses.MetroLine",
     "pk": 5,
     "fields": {
-      "name": "Войковская"
+      "line_id": "5",
+      "name": "Кольцевая",
+      "name_full": "Кольцевая",
+      "city": "Москва",
+      "color": "915133"
     }
   },
   {
-    "model": "realty_addresses.metro",
+    "model": "realty_addresses.MetroLine",
     "pk": 6,
     "fields": {
-      "name": "Бабушкинская"
+      "line_id": "6",
+      "name": "Калужско-Рижская",
+      "name_full": "Калужско-Рижская",
+      "city": "Москва",
+      "color": "F07E24"
     }
   },
   {
-    "model": "realty_addresses.metro",
+    "model": "realty_addresses.MetroLine",
     "pk": 7,
     "fields": {
-      "name": "Преображенская площадь"
+      "line_id": "7",
+      "name": "Таганско-Краснопресненская",
+      "name_full": "Таганско-Краснопресненская",
+      "city": "Москва",
+      "color": "943E90"
     }
   },
   {
-    "model": "realty_addresses.metro",
+    "model": "realty_addresses.MetroLine",
     "pk": 8,
     "fields": {
-      "name": "Печатники"
+      "line_id": "8",
+      "name": "Калининская",
+      "name_full": "Калининская",
+      "city": "Москва",
+      "color": "FFCD1C"
     }
   },
   {
-    "model": "realty_addresses.metro",
+    "model": "realty_addresses.MetroLine",
     "pk": 9,
     "fields": {
-      "name": "Чертановская"
+      "line_id": "8А",
+      "name": "Солнцевская",
+      "name_full": "Солнцевская",
+      "city": "Москва",
+      "color": "FFCD1C"
     }
   },
   {
-    "model": "realty_addresses.metro",
+    "model": "realty_addresses.MetroLine",
     "pk": 10,
     "fields": {
-      "name": "Воронцовская"
+      "line_id": "9",
+      "name": "Серпуховско-Тимирязевская",
+      "name_full": "Серпуховско-Тимирязевская",
+      "city": "Москва",
+      "color": "ADACAC"
     }
   },
   {
-    "model": "realty_addresses.metro",
+    "model": "realty_addresses.MetroLine",
     "pk": 11,
     "fields": {
-      "name": "Давыдково"
+      "line_id": "10",
+      "name": "Люблинско-Дмитровская",
+      "name_full": "Люблинско-Дмитровская",
+      "city": "Москва",
+      "color": "BED12C"
     }
   },
   {
-    "model": "realty_addresses.metro",
+    "model": "realty_addresses.MetroLine",
     "pk": 12,
     "fields": {
-      "name": "Щукинская"
+      "line_id": "11",
+      "name": "БКЛ",
+      "name_full": "Большая кольцевая линия",
+      "city": "Москва",
+      "color": "88CDCF"
     }
   },
   {
-    "model": "realty_addresses.metro",
+    "model": "realty_addresses.MetroLine",
     "pk": 13,
     "fields": {
-      "name": "Ховрино"
+      "line_id": "12",
+      "name": "Бутовская",
+      "name_full": "Бутовская",
+      "city": "Москва",
+      "color": "BAC8E8"
     }
   },
   {
-    "model": "realty_addresses.metro",
+    "model": "realty_addresses.MetroLine",
     "pk": 14,
     "fields": {
-      "name": "Прокшино"
+      "line_id": "13",
+      "name": "Монорельс",
+      "name_full": "Монорельс",
+      "city": "Москва",
+      "color": "006DA8"
     }
   },
   {
-    "model": "realty_addresses.metro",
+    "model": "realty_addresses.MetroLine",
     "pk": 15,
     "fields": {
-      "name": "Саларьево"
+      "line_id": "14",
+      "name": "МЦК",
+      "name_full": "Московское центральное кольцо",
+      "city": "Москва",
+      "color": "F9BCD1"
+    }
+  },
+  {
+    "model": "realty_addresses.MetroLine",
+    "pk": 16,
+    "fields": {
+      "line_id": "15",
+      "name": "Некрасовская",
+      "name_full": "Некрасовская",
+      "city": "Москва",
+      "color": "CC0066"
+    }
+  },
+  {
+    "model": "realty_addresses.MetroLine",
+    "pk": 17,
+    "fields": {
+      "line_id": "16",
+      "name": "Троицкая",
+      "name_full": "Троицкая",
+      "city": "Москва",
+      "color": "027762"
+    }
+  },
+  {
+    "model": "realty_addresses.MetroLine",
+    "pk": 18,
+    "fields": {
+      "line_id": "D1",
+      "name": "D1",
+      "name_full": "МЦД-1",
+      "city": "Москва",
+      "color": "FF6000"
+    }
+  },
+  {
+    "model": "realty_addresses.MetroLine",
+    "pk": 19,
+    "fields": {
+      "line_id": "D2",
+      "name": "D2",
+      "name_full": "МЦД-2",
+      "city": "Москва",
+      "color": "FF009F"
+    }
+  },
+  {
+    "model": "realty_addresses.MetroLine",
+    "pk": 20,
+    "fields": {
+      "line_id": "D3",
+      "name": "D3",
+      "name_full": "МЦД-3",
+      "city": "Москва",
+      "color": "EA5B04"
+    }
+  },
+  {
+    "model": "realty_addresses.MetroLine",
+    "pk": 21,
+    "fields": {
+      "line_id": "D4",
+      "name": "D4",
+      "name_full": "МЦД-4",
+      "city": "Москва",
+      "color": "00CC66"
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 1,
+    "fields": {
+      "line": 20,
+      "name": "Авиамоторная",
+      "name_full": "Авиамоторная (D3)",
+      "latitude": 55.750278,
+      "longitude": 37.721944,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 2,
+    "fields": {
+      "line": 12,
+      "name": "Авиамоторная",
+      "name_full": "Авиамоторная (БКЛ)",
+      "latitude": 55.753666,
+      "longitude": 37.719154,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 3,
+    "fields": {
+      "line": 8,
+      "name": "Авиамоторная",
+      "name_full": "Авиамоторная (Калининская)",
+      "latitude": 55.751933,
+      "longitude": 37.717444,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 4,
+    "fields": {
+      "line": 2,
+      "name": "Автозаводская",
+      "name_full": "Автозаводская (Замоскворецкая)",
+      "latitude": 55.706634,
+      "longitude": 37.657008,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 5,
+    "fields": {
+      "line": 15,
+      "name": "Автозаводская",
+      "name_full": "Автозаводская (МЦК)",
+      "latitude": 55.70631,
+      "longitude": 37.66314,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 6,
+    "fields": {
+      "line": 6,
+      "name": "Академическая",
+      "name_full": "Академическая (Калужско-Рижская)",
+      "latitude": 55.687147,
+      "longitude": 37.5723,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 7,
+    "fields": {
+      "line": 4,
+      "name": "Александровский сад",
+      "name_full": "Александровский сад (Филёвская)",
+      "latitude": 55.752255,
+      "longitude": 37.608775,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 8,
+    "fields": {
+      "line": 6,
+      "name": "Алексеевская",
+      "name_full": "Алексеевская (Калужско-Рижская)",
+      "latitude": 55.807794,
+      "longitude": 37.638699,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 9,
+    "fields": {
+      "line": 2,
+      "name": "Алма-Атинская",
+      "name_full": "Алма-Атинская (Замоскворецкая)",
+      "latitude": 55.63349,
+      "longitude": 37.765678,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 10,
+    "fields": {
+      "line": 10,
+      "name": "Алтуфьево",
+      "name_full": "Алтуфьево (Серпуховско-Тимирязевская)",
+      "latitude": 55.899034,
+      "longitude": 37.586473,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 11,
+    "fields": {
+      "line": 21,
+      "name": "Аминьевская",
+      "name_full": "Аминьевская (D4)",
+      "latitude": 55.699444,
+      "longitude": 37.468056,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 12,
+    "fields": {
+      "line": 12,
+      "name": "Аминьевская",
+      "name_full": "Аминьевская (БКЛ)",
+      "latitude": 55.697189,
+      "longitude": 37.464931,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 13,
+    "fields": {
+      "line": 15,
+      "name": "Андроновка",
+      "name_full": "Андроновка (МЦК)",
+      "latitude": 55.741111,
+      "longitude": 37.734444,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 14,
+    "fields": {
+      "line": 20,
+      "name": "Андроновка",
+      "name_full": "Андроновка (D3)",
+      "latitude": 55.744444,
+      "longitude": 37.741111,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 15,
+    "fields": {
+      "line": 19,
+      "name": "Аникеевка",
+      "name_full": "Аникеевка (D2)",
+      "latitude": 55.832303,
+      "longitude": 37.219161,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 16,
+    "fields": {
+      "line": 10,
+      "name": "Аннино",
+      "name_full": "Аннино (Серпуховско-Тимирязевская)",
+      "latitude": 55.583477,
+      "longitude": 37.596999,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 17,
+    "fields": {
+      "line": 21,
+      "name": "Апрелевка",
+      "name_full": "Апрелевка (D4)",
+      "latitude": 55.550278,
+      "longitude": 37.0675,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 18,
+    "fields": {
+      "line": 3,
+      "name": "Арбатская",
+      "name_full": "Арбатская (Арбатско-Покровская)",
+      "latitude": 55.752312,
+      "longitude": 37.60349,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 19,
+    "fields": {
+      "line": 4,
+      "name": "Арбатская",
+      "name_full": "Арбатская (Филёвская)",
+      "latitude": 55.752122,
+      "longitude": 37.601553,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 20,
+    "fields": {
+      "line": 2,
+      "name": "Аэропорт",
+      "name_full": "Аэропорт (Замоскворецкая)",
+      "latitude": 55.800441,
+      "longitude": 37.530477,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 21,
+    "fields": {
+      "line": 9,
+      "name": "Аэропорт Внуково",
+      "name_full": "Аэропорт Внуково (Солнцевская)",
+      "latitude": 55.607087,
+      "longitude": 37.287702,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 22,
+    "fields": {
+      "line": 6,
+      "name": "Бабушкинская",
+      "name_full": "Бабушкинская (Калужско-Рижская)",
+      "latitude": 55.870641,
+      "longitude": 37.664341,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 23,
+    "fields": {
+      "line": 4,
+      "name": "Багратионовская",
+      "name_full": "Багратионовская (Филёвская)",
+      "latitude": 55.743544,
+      "longitude": 37.497042,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 24,
+    "fields": {
+      "line": 18,
+      "name": "Баковка",
+      "name_full": "Баковка (D1)",
+      "latitude": 55.682843,
+      "longitude": 37.315442,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 25,
+    "fields": {
+      "line": 15,
+      "name": "Балтийская",
+      "name_full": "Балтийская (МЦК)",
+      "latitude": 55.825833,
+      "longitude": 37.496111,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 26,
+    "fields": {
+      "line": 7,
+      "name": "Баррикадная",
+      "name_full": "Баррикадная (Таганско-Краснопресненская)",
+      "latitude": 55.760793,
+      "longitude": 37.581242,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 27,
+    "fields": {
+      "line": 3,
+      "name": "Бауманская",
+      "name_full": "Бауманская (Арбатско-Покровская)",
+      "latitude": 55.772405,
+      "longitude": 37.67904,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 28,
+    "fields": {
+      "line": 18,
+      "name": "Беговая",
+      "name_full": "Беговая (D1)",
+      "latitude": 55.77315,
+      "longitude": 37.549678,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 29,
+    "fields": {
+      "line": 7,
+      "name": "Беговая",
+      "name_full": "Беговая (Таганско-Краснопресненская)",
+      "latitude": 55.773505,
+      "longitude": 37.545518,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 30,
+    "fields": {
+      "line": 15,
+      "name": "Белокаменная",
+      "name_full": "Белокаменная (МЦК)",
+      "latitude": 55.83,
+      "longitude": 37.700556,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 31,
+    "fields": {
+      "line": 2,
+      "name": "Беломорская",
+      "name_full": "Беломорская (Замоскворецкая)",
+      "latitude": 55.865369,
+      "longitude": 37.475692,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 32,
+    "fields": {
+      "line": 18,
+      "name": "Белорусская",
+      "name_full": "Белорусская (D1)",
+      "latitude": 55.776811,
+      "longitude": 37.580131,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 33,
+    "fields": {
+      "line": 21,
+      "name": "Белорусская",
+      "name_full": "Белорусская (D4)",
+      "latitude": 55.776389,
+      "longitude": 37.580278,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 34,
+    "fields": {
+      "line": 2,
+      "name": "Белорусская",
+      "name_full": "Белорусская (Замоскворецкая)",
+      "latitude": 55.777439,
+      "longitude": 37.582107,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 35,
+    "fields": {
+      "line": 5,
+      "name": "Белорусская",
+      "name_full": "Белорусская (Кольцевая)",
+      "latitude": 55.775179,
+      "longitude": 37.582303,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 36,
+    "fields": {
+      "line": 6,
+      "name": "Беляево",
+      "name_full": "Беляево (Калужско-Рижская)",
+      "latitude": 55.642357,
+      "longitude": 37.526115,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 37,
+    "fields": {
+      "line": 18,
+      "name": "Бескудниково",
+      "name_full": "Бескудниково (D1)",
+      "latitude": 55.882182,
+      "longitude": 37.567689,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 38,
+    "fields": {
+      "line": 10,
+      "name": "Бибирево",
+      "name_full": "Бибирево (Серпуховско-Тимирязевская)",
+      "latitude": 55.883868,
+      "longitude": 37.603011,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 39,
+    "fields": {
+      "line": 1,
+      "name": "Библиотека им. Ленина",
+      "name_full": "Библиотека им. Ленина (Сокольническая)",
+      "latitude": 55.752123,
+      "longitude": 37.610388,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 40,
+    "fields": {
+      "line": 19,
+      "name": "Битца",
+      "name_full": "Битца (D2)",
+      "latitude": 55.571174,
+      "longitude": 37.611464,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 41,
+    "fields": {
+      "line": 13,
+      "name": "Битцевский парк",
+      "name_full": "Битцевский парк (Бутовская)",
+      "latitude": 55.600066,
+      "longitude": 37.556058,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 42,
+    "fields": {
+      "line": 11,
+      "name": "Борисово",
+      "name_full": "Борисово (Люблинско-Дмитровская)",
+      "latitude": 55.6325,
+      "longitude": 37.743333,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 43,
+    "fields": {
+      "line": 10,
+      "name": "Боровицкая",
+      "name_full": "Боровицкая (Серпуховско-Тимирязевская)",
+      "latitude": 55.750399,
+      "longitude": 37.60934,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 44,
+    "fields": {
+      "line": 9,
+      "name": "Боровское шоссе",
+      "name_full": "Боровское шоссе (Солнцевская)",
+      "latitude": 55.647,
+      "longitude": 37.3701,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 45,
+    "fields": {
+      "line": 6,
+      "name": "Ботанический сад",
+      "name_full": "Ботанический сад (Калужско-Рижская)",
+      "latitude": 55.844597,
+      "longitude": 37.637811,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 46,
+    "fields": {
+      "line": 15,
+      "name": "Ботанический сад",
+      "name_full": "Ботанический сад (МЦК)",
+      "latitude": 55.845556,
+      "longitude": 37.640278,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 47,
+    "fields": {
+      "line": 11,
+      "name": "Братиславская",
+      "name_full": "Братиславская (Люблинско-Дмитровская)",
+      "latitude": 55.658817,
+      "longitude": 37.748415,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 48,
+    "fields": {
+      "line": 13,
+      "name": "Бульвар адмирала Ушакова",
+      "name_full": "Бульвар адмирала Ушакова (Бутовская)",
+      "latitude": 55.545207,
+      "longitude": 37.542329,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 49,
+    "fields": {
+      "line": 10,
+      "name": "Бульвар Дмитрия Донского",
+      "name_full": "Бульвар Дмитрия Донского (Серпуховско-Тимирязевская)",
+      "latitude": 55.568201,
+      "longitude": 37.576856,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 50,
+    "fields": {
+      "line": 15,
+      "name": "Бульвар Рокоссовского",
+      "name_full": "Бульвар Рокоссовского (МЦК)",
+      "latitude": 55.817222,
+      "longitude": 37.736944,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 51,
+    "fields": {
+      "line": 1,
+      "name": "Бульвар Рокоссовского",
+      "name_full": "Бульвар Рокоссовского (Сокольническая)",
+      "latitude": 55.814916,
+      "longitude": 37.732227,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 52,
+    "fields": {
+      "line": 13,
+      "name": "Бунинская аллея",
+      "name_full": "Бунинская аллея (Бутовская)",
+      "latitude": 55.537977,
+      "longitude": 37.515899,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 53,
+    "fields": {
+      "line": 19,
+      "name": "Бутово",
+      "name_full": "Бутово (D2)",
+      "latitude": 55.541698,
+      "longitude": 37.57068,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 54,
+    "fields": {
+      "line": 11,
+      "name": "Бутырская",
+      "name_full": "Бутырская (Люблинско-Дмитровская)",
+      "latitude": 55.813333,
+      "longitude": 37.602778,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 55,
+    "fields": {
+      "line": 20,
+      "name": "Быково",
+      "name_full": "Быково (D3)",
+      "latitude": 55.626667,
+      "longitude": 38.070556,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 56,
+    "fields": {
+      "line": 12,
+      "name": "Варшавская",
+      "name_full": "Варшавская (БКЛ)",
+      "latitude": 55.653406,
+      "longitude": 37.619711,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 57,
+    "fields": {
+      "line": 6,
+      "name": "ВДНХ",
+      "name_full": "ВДНХ (Калужско-Рижская)",
+      "latitude": 55.819626,
+      "longitude": 37.640751,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 58,
+    "fields": {
+      "line": 15,
+      "name": "Верхние Котлы",
+      "name_full": "Верхние Котлы (МЦК)",
+      "latitude": 55.69,
+      "longitude": 37.618889,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 59,
+    "fields": {
+      "line": 11,
+      "name": "Верхние Лихоборы",
+      "name_full": "Верхние Лихоборы (Люблинско-Дмитровская)",
+      "latitude": 55.855143,
+      "longitude": 37.561589,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 60,
+    "fields": {
+      "line": 20,
+      "name": "Вешняки",
+      "name_full": "Вешняки (D3)",
+      "latitude": 55.721944,
+      "longitude": 37.799167,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 61,
+    "fields": {
+      "line": 15,
+      "name": "Владыкино",
+      "name_full": "Владыкино (МЦК)",
+      "latitude": 55.847222,
+      "longitude": 37.591944,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 62,
+    "fields": {
+      "line": 10,
+      "name": "Владыкино",
+      "name_full": "Владыкино (Серпуховско-Тимирязевская)",
+      "latitude": 55.848236,
+      "longitude": 37.590451,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 63,
+    "fields": {
+      "line": 21,
+      "name": "Внуково",
+      "name_full": "Внуково (D4)",
+      "latitude": 55.648889,
+      "longitude": 37.269722,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 64,
+    "fields": {
+      "line": 18,
+      "name": "Водники",
+      "name_full": "Водники (D1)",
+      "latitude": 55.952601,
+      "longitude": 37.512407,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 65,
+    "fields": {
+      "line": 2,
+      "name": "Водный стадион",
+      "name_full": "Водный стадион (Замоскворецкая)",
+      "latitude": 55.838978,
+      "longitude": 37.487515,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 66,
+    "fields": {
+      "line": 2,
+      "name": "Войковская",
+      "name_full": "Войковская (Замоскворецкая)",
+      "latitude": 55.818923,
+      "longitude": 37.497791,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 67,
+    "fields": {
+      "line": 7,
+      "name": "Волгоградский проспект",
+      "name_full": "Волгоградский проспект (Таганско-Краснопресненская)",
+      "latitude": 55.725546,
+      "longitude": 37.685197,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 68,
+    "fields": {
+      "line": 11,
+      "name": "Волжская",
+      "name_full": "Волжская (Люблинско-Дмитровская)",
+      "latitude": 55.690446,
+      "longitude": 37.754314,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 69,
+    "fields": {
+      "line": 19,
+      "name": "Волоколамская",
+      "name_full": "Волоколамская (D2)",
+      "latitude": 55.832192,
+      "longitude": 37.38331,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 70,
+    "fields": {
+      "line": 3,
+      "name": "Волоколамская",
+      "name_full": "Волоколамская (Арбатско-Покровская)",
+      "latitude": 55.835154,
+      "longitude": 37.382453,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 71,
+    "fields": {
+      "line": 1,
+      "name": "Воробьёвы горы",
+      "name_full": "Воробьёвы горы (Сокольническая)",
+      "latitude": 55.709169,
+      "longitude": 37.557293,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 72,
+    "fields": {
+      "line": 12,
+      "name": "Воронцовская",
+      "name_full": "Воронцовская (БКЛ)",
+      "latitude": 55.658845,
+      "longitude": 37.539446,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 73,
+    "fields": {
+      "line": 14,
+      "name": "Выставочный центр",
+      "name_full": "Выставочный центр (Монорельс)",
+      "latitude": 55.824086,
+      "longitude": 37.638494,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 74,
+    "fields": {
+      "line": 20,
+      "name": "Выхино",
+      "name_full": "Выхино (D3)",
+      "latitude": 55.716358,
+      "longitude": 37.816363,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 75,
+    "fields": {
+      "line": 7,
+      "name": "Выхино",
+      "name_full": "Выхино (Таганско-Краснопресненская)",
+      "latitude": 55.715983,
+      "longitude": 37.816788,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 76,
+    "fields": {
+      "line": 17,
+      "name": "Генерала Тюленева",
+      "name_full": "Генерала Тюленева (Троицкая)",
+      "latitude": 55.626522,
+      "longitude": 37.486343,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 77,
+    "fields": {
+      "line": 9,
+      "name": "Говорово",
+      "name_full": "Говорово (Солнцевская)",
+      "latitude": 55.6588,
+      "longitude": 37.4174,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 78,
+    "fields": {
+      "line": 19,
+      "name": "Гражданская",
+      "name_full": "Гражданская (D2)",
+      "latitude": 55.805483,
+      "longitude": 37.553316,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 79,
+    "fields": {
+      "line": 20,
+      "name": "Грачёвская",
+      "name_full": "Грачёвская (D3)",
+      "latitude": 55.869444,
+      "longitude": 37.509167,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 80,
+    "fields": {
+      "line": 12,
+      "name": "Давыдково",
+      "name_full": "Давыдково (БКЛ)",
+      "latitude": 55.71517,
+      "longitude": 37.45177,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 81,
+    "fields": {
+      "line": 18,
+      "name": "Дегунино",
+      "name_full": "Дегунино (D1)",
+      "latitude": 55.865576,
+      "longitude": 37.573232,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 82,
+    "fields": {
+      "line": 9,
+      "name": "Деловой центр",
+      "name_full": "Деловой центр (Солнцевская)",
+      "latitude": 55.749408,
+      "longitude": 37.537624,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 83,
+    "fields": {
+      "line": 4,
+      "name": "Деловой центр",
+      "name_full": "Деловой центр (Филёвская)",
+      "latitude": 55.750243,
+      "longitude": 37.542641,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 84,
+    "fields": {
+      "line": 19,
+      "name": "Депо",
+      "name_full": "Депо (D2)",
+      "latitude": 55.674118,
+      "longitude": 37.728056,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 85,
+    "fields": {
+      "line": 2,
+      "name": "Динамо",
+      "name_full": "Динамо (Замоскворецкая)",
+      "latitude": 55.789704,
+      "longitude": 37.558212,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 86,
+    "fields": {
+      "line": 19,
+      "name": "Дмитровская",
+      "name_full": "Дмитровская (D2)",
+      "latitude": 55.807951,
+      "longitude": 37.578478,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 87,
+    "fields": {
+      "line": 10,
+      "name": "Дмитровская",
+      "name_full": "Дмитровская (Серпуховско-Тимирязевская)",
+      "latitude": 55.808056,
+      "longitude": 37.581734,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 88,
+    "fields": {
+      "line": 5,
+      "name": "Добрынинская",
+      "name_full": "Добрынинская (Кольцевая)",
+      "latitude": 55.728994,
+      "longitude": 37.622533,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 89,
+    "fields": {
+      "line": 18,
+      "name": "Долгопрудная",
+      "name_full": "Долгопрудная (D1)",
+      "latitude": 55.938143,
+      "longitude": 37.520986,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 90,
+    "fields": {
+      "line": 2,
+      "name": "Домодедовская",
+      "name_full": "Домодедовская (Замоскворецкая)",
+      "latitude": 55.610131,
+      "longitude": 37.717111,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 91,
+    "fields": {
+      "line": 11,
+      "name": "Достоевская",
+      "name_full": "Достоевская (Люблинско-Дмитровская)",
+      "latitude": 55.781667,
+      "longitude": 37.613889,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 92,
+    "fields": {
+      "line": 11,
+      "name": "Дубровка",
+      "name_full": "Дубровка (Люблинско-Дмитровская)",
+      "latitude": 55.71807,
+      "longitude": 37.676259,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 93,
+    "fields": {
+      "line": 15,
+      "name": "Дубровка",
+      "name_full": "Дубровка (МЦК)",
+      "latitude": 55.71268,
+      "longitude": 37.677775,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 94,
+    "fields": {
+      "line": 21,
+      "name": "Ермакова Роща",
+      "name_full": "Ермакова Роща (D4)",
+      "latitude": 55.765556,
+      "longitude": 37.535278,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 95,
+    "fields": {
+      "line": 20,
+      "name": "Есенинская",
+      "name_full": "Есенинская (D3)",
+      "latitude": 55.581944,
+      "longitude": 38.184167,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 96,
+    "fields": {
+      "line": 21,
+      "name": "Железнодорожная",
+      "name_full": "Железнодорожная (D4)",
+      "latitude": 55.7525,
+      "longitude": 38.008889,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 97,
+    "fields": {
+      "line": 7,
+      "name": "Жулебино",
+      "name_full": "Жулебино (Таганско-Краснопресненская)",
+      "latitude": 55.684722,
+      "longitude": 37.855833,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 98,
+    "fields": {
+      "line": 15,
+      "name": "ЗИЛ",
+      "name_full": "ЗИЛ (МЦК)",
+      "latitude": 55.698333,
+      "longitude": 37.648333,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 99,
+    "fields": {
+      "line": 15,
+      "name": "Зорге",
+      "name_full": "Зорге (МЦК)",
+      "latitude": 55.787778,
+      "longitude": 37.504444,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 100,
+    "fields": {
+      "line": 12,
+      "name": "Зюзино",
+      "name_full": "Зюзино (БКЛ)",
+      "latitude": 55.655717,
+      "longitude": 37.57369,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 101,
+    "fields": {
+      "line": 11,
+      "name": "Зябликово",
+      "name_full": "Зябликово (Люблинско-Дмитровская)",
+      "latitude": 55.611944,
+      "longitude": 37.745278,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 102,
+    "fields": {
+      "line": 15,
+      "name": "Измайлово",
+      "name_full": "Измайлово (МЦК)",
+      "latitude": 55.788611,
+      "longitude": 37.742778,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 103,
+    "fields": {
+      "line": 3,
+      "name": "Измайловская",
+      "name_full": "Измайловская (Арбатско-Покровская)",
+      "latitude": 55.787713,
+      "longitude": 37.779896,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 104,
+    "fields": {
+      "line": 20,
+      "name": "Ильинская",
+      "name_full": "Ильинская (D3)",
+      "latitude": 55.616389,
+      "longitude": 38.100278,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 105,
+    "fields": {
+      "line": 20,
+      "name": "Ипподром",
+      "name_full": "Ипподром (D3)",
+      "latitude": 55.560278,
+      "longitude": 38.238889,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 106,
+    "fields": {
+      "line": 19,
+      "name": "Калитники",
+      "name_full": "Калитники (D2)",
+      "latitude": 55.734146,
+      "longitude": 37.701969,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 107,
+    "fields": {
+      "line": 6,
+      "name": "Калужская",
+      "name_full": "Калужская (Калужско-Рижская)",
+      "latitude": 55.656682,
+      "longitude": 37.540075,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 108,
+    "fields": {
+      "line": 2,
+      "name": "Кантемировская",
+      "name_full": "Кантемировская (Замоскворецкая)",
+      "latitude": 55.636107,
+      "longitude": 37.656218,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 109,
+    "fields": {
+      "line": 12,
+      "name": "Каховская",
+      "name_full": "Каховская (БКЛ)",
+      "latitude": 55.65278,
+      "longitude": 37.597955,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 110,
+    "fields": {
+      "line": 12,
+      "name": "Каширская",
+      "name_full": "Каширская (БКЛ)",
+      "latitude": 55.654462,
+      "longitude": 37.647639,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 111,
+    "fields": {
+      "line": 2,
+      "name": "Каширская",
+      "name_full": "Каширская (Замоскворецкая)",
+      "latitude": 55.655745,
+      "longitude": 37.649683,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 112,
+    "fields": {
+      "line": 3,
+      "name": "Киевская",
+      "name_full": "Киевская (Арбатско-Покровская)",
+      "latitude": 55.743117,
+      "longitude": 37.564132,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 113,
+    "fields": {
+      "line": 5,
+      "name": "Киевская",
+      "name_full": "Киевская (Кольцевая)",
+      "latitude": 55.74361,
+      "longitude": 37.56735,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 114,
+    "fields": {
+      "line": 4,
+      "name": "Киевская",
+      "name_full": "Киевская (Филёвская)",
+      "latitude": 55.743168,
+      "longitude": 37.565425,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 115,
+    "fields": {
+      "line": 6,
+      "name": "Китай-город",
+      "name_full": "Китай-город (Калужско-Рижская)",
+      "latitude": 55.756498,
+      "longitude": 37.631326,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 116,
+    "fields": {
+      "line": 7,
+      "name": "Китай-город",
+      "name_full": "Китай-город (Таганско-Краснопресненская)",
+      "latitude": 55.75436,
+      "longitude": 37.633877,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 117,
+    "fields": {
+      "line": 12,
+      "name": "Кленовый бульвар",
+      "name_full": "Кленовый бульвар (БКЛ)",
+      "latitude": 55.674692,
+      "longitude": 37.681568,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 118,
+    "fields": {
+      "line": 11,
+      "name": "Кожуховская",
+      "name_full": "Кожуховская (Люблинско-Дмитровская)",
+      "latitude": 55.706156,
+      "longitude": 37.68544,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 119,
+    "fields": {
+      "line": 21,
+      "name": "Кокошкино",
+      "name_full": "Кокошкино (D4)",
+      "latitude": 55.599722,
+      "longitude": 37.171389,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 120,
+    "fields": {
+      "line": 2,
+      "name": "Коломенская",
+      "name_full": "Коломенская (Замоскворецкая)",
+      "latitude": 55.677423,
+      "longitude": 37.663719,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 121,
+    "fields": {
+      "line": 17,
+      "name": "Коммунарка",
+      "name_full": "Коммунарка (Троицкая)",
+      "latitude": 55.574599,
+      "longitude": 37.467967,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 122,
+    "fields": {
+      "line": 5,
+      "name": "Комсомольская",
+      "name_full": "Комсомольская (Кольцевая)",
+      "latitude": 55.775672,
+      "longitude": 37.654772,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 123,
+    "fields": {
+      "line": 1,
+      "name": "Комсомольская",
+      "name_full": "Комсомольская (Сокольническая)",
+      "latitude": 55.774072,
+      "longitude": 37.654565,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 124,
+    "fields": {
+      "line": 6,
+      "name": "Коньково",
+      "name_full": "Коньково (Калужско-Рижская)",
+      "latitude": 55.631857,
+      "longitude": 37.519156,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 125,
+    "fields": {
+      "line": 15,
+      "name": "Коптево",
+      "name_full": "Коптево (МЦК)",
+      "latitude": 55.839637,
+      "longitude": 37.520037,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 126,
+    "fields": {
+      "line": 17,
+      "name": "Корниловская",
+      "name_full": "Корниловская (Троицкая)",
+      "latitude": 55.598787,
+      "longitude": 37.4793,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 127,
+    "fields": {
+      "line": 20,
+      "name": "Косино",
+      "name_full": "Косино (D3)",
+      "latitude": 55.714167,
+      "longitude": 37.8475,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 128,
+    "fields": {
+      "line": 16,
+      "name": "Косино",
+      "name_full": "Косино (Некрасовская)",
+      "latitude": 55.703423,
+      "longitude": 37.851305,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 129,
+    "fields": {
+      "line": 7,
+      "name": "Котельники",
+      "name_full": "Котельники (Таганско-Краснопресненская)",
+      "latitude": 55.6743,
+      "longitude": 37.8582,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 130,
+    "fields": {
+      "line": 20,
+      "name": "Красково",
+      "name_full": "Красково (D3)",
+      "latitude": 55.649722,
+      "longitude": 37.9825,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 131,
+    "fields": {
+      "line": 2,
+      "name": "Красногвардейская",
+      "name_full": "Красногвардейская (Замоскворецкая)",
+      "latitude": 55.614075,
+      "longitude": 37.742697,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 132,
+    "fields": {
+      "line": 19,
+      "name": "Красногорская",
+      "name_full": "Красногорская (D2)",
+      "latitude": 55.814335,
+      "longitude": 37.303944,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 133,
+    "fields": {
+      "line": 5,
+      "name": "Краснопресненская",
+      "name_full": "Краснопресненская (Кольцевая)",
+      "latitude": 55.760378,
+      "longitude": 37.577114,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 134,
+    "fields": {
+      "line": 1,
+      "name": "Красносельская",
+      "name_full": "Красносельская (Сокольническая)",
+      "latitude": 55.780014,
+      "longitude": 37.666097,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 135,
+    "fields": {
+      "line": 1,
+      "name": "Красные ворота",
+      "name_full": "Красные ворота (Сокольническая)",
+      "latitude": 55.768307,
+      "longitude": 37.6478,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 136,
+    "fields": {
+      "line": 19,
+      "name": "Красный Балтиец",
+      "name_full": "Красный Балтиец (D2)",
+      "latitude": 55.815478,
+      "longitude": 37.526618,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 137,
+    "fields": {
+      "line": 19,
+      "name": "Красный строитель",
+      "name_full": "Красный строитель (D2)",
+      "latitude": 55.589798,
+      "longitude": 37.615093,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 138,
+    "fields": {
+      "line": 20,
+      "name": "Кратово",
+      "name_full": "Кратово (D3)",
+      "latitude": 55.591667,
+      "longitude": 38.16,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 139,
+    "fields": {
+      "line": 11,
+      "name": "Крестьянская застава",
+      "name_full": "Крестьянская застава (Люблинско-Дмитровская)",
+      "latitude": 55.732278,
+      "longitude": 37.665325,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 140,
+    "fields": {
+      "line": 1,
+      "name": "Кропоткинская",
+      "name_full": "Кропоткинская (Сокольническая)",
+      "latitude": 55.745297,
+      "longitude": 37.604217,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 141,
+    "fields": {
+      "line": 3,
+      "name": "Крылатское",
+      "name_full": "Крылатское (Арбатско-Покровская)",
+      "latitude": 55.756842,
+      "longitude": 37.408139,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 142,
+    "fields": {
+      "line": 15,
+      "name": "Крымская",
+      "name_full": "Крымская (МЦК)",
+      "latitude": 55.690038,
+      "longitude": 37.605,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 143,
+    "fields": {
+      "line": 20,
+      "name": "Крюково",
+      "name_full": "Крюково (D3)",
+      "latitude": 55.979722,
+      "longitude": 37.173611,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 144,
+    "fields": {
+      "line": 21,
+      "name": "Крёкшино",
+      "name_full": "Крёкшино (D4)",
+      "latitude": 55.577778,
+      "longitude": 37.109722,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 145,
+    "fields": {
+      "line": 7,
+      "name": "Кузнецкий мост",
+      "name_full": "Кузнецкий мост (Таганско-Краснопресненская)",
+      "latitude": 55.761498,
+      "longitude": 37.624423,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 146,
+    "fields": {
+      "line": 7,
+      "name": "Кузьминки",
+      "name_full": "Кузьминки (Таганско-Краснопресненская)",
+      "latitude": 55.705493,
+      "longitude": 37.763295,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 147,
+    "fields": {
+      "line": 18,
+      "name": "Кунцевская",
+      "name_full": "Кунцевская (D1)",
+      "latitude": 55.726903,
+      "longitude": 37.449282,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 148,
+    "fields": {
+      "line": 3,
+      "name": "Кунцевская",
+      "name_full": "Кунцевская (Арбатско-Покровская)",
+      "latitude": 55.730634,
+      "longitude": 37.445123,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 149,
+    "fields": {
+      "line": 12,
+      "name": "Кунцевская",
+      "name_full": "Кунцевская (БКЛ)",
+      "latitude": 55.728707,
+      "longitude": 37.445985,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 150,
+    "fields": {
+      "line": 4,
+      "name": "Кунцевская",
+      "name_full": "Кунцевская (Филёвская)",
+      "latitude": 55.730815,
+      "longitude": 37.446754,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 151,
+    "fields": {
+      "line": 19,
+      "name": "Курская",
+      "name_full": "Курская (D2)",
+      "latitude": 55.758291,
+      "longitude": 37.662371,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 152,
+    "fields": {
+      "line": 21,
+      "name": "Курская",
+      "name_full": "Курская (D4)",
+      "latitude": 55.757992,
+      "longitude": 37.66221,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 153,
+    "fields": {
+      "line": 3,
+      "name": "Курская",
+      "name_full": "Курская (Арбатско-Покровская)",
+      "latitude": 55.758564,
+      "longitude": 37.659039,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 154,
+    "fields": {
+      "line": 5,
+      "name": "Курская",
+      "name_full": "Курская (Кольцевая)",
+      "latitude": 55.758631,
+      "longitude": 37.661059,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 155,
+    "fields": {
+      "line": 19,
+      "name": "Курьяново",
+      "name_full": "Курьяново (D2)",
+      "latitude": 55.649855,
+      "longitude": 37.701439,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 156,
+    "fields": {
+      "line": 21,
+      "name": "Кусково",
+      "name_full": "Кусково (D4)",
+      "latitude": 55.739722,
+      "longitude": 37.795278,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 157,
+    "fields": {
+      "line": 21,
+      "name": "Кутузовская",
+      "name_full": "Кутузовская (D4)",
+      "latitude": 55.741944,
+      "longitude": 37.533056,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 158,
+    "fields": {
+      "line": 15,
+      "name": "Кутузовская",
+      "name_full": "Кутузовская (МЦК)",
+      "latitude": 55.740833,
+      "longitude": 37.533333,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 159,
+    "fields": {
+      "line": 4,
+      "name": "Кутузовская",
+      "name_full": "Кутузовская (Филёвская)",
+      "latitude": 55.740544,
+      "longitude": 37.5341,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 160,
+    "fields": {
+      "line": 21,
+      "name": "Кучино",
+      "name_full": "Кучино (D4)",
+      "latitude": 55.752222,
+      "longitude": 37.954722,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 161,
+    "fields": {
+      "line": 20,
+      "name": "Левобережная",
+      "name_full": "Левобережная (D3)",
+      "latitude": 55.886944,
+      "longitude": 37.468611,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 162,
+    "fields": {
+      "line": 6,
+      "name": "Ленинский проспект",
+      "name_full": "Ленинский проспект (Калужско-Рижская)",
+      "latitude": 55.70678,
+      "longitude": 37.58499,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 163,
+    "fields": {
+      "line": 7,
+      "name": "Лермонтовский проспект",
+      "name_full": "Лермонтовский проспект (Таганско-Краснопресненская)",
+      "latitude": 55.702036,
+      "longitude": 37.851044,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 164,
+    "fields": {
+      "line": 21,
+      "name": "Лесной Городок",
+      "name_full": "Лесной Городок (D4)",
+      "latitude": 55.630278,
+      "longitude": 37.219167,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 165,
+    "fields": {
+      "line": 13,
+      "name": "Лесопарковая",
+      "name_full": "Лесопарковая (Бутовская)",
+      "latitude": 55.581656,
+      "longitude": 37.577816,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 166,
+    "fields": {
+      "line": 12,
+      "name": "Лефортово",
+      "name_full": "Лефортово (БКЛ)",
+      "latitude": 55.764693,
+      "longitude": 37.706757,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 167,
+    "fields": {
+      "line": 18,
+      "name": "Лианозово",
+      "name_full": "Лианозово (D1)",
+      "latitude": 55.897195,
+      "longitude": 37.553585,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 168,
+    "fields": {
+      "line": 11,
+      "name": "Лианозово",
+      "name_full": "Лианозово (Люблинско-Дмитровская)",
+      "latitude": 55.898614,
+      "longitude": 37.544854,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 169,
+    "fields": {
+      "line": 20,
+      "name": "Лихоборы",
+      "name_full": "Лихоборы (D3)",
+      "latitude": 55.85,
+      "longitude": 37.5525,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 170,
+    "fields": {
+      "line": 15,
+      "name": "Лихоборы",
+      "name_full": "Лихоборы (МЦК)",
+      "latitude": 55.847222,
+      "longitude": 37.551389,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 171,
+    "fields": {
+      "line": 18,
+      "name": "Лобня",
+      "name_full": "Лобня (D1)",
+      "latitude": 56.013306,
+      "longitude": 37.484945,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 172,
+    "fields": {
+      "line": 15,
+      "name": "Локомотив",
+      "name_full": "Локомотив (МЦК)",
+      "latitude": 55.803219,
+      "longitude": 37.745742,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 173,
+    "fields": {
+      "line": 9,
+      "name": "Ломоносовский проспект",
+      "name_full": "Ломоносовский проспект (Солнцевская)",
+      "latitude": 55.70706,
+      "longitude": 37.516063,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 174,
+    "fields": {
+      "line": 1,
+      "name": "Лубянка",
+      "name_full": "Лубянка (Сокольническая)",
+      "latitude": 55.759889,
+      "longitude": 37.625336,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 175,
+    "fields": {
+      "line": 15,
+      "name": "Лужники",
+      "name_full": "Лужники (МЦК)",
+      "latitude": 55.720278,
+      "longitude": 37.563056,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 176,
+    "fields": {
+      "line": 16,
+      "name": "Лухмановская",
+      "name_full": "Лухмановская (Некрасовская)",
+      "latitude": 55.708516,
+      "longitude": 37.900569,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 177,
+    "fields": {
+      "line": 20,
+      "name": "Люберцы",
+      "name_full": "Люберцы (D3)",
+      "latitude": 55.681667,
+      "longitude": 37.896944,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 178,
+    "fields": {
+      "line": 19,
+      "name": "Люблино",
+      "name_full": "Люблино (D2)",
+      "latitude": 55.685021,
+      "longitude": 37.733895,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 179,
+    "fields": {
+      "line": 11,
+      "name": "Люблино",
+      "name_full": "Люблино (Люблинско-Дмитровская)",
+      "latitude": 55.676596,
+      "longitude": 37.761639,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 180,
+    "fields": {
+      "line": 20,
+      "name": "Малаховка",
+      "name_full": "Малаховка (D3)",
+      "latitude": 55.645,
+      "longitude": 38.008333,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 181,
+    "fields": {
+      "line": 20,
+      "name": "Малино",
+      "name_full": "Малино (D3)",
+      "latitude": 55.969167,
+      "longitude": 37.211667,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 182,
+    "fields": {
+      "line": 18,
+      "name": "Марк",
+      "name_full": "Марк (D1)",
+      "latitude": 55.904438,
+      "longitude": 37.538269,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 183,
+    "fields": {
+      "line": 8,
+      "name": "Марксистская",
+      "name_full": "Марксистская (Калининская)",
+      "latitude": 55.740746,
+      "longitude": 37.65604,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 184,
+    "fields": {
+      "line": 19,
+      "name": "Марьина Роща",
+      "name_full": "Марьина Роща (D2)",
+      "latitude": 55.8009,
+      "longitude": 37.6188,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 185,
+    "fields": {
+      "line": 21,
+      "name": "Марьина Роща",
+      "name_full": "Марьина Роща (D4)",
+      "latitude": 55.800833,
+      "longitude": 37.618889,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 186,
+    "fields": {
+      "line": 12,
+      "name": "Марьина Роща",
+      "name_full": "Марьина Роща (БКЛ)",
+      "latitude": 55.796562,
+      "longitude": 37.615901,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 187,
+    "fields": {
+      "line": 11,
+      "name": "Марьина Роща",
+      "name_full": "Марьина Роща (Люблинско-Дмитровская)",
+      "latitude": 55.793723,
+      "longitude": 37.61618,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 188,
+    "fields": {
+      "line": 11,
+      "name": "Марьино",
+      "name_full": "Марьино (Люблинско-Дмитровская)",
+      "latitude": 55.649158,
+      "longitude": 37.743844,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 189,
+    "fields": {
+      "line": 21,
+      "name": "Матвеевская",
+      "name_full": "Матвеевская (D4)",
+      "latitude": 55.704722,
+      "longitude": 37.482222,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 190,
+    "fields": {
+      "line": 2,
+      "name": "Маяковская",
+      "name_full": "Маяковская (Замоскворецкая)",
+      "latitude": 55.769808,
+      "longitude": 37.596192,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 191,
+    "fields": {
+      "line": 6,
+      "name": "Медведково",
+      "name_full": "Медведково (Калужско-Рижская)",
+      "latitude": 55.888103,
+      "longitude": 37.661562,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 192,
+    "fields": {
+      "line": 10,
+      "name": "Менделеевская",
+      "name_full": "Менделеевская (Серпуховско-Тимирязевская)",
+      "latitude": 55.781999,
+      "longitude": 37.599141,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 193,
+    "fields": {
+      "line": 21,
+      "name": "Мещерская",
+      "name_full": "Мещерская (D4)",
+      "latitude": 55.666667,
+      "longitude": 37.424444,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 194,
+    "fields": {
+      "line": 21,
+      "name": "Минская",
+      "name_full": "Минская (D4)",
+      "latitude": 55.723333,
+      "longitude": 37.533056,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 195,
+    "fields": {
+      "line": 9,
+      "name": "Минская",
+      "name_full": "Минская (Солнцевская)",
+      "latitude": 55.723947,
+      "longitude": 37.497872,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 196,
+    "fields": {
+      "line": 3,
+      "name": "Митино",
+      "name_full": "Митино (Арбатско-Покровская)",
+      "latitude": 55.846098,
+      "longitude": 37.36122,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 197,
+    "fields": {
+      "line": 20,
+      "name": "Митьково",
+      "name_full": "Митьково (D3)",
+      "latitude": 55.786389,
+      "longitude": 37.6675,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 198,
+    "fields": {
+      "line": 21,
+      "name": "Мичуринец",
+      "name_full": "Мичуринец (D4)",
+      "latitude": 55.646111,
+      "longitude": 37.315,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 199,
+    "fields": {
+      "line": 12,
+      "name": "Мичуринский проспект",
+      "name_full": "Мичуринский проспект (БКЛ)",
+      "latitude": 55.688203,
+      "longitude": 37.485304,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 200,
+    "fields": {
+      "line": 9,
+      "name": "Мичуринский проспект",
+      "name_full": "Мичуринский проспект (Солнцевская)",
+      "latitude": 55.6888,
+      "longitude": 37.485,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 201,
+    "fields": {
+      "line": 12,
+      "name": "Мнёвники",
+      "name_full": "Мнёвники (БКЛ)",
+      "latitude": 55.761148,
+      "longitude": 37.47139,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 202,
+    "fields": {
+      "line": 20,
+      "name": "Молжаниново",
+      "name_full": "Молжаниново (D3)",
+      "latitude": 55.924167,
+      "longitude": 37.380833,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 203,
+    "fields": {
+      "line": 3,
+      "name": "Молодёжная",
+      "name_full": "Молодёжная (Арбатско-Покровская)",
+      "latitude": 55.741375,
+      "longitude": 37.415627,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 204,
+    "fields": {
+      "line": 21,
+      "name": "Москва-Сити",
+      "name_full": "Москва-Сити (D4)",
+      "latitude": 55.748086,
+      "longitude": 37.531525,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 205,
+    "fields": {
+      "line": 15,
+      "name": "Москва-Сити",
+      "name_full": "Москва-Сити (МЦК)",
+      "latitude": 55.747222,
+      "longitude": 37.532222,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 206,
+    "fields": {
+      "line": 4,
+      "name": "Москва-Сити",
+      "name_full": "Москва-Сити (Филёвская)",
+      "latitude": 55.748324,
+      "longitude": 37.533282,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 207,
+    "fields": {
+      "line": 19,
+      "name": "Москва-Товарная",
+      "name_full": "Москва-Товарная (D2)",
+      "latitude": 55.745656,
+      "longitude": 37.688306,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 208,
+    "fields": {
+      "line": 19,
+      "name": "Москворечье",
+      "name_full": "Москворечье (D2)",
+      "latitude": 55.640396,
+      "longitude": 37.689087,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 209,
+    "fields": {
+      "line": 20,
+      "name": "Моссельмаш",
+      "name_full": "Моссельмаш (D3)",
+      "latitude": 55.862222,
+      "longitude": 37.526389,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 210,
+    "fields": {
+      "line": 3,
+      "name": "Мякинино",
+      "name_full": "Мякинино (Арбатско-Покровская)",
+      "latitude": 55.823342,
+      "longitude": 37.385214,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 211,
+    "fields": {
+      "line": 10,
+      "name": "Нагатинская",
+      "name_full": "Нагатинская (Серпуховско-Тимирязевская)",
+      "latitude": 55.682099,
+      "longitude": 37.620917,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 212,
+    "fields": {
+      "line": 12,
+      "name": "Нагатинский затон",
+      "name_full": "Нагатинский затон (БКЛ)",
+      "latitude": 55.684427,
+      "longitude": 37.704592,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 213,
+    "fields": {
+      "line": 10,
+      "name": "Нагорная",
+      "name_full": "Нагорная (Серпуховско-Тимирязевская)",
+      "latitude": 55.672962,
+      "longitude": 37.610397,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 214,
+    "fields": {
+      "line": 12,
+      "name": "Народное ополчение",
+      "name_full": "Народное ополчение (БКЛ)",
+      "latitude": 55.775697,
+      "longitude": 37.485071,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 215,
+    "fields": {
+      "line": 19,
+      "name": "Нахабино",
+      "name_full": "Нахабино (D2)",
+      "latitude": 55.841655,
+      "longitude": 37.184854,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 216,
+    "fields": {
+      "line": 10,
+      "name": "Нахимовский проспект",
+      "name_full": "Нахимовский проспект (Серпуховско-Тимирязевская)",
+      "latitude": 55.662379,
+      "longitude": 37.605274,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 217,
+    "fields": {
+      "line": 16,
+      "name": "Некрасовка",
+      "name_full": "Некрасовка (Некрасовская)",
+      "latitude": 55.702967,
+      "longitude": 37.92803,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 218,
+    "fields": {
+      "line": 18,
+      "name": "Немчиновка",
+      "name_full": "Немчиновка (D1)",
+      "latitude": 55.715991,
+      "longitude": 37.37536,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 219,
+    "fields": {
+      "line": 21,
+      "name": "Нижегородская",
+      "name_full": "Нижегородская (D4)",
+      "latitude": 55.733333,
+      "longitude": 37.729444,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 220,
+    "fields": {
+      "line": 12,
+      "name": "Нижегородская",
+      "name_full": "Нижегородская (БКЛ)",
+      "latitude": 55.731835,
+      "longitude": 37.729404,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 221,
+    "fields": {
+      "line": 15,
+      "name": "Нижегородская",
+      "name_full": "Нижегородская (МЦК)",
+      "latitude": 55.732222,
+      "longitude": 37.72825,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 222,
+    "fields": {
+      "line": 16,
+      "name": "Нижегородская",
+      "name_full": "Нижегородская (Некрасовская)",
+      "latitude": 55.731724,
+      "longitude": 37.730158,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 223,
+    "fields": {
+      "line": 21,
+      "name": "Никольское",
+      "name_full": "Никольское (D4)",
+      "latitude": 55.759722,
+      "longitude": 37.897778,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 224,
+    "fields": {
+      "line": 12,
+      "name": "Новаторская",
+      "name_full": "Новаторская (БКЛ)",
+      "latitude": 55.669823,
+      "longitude": 37.52218,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 225,
+    "fields": {
+      "line": 17,
+      "name": "Новаторская",
+      "name_full": "Новаторская (Троицкая)",
+      "latitude": 55.672032,
+      "longitude": 37.521875,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 226,
+    "fields": {
+      "line": 21,
+      "name": "Новогиреево",
+      "name_full": "Новогиреево (D4)",
+      "latitude": 55.744444,
+      "longitude": 37.818333,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 227,
+    "fields": {
+      "line": 8,
+      "name": "Новогиреево",
+      "name_full": "Новогиреево (Калининская)",
+      "latitude": 55.752237,
+      "longitude": 37.814587,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 228,
+    "fields": {
+      "line": 18,
+      "name": "Новодачная",
+      "name_full": "Новодачная (D1)",
+      "latitude": 55.924396,
+      "longitude": 37.527938,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 229,
+    "fields": {
+      "line": 8,
+      "name": "Новокосино",
+      "name_full": "Новокосино (Калининская)",
+      "latitude": 55.745113,
+      "longitude": 37.864052,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 230,
+    "fields": {
+      "line": 2,
+      "name": "Новокузнецкая",
+      "name_full": "Новокузнецкая (Замоскворецкая)",
+      "latitude": 55.742391,
+      "longitude": 37.62928,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 231,
+    "fields": {
+      "line": 1,
+      "name": "Новомосковская",
+      "name_full": "Новомосковская (Сокольническая)",
+      "latitude": 55.560071,
+      "longitude": 37.46865,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 232,
+    "fields": {
+      "line": 17,
+      "name": "Новомосковская",
+      "name_full": "Новомосковская (Троицкая)",
+      "latitude": 55.560596,
+      "longitude": 37.465236,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 233,
+    "fields": {
+      "line": 21,
+      "name": "Новопеределкино",
+      "name_full": "Новопеределкино (D4)",
+      "latitude": 55.639167,
+      "longitude": 37.381111,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 234,
+    "fields": {
+      "line": 9,
+      "name": "Новопеределкино",
+      "name_full": "Новопеределкино (Солнцевская)",
+      "latitude": 55.6385,
+      "longitude": 37.3544,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 235,
+    "fields": {
+      "line": 20,
+      "name": "Новоподрезково",
+      "name_full": "Новоподрезково (D3)",
+      "latitude": 55.936389,
+      "longitude": 37.351667,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 236,
+    "fields": {
+      "line": 5,
+      "name": "Новослободская",
+      "name_full": "Новослободская (Кольцевая)",
+      "latitude": 55.779606,
+      "longitude": 37.601252,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 237,
+    "fields": {
+      "line": 19,
+      "name": "Новохохловская",
+      "name_full": "Новохохловская (D2)",
+      "latitude": 55.724434,
+      "longitude": 37.713557,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 238,
+    "fields": {
+      "line": 15,
+      "name": "Новохохловская",
+      "name_full": "Новохохловская (МЦК)",
+      "latitude": 55.723889,
+      "longitude": 37.716111,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 239,
+    "fields": {
+      "line": 6,
+      "name": "Новоясеневская",
+      "name_full": "Новоясеневская (Калужско-Рижская)",
+      "latitude": 55.601947,
+      "longitude": 37.553017,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 240,
+    "fields": {
+      "line": 6,
+      "name": "Новые Черемушки",
+      "name_full": "Новые Черемушки (Калужско-Рижская)",
+      "latitude": 55.670077,
+      "longitude": 37.554493,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 241,
+    "fields": {
+      "line": 18,
+      "name": "Одинцово",
+      "name_full": "Одинцово (D1)",
+      "latitude": 55.672473,
+      "longitude": 37.282779,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 242,
+    "fields": {
+      "line": 9,
+      "name": "Озёрная",
+      "name_full": "Озёрная (Солнцевская)",
+      "latitude": 55.6698,
+      "longitude": 37.4495,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 243,
+    "fields": {
+      "line": 18,
+      "name": "Окружная",
+      "name_full": "Окружная (D1)",
+      "latitude": 55.847538,
+      "longitude": 37.574489,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 244,
+    "fields": {
+      "line": 11,
+      "name": "Окружная",
+      "name_full": "Окружная (Люблинско-Дмитровская)",
+      "latitude": 55.844748,
+      "longitude": 37.575531,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 245,
+    "fields": {
+      "line": 15,
+      "name": "Окружная",
+      "name_full": "Окружная (МЦК)",
+      "latitude": 55.848889,
+      "longitude": 37.571111,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 246,
+    "fields": {
+      "line": 16,
+      "name": "Окская",
+      "name_full": "Окская (Некрасовская)",
+      "latitude": 55.718623,
+      "longitude": 37.781272,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 247,
+    "fields": {
+      "line": 6,
+      "name": "Октябрьская",
+      "name_full": "Октябрьская (Калужско-Рижская)",
+      "latitude": 55.731232,
+      "longitude": 37.612851,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 248,
+    "fields": {
+      "line": 5,
+      "name": "Октябрьская",
+      "name_full": "Октябрьская (Кольцевая)",
+      "latitude": 55.729264,
+      "longitude": 37.611049,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 249,
+    "fields": {
+      "line": 7,
+      "name": "Октябрьское поле",
+      "name_full": "Октябрьское поле (Таганско-Краснопресненская)",
+      "latitude": 55.793581,
+      "longitude": 37.493317,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 250,
+    "fields": {
+      "line": 21,
+      "name": "Ольгино",
+      "name_full": "Ольгино (D4)",
+      "latitude": 55.751667,
+      "longitude": 37.978611,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 251,
+    "fields": {
+      "line": 1,
+      "name": "Ольховая",
+      "name_full": "Ольховая (Сокольническая)",
+      "latitude": 55.56898,
+      "longitude": 37.459047,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 252,
+    "fields": {
+      "line": 19,
+      "name": "Опалиха",
+      "name_full": "Опалиха (D2)",
+      "latitude": 55.824809,
+      "longitude": 37.242265,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 253,
+    "fields": {
+      "line": 2,
+      "name": "Орехово",
+      "name_full": "Орехово (Замоскворецкая)",
+      "latitude": 55.61269,
+      "longitude": 37.695214,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 254,
+    "fields": {
+      "line": 20,
+      "name": "Останкино",
+      "name_full": "Останкино (D3)",
+      "latitude": 55.817222,
+      "longitude": 37.603611,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 255,
+    "fields": {
+      "line": 19,
+      "name": "Остафьево",
+      "name_full": "Остафьево (D2)",
+      "latitude": 55.486015,
+      "longitude": 37.555157,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 256,
+    "fields": {
+      "line": 20,
+      "name": "Отдых",
+      "name_full": "Отдых (D3)",
+      "latitude": 55.601111,
+      "longitude": 38.136944,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 257,
+    "fields": {
+      "line": 10,
+      "name": "Отрадное",
+      "name_full": "Отрадное (Серпуховско-Тимирязевская)",
+      "latitude": 55.864273,
+      "longitude": 37.605066,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 258,
+    "fields": {
+      "line": 1,
+      "name": "Охотный ряд",
+      "name_full": "Охотный ряд (Сокольническая)",
+      "latitude": 55.757228,
+      "longitude": 37.615078,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 259,
+    "fields": {
+      "line": 21,
+      "name": "Очаково",
+      "name_full": "Очаково (D4)",
+      "latitude": 55.683611,
+      "longitude": 37.451389,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 260,
+    "fields": {
+      "line": 2,
+      "name": "Павелецкая",
+      "name_full": "Павелецкая (Замоскворецкая)",
+      "latitude": 55.729741,
+      "longitude": 37.638693,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 261,
+    "fields": {
+      "line": 5,
+      "name": "Павелецкая",
+      "name_full": "Павелецкая (Кольцевая)",
+      "latitude": 55.731414,
+      "longitude": 37.636294,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 262,
+    "fields": {
+      "line": 19,
+      "name": "Павшино",
+      "name_full": "Павшино (D2)",
+      "latitude": 55.815175,
+      "longitude": 37.341439,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 263,
+    "fields": {
+      "line": 20,
+      "name": "Панки",
+      "name_full": "Панки (D3)",
+      "latitude": 55.668889,
+      "longitude": 37.9225,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 264,
+    "fields": {
+      "line": 15,
+      "name": "Панфиловская",
+      "name_full": "Панфиловская (МЦК)",
+      "latitude": 55.799167,
+      "longitude": 37.498889,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 265,
+    "fields": {
+      "line": 5,
+      "name": "Парк культуры",
+      "name_full": "Парк культуры (Кольцевая)",
+      "latitude": 55.735221,
+      "longitude": 37.593095,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 266,
+    "fields": {
+      "line": 1,
+      "name": "Парк культуры",
+      "name_full": "Парк культуры (Сокольническая)",
+      "latitude": 55.736163,
+      "longitude": 37.595027,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 267,
+    "fields": {
+      "line": 3,
+      "name": "Парк Победы",
+      "name_full": "Парк Победы (Арбатско-Покровская)",
+      "latitude": 55.735679,
+      "longitude": 37.516865,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 268,
+    "fields": {
+      "line": 9,
+      "name": "Парк Победы",
+      "name_full": "Парк Победы (Солнцевская)",
+      "latitude": 55.736478,
+      "longitude": 37.514401,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 269,
+    "fields": {
+      "line": 3,
+      "name": "Партизанская",
+      "name_full": "Партизанская (Арбатско-Покровская)",
+      "latitude": 55.788401,
+      "longitude": 37.74882,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 270,
+    "fields": {
+      "line": 19,
+      "name": "Пенягино",
+      "name_full": "Пенягино (D2)",
+      "latitude": 55.822539,
+      "longitude": 37.361049,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 271,
+    "fields": {
+      "line": 3,
+      "name": "Первомайская",
+      "name_full": "Первомайская (Арбатско-Покровская)",
+      "latitude": 55.794376,
+      "longitude": 37.799364,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 272,
+    "fields": {
+      "line": 21,
+      "name": "Переделкино",
+      "name_full": "Переделкино (D4)",
+      "latitude": 55.656111,
+      "longitude": 37.353889,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 273,
+    "fields": {
+      "line": 19,
+      "name": "Перерва",
+      "name_full": "Перерва (D2)",
+      "latitude": 55.661415,
+      "longitude": 37.716998,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 274,
+    "fields": {
+      "line": 8,
+      "name": "Перово",
+      "name_full": "Перово (Калининская)",
+      "latitude": 55.75098,
+      "longitude": 37.78422,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 275,
+    "fields": {
+      "line": 20,
+      "name": "Перово",
+      "name_full": "Перово (D3)",
+      "latitude": 55.735556,
+      "longitude": 37.765,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 276,
+    "fields": {
+      "line": 12,
+      "name": "Петровский парк",
+      "name_full": "Петровский парк (БКЛ)",
+      "latitude": 55.791957,
+      "longitude": 37.557322,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 277,
+    "fields": {
+      "line": 20,
+      "name": "Петровско-Разумовская",
+      "name_full": "Петровско-Разумовская (D3)",
+      "latitude": 55.839722,
+      "longitude": 37.568333,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 278,
+    "fields": {
+      "line": 11,
+      "name": "Петровско-Разумовская",
+      "name_full": "Петровско-Разумовская (Люблинско-Дмитровская)",
+      "latitude": 55.836667,
+      "longitude": 37.575556,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 279,
+    "fields": {
+      "line": 10,
+      "name": "Петровско-Разумовская",
+      "name_full": "Петровско-Разумовская (Серпуховско-Тимирязевская)",
+      "latitude": 55.836565,
+      "longitude": 37.575512,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 280,
+    "fields": {
+      "line": 19,
+      "name": "Печатники",
+      "name_full": "Печатники (D2)",
+      "latitude": 55.6921,
+      "longitude": 37.73279,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 281,
+    "fields": {
+      "line": 12,
+      "name": "Печатники",
+      "name_full": "Печатники (БКЛ)",
+      "latitude": 55.694616,
+      "longitude": 37.727346,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 282,
+    "fields": {
+      "line": 11,
+      "name": "Печатники",
+      "name_full": "Печатники (Люблинско-Дмитровская)",
+      "latitude": 55.692921,
+      "longitude": 37.728338,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 283,
+    "fields": {
+      "line": 4,
+      "name": "Пионерская",
+      "name_full": "Пионерская (Филёвская)",
+      "latitude": 55.736027,
+      "longitude": 37.466728,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 284,
+    "fields": {
+      "line": 7,
+      "name": "Планерная",
+      "name_full": "Планерная (Таганско-Краснопресненская)",
+      "latitude": 55.859676,
+      "longitude": 37.436808,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 285,
+    "fields": {
+      "line": 15,
+      "name": "Площадь Гагарина",
+      "name_full": "Площадь Гагарина (МЦК)",
+      "latitude": 55.706944,
+      "longitude": 37.585833,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 286,
+    "fields": {
+      "line": 8,
+      "name": "Площадь Ильича",
+      "name_full": "Площадь Ильича (Калининская)",
+      "latitude": 55.747115,
+      "longitude": 37.680726,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 287,
+    "fields": {
+      "line": 3,
+      "name": "Площадь Революции",
+      "name_full": "Площадь Революции (Арбатско-Покровская)",
+      "latitude": 55.756741,
+      "longitude": 37.62236,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 288,
+    "fields": {
+      "line": 19,
+      "name": "Площадь трёх вокзалов",
+      "name_full": "Площадь трёх вокзалов (D2)",
+      "latitude": 55.77667,
+      "longitude": 37.65111,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 289,
+    "fields": {
+      "line": 21,
+      "name": "Площадь трёх вокзалов",
+      "name_full": "Площадь трёх вокзалов (D4)",
+      "latitude": 55.776667,
+      "longitude": 37.651111,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 290,
+    "fields": {
+      "line": 20,
+      "name": "Плющево",
+      "name_full": "Плющево (D3)",
+      "latitude": 55.730556,
+      "longitude": 37.774167,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 291,
+    "fields": {
+      "line": 21,
+      "name": "Победа",
+      "name_full": "Победа (D4)",
+      "latitude": 55.566111,
+      "longitude": 37.093056,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 292,
+    "fields": {
+      "line": 19,
+      "name": "Подольск",
+      "name_full": "Подольск (D2)",
+      "latitude": 55.431494,
+      "longitude": 37.565452,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 293,
+    "fields": {
+      "line": 20,
+      "name": "Подрезково",
+      "name_full": "Подрезково (D3)",
+      "latitude": 55.941667,
+      "longitude": 37.334722,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 294,
+    "fields": {
+      "line": 21,
+      "name": "Поклонная",
+      "name_full": "Поклонная (D4)",
+      "latitude": 55.728333,
+      "longitude": 37.511667,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 295,
+    "fields": {
+      "line": 19,
+      "name": "Покровское",
+      "name_full": "Покровское (D2)",
+      "latitude": 55.602968,
+      "longitude": 37.632071,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 296,
+    "fields": {
+      "line": 7,
+      "name": "Полежаевская",
+      "name_full": "Полежаевская (Таганско-Краснопресненская)",
+      "latitude": 55.777201,
+      "longitude": 37.517895,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 297,
+    "fields": {
+      "line": 10,
+      "name": "Полянка",
+      "name_full": "Полянка (Серпуховско-Тимирязевская)",
+      "latitude": 55.736795,
+      "longitude": 37.618594,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 298,
+    "fields": {
+      "line": 1,
+      "name": "Потапово",
+      "name_full": "Потапово (Сокольническая)",
+      "latitude": 55.552664,
+      "longitude": 37.493044,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 299,
+    "fields": {
+      "line": 10,
+      "name": "Пражская",
+      "name_full": "Пражская (Серпуховско-Тимирязевская)",
+      "latitude": 55.610962,
+      "longitude": 37.602386,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 300,
+    "fields": {
+      "line": 1,
+      "name": "Преображенская площадь",
+      "name_full": "Преображенская площадь (Сокольническая)",
+      "latitude": 55.796322,
+      "longitude": 37.713582,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 301,
+    "fields": {
+      "line": 1,
+      "name": "Прокшино",
+      "name_full": "Прокшино (Сокольническая)",
+      "latitude": 55.586456,
+      "longitude": 37.43322,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 302,
+    "fields": {
+      "line": 7,
+      "name": "Пролетарская",
+      "name_full": "Пролетарская (Таганско-Краснопресненская)",
+      "latitude": 55.731546,
+      "longitude": 37.666917,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 303,
+    "fields": {
+      "line": 12,
+      "name": "Проспект Вернадского",
+      "name_full": "Проспект Вернадского (БКЛ)",
+      "latitude": 55.678519,
+      "longitude": 37.503747,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 304,
+    "fields": {
+      "line": 1,
+      "name": "Проспект Вернадского",
+      "name_full": "Проспект Вернадского (Сокольническая)",
+      "latitude": 55.676549,
+      "longitude": 37.504584,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 305,
+    "fields": {
+      "line": 6,
+      "name": "Проспект Мира",
+      "name_full": "Проспект Мира (Калужско-Рижская)",
+      "latitude": 55.781827,
+      "longitude": 37.633199,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 306,
+    "fields": {
+      "line": 5,
+      "name": "Проспект Мира",
+      "name_full": "Проспект Мира (Кольцевая)",
+      "latitude": 55.779584,
+      "longitude": 37.633646,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 307,
+    "fields": {
+      "line": 6,
+      "name": "Профсоюзная",
+      "name_full": "Профсоюзная (Калужско-Рижская)",
+      "latitude": 55.677671,
+      "longitude": 37.562595,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 308,
+    "fields": {
+      "line": 7,
+      "name": "Пушкинская",
+      "name_full": "Пушкинская (Таганско-Краснопресненская)",
+      "latitude": 55.765607,
+      "longitude": 37.604356,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 309,
+    "fields": {
+      "line": 9,
+      "name": "Пыхтино",
+      "name_full": "Пыхтино (Солнцевская)",
+      "latitude": 55.625,
+      "longitude": 37.298056,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 310,
+    "fields": {
+      "line": 3,
+      "name": "Пятницкое шоссе",
+      "name_full": "Пятницкое шоссе (Арбатско-Покровская)",
+      "latitude": 55.853634,
+      "longitude": 37.353108,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 311,
+    "fields": {
+      "line": 18,
+      "name": "Рабочий поселок",
+      "name_full": "Рабочий поселок (D1)",
+      "latitude": 55.726918,
+      "longitude": 37.417877,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 312,
+    "fields": {
+      "line": 9,
+      "name": "Раменки",
+      "name_full": "Раменки (Солнцевская)",
+      "latitude": 55.697691,
+      "longitude": 37.498725,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 313,
+    "fields": {
+      "line": 20,
+      "name": "Раменское",
+      "name_full": "Раменское (D3)",
+      "latitude": 55.565351,
+      "longitude": 38.225435,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 314,
+    "fields": {
+      "line": 9,
+      "name": "Рассказовка",
+      "name_full": "Рассказовка (Солнцевская)",
+      "latitude": 55.6324,
+      "longitude": 37.3328,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 315,
+    "fields": {
+      "line": 21,
+      "name": "Реутово",
+      "name_full": "Реутово (D4)",
+      "latitude": 55.751389,
+      "longitude": 37.855833,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 316,
+    "fields": {
+      "line": 2,
+      "name": "Речной вокзал",
+      "name_full": "Речной вокзал (Замоскворецкая)",
+      "latitude": 55.854152,
+      "longitude": 37.476728,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 317,
+    "fields": {
+      "line": 19,
+      "name": "Рижская",
+      "name_full": "Рижская (D2)",
+      "latitude": 55.793986,
+      "longitude": 37.638602,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 318,
+    "fields": {
+      "line": 12,
+      "name": "Рижская",
+      "name_full": "Рижская (БКЛ)",
+      "latitude": 55.7938,
+      "longitude": 37.6359,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 319,
+    "fields": {
+      "line": 6,
+      "name": "Рижская",
+      "name_full": "Рижская (Калужско-Рижская)",
+      "latitude": 55.792494,
+      "longitude": 37.636114,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 320,
+    "fields": {
+      "line": 11,
+      "name": "Римская",
+      "name_full": "Римская (Люблинско-Дмитровская)",
+      "latitude": 55.747027,
+      "longitude": 37.679996,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 321,
+    "fields": {
+      "line": 15,
+      "name": "Ростокино",
+      "name_full": "Ростокино (МЦК)",
+      "latitude": 55.839444,
+      "longitude": 37.667778,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 322,
+    "fields": {
+      "line": 1,
+      "name": "Румянцево",
+      "name_full": "Румянцево (Сокольническая)",
+      "latitude": 55.633,
+      "longitude": 37.4419,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 323,
+    "fields": {
+      "line": 7,
+      "name": "Рязанский проспект",
+      "name_full": "Рязанский проспект (Таганско-Краснопресненская)",
+      "latitude": 55.716139,
+      "longitude": 37.792694,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 324,
+    "fields": {
+      "line": 18,
+      "name": "Савёловская",
+      "name_full": "Савёловская (D1)",
+      "latitude": 55.795363,
+      "longitude": 37.58915,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 325,
+    "fields": {
+      "line": 21,
+      "name": "Савёловская",
+      "name_full": "Савёловская (D4)",
+      "latitude": 55.794444,
+      "longitude": 37.590278,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 326,
+    "fields": {
+      "line": 12,
+      "name": "Савёловская",
+      "name_full": "Савёловская (БКЛ)",
+      "latitude": 55.792807,
+      "longitude": 37.586122,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 327,
+    "fields": {
+      "line": 10,
+      "name": "Савёловская",
+      "name_full": "Савёловская (Серпуховско-Тимирязевская)",
+      "latitude": 55.794054,
+      "longitude": 37.587163,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 328,
+    "fields": {
+      "line": 1,
+      "name": "Саларьево",
+      "name_full": "Саларьево (Сокольническая)",
+      "latitude": 55.6227,
+      "longitude": 37.424,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 329,
+    "fields": {
+      "line": 21,
+      "name": "Салтыковская",
+      "name_full": "Салтыковская (D4)",
+      "latitude": 55.757778,
+      "longitude": 37.923056,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 330,
+    "fields": {
+      "line": 21,
+      "name": "Санино",
+      "name_full": "Санино (D4)",
+      "latitude": 55.583889,
+      "longitude": 37.138333,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 331,
+    "fields": {
+      "line": 6,
+      "name": "Свиблово",
+      "name_full": "Свиблово (Калужско-Рижская)",
+      "latitude": 55.855558,
+      "longitude": 37.653379,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 332,
+    "fields": {
+      "line": 10,
+      "name": "Севастопольская",
+      "name_full": "Севастопольская (Серпуховско-Тимирязевская)",
+      "latitude": 55.651451,
+      "longitude": 37.59809,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 333,
+    "fields": {
+      "line": 11,
+      "name": "Селигерская",
+      "name_full": "Селигерская (Люблинско-Дмитровская)",
+      "latitude": 55.866556,
+      "longitude": 37.547117,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 334,
+    "fields": {
+      "line": 3,
+      "name": "Семёновская",
+      "name_full": "Семёновская (Арбатско-Покровская)",
+      "latitude": 55.783096,
+      "longitude": 37.719289,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 335,
+    "fields": {
+      "line": 21,
+      "name": "Серп и Молот",
+      "name_full": "Серп и Молот (D4)",
+      "latitude": 55.748056,
+      "longitude": 37.681944,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 336,
+    "fields": {
+      "line": 10,
+      "name": "Серпуховская",
+      "name_full": "Серпуховская (Серпуховско-Тимирязевская)",
+      "latitude": 55.726548,
+      "longitude": 37.624792,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 337,
+    "fields": {
+      "line": 18,
+      "name": "Сетунь",
+      "name_full": "Сетунь (D1)",
+      "latitude": 55.724211,
+      "longitude": 37.398473,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 338,
+    "fields": {
+      "line": 19,
+      "name": "Силикатная",
+      "name_full": "Силикатная (D2)",
+      "latitude": 55.470459,
+      "longitude": 37.555454,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 339,
+    "fields": {
+      "line": 18,
+      "name": "Сколково",
+      "name_full": "Сколково (D1)",
+      "latitude": 55.700091,
+      "longitude": 37.342526,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 340,
+    "fields": {
+      "line": 18,
+      "name": "Славянский бульвар",
+      "name_full": "Славянский бульвар (D1)",
+      "latitude": 55.730406,
+      "longitude": 37.472378,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 341,
+    "fields": {
+      "line": 3,
+      "name": "Славянский бульвар",
+      "name_full": "Славянский бульвар (Арбатско-Покровская)",
+      "latitude": 55.729542,
+      "longitude": 37.470973,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 342,
+    "fields": {
+      "line": 3,
+      "name": "Смоленская",
+      "name_full": "Смоленская (Арбатско-Покровская)",
+      "latitude": 55.747713,
+      "longitude": 37.583802,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 343,
+    "fields": {
+      "line": 4,
+      "name": "Смоленская",
+      "name_full": "Смоленская (Филёвская)",
+      "latitude": 55.749083,
+      "longitude": 37.582173,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 344,
+    "fields": {
+      "line": 2,
+      "name": "Сокол",
+      "name_full": "Сокол (Замоскворецкая)",
+      "latitude": 55.805564,
+      "longitude": 37.515245,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 345,
+    "fields": {
+      "line": 15,
+      "name": "Соколиная Гора",
+      "name_full": "Соколиная Гора (МЦК)",
+      "latitude": 55.77,
+      "longitude": 37.745278,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 346,
+    "fields": {
+      "line": 12,
+      "name": "Сокольники",
+      "name_full": "Сокольники (БКЛ)",
+      "latitude": 55.790109,
+      "longitude": 37.679376,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 347,
+    "fields": {
+      "line": 1,
+      "name": "Сокольники",
+      "name_full": "Сокольники (Сокольническая)",
+      "latitude": 55.789282,
+      "longitude": 37.679895,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 348,
+    "fields": {
+      "line": 21,
+      "name": "Солнечная",
+      "name_full": "Солнечная (D4)",
+      "latitude": 55.656944,
+      "longitude": 37.383611,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 349,
+    "fields": {
+      "line": 9,
+      "name": "Солнцево",
+      "name_full": "Солнцево (Солнцевская)",
+      "latitude": 55.649,
+      "longitude": 37.3911,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 350,
+    "fields": {
+      "line": 20,
+      "name": "Сортировочная",
+      "name_full": "Сортировочная (D3)",
+      "latitude": 55.763611,
+      "longitude": 37.720833,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 351,
+    "fields": {
+      "line": 7,
+      "name": "Спартак",
+      "name_full": "Спартак (Таганско-Краснопресненская)",
+      "latitude": 55.8182,
+      "longitude": 37.4352,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 352,
+    "fields": {
+      "line": 1,
+      "name": "Спортивная",
+      "name_full": "Спортивная (Сокольническая)",
+      "latitude": 55.722388,
+      "longitude": 37.562041,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 353,
+    "fields": {
+      "line": 11,
+      "name": "Сретенский бульвар",
+      "name_full": "Сретенский бульвар (Люблинско-Дмитровская)",
+      "latitude": 55.766106,
+      "longitude": 37.635688,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 354,
+    "fields": {
+      "line": 16,
+      "name": "Стахановская",
+      "name_full": "Стахановская (Некрасовская)",
+      "latitude": 55.727207,
+      "longitude": 37.752257,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 355,
+    "fields": {
+      "line": 19,
+      "name": "Стрешнево",
+      "name_full": "Стрешнево (D2)",
+      "latitude": 55.81521,
+      "longitude": 37.490003,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 356,
+    "fields": {
+      "line": 15,
+      "name": "Стрешнево",
+      "name_full": "Стрешнево (МЦК)",
+      "latitude": 55.813611,
+      "longitude": 37.486944,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 357,
+    "fields": {
+      "line": 3,
+      "name": "Строгино",
+      "name_full": "Строгино (Арбатско-Покровская)",
+      "latitude": 55.803831,
+      "longitude": 37.402405,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 358,
+    "fields": {
+      "line": 4,
+      "name": "Студенческая",
+      "name_full": "Студенческая (Филёвская)",
+      "latitude": 55.738761,
+      "longitude": 37.54842,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 359,
+    "fields": {
+      "line": 6,
+      "name": "Сухаревская",
+      "name_full": "Сухаревская (Калужско-Рижская)",
+      "latitude": 55.772315,
+      "longitude": 37.63285,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 360,
+    "fields": {
+      "line": 7,
+      "name": "Сходненская",
+      "name_full": "Сходненская (Таганско-Краснопресненская)",
+      "latitude": 55.84926,
+      "longitude": 37.44076,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 361,
+    "fields": {
+      "line": 20,
+      "name": "Сходня",
+      "name_full": "Сходня (D3)",
+      "latitude": 55.949722,
+      "longitude": 37.298611,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 362,
+    "fields": {
+      "line": 5,
+      "name": "Таганская",
+      "name_full": "Таганская (Кольцевая)",
+      "latitude": 55.742396,
+      "longitude": 37.653334,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 363,
+    "fields": {
+      "line": 7,
+      "name": "Таганская",
+      "name_full": "Таганская (Таганско-Краснопресненская)",
+      "latitude": 55.739502,
+      "longitude": 37.653605,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 364,
+    "fields": {
+      "line": 2,
+      "name": "Тверская",
+      "name_full": "Тверская (Замоскворецкая)",
+      "latitude": 55.765343,
+      "longitude": 37.603918,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 365,
+    "fields": {
+      "line": 2,
+      "name": "Театральная",
+      "name_full": "Театральная (Замоскворецкая)",
+      "latitude": 55.758808,
+      "longitude": 37.61768,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 366,
+    "fields": {
+      "line": 19,
+      "name": "Текстильщики",
+      "name_full": "Текстильщики (D2)",
+      "latitude": 55.707289,
+      "longitude": 37.729511,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 367,
+    "fields": {
+      "line": 12,
+      "name": "Текстильщики",
+      "name_full": "Текстильщики (БКЛ)",
+      "latitude": 55.707725,
+      "longitude": 37.728406,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 368,
+    "fields": {
+      "line": 7,
+      "name": "Текстильщики",
+      "name_full": "Текстильщики (Таганско-Краснопресненская)",
+      "latitude": 55.709211,
+      "longitude": 37.732117,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 369,
+    "fields": {
+      "line": 14,
+      "name": "Телецентр",
+      "name_full": "Телецентр (Монорельс)",
+      "latitude": 55.821795,
+      "longitude": 37.608975,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 370,
+    "fields": {
+      "line": 6,
+      "name": "Теплый Стан",
+      "name_full": "Теплый Стан (Калужско-Рижская)",
+      "latitude": 55.61873,
+      "longitude": 37.505912,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 371,
+    "fields": {
+      "line": 12,
+      "name": "Терехово",
+      "name_full": "Терехово (БКЛ)",
+      "latitude": 55.748108,
+      "longitude": 37.459738,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 372,
+    "fields": {
+      "line": 18,
+      "name": "Тестовская",
+      "name_full": "Тестовская (D1)",
+      "latitude": 55.754147,
+      "longitude": 37.531684,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 373,
+    "fields": {
+      "line": 2,
+      "name": "Технопарк",
+      "name_full": "Технопарк (Замоскворецкая)",
+      "latitude": 55.695,
+      "longitude": 37.664167,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 374,
+    "fields": {
+      "line": 18,
+      "name": "Тимирязевская",
+      "name_full": "Тимирязевская (D1)",
+      "latitude": 55.81956,
+      "longitude": 37.575765,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 375,
+    "fields": {
+      "line": 14,
+      "name": "Тимирязевская",
+      "name_full": "Тимирязевская (Монорельс)",
+      "latitude": 55.819049,
+      "longitude": 37.578882,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 376,
+    "fields": {
+      "line": 10,
+      "name": "Тимирязевская",
+      "name_full": "Тимирязевская (Серпуховско-Тимирязевская)",
+      "latitude": 55.81866,
+      "longitude": 37.574498,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 377,
+    "fields": {
+      "line": 21,
+      "name": "Толстопальцево",
+      "name_full": "Толстопальцево (D4)",
+      "latitude": 55.607778,
+      "longitude": 37.186389,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 378,
+    "fields": {
+      "line": 20,
+      "name": "Томилино",
+      "name_full": "Томилино (D3)",
+      "latitude": 55.655,
+      "longitude": 37.954722,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 379,
+    "fields": {
+      "line": 8,
+      "name": "Третьяковская",
+      "name_full": "Третьяковская (Калининская)",
+      "latitude": 55.741125,
+      "longitude": 37.626142,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 380,
+    "fields": {
+      "line": 6,
+      "name": "Третьяковская",
+      "name_full": "Третьяковская (Калужско-Рижская)",
+      "latitude": 55.74073,
+      "longitude": 37.625624,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 381,
+    "fields": {
+      "line": 19,
+      "name": "Трикотажная",
+      "name_full": "Трикотажная (D2)",
+      "latitude": 55.833137,
+      "longitude": 37.398967,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 382,
+    "fields": {
+      "line": 1,
+      "name": "Тропарёво",
+      "name_full": "Тропарёво (Сокольническая)",
+      "latitude": 55.6459,
+      "longitude": 37.4725,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 383,
+    "fields": {
+      "line": 11,
+      "name": "Трубная",
+      "name_full": "Трубная (Люблинско-Дмитровская)",
+      "latitude": 55.76771,
+      "longitude": 37.621926,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 384,
+    "fields": {
+      "line": 10,
+      "name": "Тульская",
+      "name_full": "Тульская (Серпуховско-Тимирязевская)",
+      "latitude": 55.70961,
+      "longitude": 37.622569,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 385,
+    "fields": {
+      "line": 6,
+      "name": "Тургеневская",
+      "name_full": "Тургеневская (Калужско-Рижская)",
+      "latitude": 55.765371,
+      "longitude": 37.636732,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 386,
+    "fields": {
+      "line": 19,
+      "name": "Тушинская",
+      "name_full": "Тушинская (D2)",
+      "latitude": 55.827292,
+      "longitude": 37.440398,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 387,
+    "fields": {
+      "line": 7,
+      "name": "Тушинская",
+      "name_full": "Тушинская (Таганско-Краснопресненская)",
+      "latitude": 55.825479,
+      "longitude": 37.437024,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 388,
+    "fields": {
+      "line": 17,
+      "name": "Тютчевская",
+      "name_full": "Тютчевская (Троицкая)",
+      "latitude": 55.617992,
+      "longitude": 37.482444,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 389,
+    "fields": {
+      "line": 15,
+      "name": "Угрешская",
+      "name_full": "Угрешская (МЦК)",
+      "latitude": 55.718333,
+      "longitude": 37.697778,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 390,
+    "fields": {
+      "line": 20,
+      "name": "Удельная",
+      "name_full": "Удельная (D3)",
+      "latitude": 55.634444,
+      "longitude": 38.043889,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 391,
+    "fields": {
+      "line": 14,
+      "name": "Ул. Академика Королева",
+      "name_full": "Ул. Академика Королева (Монорельс)",
+      "latitude": 55.821821,
+      "longitude": 37.627167,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 392,
+    "fields": {
+      "line": 14,
+      "name": "Ул. Милашенкова",
+      "name_full": "Ул. Милашенкова (Монорельс)",
+      "latitude": 55.821876,
+      "longitude": 37.591206,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 393,
+    "fields": {
+      "line": 14,
+      "name": "Ул. Сергея Эйзенштейна",
+      "name_full": "Ул. Сергея Эйзенштейна (Монорельс)",
+      "latitude": 55.829305,
+      "longitude": 37.644997,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 394,
+    "fields": {
+      "line": 7,
+      "name": "Улица 1905 года",
+      "name_full": "Улица 1905 года (Таганско-Краснопресненская)",
+      "latitude": 55.763944,
+      "longitude": 37.562271,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 395,
+    "fields": {
+      "line": 10,
+      "name": "Улица Академика Янгеля",
+      "name_full": "Улица Академика Янгеля (Серпуховско-Тимирязевская)",
+      "latitude": 55.596753,
+      "longitude": 37.601498,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 396,
+    "fields": {
+      "line": 13,
+      "name": "Улица Горчакова",
+      "name_full": "Улица Горчакова (Бутовская)",
+      "latitude": 55.542281,
+      "longitude": 37.532063,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 397,
+    "fields": {
+      "line": 16,
+      "name": "Улица Дмитриевского",
+      "name_full": "Улица Дмитриевского (Некрасовская)",
+      "latitude": 55.710311,
+      "longitude": 37.879045,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 398,
+    "fields": {
+      "line": 13,
+      "name": "Улица Скобелевская",
+      "name_full": "Улица Скобелевская (Бутовская)",
+      "latitude": 55.548103,
+      "longitude": 37.552721,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 399,
+    "fields": {
+      "line": 13,
+      "name": "Улица Старокачаловская",
+      "name_full": "Улица Старокачаловская (Бутовская)",
+      "latitude": 55.569194,
+      "longitude": 37.576074,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 400,
+    "fields": {
+      "line": 1,
+      "name": "Университет",
+      "name_full": "Университет (Сокольническая)",
+      "latitude": 55.69329,
+      "longitude": 37.534511,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 401,
+    "fields": {
+      "line": 17,
+      "name": "Университет дружбы народов",
+      "name_full": "Университет дружбы народов (Троицкая)",
+      "latitude": 55.649091,
+      "longitude": 37.5073,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 402,
+    "fields": {
+      "line": 20,
+      "name": "Ухтомская",
+      "name_full": "Ухтомская (D3)",
+      "latitude": 55.698611,
+      "longitude": 37.864167,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 403,
+    "fields": {
+      "line": 20,
+      "name": "Фабричная",
+      "name_full": "Фабричная (D3)",
+      "latitude": 55.572859,
+      "longitude": 38.206822,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 404,
+    "fields": {
+      "line": 11,
+      "name": "Физтех",
+      "name_full": "Физтех (Люблинско-Дмитровская)",
+      "latitude": 55.921536,
+      "longitude": 37.546498,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 405,
+    "fields": {
+      "line": 1,
+      "name": "Филатов луг",
+      "name_full": "Филатов луг (Сокольническая)",
+      "latitude": 55.601177,
+      "longitude": 37.407995,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 406,
+    "fields": {
+      "line": 4,
+      "name": "Филевский парк",
+      "name_full": "Филевский парк (Филёвская)",
+      "latitude": 55.739665,
+      "longitude": 37.483902,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 407,
+    "fields": {
+      "line": 18,
+      "name": "Фили",
+      "name_full": "Фили (D1)",
+      "latitude": 55.744216,
+      "longitude": 37.514976,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 408,
+    "fields": {
+      "line": 4,
+      "name": "Фили",
+      "name_full": "Фили (Филёвская)",
+      "latitude": 55.746763,
+      "longitude": 37.514035,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 409,
+    "fields": {
+      "line": 20,
+      "name": "Фирсановская",
+      "name_full": "Фирсановская (D3)",
+      "latitude": 55.960278,
+      "longitude": 37.251111,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 410,
+    "fields": {
+      "line": 11,
+      "name": "Фонвизинская",
+      "name_full": "Фонвизинская (Люблинско-Дмитровская)",
+      "latitude": 55.822778,
+      "longitude": 37.588056,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 411,
+    "fields": {
+      "line": 1,
+      "name": "Фрунзенская",
+      "name_full": "Фрунзенская (Сокольническая)",
+      "latitude": 55.727462,
+      "longitude": 37.58022,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 412,
+    "fields": {
+      "line": 20,
+      "name": "Химки",
+      "name_full": "Химки (D3)",
+      "latitude": 55.894444,
+      "longitude": 37.450833,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 413,
+    "fields": {
+      "line": 18,
+      "name": "Хлебниково",
+      "name_full": "Хлебниково (D1)",
+      "latitude": 55.970897,
+      "longitude": 37.504591,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 414,
+    "fields": {
+      "line": 20,
+      "name": "Ховрино",
+      "name_full": "Ховрино (D3)",
+      "latitude": 55.879444,
+      "longitude": 37.486667,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 415,
+    "fields": {
+      "line": 2,
+      "name": "Ховрино",
+      "name_full": "Ховрино (Замоскворецкая)",
+      "latitude": 55.878273,
+      "longitude": 37.480768,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 416,
+    "fields": {
+      "line": 15,
+      "name": "Хорошево",
+      "name_full": "Хорошево (МЦК)",
+      "latitude": 55.777222,
+      "longitude": 37.507222,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 417,
+    "fields": {
+      "line": 12,
+      "name": "Хорошевская",
+      "name_full": "Хорошевская (БКЛ)",
+      "latitude": 55.776862,
+      "longitude": 37.520797,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 418,
+    "fields": {
+      "line": 19,
+      "name": "Царицыно",
+      "name_full": "Царицыно (D2)",
+      "latitude": 55.618496,
+      "longitude": 37.668767,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 419,
+    "fields": {
+      "line": 2,
+      "name": "Царицыно",
+      "name_full": "Царицыно (Замоскворецкая)",
+      "latitude": 55.620982,
+      "longitude": 37.669612,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 420,
+    "fields": {
+      "line": 10,
+      "name": "Цветной бульвар",
+      "name_full": "Цветной бульвар (Серпуховско-Тимирязевская)",
+      "latitude": 55.771653,
+      "longitude": 37.620466,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 421,
+    "fields": {
+      "line": 12,
+      "name": "ЦСКА",
+      "name_full": "ЦСКА (БКЛ)",
+      "latitude": 55.786602,
+      "longitude": 37.533301,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 422,
+    "fields": {
+      "line": 1,
+      "name": "Черкизовская",
+      "name_full": "Черкизовская (Сокольническая)",
+      "latitude": 55.802787,
+      "longitude": 37.744863,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 423,
+    "fields": {
+      "line": 10,
+      "name": "Чертановская",
+      "name_full": "Чертановская (Серпуховско-Тимирязевская)",
+      "latitude": 55.640538,
+      "longitude": 37.606065,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 424,
+    "fields": {
+      "line": 10,
+      "name": "Чеховская",
+      "name_full": "Чеховская (Серпуховско-Тимирязевская)",
+      "latitude": 55.765747,
+      "longitude": 37.608493,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 425,
+    "fields": {
+      "line": 1,
+      "name": "Чистые пруды",
+      "name_full": "Чистые пруды (Сокольническая)",
+      "latitude": 55.76499,
+      "longitude": 37.638293,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 426,
+    "fields": {
+      "line": 11,
+      "name": "Чкаловская",
+      "name_full": "Чкаловская (Люблинско-Дмитровская)",
+      "latitude": 55.755951,
+      "longitude": 37.659293,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 427,
+    "fields": {
+      "line": 21,
+      "name": "Чухлинка",
+      "name_full": "Чухлинка (D4)",
+      "latitude": 55.733508,
+      "longitude": 37.76354,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 428,
+    "fields": {
+      "line": 6,
+      "name": "Шаболовская",
+      "name_full": "Шаболовская (Калужско-Рижская)",
+      "latitude": 55.718828,
+      "longitude": 37.607892,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 429,
+    "fields": {
+      "line": 15,
+      "name": "Шелепиха",
+      "name_full": "Шелепиха (МЦК)",
+      "latitude": 55.7575,
+      "longitude": 37.525556,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 430,
+    "fields": {
+      "line": 18,
+      "name": "Шереметьевская",
+      "name_full": "Шереметьевская (D1)",
+      "latitude": 55.983771,
+      "longitude": 37.498833,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 431,
+    "fields": {
+      "line": 11,
+      "name": "Шипиловская",
+      "name_full": "Шипиловская (Люблинско-Дмитровская)",
+      "latitude": 55.621667,
+      "longitude": 37.743611,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 432,
+    "fields": {
+      "line": 8,
+      "name": "Шоссе Энтузиастов",
+      "name_full": "Шоссе Энтузиастов (Калининская)",
+      "latitude": 55.75809,
+      "longitude": 37.751703,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 433,
+    "fields": {
+      "line": 15,
+      "name": "Шоссе Энтузиастов",
+      "name_full": "Шоссе Энтузиастов (МЦК)",
+      "latitude": 55.758633,
+      "longitude": 37.748477,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 434,
+    "fields": {
+      "line": 19,
+      "name": "Щербинка",
+      "name_full": "Щербинка (D2)",
+      "latitude": 55.510155,
+      "longitude": 37.562191,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 435,
+    "fields": {
+      "line": 19,
+      "name": "Щукинская",
+      "name_full": "Щукинская (D2)",
+      "latitude": 55.8112,
+      "longitude": 37.4605,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 436,
+    "fields": {
+      "line": 7,
+      "name": "Щукинская",
+      "name_full": "Щукинская (Таганско-Краснопресненская)",
+      "latitude": 55.8094,
+      "longitude": 37.463241,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 437,
+    "fields": {
+      "line": 3,
+      "name": "Щёлковская",
+      "name_full": "Щёлковская (Арбатско-Покровская)",
+      "latitude": 55.809962,
+      "longitude": 37.798261,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 438,
+    "fields": {
+      "line": 20,
+      "name": "Электрозаводская",
+      "name_full": "Электрозаводская (D3)",
+      "latitude": 55.781111,
+      "longitude": 37.705278,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 439,
+    "fields": {
+      "line": 3,
+      "name": "Электрозаводская",
+      "name_full": "Электрозаводская (Арбатско-Покровская)",
+      "latitude": 55.782057,
+      "longitude": 37.7053,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 440,
+    "fields": {
+      "line": 12,
+      "name": "Электрозаводская",
+      "name_full": "Электрозаводская (БКЛ)",
+      "latitude": 55.782057,
+      "longitude": 37.7053,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 441,
+    "fields": {
+      "line": 16,
+      "name": "Юго-Восточная",
+      "name_full": "Юго-Восточная (Некрасовская)",
+      "latitude": 55.705351,
+      "longitude": 37.817995,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 442,
+    "fields": {
+      "line": 1,
+      "name": "Юго-Западная",
+      "name_full": "Юго-Западная (Сокольническая)",
+      "latitude": 55.663146,
+      "longitude": 37.482852,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 443,
+    "fields": {
+      "line": 10,
+      "name": "Южная",
+      "name_full": "Южная (Серпуховско-Тимирязевская)",
+      "latitude": 55.622436,
+      "longitude": 37.609047,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 444,
+    "fields": {
+      "line": 6,
+      "name": "Ясенево",
+      "name_full": "Ясенево (Калужско-Рижская)",
+      "latitude": 55.606182,
+      "longitude": 37.5334,
+      "is_closed": null
+    }
+  },
+  {
+    "model": "realty_addresses.Metro",
+    "pk": 445,
+    "fields": {
+      "line": 11,
+      "name": "Яхромская",
+      "name_full": "Яхромская (Люблинско-Дмитровская)",
+      "latitude": 55.879904,
+      "longitude": 37.545429,
+      "is_closed": null
     }
   },
   {
@@ -1813,7 +7279,7 @@
       "ownership": null,
       "latitude": 54.99217,
       "longitude": 73.370558,
-      "metro": 1,
+      "metro": 344,
       "minutes_to_metro": 10
     }
   },
@@ -1828,7 +7294,7 @@
       "ownership": null,
       "latitude": 55.692846,
       "longitude": 37.540353,
-      "metro": 2,
+      "metro": 400,
       "minutes_to_metro": 6
     }
   },
@@ -1858,7 +7324,7 @@
       "ownership": null,
       "latitude": 54.9921,
       "longitude": 73.36886,
-      "metro": 4,
+      "metro": 359,
       "minutes_to_metro": null
     }
   },
@@ -1873,7 +7339,7 @@
       "ownership": null,
       "latitude": 54.992,
       "longitude": 73.3688,
-      "metro": 5,
+      "metro": 66,
       "minutes_to_metro": null
     }
   },
@@ -1888,7 +7354,7 @@
       "ownership": null,
       "latitude": 54.991,
       "longitude": 73.36885,
-      "metro": 6,
+      "metro": 22,
       "minutes_to_metro": null
     }
   },
@@ -1903,7 +7369,7 @@
       "ownership": null,
       "latitude": 54.99,
       "longitude": 73.36884,
-      "metro": 7,
+      "metro": 300,
       "minutes_to_metro": null
     }
   },
@@ -1918,7 +7384,7 @@
       "ownership": null,
       "latitude": 54.98,
       "longitude": 73.368,
-      "metro": 8,
+      "metro": 282,
       "minutes_to_metro": null
     }
   },
@@ -1933,7 +7399,7 @@
       "ownership": null,
       "latitude": 54.988,
       "longitude": 73.367,
-      "metro": 9,
+      "metro": 423,
       "minutes_to_metro": null
     }
   },
@@ -1948,7 +7414,7 @@
       "ownership": null,
       "latitude": 54.987,
       "longitude": 73.3687,
-      "metro": 10,
+      "metro": 72,
       "minutes_to_metro": null
     }
   },
@@ -1963,7 +7429,7 @@
       "ownership": null,
       "latitude": 54.983,
       "longitude": 73.3673,
-      "metro": 11,
+      "metro": 80,
       "minutes_to_metro": null
     }
   },
@@ -1978,7 +7444,7 @@
       "ownership": null,
       "latitude": 54.9,
       "longitude": 73.3,
-      "metro": 12,
+      "metro": 436,
       "minutes_to_metro": null
     }
   },
@@ -1993,7 +7459,7 @@
       "ownership": null,
       "latitude": 54.8,
       "longitude": 73.3,
-      "metro": 13,
+      "metro": 415,
       "minutes_to_metro": null
     }
   },
@@ -2008,7 +7474,7 @@
       "ownership": null,
       "latitude": 54.9921,
       "longitude": 73.36886,
-      "metro": 14,
+      "metro": 301,
       "minutes_to_metro": null
     }
   },
@@ -2023,7 +7489,7 @@
       "ownership": null,
       "latitude": 54,
       "longitude": 73,
-      "metro": 15,
+      "metro": 328,
       "minutes_to_metro": null
     }
   },

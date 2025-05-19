@@ -356,7 +356,7 @@ class RealtyFilterOptionsView(views.APIView):
 
                 },
                 "metro": [
-                    {"id": bt.id, "name": bt.name} for bt in
+                    {"id": bt.id, "name": bt.name, "name_full": bt.name_full, "color": bt.line.color} for bt in
                     realty_addresses_models.Metro.objects.all()
                 ]
             },

@@ -140,9 +140,13 @@ class MetroSerializer(serializers.ModelSerializer):
         required=True,
     )
 
+    color = serializers.CharField(source='line.color', read_only=True)
+    line_name = serializers.CharField(source='line.name', read_only=True)
+    line_name_full = serializers.CharField(source='line.name_full', read_only=True)
+
     class Meta:
         model = address_models.Metro
-        fields = "__all__"
+        fields = ['id', 'name', 'name_full', 'color', 'line_name', 'line_name_full']
 
 
 class AddressReadSerializer(serializers.ModelSerializer):
