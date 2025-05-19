@@ -400,6 +400,7 @@ class ShortRealtySerializer(serializers.ModelSerializer):
     owner_id = serializers.ReadOnlyField(source='owner.id')
     owner_name = serializers.ReadOnlyField(source='owner.first_name')
     owner_type = serializers.ReadOnlyField(source='owner_type.participant')
+    # bathroom = serializers.ReadOnlyField(source='common_characteristics.bathroom.type')
     communication_method = SlugRelatedField(
         slug_field="method",
         queryset=values_models.CommunicationMethod.objects.all(),
@@ -431,6 +432,7 @@ class ShortRealtySerializer(serializers.ModelSerializer):
                   "owner_id",
                   "owner_name",
                   "owner_type",
+                  # "bathroom",
                   "communication_method",
                   "floors_number",
                   "published_at",

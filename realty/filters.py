@@ -43,10 +43,11 @@ class RealtyFilter(django_filters.FilterSet):
         lookup_expr='icontains',
         label='Метро'
     )
-    address_street = django_filters.CharFilter(
-        field_name='address__street__name',
-        lookup_expr='icontains',
-        label='Улица'
+    address_street = django_filters.BaseInFilter(
+        method='filter_address',
+        label='Улица или метро',
+        help_text='Можно ввести несколько значений, через запятую без пробелов '
+                  'или добавить значение в новый строковый элемент.'
     )
     address_house_number = django_filters.CharFilter(
         field_name='address__house_number',
@@ -205,4 +206,15 @@ class RealtyFilter(django_filters.FilterSet):
             return queryset.filter(
                 Q(commission__isnull=True) | Q(commission=0)
             )
+        return queryset
+
+    def filter_address(self, queryset, name, value):
+        if value:
+            # Create a Q object for each value
+            q_objects = Q()
+            for v in value:
+                # Capitalize first letter, lowercase the rest
+                v = v[0].upper() + v[1:].lower()
+                q_objects |= Q(address__street__name__icontains=v) | Q(address__metro__name__icontains=v)
+            return queryset.filter(q_objects)
         return queryset
