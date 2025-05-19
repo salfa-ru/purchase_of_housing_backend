@@ -1,0 +1,233 @@
+[
+  {
+    "model": "realty_addresses.MetroLine",
+    "pk": 1,
+    "fields": {
+      "line_id": "1",
+      "line_name": "Сокольническая",
+      "line_name_full": "Сокольническая",
+      "city": "Москва",
+      "color": "E42313"
+    }
+  },
+  {
+    "model": "realty_addresses.MetroLine",
+    "pk": 2,
+    "fields": {
+      "line_id": "2",
+      "line_name": "Замоскворецкая",
+      "line_name_full": "Замоскворецкая",
+      "city": "Москва",
+      "color": "4FB04F"
+    }
+  },
+  {
+    "model": "realty_addresses.MetroLine",
+    "pk": 3,
+    "fields": {
+      "line_id": "3",
+      "line_name": "Арбатско-Покровская",
+      "line_name_full": "Арбатско-Покровская",
+      "city": "Москва",
+      "color": "0072BA"
+    }
+  },
+  {
+    "model": "realty_addresses.MetroLine",
+    "pk": 4,
+    "fields": {
+      "line_id": "4",
+      "line_name": "Филёвская",
+      "line_name_full": "Филёвская",
+      "city": "Москва",
+      "color": "1EBCEF"
+    }
+  },
+  {
+    "model": "realty_addresses.MetroLine",
+    "pk": 5,
+    "fields": {
+      "line_id": "5",
+      "line_name": "Кольцевая",
+      "line_name_full": "Кольцевая",
+      "city": "Москва",
+      "color": "915133"
+    }
+  },
+  {
+    "model": "realty_addresses.MetroLine",
+    "pk": 6,
+    "fields": {
+      "line_id": "6",
+      "line_name": "Калужско-Рижская",
+      "line_name_full": "Калужско-Рижская",
+      "city": "Москва",
+      "color": "F07E24"
+    }
+  },
+  {
+    "model": "realty_addresses.MetroLine",
+    "pk": 7,
+    "fields": {
+      "line_id": "7",
+      "line_name": "Таганско-Краснопресненская",
+      "line_name_full": "Таганско-Краснопресненская",
+      "city": "Москва",
+      "color": "943E90"
+    }
+  },
+  {
+    "model": "realty_addresses.MetroLine",
+    "pk": 8,
+    "fields": {
+      "line_id": "8",
+      "line_name": "Калининская",
+      "line_name_full": "Калининская",
+      "city": "Москва",
+      "color": "FFCD1C"
+    }
+  },
+  {
+    "model": "realty_addresses.MetroLine",
+    "pk": 9,
+    "fields": {
+      "line_id": "8А",
+      "line_name": "Солнцевская",
+      "line_name_full": "Солнцевская",
+      "city": "Москва",
+      "color": "FFCD1C"
+    }
+  },
+  {
+    "model": "realty_addresses.MetroLine",
+    "pk": 10,
+    "fields": {
+      "line_id": "9",
+      "line_name": "Серпуховско-Тимирязевская",
+      "line_name_full": "Серпуховско-Тимирязевская",
+      "city": "Москва",
+      "color": "ADACAC"
+    }
+  },
+  {
+    "model": "realty_addresses.MetroLine",
+    "pk": 11,
+    "fields": {
+      "line_id": "10",
+      "line_name": "Люблинско-Дмитровская",
+      "line_name_full": "Люблинско-Дмитровская",
+      "city": "Москва",
+      "color": "BED12C"
+    }
+  },
+  {
+    "model": "realty_addresses.MetroLine",
+    "pk": 12,
+    "fields": {
+      "line_id": "11",
+      "line_name": "БКЛ",
+      "line_name_full": "Большая кольцевая линия",
+      "city": "Москва",
+      "color": "88CDCF"
+    }
+  },
+  {
+    "model": "realty_addresses.MetroLine",
+    "pk": 13,
+    "fields": {
+      "line_id": "12",
+      "line_name": "Бутовская",
+      "line_name_full": "Бутовская",
+      "city": "Москва",
+      "color": "BAC8E8"
+    }
+  },
+  {
+    "model": "realty_addresses.MetroLine",
+    "pk": 14,
+    "fields": {
+      "line_id": "13",
+      "line_name": "Монорельс",
+      "line_name_full": "Монорельс",
+      "city": "Москва",
+      "color": "006DA8"
+    }
+  },
+  {
+    "model": "realty_addresses.MetroLine",
+    "pk": 15,
+    "fields": {
+      "line_id": "14",
+      "line_name": "МЦК",
+      "line_name_full": "Московское центральное кольцо",
+      "city": "Москва",
+      "color": "F9BCD1"
+    }
+  },
+  {
+    "model": "realty_addresses.MetroLine",
+    "pk": 16,
+    "fields": {
+      "line_id": "15",
+      "line_name": "Некрасовская",
+      "line_name_full": "Некрасовская",
+      "city": "Москва",
+      "color": "CC0066"
+    }
+  },
+  {
+    "model": "realty_addresses.MetroLine",
+    "pk": 17,
+    "fields": {
+      "line_id": "16",
+      "line_name": "Троицкая",
+      "line_name_full": "Троицкая",
+      "city": "Москва",
+      "color": "027762"
+    }
+  },
+  {
+    "model": "realty_addresses.MetroLine",
+    "pk": 18,
+    "fields": {
+      "line_id": "D1",
+      "line_name": "D1",
+      "line_name_full": "МЦД-1",
+      "city": "Москва",
+      "color": "FF6000"
+    }
+  },
+  {
+    "model": "realty_addresses.MetroLine",
+    "pk": 19,
+    "fields": {
+      "line_id": "D2",
+      "line_name": "D2",
+      "line_name_full": "МЦД-2",
+      "city": "Москва",
+      "color": "FF009F"
+    }
+  },
+  {
+    "model": "realty_addresses.MetroLine",
+    "pk": 20,
+    "fields": {
+      "line_id": "D3",
+      "line_name": "D3",
+      "line_name_full": "МЦД-3",
+      "city": "Москва",
+      "color": "EA5B04"
+    }
+  },
+  {
+    "model": "realty_addresses.MetroLine",
+    "pk": 21,
+    "fields": {
+      "line_id": "D4",
+      "line_name": "D4",
+      "line_name_full": "МЦД-4",
+      "city": "Москва",
+      "color": "00CC66"
+    }
+  }
+]

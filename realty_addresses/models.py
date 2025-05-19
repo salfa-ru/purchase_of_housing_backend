@@ -88,20 +88,77 @@ class Street(models.Model):
         return f"{self.name}, {self.zone}, {self.district}, {self.city}"
 
 
-class Metro(models.Model):
-    """Metro model."""
+class MetroLine(models.Model):
+    """
+    Metro Line model.
+    Хранит информацию о линиях метро.
+    """
+    id = models.IntegerField(primary_key=True)
 
-    name = models.CharField(
-        max_length=constants.CHAR_LENGTH, verbose_name="Метро"
+    line_id = models.CharField(
+        max_length=10,
+        unique=True,
+        verbose_name="Идентификатор линии",
+        help_text="Привычный код станции (например, '1', '8A', 'D1')"
     )
+    name = models.CharField(max_length=150, verbose_name="Название линии")
+    name_full = models.CharField(max_length=150, verbose_name="Полное Название линии")
+
+    city = models.CharField(max_length=50, verbose_name="Город", default="Москва")
+
+    color = models.CharField(max_length=6, verbose_name="Цвет линии (HEX)",
+                                 help_text="Шестнадцатеричный код цвета без '#'")
 
     class Meta:
         ordering = ["name"]
-        verbose_name = "Метро"
-        verbose_name_plural = "Метро"
+        verbose_name = "Линия метро"
+        verbose_name_plural = "Линии метро"
 
     def __str__(self):
-        return f"{self.name}"
+        if self.name != self.name_full:
+            return f"{self.name_full} ({self.name}) ({self.line_id})"
+        else:
+            return f"{self.name_full} ({self.line_id})"
+
+
+class Metro(models.Model):
+    """
+    Metro station model. Список станций метро.
+    """
+
+    id = models.IntegerField(primary_key=True)
+    name = models.CharField(
+        max_length=150,
+        verbose_name="Название станции (краткое)"
+    )
+    name_full = models.CharField(
+        max_length=250,
+        verbose_name="Полное название станции",
+        help_text="Например, 'Авиамоторная (D3)'",
+        # TODO - Нужно позже удалить:
+        default=""
+    )
+    line = models.ForeignKey(
+        MetroLine,
+        on_delete=models.CASCADE,
+        related_name='stations',
+        verbose_name="Линия метро",
+        # TODO - Нужно позже удалить:
+        default=1  # По умолчанию устанавливаем значение 1 - только для успешной миграции!
+
+    )
+    latitude = models.FloatField(verbose_name="Широта", null=True, blank=True)
+    longitude = models.FloatField(verbose_name="Долгота", null=True, blank=True)
+    is_closed = models.BooleanField(null=True, blank=True, verbose_name="Станция закрыта")
+
+    class Meta:
+        ordering = ["name", "line__id"]
+        verbose_name = "Станция метро"
+        verbose_name_plural = "Станции метро"
+
+    def __str__(self):
+        # Используем name_full, так как оно более информативно
+        return f"{self.name_full}"
 
 
 class Address(models.Model):

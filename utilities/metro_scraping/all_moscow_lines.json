@@ -1,0 +1,170 @@
+[
+  {
+    "id": 1,
+    "line_id": "1",
+    "line_name": "Сокольническая",
+    "line_name_full": "Сокольническая линия",
+    "city": "Москва",
+    "color": "E42313"
+  },
+  {
+    "id": 2,
+    "line_id": "2",
+    "line_name": "Замоскворецкая",
+    "line_name_full": "Замоскворецкая линия",
+    "city": "Москва",
+    "color": "4FB04F"
+  },
+  {
+    "id": 3,
+    "line_id": "3",
+    "line_name": "Арбатско-Покровская",
+    "line_name_full": "Арбатско-Покровская линия",
+    "city": "Москва",
+    "color": "0072BA"
+  },
+  {
+    "id": 4,
+    "line_id": "4",
+    "line_name": "Филёвская",
+    "line_name_full": "Филёвская линия",
+    "city": "Москва",
+    "color": "1EBCEF"
+  },
+  {
+    "id": 5,
+    "line_id": "5",
+    "line_name": "Кольцевая",
+    "line_name_full": "Кольцевая линия",
+    "city": "Москва",
+    "color": "915133"
+  },
+  {
+    "id": 6,
+    "line_id": "6",
+    "line_name": "Калужско-Рижская",
+    "line_name_full": "Калужско-Рижская линия",
+    "city": "Москва",
+    "color": "F07E24"
+  },
+  {
+    "id": 7,
+    "line_id": "7",
+    "line_name": "Таганско-Краснопресненская",
+    "line_name_full": "Таганско-Краснопресненская линия",
+    "city": "Москва",
+    "color": "943E90"
+  },
+  {
+    "id": 8,
+    "line_id": "8",
+    "line_name": "Калининская",
+    "line_name_full": "Калининская линия",
+    "city": "Москва",
+    "color": "FFCD1C"
+  },
+  {
+    "id": 9,
+    "line_id": "8А",
+    "line_name": "Солнцевская",
+    "line_name_full": "Солнцевская линия",
+    "city": "Москва",
+    "color": "FFCD1C"
+  },
+  {
+    "id": 10,
+    "line_id": "9",
+    "line_name": "Серпуховско-Тимирязевская",
+    "line_name_full": "Серпуховско-Тимирязевская линия",
+    "city": "Москва",
+    "color": "ADACAC"
+  },
+  {
+    "id": 11,
+    "line_id": "10",
+    "line_name": "Люблинско-Дмитровская",
+    "line_name_full": "Люблинско-Дмитровская линия",
+    "city": "Москва",
+    "color": "BED12C"
+  },
+  {
+    "id": 12,
+    "line_id": "11",
+    "line_name": "БКЛ",
+    "line_name_full": "Большая кольцевая линия",
+    "city": "Москва",
+    "color": "88CDCF"
+  },
+  {
+    "id": 13,
+    "line_id": "12",
+    "line_name": "Бутовская",
+    "line_name_full": "Бутовская линия",
+    "city": "Москва",
+    "color": "BAC8E8"
+  },
+  {
+    "id": 14,
+    "line_id": "13",
+    "line_name": "Монорельс",
+    "line_name_full": "Монорельс",
+    "city": "Москва",
+    "color": "006DA8"
+  },
+  {
+    "id": 15,
+    "line_id": "14",
+    "line_name": "МЦК",
+    "line_name_full": "Московское центральное кольцо",
+    "city": "Москва",
+    "color": "F9BCD1"
+  },
+  {
+    "id": 16,
+    "line_id": "15",
+    "line_name": "Некрасовская",
+    "line_name_full": "Некрасовская линия",
+    "city": "Москва",
+    "color": "CC0066"
+  },
+  {
+    "id": 17,
+    "line_id": "16",
+    "line_name": "Троицкая",
+    "line_name_full": "Троицкая линия",
+    "city": "Москва",
+    "color": "027762"
+  },
+  {
+    "id": 18,
+    "line_id": "D1",
+    "line_name": "D1",
+    "line_name_full": "МЦД-1 Белорусско-Савёловский диаметр",
+    "city": "Москва",
+    "color": "FF6000"
+  },
+  {
+    "id": 19,
+    "line_id": "D2",
+    "line_name": "D2",
+    "line_name_full": "МЦД-2 Курско-Рижский диаметр",
+    "city": "Москва",
+    "color": "FF009F"
+  },
+  {
+    "id": 20,
+    "line_id": "D3",
+    "line_name": "D3",
+    "line_name_full": "МЦД-3 Ленинградско-Казанский диаметр",
+    "city": "Москва",
+    "color": "EA5B04"
+  },
+  {
+    "id": 21,
+    "line_id": "D4",
+    "line_name": "D4",
+    "line_name_full": "МЦД-4 Калужско-Нижегородский диаметр",
+    "city": "Москва",
+    "color": "00CC66"
+  }
+]

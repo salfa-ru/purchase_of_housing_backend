@@ -5,6 +5,7 @@ from drf_spectacular.utils import extend_schema
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework import generics
 
 from config import constants
 from realty.filters import RealtyFilter
@@ -12,8 +13,10 @@ from realty.models import Realty
 from realty.serializers.serializers_realty import ShortRealtySerializer
 from realty_addresses.serializers import (
     MapPointsSerializer, MapPointsRequestSerializer,
-    GetAnnouncementsInMapPointRequestSerializer)
+    GetAnnouncementsInMapPointRequestSerializer, MetroSerializer)
 from realty_values import models as models_values
+from .models import Metro, MetroLine
+from realty_addresses.filters import MetroFilter
 
 
 @extend_schema(
@@ -121,3 +124,33 @@ class GetListAnnouncementsInMapPoint(APIView):
         serializer = ShortRealtySerializer(queryset, many=True)
 
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+@extend_schema(
+    summary='Получение списка станций метро',
+    description=(
+        'Возвращает список станций метро с информацией о линиях. '
+        'Поддерживает фильтрацию по названию станции и линии метро. '
+        'Поиск осуществляется по частичному совпадению и не чувствителен к регистру. '
+        'Возвращает 404, если станции не найдены.'
+    ),
+    responses={200: MetroSerializer(many=True), 404: None}
+)
+class MetroStationsAPIView(generics.ListAPIView):
+    """
+    API endpoint for retrieving metro stations with optional filtering.
+    """
+    serializer_class = MetroSerializer
+    queryset = Metro.objects.select_related('line').all()
+    filter_backends = (DjangoFilterBackend,)
+    filterset_class = MetroFilter
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())
+        if not queryset.exists():
+            return Response(
+                {"detail": "Станции метро не найдены."},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
