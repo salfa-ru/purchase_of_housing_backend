@@ -54,6 +54,8 @@ class MessagesPagination(ConfigurablePagination):
                                      f'(по умолчанию {constants.CHATS_PAGESIZE_DEFAULT}, '
                                      f'максимум {constants.CHATS_PAGESIZE_MAX}), '
                                      f'настраивается константами CHATS_PAGESIZE'),
+        OpenApiParameter(name='i_block', type=bool, location=OpenApiParameter.QUERY, description='Фильтр: показывать только чаты, где я заблокировал собеседника (true/false)'),
+        OpenApiParameter(name='i_am_blocked', type=bool, location=OpenApiParameter.QUERY, description='Фильтр: показывать только чаты, где меня заблокировал собеседник (true/false)'),
     ]
 )
 class ChatListAPIView(generics.ListAPIView):
@@ -64,7 +66,10 @@ class ChatListAPIView(generics.ListAPIView):
     <font color="#ce591b"> - В схеме Swagger его не видно!!</font></li>
     <li><strong>unread </strong>- количество непрочитанных сообщений в каждом чате</li></ul>
 
-    Не смотрите не структуру "образца" JSON, смотрите на реально приходящий JSON! """
+    Не смотрите не структуру "образца" JSON, смотрите на реально приходящий JSON! <br><br>
+    В качестве значения "i_am_blocked" и "i_block" могут быть  <ul>
+    <li>Истинные значения: <strong> "true", "1", "yes", "on" </strong> </li>
+    <li>Ложные значения:  <strong>"false", "0", "no", "off" </strong></li></ul>"""
     serializer_class = ChatMessagesSerializer
     permission_classes = [permissions.IsAuthenticated]
     pagination_class = ChatsPagination
@@ -75,24 +80,46 @@ class ChatListAPIView(generics.ListAPIView):
 
         is_blacklist = self.kwargs.get("blacklist", False)
 
-        if is_blacklist:
-            filtered_chats = []
-            for chat in chats:
-                other_user = chat.owner if chat.client == user else chat.client
-                if Blocking.objects.filter(user_who=user, user_whom=other_user):
-                    if chat.messages.filter(
-                            Q(user_from=user, is_deleted_from=False) |
-                            Q(user_to=user, is_deleted_to=False)
-                    ).exists():
-                        filtered_chats.append(chat)
-        else:
-            filtered_chats = []
-            for chat in chats:
-                if chat.messages.filter(
-                        Q(user_from=user, is_deleted_from=False) |
-                        Q(user_to=user, is_deleted_to=False)
-                ).exists():
-                    filtered_chats.append(chat)
+        # Получаем query-параметры
+        i_block_param = self.request.query_params.get("i_block")
+        i_am_blocked_param = self.request.query_params.get("i_am_blocked")
+
+        def parse_bool(val):
+            if val is None:
+                return None
+            if val.lower() in ("true", "1", "yes", "on"): return True
+            if val.lower() in ("false", "0", "no", "off"): return False
+            return None
+
+        i_block = parse_bool(i_block_param)
+        i_am_blocked = parse_bool(i_am_blocked_param)
+
+        filtered_chats = []
+        for chat in chats:
+            # Фильтрация по наличию сообщений (как было)
+            has_messages = chat.messages.filter(
+                Q(user_from=user, is_deleted_from=False) |
+                Q(user_to=user, is_deleted_to=False)
+            ).exists()
+            if not has_messages:
+                continue
+
+            # Фильтрация по блокировкам
+            other_user = chat.owner if chat.client == user else chat.client
+            i_block_val = Blocking.objects.filter(user_who=user, user_whom=other_user).exists()
+            i_am_blocked_val = Blocking.objects.filter(user_who=other_user, user_whom=user).exists()
+
+            if i_block is not None and i_block != i_block_val:
+                continue
+            if i_am_blocked is not None and i_am_blocked != i_am_blocked_val:
+                continue
+
+            if is_blacklist:
+                # Для /chats/blacklist/ — только если я заблокировал собеседника
+                if not i_block_val:
+                    continue
+
+            filtered_chats.append(chat)
         return filtered_chats
 
     def list(self, request, *args, **kwargs):  # Переопределяем метод list ДЛЯ ПОЛУЧЕНИЯ UNREAD TOTAL
