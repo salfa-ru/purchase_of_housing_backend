@@ -14,11 +14,13 @@ class RealtyPhoto(models.Model):
         verbose_name='Недвижимость',
         related_name='realty_photos',
     )
-    image = models.ImageField(upload_to='realty_photos', verbose_name='Фото') # default='', null=True, blank=True 
+    image = models.ImageField(upload_to='realty_photos', verbose_name='Фото')
+    sorter = models.IntegerField(default=0, verbose_name='Порядок сортировки')
 
     class Meta:
         verbose_name = 'Фото недвижимости'
         verbose_name_plural = 'Фото недвижимости'
+        ordering = ['sorter']
 
     def __str__(self):
         return self.image.name

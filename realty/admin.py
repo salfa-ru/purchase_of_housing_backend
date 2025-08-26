@@ -1,8 +1,27 @@
 from django.contrib import admin
 
+from django.utils.html import format_html
 from .forms import RealtyForm
 from .models import Realty, Sale, Rent
 from .utils import get_apartment_short_info
+from realty_photos.models import RealtyPhoto
+
+
+class RealtyPhotoInline(admin.TabularInline):
+    model = RealtyPhoto
+    extra = 0
+    fields = ('photo_id', 'image_tag', 'sorter',)
+    readonly_fields = ('photo_id', 'image_tag',)
+
+    def photo_id(self, obj):
+        return obj.id
+    photo_id.short_description = 'ID'
+
+    def image_tag(self, obj):
+        if obj.image:
+            return format_html('<img src="{}" style="max-width:100px; max-height:100px;" />', obj.image.url)
+        return "No Image"
+    image_tag.short_description = 'Image'
 
 
 class SaleInline(admin.StackedInline):
@@ -110,11 +129,11 @@ class RealtyAdmin(admin.ModelAdmin):
 
     def get_inlines(self, request, obj=None):
         """Использование inline формы только для уже созданной модели"""
-        inlines = []
+        inlines = [RealtyPhotoInline] # Always include photo inline
         if obj and obj.trade_type == "sale":
-            inlines = [SaleInline]
+            inlines.append(SaleInline)
         elif obj and obj.trade_type == "rent":
-            inlines = [RentInline]
+            inlines.append(RentInline)
         return inlines
 
 
