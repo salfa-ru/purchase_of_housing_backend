@@ -253,9 +253,10 @@ class RealtyCreateSerializer(serializers.ModelSerializer):
 
         # Check for minimum and maximum photos
         num_photos = len(value) # The 'value' list represents the desired final set of photos
-        
-        if not (5 <= num_photos <= 10):
-            raise serializers.ValidationError("The number of photos must be between 5 and 10.")
+
+
+        if not (constants.NUMBER_OF_PHOTOS_MIN <= num_photos <= constants.NUMBER_OF_PHOTOS_MAX):
+            raise serializers.ValidationError(f"The number of photos must be between {constants.NUMBER_OF_PHOTOS_MIN} and {constants.NUMBER_OF_PHOTOS_MAX}.")
         
         return value
 
