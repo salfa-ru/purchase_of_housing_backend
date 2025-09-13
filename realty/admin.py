@@ -10,8 +10,8 @@ from realty_photos.models import RealtyPhoto
 class RealtyPhotoInline(admin.TabularInline):
     model = RealtyPhoto
     extra = 0
-    fields = ('photo_id', 'image_tag', 'sorter',)
-    readonly_fields = ('photo_id', 'image_tag',)
+    fields = ('photo_id', 'image_tag', 'sorter')
+    readonly_fields = ('photo_id', 'image_tag')
 
     def photo_id(self, obj):
         return obj.id

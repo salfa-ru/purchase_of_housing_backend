@@ -16,5 +16,5 @@ class RealtyPhotoSerializer(serializers.ModelSerializer):
         fields = (
             "id",
             "image",
-            # "sorter",
+            # "sorter" ,
             )
