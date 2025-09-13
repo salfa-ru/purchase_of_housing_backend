@@ -14,6 +14,7 @@ from realty_values import models as values_models
 from realty_specificities import models as specificities_models
 from realty_addresses import serializers as address_serializers
 from realty_specificities import serializers as specif_serializers
+from django.db.models import Max
 from realty_photos.serializers import RealtyPhotoSerializer
 
 
@@ -508,7 +509,7 @@ class RealtyCreateSerializer(serializers.ModelSerializer):
 
             if uploaded_photos:
                 # Find the max sorter value for existing photos
-                max_sorter = realty_instance.realty_photos.aggregate(models.Max('sorter'))['sorter__max']
+                max_sorter = realty_instance.realty_photos.aggregate(Max('sorter'))['sorter__max']
                 next_sorter = (max_sorter or 0) + 1
                 for photo in uploaded_photos:
                     RealtyPhoto.objects.create(realty=realty_instance, image=photo, sorter=next_sorter)
