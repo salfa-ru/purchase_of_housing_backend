@@ -20,7 +20,7 @@ DEBUG = os.getenv('DEBUG', 'False') == 'True'
 
 DOMAIN = os.getenv('DOMAIN')
 
-ALLOWED_HOSTS = [DOMAIN, os.getenv('HOST_IP'), 'localhost']
+ALLOWED_HOSTS = [DOMAIN, os.getenv('HOST_IP'), 'localhost', 'api.prod.estate.ktsf.ru']
 
 
 CSRF_TRUSTED_ORIGINS = [
