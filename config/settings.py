@@ -30,7 +30,7 @@ CSRF_TRUSTED_ORIGINS = [
     # This is not right
     "https://api.prod.estate.ktsf.ru",
     "https://api.test.estate.ktsf.ru",
-]
+
     # 'http://*',
     # 'https://*',
 ]
