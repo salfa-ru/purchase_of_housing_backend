@@ -26,6 +26,11 @@ ALLOWED_HOSTS = [DOMAIN, os.getenv('HOST_IP'), 'localhost', 'api.prod.estate.kts
 CSRF_TRUSTED_ORIGINS = [
     f'http://{DOMAIN}',
     f'https://{DOMAIN}',
+
+    # This is not right
+    "https://api.prod.estate.ktsf.ru",
+    "https://api.test.estate.ktsf.ru",
+]
     # 'http://*',
     # 'https://*',
 ]
