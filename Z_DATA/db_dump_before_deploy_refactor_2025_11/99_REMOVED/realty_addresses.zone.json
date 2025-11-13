@@ -1,0 +1,93 @@
+[
+{
+    "model": "realty_addresses.zone",
+    "pk": 1,
+    "fields": {
+        "name": "Гагаринский"
+    }
+},
+{
+    "model": "realty_addresses.zone",
+    "pk": 2,
+    "fields": {
+        "name": "Красносельский"
+    }
+},
+{
+    "model": "realty_addresses.zone",
+    "pk": 3,
+    "fields": {
+        "name": "Войковский"
+    }
+},
+{
+    "model": "realty_addresses.zone",
+    "pk": 4,
+    "fields": {
+        "name": "Южное Медведково"
+    }
+},
+{
+    "model": "realty_addresses.zone",
+    "pk": 5,
+    "fields": {
+        "name": "Преображенское"
+    }
+},
+{
+    "model": "realty_addresses.zone",
+    "pk": 6,
+    "fields": {
+        "name": "Текстильщики"
+    }
+},
+{
+    "model": "realty_addresses.zone",
+    "pk": 7,
+    "fields": {
+        "name": "Чертаново Северное"
+    }
+},
+{
+    "model": "realty_addresses.zone",
+    "pk": 8,
+    "fields": {
+        "name": "Обручевский"
+    }
+},
+{
+    "model": "realty_addresses.zone",
+    "pk": 9,
+    "fields": {
+        "name": "Можайский"
+    }
+},
+{
+    "model": "realty_addresses.zone",
+    "pk": 10,
+    "fields": {
+        "name": "Щукино"
+    }
+},
+{
+    "model": "realty_addresses.zone",
+    "pk": 11,
+    "fields": {
+        "name": "Старое Крюково"
+    }
+},
+{
+    "model": "realty_addresses.zone",
+    "pk": 12,
+    "fields": {
+        "name": "Коммунарка"
+    }
+},
+{
+    "model": "realty_addresses.zone",
+    "pk": 13,
+    "fields": {
+        "name": "Краснопахорский"
+    }
+}
+]

@@ -1,0 +1,30 @@
+[
+{
+    "model": "realty_values.realtyadvstatus",
+    "pk": 1,
+    "fields": {
+        "status": "Активно"
+    }
+},
+{
+    "model": "realty_values.realtyadvstatus",
+    "pk": 2,
+    "fields": {
+        "status": "На модерации"
+    }
+},
+{
+    "model": "realty_values.realtyadvstatus",
+    "pk": 3,
+    "fields": {
+        "status": "Отклонено"
+    }
+},
+{
+    "model": "realty_values.realtyadvstatus",
+    "pk": 4,
+    "fields": {
+        "status": "В архиве"
+    }
+}
+]

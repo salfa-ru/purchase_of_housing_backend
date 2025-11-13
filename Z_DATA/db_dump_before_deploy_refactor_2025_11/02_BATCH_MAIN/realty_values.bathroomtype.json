@@ -1,0 +1,16 @@
+[
+{
+    "model": "realty_values.bathroomtype",
+    "pk": 1,
+    "fields": {
+        "type": "Раздельный"
+    }
+},
+{
+    "model": "realty_values.bathroomtype",
+    "pk": 2,
+    "fields": {
+        "type": "Совмещенный"
+    }
+}
+]

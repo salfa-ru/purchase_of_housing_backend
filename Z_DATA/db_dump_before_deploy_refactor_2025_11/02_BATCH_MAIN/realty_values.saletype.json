@@ -1,0 +1,9 @@
+[
+{
+    "model": "realty_values.saletype",
+    "pk": 1,
+    "fields": {
+        "type": "Свободная продажа"
+    }
+}
+]

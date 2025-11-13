@@ -1,0 +1,16 @@
+[
+{
+    "model": "realty_values.communicationmethod",
+    "pk": 1,
+    "fields": {
+        "method": "Звонки и сообщения"
+    }
+},
+{
+    "model": "realty_values.communicationmethod",
+    "pk": 2,
+    "fields": {
+        "method": "Только сообщения"
+    }
+}
+]

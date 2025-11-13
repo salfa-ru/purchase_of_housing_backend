@@ -1,0 +1,16 @@
+[
+{
+    "model": "realty_values.realtytype",
+    "pk": 1,
+    "fields": {
+        "type": "Квартира"
+    }
+},
+{
+    "model": "realty_values.realtytype",
+    "pk": 2,
+    "fields": {
+        "type": "Апартаменты"
+    }
+}
+]

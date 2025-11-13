@@ -1,0 +1,30 @@
+[
+{
+    "model": "realty_values.repairtype",
+    "pk": 1,
+    "fields": {
+        "type": "Без ремонта"
+    }
+},
+{
+    "model": "realty_values.repairtype",
+    "pk": 2,
+    "fields": {
+        "type": "Косметический"
+    }
+},
+{
+    "model": "realty_values.repairtype",
+    "pk": 3,
+    "fields": {
+        "type": "Евроремонт"
+    }
+},
+{
+    "model": "realty_values.repairtype",
+    "pk": 4,
+    "fields": {
+        "type": "Дизайнерский"
+    }
+}
+]

@@ -1,0 +1,23 @@
+[
+{
+    "model": "realty_values.tradeparticipant",
+    "pk": 1,
+    "fields": {
+        "participant": "Собственник"
+    }
+},
+{
+    "model": "realty_values.tradeparticipant",
+    "pk": 2,
+    "fields": {
+        "participant": "Арендатор"
+    }
+},
+{
+    "model": "realty_values.tradeparticipant",
+    "pk": 3,
+    "fields": {
+        "participant": "Агент"
+    }
+}
+]

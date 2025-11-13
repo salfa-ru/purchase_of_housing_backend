@@ -1,0 +1,28 @@
+[
+{
+    "model": "users.user",
+    "pk": 1,
+    "fields": {
+        "password": "pbkdf2_sha256$600000$hSXquKNLnTyiXda2KoQP2H$en/quGm14MpIhulNN5lNab+E/l3XnvDx2IEd3GbuBhs=",
+        "last_login": "2025-08-26T09:10:34.413Z",
+        "is_superuser": true,
+        "username": "admin",
+        "is_staff": true,
+        "is_active": true,
+        "date_joined": "2024-08-21T08:14:13.819Z",
+        "first_name": "admin",
+        "last_name": "admin",
+        "email": "admin@email.com",
+        "uuid_esa": null,
+        "avatar": "",
+        "user_type": null,
+        "phone_number": "admin_phone",
+        "updated_at": null,
+        "phone_qr_code": "",
+        "is_deleted": false,
+        "deleted_at": null,
+        "groups": [],
+        "user_permissions": []
+    }
+}
+]

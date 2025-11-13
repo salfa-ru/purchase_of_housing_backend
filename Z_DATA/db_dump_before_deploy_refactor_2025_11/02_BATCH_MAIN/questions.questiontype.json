@@ -1,0 +1,16 @@
+[
+{
+    "model": "questions.questiontype",
+    "pk": 1,
+    "fields": {
+        "type": "FAQ"
+    }
+},
+{
+    "model": "questions.questiontype",
+    "pk": 2,
+    "fields": {
+        "type": "Правовая информация"
+    }
+}
+]

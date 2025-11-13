@@ -1,0 +1,9 @@
+[
+{
+    "model": "realty_values.housingtype",
+    "pk": 1,
+    "fields": {
+        "type": "Вторичное жилье"
+    }
+}
+]

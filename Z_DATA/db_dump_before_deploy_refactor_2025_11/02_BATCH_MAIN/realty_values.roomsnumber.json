@@ -1,0 +1,37 @@
+[
+{
+    "model": "realty_values.roomsnumber",
+    "pk": 1,
+    "fields": {
+        "number_of_rooms": "1"
+    }
+},
+{
+    "model": "realty_values.roomsnumber",
+    "pk": 2,
+    "fields": {
+        "number_of_rooms": "2"
+    }
+},
+{
+    "model": "realty_values.roomsnumber",
+    "pk": 3,
+    "fields": {
+        "number_of_rooms": "3"
+    }
+},
+{
+    "model": "realty_values.roomsnumber",
+    "pk": 4,
+    "fields": {
+        "number_of_rooms": "4+"
+    }
+},
+{
+    "model": "realty_values.roomsnumber",
+    "pk": 5,
+    "fields": {
+        "number_of_rooms": "Студия"
+    }
+}
+]

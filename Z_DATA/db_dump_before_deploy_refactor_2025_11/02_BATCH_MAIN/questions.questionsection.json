@@ -1,0 +1,42 @@
+[
+{
+    "model": "questions.questionsection",
+    "pk": 1,
+    "fields": {
+        "section": "Аренда",
+        "type": 1
+    }
+},
+{
+    "model": "questions.questionsection",
+    "pk": 2,
+    "fields": {
+        "section": "Покупка",
+        "type": 1
+    }
+},
+{
+    "model": "questions.questionsection",
+    "pk": 3,
+    "fields": {
+        "section": "Продажа",
+        "type": 1
+    }
+},
+{
+    "model": "questions.questionsection",
+    "pk": 4,
+    "fields": {
+        "section": "Частые вопросы о недвижимости",
+        "type": 2
+    }
+},
+{
+    "model": "questions.questionsection",
+    "pk": 5,
+    "fields": {
+        "section": "Шаблоны документов",
+        "type": 2
+    }
+}
+]

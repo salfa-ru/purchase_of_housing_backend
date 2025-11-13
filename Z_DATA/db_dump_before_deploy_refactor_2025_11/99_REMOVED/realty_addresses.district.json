@@ -1,0 +1,86 @@
+[
+{
+    "model": "realty_addresses.district",
+    "pk": 1,
+    "fields": {
+        "name": "САО"
+    }
+},
+{
+    "model": "realty_addresses.district",
+    "pk": 2,
+    "fields": {
+        "name": "ЮЗАО"
+    }
+},
+{
+    "model": "realty_addresses.district",
+    "pk": 3,
+    "fields": {
+        "name": "ЦАО"
+    }
+},
+{
+    "model": "realty_addresses.district",
+    "pk": 4,
+    "fields": {
+        "name": "СВАО"
+    }
+},
+{
+    "model": "realty_addresses.district",
+    "pk": 5,
+    "fields": {
+        "name": "ВАО"
+    }
+},
+{
+    "model": "realty_addresses.district",
+    "pk": 6,
+    "fields": {
+        "name": "ЮВАО"
+    }
+},
+{
+    "model": "realty_addresses.district",
+    "pk": 7,
+    "fields": {
+        "name": "ЮАО"
+    }
+},
+{
+    "model": "realty_addresses.district",
+    "pk": 8,
+    "fields": {
+        "name": "ЗАО"
+    }
+},
+{
+    "model": "realty_addresses.district",
+    "pk": 9,
+    "fields": {
+        "name": "СЗАО"
+    }
+},
+{
+    "model": "realty_addresses.district",
+    "pk": 10,
+    "fields": {
+        "name": "Зеленоградский АО"
+    }
+},
+{
+    "model": "realty_addresses.district",
+    "pk": 11,
+    "fields": {
+        "name": "Новомосковский АО"
+    }
+},
+{
+    "model": "realty_addresses.district",
+    "pk": 12,
+    "fields": {
+        "name": "Троицкий"
+    }
+}
+]

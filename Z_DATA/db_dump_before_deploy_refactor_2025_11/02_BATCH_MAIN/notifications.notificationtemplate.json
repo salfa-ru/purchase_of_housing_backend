@@ -1,0 +1,65 @@
+[
+{
+    "model": "notifications.notificationtemplate",
+    "pk": 1,
+    "fields": {
+        "code": "on_moderation",
+        "part1": "Ваше объявление №___ отправлено на модерацию.",
+        "part2": null
+    }
+},
+{
+    "model": "notifications.notificationtemplate",
+    "pk": 2,
+    "fields": {
+        "code": "published",
+        "part1": "Ваше объявление №___ опубликовано.",
+        "part2": null
+    }
+},
+{
+    "model": "notifications.notificationtemplate",
+    "pk": 3,
+    "fields": {
+        "code": "rejected",
+        "part1": "Ваше объявление №___ отклонено модератором.",
+        "part2": "Объявление не соответствует Правилам размещения объявлений на сайте."
+    }
+},
+{
+    "model": "notifications.notificationtemplate",
+    "pk": 4,
+    "fields": {
+        "code": "expired",
+        "part1": "Истек срок публикации объявления №___.",
+        "part2": "Ваше объявление было перемещено в архив. Чтобы снова опубликовать объявление, нажмите «Опубликовать»."
+    }
+},
+{
+    "model": "notifications.notificationtemplate",
+    "pk": 5,
+    "fields": {
+        "code": "blocked",
+        "part1": "Ваше объявление №___ заблокировано модератором.",
+        "part2": "Объявление не соответствует Правилам размещения объявлений на сайте."
+    }
+},
+{
+    "model": "notifications.notificationtemplate",
+    "pk": 6,
+    "fields": {
+        "code": "archived",
+        "part1": "Ваше объявление №___ было перемещено в архив.",
+        "part2": "Чтобы снова опубликовать объявление, нажмите «Опубликовать»."
+    }
+},
+{
+    "model": "notifications.notificationtemplate",
+    "pk": 404,
+    "fields": {
+        "code": "deleted",
+        "part1": "Ваше объявление №___ удалено.",
+        "part2": null
+    }
+}
+]

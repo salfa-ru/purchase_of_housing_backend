@@ -1,0 +1,9 @@
+[
+{
+    "model": "realty_addresses.city",
+    "pk": 1,
+    "fields": {
+        "name": "Москва"
+    }
+}
+]

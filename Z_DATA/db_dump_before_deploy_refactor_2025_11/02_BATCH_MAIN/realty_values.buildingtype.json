@@ -1,0 +1,44 @@
+[
+{
+    "model": "realty_values.buildingtype",
+    "pk": 1,
+    "fields": {
+        "type": "Кирпичный"
+    }
+},
+{
+    "model": "realty_values.buildingtype",
+    "pk": 2,
+    "fields": {
+        "type": "Монолитный"
+    }
+},
+{
+    "model": "realty_values.buildingtype",
+    "pk": 3,
+    "fields": {
+        "type": "Панельный"
+    }
+},
+{
+    "model": "realty_values.buildingtype",
+    "pk": 4,
+    "fields": {
+        "type": "Блочный"
+    }
+},
+{
+    "model": "realty_values.buildingtype",
+    "pk": 5,
+    "fields": {
+        "type": "Кирпично-монолитный"
+    }
+},
+{
+    "model": "realty_values.buildingtype",
+    "pk": 6,
+    "fields": {
+        "type": "Деревянный"
+    }
+}
+]
