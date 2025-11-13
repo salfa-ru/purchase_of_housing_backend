@@ -1,3 +1,6 @@
+
+Первичная популяция данными
+
 1) ADD FIRST USER - ADMIN (with default pass)
 
 python manage.py loaddata Z_DATA/db_dump_before_deploy_refactor_2025_11/01_FIRST_BATCH/users.user.json
@@ -25,5 +28,9 @@ auth.group.json
 auth.permission.json
 realty_addresses.district.json
 realty_addresses.zone.json
+
+----------
+
+Добавление базовых данных завершено.
 
 

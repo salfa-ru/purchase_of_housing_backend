@@ -1,0 +1,58 @@
+
+services:  # Определение всех сервисов, которые будут запускаться.
+
+  db:  # Настройка сервиса для базы данных PostgreSQL.
+    image: postgres:16  # Используемый образ PostgreSQL версии 16.
+    env_file:
+      - .env  # Файл окружения (.env) с настройками, такими как POSTGRES_USER и POSTGRES_DB.
+    volumes:
+      # - pgdata:/var/lib/postgresql/data  # Монтирование тома для сохранения данных базы на хосте.
+      - type: bind
+        source: /opt/postgres_data # Путь на хосте
+        target: /var/lib/postgresql/data
+        bind:
+          create_host_path: true
+    healthcheck:
+      test: [ "CMD-SHELL", "sh -c 'pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB'" ]  # Проверка готовности PostgreSQL к работе.
+      interval: 5s  # Интервал между проверками (5 секунд).
+      timeout: 5s  # Время ожидания ответа от команды проверки.
+      retries: 5  # Количество попыток перед переключением статуса на "неисправен".
+    restart: always  # Автоматический перезапуск контейнера, если он завершится с ошибкой.
+
+  backend:  # Сервис для основного backend-приложения.
+    # build: ./  # Сборка backend-контейнера из образа.
+    image: akatosphere/purchase_of_housing_backend:latest
+    env_file: .env # Использование файла окружения .env для конфигурации.
+    volumes:
+      - static_data:/app/static  # Том для хранения статических файлов приложения.
+      - media_data:/app/media  # Том для хранения медиафайлов приложения.
+    depends_on:
+      db:
+        condition: service_healthy  # Ожидание готовности сервиса `db` перед запуском backend.
+    restart: always  # Автоматический перезапуск контейнера при сбоях.
+
+  nginx:  # Сервис для Nginx, который выполняет роль веб-сервера.
+    image: nginx:latest  # Использование последнего образа Nginx.
+    ports:
+      - 8080:80  # Проброс порта 8080 хоста на порт 80 контейнера для внешнего доступа.
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf  # Монтирование конфигурационного файла Nginx.
+      - static_data:/var/html/static/  # Подключение тома со статическими файлами.
+      - media_data:/var/html/media/  # Подключение тома с медиафайлами.
+    depends_on:
+      - backend  # Ожидание запуска backend перед запуском Nginx.
+    restart: always  # Автоматический перезапуск контейнера Nginx при сбоях.
+
+
+volumes:  # Определение всех используемых томов.
+  pgdata: # Single, persistent volume for PostgreSQL data
+    name: pgdata_alfa
+    external: true  # Use the existing external volume
+    # pgdata_alfa:  # Том для хранения данных PostgreSQL.
+    # name: pgdata_alfa  # Указание имени тома для базы данных
+    # было следующее предупреждение:
+    # "volume \"pgdata_alfa\" already exists but was not created
+    # by Docker Compose. Use `external: true` to use an existing volume"
+    # external: true  # Use an existing volume instead of creating a new one.
+  static_data:  # Том для хранения статических файлов.
+  media_data:  # Том для хранения медиафайлов.
