@@ -25,7 +25,8 @@ services:
     env_file: ../.env.prod
     volumes:
       - .:/app
-#      - static_data:/app/static/
+      # Testing staticfiles
+      - static_data:/app/static/
       - ../media_prod:/app/media/
     ports:
       - 8080:8080  # Левое число — порт на хосте, Правое число — порт внутри контейнера
@@ -42,7 +43,8 @@ services:
     env_file: ../.env.test
     volumes:
       - .:/app
-#      - static_data:/app/static/
+      # Testing staticfiles
+      - static_data:/app/static/
       - ../media_test:/app/media/
     ports:
       - 8081:8080  # Левое число — порт на хосте, Правое число — порт внутри контейнера

@@ -4,7 +4,7 @@
 ###  1) ADD FIRST USER - ADMIN (with default pass)
 
 ```
-python manage.py loaddata Z_DATA/db_dump_before_deploy_refactor_2025_11/01_FIRST_BATCH/users.user.json
+python manage.py loaddata Z_DATA/db_dump_before_deploy_refactor_2025_11/01_BATCH/users.user.json
 ```
 
 What the heck - What is user_type in user app?
