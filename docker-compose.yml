@@ -68,7 +68,7 @@ services:
       - /var/lib/letsencrypt:/var/lib/letsencrypt
     depends_on:
       - backend_prod
-      - backend_test:
+      - backend_test
     restart: always  # Перезапуск при сбоях
     networks:
       - real_network
