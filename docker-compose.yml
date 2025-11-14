@@ -12,12 +12,6 @@ services:
     volumes:
       - ../pgdata_prod:/var/lib/postgresql/data
 
-    healthcheck:
-      test: [ "CMD-SHELL", "sh -c 'pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB'" ]  # Проверка готовности PostgreSQL к работе.
-      interval: 5s  # Интервал между проверками (5 секунд).
-      timeout: 5s  # Время ожидания ответа от команды проверки.
-      retries: 5  # Количество попыток перед переключением статуса на "неисправен".
-
     networks:
       - real_network
 
@@ -35,11 +29,6 @@ services:
     depends_on:
       postgres_prod:
         condition: service_healthy
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/health/"] # Assuming a health check endpoint exists
-      interval: 30s
-      timeout: 10s
-      retries: 5
     networks:
       - real_network
 
@@ -78,10 +67,8 @@ services:
       - /etc/letsencrypt:/etc/letsencrypt  # Сертификаты
       - /var/lib/letsencrypt:/var/lib/letsencrypt
     depends_on:
-      backend_prod:
-        condition: service_healthy
-      backend_test:
-        condition: service_healthy
+      - backend_prod
+      - backend_test:
     restart: always  # Перезапуск при сбоях
     networks:
       - real_network
