@@ -30,18 +30,23 @@ if extra_hosts:
 
 
 
-
 CSRF_TRUSTED_ORIGINS = [
     # f'http://{DOMAIN}',
     # f'https://{DOMAIN}',
 
     # This is not right
-    "https://api.prod.estate.ktsf.ru",
-    "https://api.test.estate.ktsf.ru",
+    # "https://api.prod.estate.ktsf.ru",
+    # "https://api.test.estate.ktsf.ru",
 
     # 'http://*',
     # 'https://*',
 ]
+
+extra_trusted_origins = os.getenv("EXTRA_CSRF_TRUSTED_ORIGINS")
+
+if extra_trusted_origins:
+    CSRF_TRUSTED_ORIGINS += [host.strip() for host in extra_trusted_origins.split(",")]
+
 
 INSTALLED_APPS = [
     'django.contrib.admin',
