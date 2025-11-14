@@ -5,7 +5,7 @@ FROM python:3.11
 WORKDIR /app
 
 # Устанавливаем gunicorn— сервер, который будет обрабатывать запросы к приложению
-RUN pip install gunicorn==20.1.0
+RUN pip install gunicorn==23.0.0
 
 COPY requirements.txt .
 
