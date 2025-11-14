@@ -226,7 +226,8 @@ CORS_ALLOWED_ORIGINS = [
     "https://house-react-ten.vercel.app"
 ]
 
-# CORS_ALLOW_ALL_ORIGINS = True
+# REMOVE IN PRODUCTION
+CORS_ALLOW_ALL_ORIGINS = True
 
 CORS_ALLOW_METHODS = [
     'DELETE',
