@@ -19,4 +19,10 @@ RUN pip install -r requirements.txt --no-cache-dir
 COPY . .
 
 # Запускаем сервер gunicorn, связывая его с портом 8080, и указываем конфигурационный файл WSGI
-CMD ["gunicorn", "--bind", "0.0.0.0:8080", "config.wsgi"]
+# CMD ["gunicorn", "--bind", "0.0.0.0:8080", "config.wsgi"]
+
+# Увеличиваю количество воркеров
+# --workers: количество процессов. Формула: (2 * количество_ядер_CPU) + 1. Начну с 2-3.
+# --threads: количество потоков на один процесс. 2-4 потока на воркер — норм
+#  Теперь один воркер сможет одновременно обрабатывать до 4 запросов.
+CMD ["gunicorn config.wsgi:application --workers 3 --threads 4 --bind 0.0.0.0:8080"]

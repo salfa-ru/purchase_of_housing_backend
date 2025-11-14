@@ -13,10 +13,10 @@ services:
     volumes:
       - ../pgdata_prod:/var/lib/postgresql/data
     healthcheck:
-      test: [ "CMD-SHELL", "sh -c 'pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB'" ]  # Проверка готовности PostgreSQL к работе.
-      interval: 5s  # Интервал между проверками (5 секунд).
-      timeout: 5s  # Время ожидания ответа от команды проверки.
-      retries: 5  # Количество попыток перед переключением статуса на "неисправен".
+      test: [ "CMD-SHELL", "sh -c 'pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB'" ]  # PostgreSQL is_ready check
+      interval: 30s
+      timeout: 5s
+      retries: 5
     networks:
       - real_network
 
@@ -26,15 +26,19 @@ services:
     env_file: ../.env.prod
     volumes:
       - .:/app
-      # Testing staticfiles
       - ../static:/app/static/
       - ../media_prod:/app/media/
     ports:
-      - 8080:8080  # Левое число — порт на хосте, Правое число — порт внутри контейнера
-    restart: always  # Автоматический перезапуск контейнера при сбоях.
+      - 8080:8080    # HOST:CONTAINER
+    restart: always  # Auto-restart on failure
     depends_on:
       postgres_prod:
         condition: service_healthy
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8080/hidden-health/" ]
+      interval: 60s
+      timeout: 10s
+      retries: 5
     networks:
       - real_network
 
@@ -44,16 +48,16 @@ services:
     env_file: ../.env.test
     volumes:
       - .:/app
-      # Testing staticfiles
       - ../static:/app/static/
       - ../media_test:/app/media/
     ports:
-      - 8081:8080  # Левое число — порт на хосте, Правое число — порт внутри контейнера
+      - 8081:8080  # HOST:CONTAINER
 
-    restart: always  # Автоматический перезапуск контейнера при сбоях.
+    restart: always
+    #  Assuming a health check endpoint exists
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/health/"] # Assuming a health check endpoint exists
-      interval: 30s
+      test: ["CMD", "curl", "-f", "http://localhost:8080/hidden-health/"]
+      interval: 60s
       timeout: 10s
       retries: 5
     networks:
@@ -62,21 +66,19 @@ services:
   nginx:
     image: nginx:latest
     ports:
-      - 80:80   # HTTP
-      - 443:443 # HTTPS
+      - 80:80    # HTTP
+      - 443:443  # HTTPS
     volumes:
       - ../static:/app/static/  # Том для статики
-      - ../media_prod:/var/www/media/prod/ # Путь для продакшен медиа внутри Nginx
-      - ../media_test:/var/www/media/test/ # Путь для тестовых медиа внутри Nginx
-
+      - ../media_prod:/var/www/media/prod/   # media_prod in Nginx
+      - ../media_test:/var/www/media/test/   # media_prod in Nginx
       - ./nginx.conf:/etc/nginx/nginx.conf
-#      - /var/kassa:/var/kassa
-      - /etc/letsencrypt:/etc/letsencrypt  # Сертификаты
+      - /etc/letsencrypt:/etc/letsencrypt    # certificates
       - /var/lib/letsencrypt:/var/lib/letsencrypt
     depends_on:
       - backend_prod
       - backend_test
-    restart: always  # Перезапуск при сбоях
+    restart: always  # auto-restart
     networks:
       - real_network
 
@@ -84,5 +86,3 @@ networks:
   real_network:
     driver: bridge
 
-#volumes:
-#  static_data:  # кажется, использую внутреннюю папку static из джанго!
