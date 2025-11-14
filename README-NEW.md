@@ -26,11 +26,17 @@ python manage.py fix_moderator_permissions
 find Z_DATA/db_dump_before_deploy_refactor_2025_11/02_BATCH_MAIN/ -name "*.json" -print0 | xargs -0 python manage.py loaddata
 ```
 
-### 4) Оставляем незагруженными в папке 99_REMOVED:
+### 3) Загружаем большинство следующих справочников
+
+```
+find Z_DATA/db_dump_before_deploy_refactor_2025_11/03_VERIFY_DATA/ -name "*.json" -print0 | xargs -0 python manage.py loaddata
+```
+
+
+
+### 5) Оставляем незагруженными в папке 99_REMOVED:
 auth.group.json
 auth.permission.json
-realty_addresses.district.json
-realty_addresses.zone.json
 
 ----------
 
