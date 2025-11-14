@@ -5,9 +5,10 @@ services:
     env_file: ../.env.prod
     container_name: realty_postgres_prod
     environment:
-      POSTGRES_DB: realty_db          # название базы
-      POSTGRES_USER: realty_user      # имя пользователя
-      POSTGRES_PASSWORD: strong_pass  # пароль
+      # Data that is in env file - removed from here completely
+      # POSTGRES_DB: realty_db          # db name
+      # POSTGRES_USER: realty_user      # username
+      # POSTGRES_PASSWORD: strong_pass  # password
       POSTGRES_INITDB_ARGS: "--locale-provider=icu --icu-locale=ru-RU"
     volumes:
       - ../pgdata_prod:/var/lib/postgresql/data
