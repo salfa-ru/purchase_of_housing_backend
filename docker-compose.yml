@@ -9,8 +9,6 @@ services:
       POSTGRES_USER: realty_user      # имя пользователя
       POSTGRES_PASSWORD: strong_pass  # пароль
       POSTGRES_INITDB_ARGS: "--locale-provider=icu --icu-locale=ru-RU"
-      LC_COLLATE: ru_RU.UTF-8
-      LC_CTYPE: ru_RU.UTF-8
     volumes:
       - ../pgdata_prod:/var/lib/postgresql/data
 
