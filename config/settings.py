@@ -218,13 +218,13 @@ Q_CLUSTER = {
     'poll': 1,  # Poll every 1 second instead of 0.2
 }
 
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:5173",
-    "http://127.0.0.1:5173",
-    "https://estate.ktsf.ru",
-    "https://front.test.estate.ktsf.ru",
-    "https://house-react-ten.vercel.app"
-]
+# CORS_ALLOWED_ORIGINS = [
+#     "http://localhost:5173",
+#     "http://127.0.0.1:5173",
+#     "https://estate.ktsf.ru",
+#     "https://front.test.estate.ktsf.ru",
+#     "https://house-react-ten.vercel.app"
+# ]
 
 # REMOVE IN PRODUCTION
 CORS_ALLOW_ALL_ORIGINS = True
