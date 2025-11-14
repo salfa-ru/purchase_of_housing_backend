@@ -35,6 +35,11 @@ services:
     depends_on:
       postgres_prod:
         condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health/"] # Assuming a health check endpoint exists
+      interval: 30s
+      timeout: 10s
+      retries: 5
     networks:
       - real_network
 
@@ -50,7 +55,11 @@ services:
       - 8081:8080  # Левое число — порт на хосте, Правое число — порт внутри контейнера
 
     restart: always  # Автоматический перезапуск контейнера при сбоях.
-
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health/"] # Assuming a health check endpoint exists
+      interval: 30s
+      timeout: 10s
+      retries: 5
     networks:
       - real_network
 
@@ -69,8 +78,10 @@ services:
       - /etc/letsencrypt:/etc/letsencrypt  # Сертификаты
       - /var/lib/letsencrypt:/var/lib/letsencrypt
     depends_on:
-      - backend_prod
-      - backend_test  # Ожидание запуска backend перед запуском Nginx
+      backend_prod:
+        condition: service_healthy
+      backend_test:
+        condition: service_healthy
     restart: always  # Перезапуск при сбоях
     networks:
       - real_network
