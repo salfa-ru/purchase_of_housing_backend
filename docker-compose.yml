@@ -39,3 +39,6 @@ services:
 networks:
   real_network:
     driver: bridge
+
+volumes:
+  static_data:  # кажется, использую внутреннюю папку static из джанго!
