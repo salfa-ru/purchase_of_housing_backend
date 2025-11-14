@@ -30,6 +30,8 @@ services:
       - .:/app
       - static_data:/app/static/
       - ../media_test:/app/media/
+    ports:
+      - 8080:8080
 
     restart: always  # Автоматический перезапуск контейнера при сбоях.
 
