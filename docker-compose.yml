@@ -22,6 +22,22 @@ services:
       - real_network
 
 
+  postgres_test:
+    image: postgres:17
+    env_file: ../.env.test
+    container_name: realty_postgres_test
+    environment:
+      POSTGRES_DB: realty_db          # название базы
+      POSTGRES_USER: realty_user      # имя пользователя
+      POSTGRES_PASSWORD: strong_pass  # пароль
+      POSTGRES_INITDB_ARGS: "--locale-provider=icu --icu-locale=ru-RU"
+    volumes:
+      - ../pgdata_prod:/var/lib/postgresql/data
+
+    networks:
+      - real_network
+
+
   backend_test:
     build: .
     container_name: realty_django_test
@@ -31,7 +47,7 @@ services:
       - static_data:/app/static/
       - ../media_test:/app/media/
     ports:
-      - 8080:8080
+      - 8080:8080  # Левое число — порт на хосте, Правое число — порт внутри контейнера
 
     restart: always  # Автоматический перезапуск контейнера при сбоях.
 
