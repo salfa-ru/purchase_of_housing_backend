@@ -13,14 +13,27 @@ SECRET_KEY = os.getenv('SECRET_KEY', 'default_key')
 DEBUG = os.getenv('DEBUG', 'False').lower() == 'true'
 
 
-DOMAIN = os.getenv('DOMAIN')
+# DOMAIN = os.getenv('DOMAIN')
+# ALLOWED_HOSTS = [DOMAIN, os.getenv('HOST_IP'), 'localhost', 'api.prod.estate.ktsf.ru']
 
-ALLOWED_HOSTS = [DOMAIN, os.getenv('HOST_IP'), 'localhost', 'api.prod.estate.ktsf.ru']
+
+ALLOWED_HOSTS = [
+    # os.getenv("DOMAIN"),
+    # os.getenv("HOST_IP"),
+    "localhost",
+]
+
+extra_hosts = os.getenv("EXTRA_ALLOWED_HOSTS")
+
+if extra_hosts:
+    ALLOWED_HOSTS += [host.strip() for host in extra_hosts.split(",")]
+
+
 
 
 CSRF_TRUSTED_ORIGINS = [
-    f'http://{DOMAIN}',
-    f'https://{DOMAIN}',
+    # f'http://{DOMAIN}',
+    # f'https://{DOMAIN}',
 
     # This is not right
     "https://api.prod.estate.ktsf.ru",
