@@ -24,7 +24,7 @@ services:
   backend_prod:
     build: .
     container_name: realty_django_prod
-    env_file: ../.env.test
+    env_file: ../.env.prod
     volumes:
       - .:/app
       - static_data:/app/static/
