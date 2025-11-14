@@ -26,7 +26,7 @@ services:
     volumes:
       - .:/app
       # Testing staticfiles
-      - static_data:/app/static/
+      - ../static:/app/static/
       - ../media_prod:/app/media/
     ports:
       - 8080:8080  # Левое число — порт на хосте, Правое число — порт внутри контейнера
@@ -44,7 +44,7 @@ services:
     volumes:
       - .:/app
       # Testing staticfiles
-      - static_data:/app/static/
+      - ../static:/app/static/
       - ../media_test:/app/media/
     ports:
       - 8081:8080  # Левое число — порт на хосте, Правое число — порт внутри контейнера
@@ -64,7 +64,7 @@ services:
       - 80:80   # HTTP
       - 443:443 # HTTPS
     volumes:
-      - static_data:/app/static/  # Том для статики
+      - ../static:/app/static/  # Том для статики
       - ../media_prod:/var/www/media/prod/ # Путь для продакшен медиа внутри Nginx
       - ../media_test:/var/www/media/test/ # Путь для тестовых медиа внутри Nginx
 
@@ -83,5 +83,5 @@ networks:
   real_network:
     driver: bridge
 
-volumes:
-  static_data:  # кажется, использую внутреннюю папку static из джанго!
+#volumes:
+#  static_data:  # кажется, использую внутреннюю папку static из джанго!
