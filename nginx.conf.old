@@ -1,0 +1,38 @@
+server {
+  listen 80;                      # Слушает HTTP-запросы на порту 80
+  index index.html;               # Устанавливает index.html как файл по умолчанию
+  server_tokens off;              # Отключает отображение версии Nginx для безопасности
+  client_max_body_size 50M;       # Ограничивает размер загружаемых данных до 50 МБ
+
+  location / {
+    proxy_pass http://backend:8080;            # Проксирует все запросы к backend-сервису (порт 8080)
+    proxy_set_header Host $http_host;
+    proxy_set_header X-Real-IP $remote_addr;   # Передает IP-адрес клиента
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for; # Сохраняет IP цепочку клиента
+    proxy_set_header X-Forwarded-Proto $scheme; # Передает протокол (http или https) исходного запроса
+  }
+
+  location /admin/ {
+    proxy_pass http://backend:8080/admin/;     # Проксирует запросы на /admin/ к backend/admin/
+    proxy_set_header Host $http_host;
+  }
+
+  location /static/admin/ {
+    alias /var/html/static/admin/;             # Отдает статические файлы админки напрямую из указанной директории
+    access_log off;                            # Отключает логирование для статических файлов
+    expires 30d;                               # Устанавливает кеширование статических файлов на 30 дней
+  }
+
+  location /static/ {
+    alias /var/html/static/;                   # Отдает другие статические файлы напрямую из директории
+    access_log off;                            # Отключает логирование для этой локации
+    expires 30d;                               # Устанавливает кеширование на 30 дней
+  }
+
+  location /media/ {
+    proxy_set_header Host $http_host;
+    alias /var/html/media/;                    # Отдает медиа-файлы напрямую из директории
+    access_log off;                            # Отключает логирование для медиа-файлов
+    expires 30d;                               # Устанавливает кеширование на 30 дней
+  }
+}

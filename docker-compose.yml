@@ -27,13 +27,13 @@ services:
     env_file: ../.env.prod
     volumes:
       - .:/app
-      - static_data:/app/static/
+#      - static_data:/app/static/
       - ../media_prod:/app/media/
     ports:
       - 8080:8080  # Левое число — порт на хосте, Правое число — порт внутри контейнера
     restart: always  # Автоматический перезапуск контейнера при сбоях.
     depends_on:
-      db:
+      postgres_prod:
         condition: service_healthy
     networks:
       - real_network
@@ -44,13 +44,34 @@ services:
     env_file: ../.env.test
     volumes:
       - .:/app
-      - static_data:/app/static/
+#      - static_data:/app/static/
       - ../media_test:/app/media/
     ports:
-      - 8080:8080  # Левое число — порт на хосте, Правое число — порт внутри контейнера
+      - 8081:8080  # Левое число — порт на хосте, Правое число — порт внутри контейнера
 
     restart: always  # Автоматический перезапуск контейнера при сбоях.
 
+    networks:
+      - real_network
+
+  nginx:
+    image: nginx:latest
+    ports:
+      - 80:80   # HTTP
+      - 443:443 # HTTPS
+    volumes:
+      - static_data:/app/static/  # Том для статики
+      - ../media_prod:/var/www/media/prod/ # Путь для продакшен медиа внутри Nginx
+      - ../media_test:/var/www/media/test/ # Путь для тестовых медиа внутри Nginx
+
+      - ./nginx.conf:/etc/nginx/nginx.conf
+#      - /var/kassa:/var/kassa
+      - /etc/letsencrypt:/etc/letsencrypt  # Сертификаты
+      - /var/lib/letsencrypt:/var/lib/letsencrypt
+    depends_on:
+      - backend_prod
+      - backend_test  # Ожидание запуска backend перед запуском Nginx
+    restart: always  # Перезапуск при сбоях
     networks:
       - real_network
 
