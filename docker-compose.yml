@@ -11,7 +11,11 @@ services:
       POSTGRES_INITDB_ARGS: "--locale-provider=icu --icu-locale=ru-RU"
     volumes:
       - ../pgdata_prod:/var/lib/postgresql/data
-
+    healthcheck:
+      test: [ "CMD-SHELL", "sh -c 'pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB'" ]  # Проверка готовности PostgreSQL к работе.
+      interval: 5s  # Интервал между проверками (5 секунд).
+      timeout: 5s  # Время ожидания ответа от команды проверки.
+      retries: 5  # Количество попыток перед переключением статуса на "неисправен".
     networks:
       - real_network
 
