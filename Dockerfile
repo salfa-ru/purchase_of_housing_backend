@@ -25,4 +25,6 @@ COPY . .
 # --workers: количество процессов. Формула: (2 * количество_ядер_CPU) + 1. Начну с 2-3.
 # --threads: количество потоков на один процесс. 2-4 потока на воркер — норм
 #  Теперь один воркер сможет одновременно обрабатывать до 4 запросов.
-CMD ["gunicorn config.wsgi:application --workers 3 --threads 4 --bind 0.0.0.0:8080"]
+#CMD ["gunicorn config.wsgi:application --workers 3 --threads 4 --bind 0.0.0.0:8080"]
+CMD ["gunicorn", "config.wsgi:application", "--workers", "3", "--threads", "4", "--bind", "0.0.0.0:8080"]
+
