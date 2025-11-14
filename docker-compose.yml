@@ -8,7 +8,7 @@ services:
       POSTGRES_DB: realty_db          # название базы
       POSTGRES_USER: realty_user      # имя пользователя
       POSTGRES_PASSWORD: strong_pass  # пароль
-      POSTGRES_INITDB_ARGS: "--locale=ru_RU.UTF-8 --encoding=UTF8"
+      POSTGRES_INITDB_ARGS: "--icu-locale=ru-RU --encoding=UTF8"
       LC_COLLATE: ru_RU.UTF-8
       LC_CTYPE: ru_RU.UTF-8
     volumes:
