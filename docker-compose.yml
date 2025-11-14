@@ -17,3 +17,21 @@ services:
       interval: 5s  # Интервал между проверками (5 секунд).
       timeout: 5s  # Время ожидания ответа от команды проверки.
       retries: 5  # Количество попыток перед переключением статуса на "неисправен".
+
+    networks:
+      - real_network
+
+
+  backend_test:
+    build: .
+    container_name: realty_django_test
+    env_file: ../.env.test
+    volumes:
+      - .:/app
+      - static_data:/app/static/
+      - ../media_test:/app/media/
+
+    restart: always  # Автоматический перезапуск контейнера при сбоях.
+
+    networks:
+      - real_network
