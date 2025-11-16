@@ -194,8 +194,8 @@ class RealtyDetailView(generics.RetrieveAPIView):
 
     def get_queryset(self):  # <-- YYY --- Переопределяем get_queryset для фильтрации
         return realty_models.Realty.objects.filter(
-            # FIXME - Отдаю ВСЕ объявления, важно чтобы Фронт фильтровал
-            #         и не показывал те, что смотреть нельзя!
+            #  Отдаю ВСЕ объявления, важно чтобы Фронт фильтровал
+            #  и не показывал те, что смотреть нельзя!
             #  realty_status__status=constants.ADVERTISMENT_STATUS,
             is_deleted=False,
             owner__is_deleted=False  # Показывать только объявления активных владельцев

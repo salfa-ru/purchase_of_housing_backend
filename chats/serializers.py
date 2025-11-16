@@ -109,8 +109,6 @@ class UserInfoSerializer(serializers.ModelSerializer):
         model = User
         fields = ['id', 'name', 'is_deleted']
 
-    # FIXME - Отдавать не email а имя!
-
     def get_name(self, obj):
         """ Если is_deleted=True - возвращает username с добавкой (Пользователь удален) ."""
         if obj.is_deleted:
