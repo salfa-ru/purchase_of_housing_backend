@@ -28,9 +28,9 @@ COPY . .
 
 # ------------- ЭТО КОММЕНТИРОВАТЬ - РАСКОММЕНТИРОВАТЬ - НАЧАЛО --------
 # FIXME - Раскомментировать после первичной установки сервера
-#COPY entrypoint.sh /app/entrypoint.sh
-#RUN chmod +x /app/entrypoint.sh
-#ENTRYPOINT ["/app/entrypoint.sh"]
+COPY entrypoint.sh /app/entrypoint.sh
+RUN chmod +x /app/entrypoint.sh
+ENTRYPOINT ["/app/entrypoint.sh"]
 # ------------- ЭТО КОММЕНТИРОВАТЬ - РАСКОММЕНТИРОВАТЬ - КОНЕЦ ---------
 
 # А для просмотра ОНЛАЙН логов Кластеров:
