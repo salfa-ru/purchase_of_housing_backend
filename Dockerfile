@@ -27,14 +27,15 @@ COPY . .
 # Копируем и делаем исполняемым скрипт entrypoint
 
 # ------------- ЭТО КОММЕНТИРОВАТЬ - РАСКОММЕНТИРОВАТЬ - НАЧАЛО --------
-COPY entrypoint.sh /app/entrypoint.sh
-RUN chmod +x /app/entrypoint.sh
-ENTRYPOINT ["/app/entrypoint.sh"]
+# FIXME - Раскомментировать после первичной установки сервера
+#COPY entrypoint.sh /app/entrypoint.sh
+#RUN chmod +x /app/entrypoint.sh
+#ENTRYPOINT ["/app/entrypoint.sh"]
 # ------------- ЭТО КОММЕНТИРОВАТЬ - РАСКОММЕНТИРОВАТЬ - КОНЕЦ ---------
 
-# А для просмотра логов Кластеров:
-# docker logs realty_django_prod - для прода
-# docker logs realty_django_test - для тестового
+# А для просмотра ОНЛАЙН логов Кластеров:
+# docker logs -f realty_django_prod - для прода
+# docker logs -f realty_django_test - для тестового
 # ======================================================================
 
 
