@@ -73,7 +73,6 @@ class RealtyForm(forms.ModelForm):
 
     class Meta:
         model = Realty
-        # fields = ('realty_status',) # Остаток кода, где в админке можно было редактировать только Статус
         fields = '__all__'  # Теперь показываются все поля, а редактируемость определяется в админке
 
     def clean(self):

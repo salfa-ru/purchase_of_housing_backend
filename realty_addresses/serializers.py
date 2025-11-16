@@ -1,6 +1,5 @@
 from rest_framework import serializers
 from realty import models as realty_models
-from .models import City, Metro, Street, Address
 
 from realty_addresses import models as address_models
 from config import constants

@@ -40,13 +40,6 @@ class RealtyForChatSerializer(serializers.ModelSerializer):
     """Сериализатор информации об объявлении.
     Для показа переписок и цепочек сообщений."""
 
-    # realty_status = serializers.SlugRelatedField(
-    #     slug_field='status',
-    #     # <-- STATUS -- Указываем, какое поле из связанной модели RealtyAdvStatus использовать (это имя статуса)
-    #     source='realty_status',  # <-- STATUS -- Указываем, какое поле в модели Realty ссылается на RealtyAdvStatus
-    #     read_only=True,  # <-- STATUS -- Делаем поле только для чтения
-    # )
-
     realty_status = serializers.SerializerMethodField()
 
     # owner = serializers.CharField(source='owner.username')
@@ -105,14 +98,6 @@ class RealtyForChatSerializer(serializers.ModelSerializer):
             'price',
         ]
 
-
-# class UserInfoSerializer(serializers.ModelSerializer):
-#     """Сериализатор для краткой информации о пользователе"""
-#     name = serializers.CharField(source='username')
-#
-#     class Meta:
-#         model = User
-#         fields = ['id', 'name']
 
 
 class UserInfoSerializer(serializers.ModelSerializer):
@@ -351,12 +336,6 @@ class CreateMessageResponseSerializer(serializers.ModelSerializer):
             # 'is_deleted_to',
         ]
 
-    # def get_me(self, obj) -> dict:  # Type hint: Returns a dictionary
-    #     return UserInfoSerializer(obj.user_from).data
-    #
-    # def get_user(self, obj) -> dict:  # Type hint: Returns a dictionary
-    #     return UserInfoSerializer(obj.user_to).data
-
     def get_user_is_owner(self, obj) -> bool:
         return obj.user_from == obj.chat.owner
 
@@ -390,7 +369,6 @@ class BlockingSerializer(serializers.ModelSerializer):
 
 
 """ Новая сложная блокировка / разблокировка по любому параметру """
-
 
 # region  Блокировка
 

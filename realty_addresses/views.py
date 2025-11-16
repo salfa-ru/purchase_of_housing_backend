@@ -15,7 +15,7 @@ from realty_addresses.serializers import (
     MapPointsSerializer, MapPointsRequestSerializer,
     GetAnnouncementsInMapPointRequestSerializer, MetroSerializer)
 from realty_values import models as models_values
-from .models import Metro, MetroLine
+from .models import Metro
 from realty_addresses.filters import MetroFilter
 
 
