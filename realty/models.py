@@ -114,8 +114,6 @@ class Realty(models.Model):
     def save(self, *args, **kwargs):    # <-- YYY --- realty_удаление v1
         """ При сохранении - устанавливаем дату удаления если объявление удалилось! """
 
-        # FIXME - считаем, что объявление после удаление не меняется, поэтому не сравниваю со старым значением
-
         if self.is_deleted and self.deleted_at is None:  # <-- YYY --- Если только что удалили
             self.deleted_at = timezone.now()
         elif not self.is_deleted:  # <-- YYY --- Если запись снова сделали "не удаленной"

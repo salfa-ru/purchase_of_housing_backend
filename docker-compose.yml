@@ -1,58 +1,88 @@
+services:
 
-services:  # Определение всех сервисов, которые будут запускаться.
-
-  db:  # Настройка сервиса для базы данных PostgreSQL.
-    image: postgres:16  # Используемый образ PostgreSQL версии 16.
-    env_file:
-      - .env  # Файл окружения (.env) с настройками, такими как POSTGRES_USER и POSTGRES_DB.
+  postgres_prod:
+    image: postgres:17
+    env_file: ../.env.prod
+    container_name: realty_postgres_prod
+    environment:
+      # Data that is in env file - removed from here completely
+      # POSTGRES_DB: realty_db          # db name
+      # POSTGRES_USER: realty_user      # username
+      # POSTGRES_PASSWORD: strong_pass  # password
+      POSTGRES_INITDB_ARGS: "--locale-provider=icu --icu-locale=ru-RU"
     volumes:
-      # - pgdata:/var/lib/postgresql/data  # Монтирование тома для сохранения данных базы на хосте.
-      - type: bind
-        source: /opt/postgres_data # Путь на хосте
-        target: /var/lib/postgresql/data
-        bind:
-          create_host_path: true
+      - ../pgdata_prod:/var/lib/postgresql/data
     healthcheck:
-      test: [ "CMD-SHELL", "sh -c 'pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB'" ]  # Проверка готовности PostgreSQL к работе.
-      interval: 5s  # Интервал между проверками (5 секунд).
-      timeout: 5s  # Время ожидания ответа от команды проверки.
-      retries: 5  # Количество попыток перед переключением статуса на "неисправен".
-    restart: always  # Автоматический перезапуск контейнера, если он завершится с ошибкой.
+      test: [ "CMD-SHELL", "sh -c 'pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB'" ]  # PostgreSQL is_ready check
+      interval: 30s
+      timeout: 5s
+      retries: 5
+    networks:
+      - real_network
 
-  backend:  # Сервис для основного backend-приложения.
-    # build: ./  # Сборка backend-контейнера из образа.
-    image: akatosphere/purchase_of_housing_backend:latest
-    env_file: .env # Использование файла окружения .env для конфигурации.
+  backend_prod:
+    build: .
+    container_name: realty_django_prod
+    env_file: ../.env.prod
     volumes:
-      - static_data:/app/static  # Том для хранения статических файлов приложения.
-      - media_data:/app/media  # Том для хранения медиафайлов приложения.
-    depends_on:
-      db:
-        condition: service_healthy  # Ожидание готовности сервиса `db` перед запуском backend.
-    restart: always  # Автоматический перезапуск контейнера при сбоях.
-
-  nginx:  # Сервис для Nginx, который выполняет роль веб-сервера.
-    image: nginx:latest  # Использование последнего образа Nginx.
+      - .:/app
+      - ../static:/app/static/
+      - ../media_prod:/app/media/
     ports:
-      - 8080:80  # Проброс порта 8080 хоста на порт 80 контейнера для внешнего доступа.
-    volumes:
-      - ./nginx.conf:/etc/nginx/conf.d/default.conf  # Монтирование конфигурационного файла Nginx.
-      - static_data:/var/html/static/  # Подключение тома со статическими файлами.
-      - media_data:/var/html/media/  # Подключение тома с медиафайлами.
+      - 8080:8080    # HOST:CONTAINER
+    restart: always  # Auto-restart on failure
     depends_on:
-      - backend  # Ожидание запуска backend перед запуском Nginx.
-    restart: always  # Автоматический перезапуск контейнера Nginx при сбоях.
+      postgres_prod:
+        condition: service_healthy
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8080/hidden-health/" ]
+      interval: 60s
+      timeout: 10s
+      retries: 5
+    networks:
+      - real_network
 
+  backend_test:
+    build: .
+    container_name: realty_django_test
+    env_file: ../.env.test
+    volumes:
+      - .:/app
+      - ../static:/app/static/
+      - ../media_test:/app/media/
+    ports:
+      - 8081:8080  # HOST:CONTAINER
 
-volumes:  # Определение всех используемых томов.
-  pgdata: # Single, persistent volume for PostgreSQL data
-    name: pgdata_alfa
-    external: true  # Use the existing external volume
-    # pgdata_alfa:  # Том для хранения данных PostgreSQL.
-    # name: pgdata_alfa  # Указание имени тома для базы данных
-    # было следующее предупреждение:
-    # "volume \"pgdata_alfa\" already exists but was not created
-    # by Docker Compose. Use `external: true` to use an existing volume"
-    # external: true  # Use an existing volume instead of creating a new one.
-  static_data:  # Том для хранения статических файлов.
-  media_data:  # Том для хранения медиафайлов.
+    restart: always
+    #  Assuming a health check endpoint exists
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/hidden-health/"]
+      interval: 60s
+      timeout: 10s
+      retries: 5
+    networks:
+      - real_network
+
+  nginx:
+    image: nginx:latest
+    ports:
+      - 80:80    # HTTP
+      - 443:443  # HTTPS
+    volumes:
+      - ../static:/app/static/  # Том для статики
+      - ../media_prod:/var/www/media/prod/   # media_prod in Nginx
+      - ../media_test:/var/www/media/test/   # media_prod in Nginx
+      - ./nginx.conf:/etc/nginx/nginx.conf
+      - /etc/letsencrypt:/etc/letsencrypt    # certificates
+      - /var/lib/letsencrypt:/var/lib/letsencrypt
+    depends_on:
+      - backend_prod
+      - backend_test
+    restart: always  # auto-restart
+    networks:
+      - real_network
+
+networks:
+  real_network:
+    driver: bridge
+

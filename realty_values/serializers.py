@@ -1,6 +1,4 @@
 from rest_framework import serializers
-from rest_framework.relations import SlugRelatedField
-
 from realty_values import models as values_models
 
 

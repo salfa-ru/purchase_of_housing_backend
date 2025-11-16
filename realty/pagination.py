@@ -13,7 +13,7 @@ class LimitRealtyPagination(PageNumberPagination):
     page_size_query_param = None
     page_size = 10
 
-# Правильное ли это место для размещения сериалайзера, пусть даже он и существует только для Сваггера?
+
 class PaginatedResponseSerializer(serializers.Serializer):
     """Сериализатор для корректного отображения пагинации в Swagger."""
     count = serializers.IntegerField(help_text="Общее количество объявлений")

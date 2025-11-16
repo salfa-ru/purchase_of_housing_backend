@@ -2,9 +2,7 @@ from drf_spectacular.utils import extend_schema
 from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated
 
-from complaints.models import Complaint
 from complaints.serializers import ComplaintsSerializer
-from realty.models import Realty
 
 
 @extend_schema(

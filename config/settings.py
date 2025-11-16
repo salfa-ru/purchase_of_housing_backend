@@ -10,30 +10,43 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 SECRET_KEY = os.getenv('SECRET_KEY', 'default_key')
 
-DEBUG = os.getenv('DEBUG', 'False') == 'True'
-# пусть на сервере всегда работает postgres!
-# 1 версия - не сработало:
-# USE_SQLITE = os.getenv('USE_SQLITE', 'False') == 'True'
+DEBUG = os.getenv('DEBUG', 'False').lower() == 'true'
 
-# 2 версия: (база работает, CORS а Ани не работает!)
-# USE_SQLITE = os.getenv('USE_SQLITE', 'True').lower() in ('true', '1', 'yes')
 
-DOMAIN = os.getenv('DOMAIN')
+# DOMAIN = os.getenv('DOMAIN')
+# ALLOWED_HOSTS = [DOMAIN, os.getenv('HOST_IP'), 'localhost', 'api.prod.estate.ktsf.ru']
 
-ALLOWED_HOSTS = [DOMAIN, os.getenv('HOST_IP'), 'localhost', 'api.prod.estate.ktsf.ru']
+
+ALLOWED_HOSTS = [
+    # os.getenv("DOMAIN"),
+    # os.getenv("HOST_IP"),
+    "localhost",
+]
+
+extra_hosts = os.getenv("EXTRA_ALLOWED_HOSTS")
+
+if extra_hosts:
+    ALLOWED_HOSTS += [host.strip() for host in extra_hosts.split(",")]
+
 
 
 CSRF_TRUSTED_ORIGINS = [
-    f'http://{DOMAIN}',
-    f'https://{DOMAIN}',
+    # f'http://{DOMAIN}',
+    # f'https://{DOMAIN}',
 
     # This is not right
-    "https://api.prod.estate.ktsf.ru",
-    "https://api.test.estate.ktsf.ru",
+    # "https://api.prod.estate.ktsf.ru",
+    # "https://api.test.estate.ktsf.ru",
 
     # 'http://*',
     # 'https://*',
 ]
+
+extra_trusted_origins = os.getenv("EXTRA_CSRF_TRUSTED_ORIGINS")
+
+if extra_trusted_origins:
+    CSRF_TRUSTED_ORIGINS += [host.strip() for host in extra_trusted_origins.split(",")]
+
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -93,8 +106,9 @@ TEMPLATES = [
 WSGI_APPLICATION = 'config.wsgi.application'
 
 
-# if USE_SQLITE:
-if DEBUG:
+USE_SQLITE = os.getenv('USE_SQLITE', 'False').lower() in ('true', '1', 'yes')
+
+if USE_SQLITE:
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
@@ -113,16 +127,6 @@ else:
         }
     }
 
-# DATABASES = {
-#         'default': {
-#             'ENGINE': 'django.db.backends.postgresql',
-#             'NAME': os.getenv('POSTGRES_DB', 'django'),
-#             'USER': os.getenv('POSTGRES_USER', 'django'),
-#             'PASSWORD': os.getenv('POSTGRES_PASSWORD', ''),
-#             'HOST': os.getenv('DB_HOST', ''),
-#             'PORT': os.getenv('DB_PORT', 5432)
-#         }
-#     }
 
 AUTH_USER_MODEL = 'users.User'
 
@@ -214,15 +218,16 @@ Q_CLUSTER = {
     'poll': 1,  # Poll every 1 second instead of 0.2
 }
 
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:5173",
-    "http://127.0.0.1:5173",
-    "https://estate.ktsf.ru",
-    "https://front.test.estate.ktsf.ru",
-    "https://house-react-ten.vercel.app"
-]
+# CORS_ALLOWED_ORIGINS = [
+#     "http://localhost:5173",
+#     "http://127.0.0.1:5173",
+#     "https://estate.ktsf.ru",
+#     "https://front.test.estate.ktsf.ru",
+#     "https://house-react-ten.vercel.app"
+# ]
 
-# CORS_ALLOW_ALL_ORIGINS = True
+# REMOVE IN PRODUCTION
+CORS_ALLOW_ALL_ORIGINS = True
 
 CORS_ALLOW_METHODS = [
     'DELETE',
