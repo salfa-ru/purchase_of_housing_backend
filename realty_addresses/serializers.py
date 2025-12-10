@@ -1,4 +1,6 @@
 from rest_framework import serializers
+
+from config.constants import MAX_MINUTES_TO_METRO
 from realty import models as realty_models
 
 from realty_addresses import models as address_models
@@ -234,9 +236,9 @@ class AddressCreateSerializer(serializers.ModelSerializer):
 
     def validate_minutes_to_metro(self, value):
         """Валидация для minutes_to_metro, чтобы значение было <= 59."""
-        if value is not None and value > 59:
+        if value is not None and value > MAX_MINUTES_TO_METRO:
             raise serializers.ValidationError(
-                "Значение 'minutes_to_metro' не может быть больше 59."
+                f"Значение 'minutes_to_metro' не может быть больше {MAX_MINUTES_TO_METRO}."
             )
         return value
 
