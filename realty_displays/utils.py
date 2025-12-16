@@ -23,17 +23,28 @@ def is_unique_view(request, realty_id, timeout, key):
 def increment_counter(request, realty, model, timeout, key, date=None):
     """Увеличение счетчика показа в поиске или в Full View"""
 
+    # Проверка не просматривает ли пользователь свое объявление
+    current_user = request.user
+    if realty.owner_id == current_user.id:
+        return
+
     # Получаем или создаем новый счетчик (ищем по дате, если она передана)
     if date:
-
-        # Проверка не просматривает ли пользователь свое объявление
-        current_user = request.user
-        if realty.owner_id == current_user.id:
-            return
-
-        counter, created = model.objects.get_or_create(realty=realty, date=date)
+        try:
+            counter, created = model.objects.get_or_create(realty=realty, date=date)
+        except model.MultipleObjectsReturned:
+            # Handle duplicates gracefully - get the first one and clean up
+            counter = model.objects.filter(realty=realty, date=date).first()
+            # Delete other duplicates
+            model.objects.filter(realty=realty, date=date).exclude(id=counter.id).delete()
     else:
-        counter, created = model.objects.get_or_create(realty=realty)
+        try:
+            counter, created = model.objects.get_or_create(realty=realty)
+        except model.MultipleObjectsReturned:
+            # Handle duplicates gracefully - get the first one and clean up
+            counter = model.objects.filter(realty=realty).first()
+            # Delete other duplicates
+            model.objects.filter(realty=realty).exclude(id=counter.id).delete()
 
     is_unique = is_unique_view(request, realty.id, timeout, key)
 

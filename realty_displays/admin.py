@@ -7,6 +7,9 @@ from realty_displays import models
 class DisplayInSearchAdmin(admin.ModelAdmin):
     list_display = ('count', 'realty', 'realty_id',)
     list_display_links = ('count',)
+    list_filter = ('realty',)
+    search_fields = ('realty__id',)
+    ordering = ('realty__id',)
 
     def realty_id(self, obj):
         """Returns the realty ID."""
@@ -19,6 +22,9 @@ class DisplayInSearchAdmin(admin.ModelAdmin):
 class DisplayFullInfoAdmin(admin.ModelAdmin):
     list_display = ('date', 'count', 'realty', 'realty_id',)
     list_display_links = ('date', 'count',)
+    list_filter = ('date', 'realty',)
+    search_fields = ('realty__id',)
+    ordering = ('realty__id', 'date',)
 
     def realty_id(self, obj):
         """Returns the realty ID."""

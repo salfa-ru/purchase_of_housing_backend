@@ -12,6 +12,7 @@ class DisplayInSearch(models.Model):
     realty = models.ForeignKey(
         realty_models.Realty,
         on_delete=models.CASCADE, verbose_name='Недвижимость', related_name='display_in_search',
+        unique=True,
     )
     count = models.PositiveIntegerField(verbose_name='Кол-во показов', default=0)
 
@@ -37,6 +38,7 @@ class DisplayFullInfo(models.Model):
     class Meta:
         verbose_name = 'Показ полной инфо'
         verbose_name_plural = 'Показы полной инфо'
+        unique_together = [['realty', 'date']]
 
     def __str__(self):
         return f'{self.date} показов {self.count} --- {self.realty}'
