@@ -213,8 +213,35 @@ class RealtyFilter(django_filters.FilterSet):
             # Create a Q object for each value
             q_objects = Q()
             for v in value:
-                # Capitalize first letter, lowercase the rest
-                v = v[0].upper() + v[1:].lower()
-                q_objects |= Q(address__street__name__icontains=v) | Q(address__metro__name__icontains=v)
+                # Split the search value into words
+                words = v.strip().split()
+                if not words:
+                    continue
+                
+                # For each value, create a condition where ALL words must be present
+                # This allows searching for multi-word addresses like "Ленинский проспект"
+                # All words must be in the same field (either all in street name or all in metro name)
+                street_q = Q()
+                metro_q = Q()
+                
+                for word in words:
+                    # Capitalize first letter, lowercase the rest
+                    word = word[0].upper() + word[1:].lower() if len(word) > 1 else word.upper()
+                    # Each word must be present in street name
+                    if street_q:
+                        street_q &= Q(address__street__name__icontains=word)
+                    else:
+                        street_q = Q(address__street__name__icontains=word)
+                    # Each word must be present in metro name
+                    if metro_q:
+                        metro_q &= Q(address__metro__name__icontains=word)
+                    else:
+                        metro_q = Q(address__metro__name__icontains=word)
+                
+                # Either all words in street OR all words in metro
+                value_q = street_q | metro_q
+                
+                # Different values in the list are combined with OR
+                q_objects |= value_q
             return queryset.filter(q_objects)
         return queryset
