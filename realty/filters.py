@@ -1,7 +1,9 @@
+import re
+
 import django_filters
 from django.contrib.postgres.search import TrigramSimilarity
+from django.db import connection
 from django.db.models import F, Q
-from django.db.models.functions import Lower
 
 from config import constants
 from .models import Realty
@@ -216,17 +218,86 @@ class RealtyFilter(django_filters.FilterSet):
         return queryset
 
     def filter_address(self, queryset, name, value):
-        return queryset.annotate(
-                street_similarity=TrigramSimilarity(
-                    'address__street__name', value
-                ),
-                metro_similarity=TrigramSimilarity(
-                    'address__metro__name', value
+        ABBREVIATIONS = [
+            r'\b[Уу]л(?:\.|-ца)?\.?\b',                    # улица
+            r'\b[Пп]р(?:\.|-кт)?\.?\b',                    # проспект
+            r'\b[Пп]ер\.?\b',                              # переулок
+            r'\b[Пп]л\.?\b',                               # площадь
+            r'\b[Шш](?:\.)?\.?\b',                          # шоссе
+            r'\b[Мм]кр(?:\.)?\.?\b',                        # микрорайон
+            r'\b[Нн]аб(?:\.)?\.?\b',                        # набережная
+            r'\b[Пп]р-д(?:\.)?\.?\b',                       # проезд
+            r'\b[Кк]в(?:\.)?\.?\b',                         # квартал
+            r'\b[Бб]-р(?:\.)?\.?\b',                        # бульвар
+            r'\b[Лл]ин(?:\.)?\.?\b',                        # линия
+            r'\b[Тт]уп(?:\.)?\.?\b',                        # тупик
+            r'\b[Аа]л(?:\.)?\.?\b',                         # аллея
+            r'\b[Вв]ъезд\b',                                # въезд
+            r'\b[Дд]ор(?:\.)?\.?\b',                        # дорога
+            r'\b[Пп]ос(?:\.)?\.?\b',                        # поселок
+            r'\b[Дд]ер(?:\.)?\.?\b',                        # деревня
+            r'\b[Сс]т(?:\.)?\.?\b',                         # станция
+            r'\b[Кк]м(?:\.)?\.?\b',                         # километр
+            r'\b[Уу]лица\b',
+            r'\b[Пп]роспект\b',
+            r'\b[Пп]ереулок\b',
+            r'\b[Пп]лощадь\b',
+            r'\b[Шш]оссе\b',
+            r'\b[Мм]икрорайон\b',
+            r'\b[Нн]абережная\b',
+            r'\b[Пп]роезд\b',
+            r'\b[Кк]вартал\b',
+            r'\b[Бб]ульвар\b',
+            r'\b[Лл]иния\b',
+            r'\b[Тт]упик\b',
+            r'\b[Аа]ллея\b',
+            r'\b[Дд]орога\b',
+            r'\b[Пп]оселок\b',
+            r'\b[Дд]еревня\b',
+            r'\b[Сс]танция\b',
+            r'\b[А-Яа-я]{1,4}[.-][а-я]{0,3}\.?\b'
+        ]
+        if connection.vendor == 'postgresql':
+            return queryset.annotate(
+                    street_similarity=TrigramSimilarity(
+                        'address__street__name', value
+                    ),
+                    metro_similarity=TrigramSimilarity(
+                        'address__metro__name', value
+                    )
+                ).filter(
+                    Q(street_similarity__gt=0.25) |
+                    Q(metro_similarity__gt=0.25)
                 )
-            ).filter(
-                Q(street_similarity__gt=0.25) |
-                Q(metro_similarity__gt=0.25)
-            )
+        elif connection.vendor == 'sqlite':
+            search_terms = [
+                term.strip() for term in value.split(',') if term.strip()
+            ]
+            if not search_terms:
+                return queryset
+            query = Q()
+            element_index = 0
+            for term in search_terms:
+                parts = term.split(' ')
+                if len(parts) > 1:
+                    for element in parts:
+                        for pattern in ABBREVIATIONS:
+                            if re.search(
+                                pattern,
+                                element,
+                                re.IGNORECASE
+                            ):
+                                element_index = parts.index(element)
+                    parts.pop(element_index)
+                    term = parts[0]
+                term = term.capitalize()
+                term_query = Q()
+                term_query |= Q(address__street__name__icontains=term)
+                term_query |= Q(address__metro__name__icontains=term)
+                query |= term_query
+            return queryset.filter(query).distinct()
+        else:
+            return queryset
         #if value:
             # Create a Q object for each value
         #    q_objects = Q()

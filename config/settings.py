@@ -21,6 +21,7 @@ ALLOWED_HOSTS = [
     # os.getenv("DOMAIN"),
     # os.getenv("HOST_IP"),
     "localhost",
+    '127.0.0.1',
 ]
 
 extra_hosts = os.getenv("EXTRA_ALLOWED_HOSTS")
@@ -252,4 +253,3 @@ CORS_ALLOW_HEADERS = [
 
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOW_ALL_LOCALHOST = True
-
