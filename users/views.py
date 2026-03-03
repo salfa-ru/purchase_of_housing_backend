@@ -1,3 +1,4 @@
+from django.http import JsonResponse
 from drf_spectacular.utils import extend_schema_view, extend_schema, OpenApiResponse
 from rest_framework import viewsets, mixins
 from rest_framework import generics
@@ -9,6 +10,11 @@ from rest_framework.authtoken.models import Token
 from rest_framework.response import Response    # <---xxx--- удаление пользователя
 from rest_framework import serializers, status  # <---xxx--- удаление пользователя
 from rest_framework.exceptions import PermissionDenied, NotFound, ValidationError  # <---xxx---
+from rest_framework.permissions import AllowAny
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
+
+from django.conf import settings
 
 from users.models import User
 from users.permissions import IsAdminOrOwner
@@ -19,48 +25,108 @@ from users.serializers import (
     UserPersonalAccountSerializer,
     UserNewMsgsSerializer
 )
+from users.utils import set_jwt_cookies
 
-from django.contrib.auth import authenticate
+#from django.contrib.auth import authenticate
 
 
-class CustomAuthToken(ObtainAuthToken):
-    """ Замена для обработки мягко-удаленных пользователей
-    Вообще, они при "удалении" еще и дезактивируются, так что
-    добавление кастомной функции не является необходимостью. """
+class CookieTokenObtainPairView(TokenObtainPairView):
+    #serializer_class = TokenObtainPairSerializer
+    authentication_classes = ()
+    permission_classes = (AllowAny,)
+
     def post(self, request, *args, **kwargs):
-        serializer = self.serializer_class(data=request.data,
-                                           context={'request': request})
+        response = super().post(request, *args, **kwargs)
+        if response.status_code == 200:
+            access_token = response.data.get('access')
+            refresh_token = response.data.get('refresh')
+            if access_token and refresh_token:
+                response = set_jwt_cookies(
+                    request,
+                    response,
+                    access_token,
+                    refresh_token
+                )
+                del response.data['access']
+                del response.data['refresh']
+        return response
+
+
+class CookieTokenRefreshView(TokenRefreshView):
+    """Обновление токенов через refresh cookie."""
+
+    def post(self, request, *args, **kwargs):
+        refresh_token = request.COOKIES.get(
+            settings.SIMPLE_JWT['REFRESH_COOKIE']
+        )
+        if not refresh_token:
+            return Response(
+                {"detail": "Refresh token not found"},
+                status=status.HTTP_401_UNAUTHORIZED
+            )
+        data = {'refresh': refresh_token}
+        serializer = self.get_serializer(data=data)
         try:
             serializer.is_valid(raise_exception=True)
-        except serializers.ValidationError as e:
-            # Handle authentication failure here
+        except TokenError as e:
+            raise InvalidToken(e.args[0])
+        response = Response(
+            serializer.validated_data,
+            status=status.HTTP_200_OK
+        )
+        access_token = response.data.get('access')
+        refresh_token = response.data.get('refresh')
+        if access_token and refresh_token:
+            response = set_jwt_cookies(request, response, access_token, refresh_token)
+            del response.data['access']
+            if 'refresh' in response.data:
+                del response.data['refresh']
+        return response
 
-            # Attempt to authenticate the user to check the actual cause of the error
-            username = request.data.get('username')  # Or 'email', depending on your setup
-            password = request.data.get('password')
-            user = authenticate(username=username, password=password)
 
-            if user is None:
-                return Response({"detail": "Невозможно войти с предоставленными учетными данными."},
-                                status=status.HTTP_400_BAD_REQUEST)  # Bad Request
-            else:
-                # If user exists but other validations failed, reraise it
-                return Response(e.detail,
-                                status=status.HTTP_400_BAD_REQUEST)
-
-        user = serializer.validated_data['user']
-
-        # Check if user is deleted *here*
-        if user.is_deleted:
-            return Response({"detail": "Учетная запись пользователя удалена."},
-                            status=status.HTTP_400_BAD_REQUEST)  # Bad Request
-
-        token, created = Token.objects.get_or_create(user=user)
-        return Response({
-            'token': token.key,
-            'user_id': user.pk,
-            'email': user.email
-        })
+#class CustomAuthToken(ObtainAuthToken):
+#    """ Замена для обработки мягко-удаленных пользователей
+#    Вообще, они при "удалении" еще и дезактивируются, так что
+#    добавление кастомной функции не является необходимостью. """
+#    def post(self, request, *args, **kwargs):
+#        serializer = self.serializer_class(data=request.data,
+#                                           context={'request': request})
+#        print('serializer', serializer)
+#        print('self.serializer_class', self.serializer_class)
+#        try:
+#           serializer.is_valid(raise_exception=True)
+#        except serializers.ValidationError as e:
+#          # Handle authentication failure here
+#            # Attempt to authenticate the user to check the actual cause of the error
+#            username = request.data.get('username')  # Or 'email', depending on your setup
+#            password = request.data.get('password')
+#            user = authenticate(username=username, password=password)
+#           if user is None:
+#                return Response({"detail": "Невозможно войти с предоставленными учетными данными."},
+#                                status=status.HTTP_400_BAD_REQUEST)  # Bad Request
+#            else:
+#               # If user exists but other validations failed, reraise it
+#                return Response(e.detail,
+#                               status=status.HTTP_400_BAD_REQUEST)
+#        user = serializer.validated_data['user']
+#       # Check if user is deleted *here*
+#        if user.is_deleted:
+#            return Response({"detail": "Учетная запись пользователя удалена."},
+#                            status=status.HTTP_400_BAD_REQUEST)  # Bad Request
+#        token, created = Token.objects.get_or_create(user=user)
+#        response = JsonResponse({
+#            'user_id': user.pk,
+#            'email': user.email
+#        })
+        # Добавление токена в куки.
+#        response.set_cookie(
+#            key='auth_token',
+#            value=token.key,
+#            httponly=True,  # Запрет доступа из JavaScript
+#            secure=True,    # Только по HTTPS (в продакшне)
+#            samesite='Lax'  # Защита от CSRF (частично)
+#        )
+#        return response
 
 
 @extend_schema_view(

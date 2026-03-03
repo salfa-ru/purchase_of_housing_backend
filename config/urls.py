@@ -3,10 +3,13 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.http import HttpResponse
 from django.urls import path, include
-from drf_spectacular.views import SpectacularSwaggerView, SpectacularRedocView, SpectacularAPIView
+from drf_spectacular.views import (
+    SpectacularSwaggerView, SpectacularRedocView, SpectacularAPIView
+)
 # from rest_framework.authtoken import views
 
-from users.views import CustomAuthToken
+#from users.views import CustomAuthToken
+from users.views import CookieTokenObtainPairView, CookieTokenRefreshView
 from .settings import DEBUG
 
 
@@ -19,6 +22,16 @@ urlpatterns = [
     path('chats/', include('chats.urls', namespace='chats')),
     path('realty-addresses/', include('realty_addresses.urls', namespace='realty-addresses')),
     path('complaints/', include('complaints.urls', namespace='complaints')),
+    path(
+        'auth/token-auth/',
+        CookieTokenObtainPairView.as_view(),
+        name='token_obtain_pair'
+        ),
+    path(
+        'auth/token-refresh/',
+        CookieTokenRefreshView.as_view(),
+        name='token_refresh'
+    ),
 
     path('schema/', SpectacularAPIView.as_view(), name='schema'),
     path('swagger/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
@@ -29,8 +42,7 @@ urlpatterns = [
 if DEBUG:
     urlpatterns += [
         # path('token-auth/', views.obtain_auth_token)
-        path('token-auth/', CustomAuthToken.as_view(), name='api_token_auth'),  # Use the custom view
-
+        #path('token-auth/', CustomAuthToken.as_view(), name='api_token_auth'),  # Use the custom view
     ]
 
 # if settings.DEBUG:

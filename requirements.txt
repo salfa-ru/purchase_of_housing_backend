@@ -16,3 +16,5 @@ drf-spectacular==0.27.2
 django-filter==24.3
 django-q2==1.7.3
 django-cors-headers==4.6.0
+djangorestframework_simplejwt==5.5.1
+djoser==2.3.3

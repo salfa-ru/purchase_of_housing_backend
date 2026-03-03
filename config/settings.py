@@ -1,5 +1,8 @@
+from datetime import timedelta
 import os
 from dotenv import load_dotenv
+
+from django.http import HttpResponse
 
 
 load_dotenv()
@@ -73,6 +76,7 @@ INSTALLED_APPS = [
     'realty_specificities.apps.RealtySpecificitiesConfig',
     'realty_values.apps.RealtyValuesConfig',
     'users.apps.UsersConfig',
+    'djoser',
 ]
 
 MIDDLEWARE = [
@@ -80,8 +84,8 @@ MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
@@ -182,7 +186,8 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         # 'users.backends.CustomAuthentication',   # отключил, так как не пользуемся ИССОЙ!
-        'rest_framework.authentication.TokenAuthentication',
+        #'rest_framework.authentication.TokenAuthentication',
+        'users.authentication.CookieJWTAuthentication',
     ],
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
     # 'EXCEPTION_HANDLER': 'config.exceptions.custom_exception_handler'
@@ -253,3 +258,23 @@ CORS_ALLOW_HEADERS = [
 
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOW_ALL_LOCALHOST = True
+
+#SESSION_COOKIE_SECURE = True
+#SESSION_COOKIE_HTTPONLY = True
+#SESSION_COOKIE_SAMESITE = 'Lax'
+#SESSION_COOKIE_AGE = 3600
+
+SIMPLE_JWT = {
+    'ROTATE_REFRESH_TOKENS': True,  # Обновление refresh токена при замене access токена
+    'BLACKLIST_AFTER_ROTATION': True,
+
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=5),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
+
+    'REFRESH_COOKIE': 'refresh_token',  # Название ключа в куки, в котором хранится refresh токен
+    'AUTH_COOKIE': 'access_token',  # Название ключа в куки, в котором хранится access токен
+    'AUTH_COOKIE_SECURE': True,  # Куки должны передаваться только по HTTPS (True для production)
+    'AUTH_COOKIE_HTTP_ONLY': True,  # Запрет доступа к куки через JavaScript
+    'AUTH_COOKIE_SAMESITE': 'Strict',  # Ограничение передачи куки при кросс-сайтовых запросах.
+    'AUTH_COOKIE_PATH': '/auth/',
+}
