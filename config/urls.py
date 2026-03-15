@@ -8,7 +8,7 @@ from drf_spectacular.views import (
 )
 # from rest_framework.authtoken import views
 
-#from users.views import CustomAuthToken
+# from users.views import CustomAuthToken
 from users.views import CookieTokenObtainPairView, CookieTokenRefreshView
 from .settings import DEBUG
 
@@ -22,6 +22,7 @@ urlpatterns = [
     path('chats/', include('chats.urls', namespace='chats')),
     path('realty-addresses/', include('realty_addresses.urls', namespace='realty-addresses')),
     path('complaints/', include('complaints.urls', namespace='complaints')),
+    path('favorites/', include('favorites.urls', namespace='favorites')),
     path(
         'auth/token-auth/',
         CookieTokenObtainPairView.as_view(),

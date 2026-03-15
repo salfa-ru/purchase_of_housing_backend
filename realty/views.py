@@ -4,11 +4,14 @@ from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import extend_schema, extend_schema_view, OpenApiParameter
 from drf_spectacular.helpers import forced_singular_serializer
 from rest_framework import generics, permissions, viewsets, views, status  # <-- YYY --- realty_удаление v1
+from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
 from rest_framework.pagination import LimitOffsetPagination
 
 from config import constants
+from realty.models import Realty
 from realty.pagination import LimitRealtyPagination, MyRealtyPagination, PaginatedResponseSerializer
+from realty.serializers.serializers_realty import RealtyBaseSerializer
 from realty_addresses import models as realty_addresses_models
 from realty_values import models as realty_values_models
 from realty_displays.models import DisplayFullInfo, DisplayInSearch
@@ -268,9 +271,9 @@ class RealtyOwnerContactsView(generics.RetrieveAPIView):
             name='page_size',
             type=int,
             description=(
-                f'Количество объявлений на странице (по умолчанию '
-                f'{constants.MY_REALTY_PAGESIZE_DEFAULT}, максимум '
-                f'{constants.MY_REALTY_PAGESIZE_MAX})'
+                    f'Количество объявлений на странице (по умолчанию '
+                    f'{constants.MY_REALTY_PAGESIZE_DEFAULT}, максимум '
+                    f'{constants.MY_REALTY_PAGESIZE_MAX})'
             ),
             required=False
         ),
@@ -448,3 +451,56 @@ class RealtyDeleteView(generics.DestroyAPIView):
         instance.deleted_at = timezone.now()
         instance.save()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+@extend_schema(
+    summary='Получение нескольких объявлений по списку ID',
+    description='Возвращает массив объявлений в том же порядке, что и запрошенные ID. Оптимизация для функции сравнения.',
+    parameters=[
+        OpenApiParameter(name='ids', description='Список ID через запятую (например, ids=1,2,3)', required=True, type=str),
+    ],
+    responses={200: realty_serializers.RealtyBaseSerializer(many=True)}
+)
+class RealtyBatchView(GenericAPIView):
+    """
+        Получение нескольких объявлений по списку ID.
+        GET /realty/batch/?ids=1,2,3
+        Возвращает массив объектов в том же порядке, что и запрошенные ID.
+    """
+    serializer_class = RealtyBaseSerializer
+    queryset = Realty.objects.all()
+
+    def get(self, request):
+        # Получаем параметр ids из запроса
+        ids_param = request.query_params.get('ids')
+
+        if not ids_param:
+            return Response(
+                {'error': 'Parameter "ids" is required'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+            # Разбираем строку "1,2,3" в список чисел
+        try:
+            id_list = [int(id.strip()) for id in ids_param.split(',')]
+        except ValueError:
+            return Response(
+                {'error': 'Invalid ID format. Use comma-separated numbers'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Получаем обьекты
+        realties = Realty.objects.filter(id__in=id_list)
+
+        # Сохраняем порядок как в запросе
+        # Создаём словарь {id: объект} для быстрого доступа
+        realty_dict = {realty.id: realty for realty in realties}
+
+        # Формируем результат в том же порядке, что и запрошенные ID
+        result = []
+        for id in id_list:
+            if id in realty_dict:
+                result.append(realty_dict[id])
+
+        # Сериалезуем
+        serializer = self.get_serializer(result, many=True)
+        return Response(serializer.date)

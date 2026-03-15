@@ -77,6 +77,7 @@ INSTALLED_APPS = [
     'realty_values.apps.RealtyValuesConfig',
     'users.apps.UsersConfig',
     'djoser',
+    'favorites',
 ]
 
 MIDDLEWARE = [
