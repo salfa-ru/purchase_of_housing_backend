@@ -8,6 +8,7 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser, UserManager
 from django.db.models.signals import pre_save
 from django.dispatch import receiver
+from django.conf import settings
 from django.utils import timezone  # <---xxx--- для удаления пользователей
 
 from config import constants
@@ -152,7 +153,6 @@ class User(AbstractUser):
         self.is_deleted = True            # <---xxx---
         self.deleted_at = timezone.now()  # <---xxx---
         self.save()
-
 
 
 @receiver(pre_save, sender=User)

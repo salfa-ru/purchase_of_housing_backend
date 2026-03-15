@@ -12,7 +12,6 @@ from rest_framework import serializers, status  # <---xxx--- удаление п
 from rest_framework.exceptions import PermissionDenied, NotFound, ValidationError  # <---xxx---
 from rest_framework.permissions import AllowAny
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
-from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
 
 from django.conf import settings
 
@@ -25,30 +24,20 @@ from users.serializers import (
     UserPersonalAccountSerializer,
     UserNewMsgsSerializer
 )
-from users.utils import set_jwt_cookies
+from users.utils import delete_expired_tokens, update_token_field
 
 #from django.contrib.auth import authenticate
 
 
 class CookieTokenObtainPairView(TokenObtainPairView):
-    #serializer_class = TokenObtainPairSerializer
     authentication_classes = ()
     permission_classes = (AllowAny,)
 
     def post(self, request, *args, **kwargs):
         response = super().post(request, *args, **kwargs)
-        if response.status_code == 200:
-            access_token = response.data.get('access')
-            refresh_token = response.data.get('refresh')
-            if access_token and refresh_token:
-                response = set_jwt_cookies(
-                    request,
-                    response,
-                    access_token,
-                    refresh_token
-                )
-                del response.data['access']
-                del response.data['refresh']
+        #del response.data['access']
+        response = update_token_field(request, response)
+        del response.data['refresh']  # refresh токен передается в куки
         return response
 
 
@@ -56,31 +45,21 @@ class CookieTokenRefreshView(TokenRefreshView):
     """Обновление токенов через refresh cookie."""
 
     def post(self, request, *args, **kwargs):
-        refresh_token = request.COOKIES.get(
+        old_refresh_token = request.COOKIES.get(
             settings.SIMPLE_JWT['REFRESH_COOKIE']
         )
-        if not refresh_token:
+        if not old_refresh_token:
             return Response(
                 {"detail": "Refresh token not found"},
                 status=status.HTTP_401_UNAUTHORIZED
             )
-        data = {'refresh': refresh_token}
-        serializer = self.get_serializer(data=data)
-        try:
-            serializer.is_valid(raise_exception=True)
-        except TokenError as e:
-            raise InvalidToken(e.args[0])
-        response = Response(
-            serializer.validated_data,
-            status=status.HTTP_200_OK
-        )
-        access_token = response.data.get('access')
-        refresh_token = response.data.get('refresh')
-        if access_token and refresh_token:
-            response = set_jwt_cookies(request, response, access_token, refresh_token)
-            del response.data['access']
-            if 'refresh' in response.data:
-                del response.data['refresh']
+        request.data['refresh'] = old_refresh_token
+        response = super().post(request, *args, **kwargs)
+        response = update_token_field(request, response)
+    #    del response.data['access']
+        if 'refresh' in response.data:  # refresh токен передается в куки
+            del response.data['refresh']
+        delete_expired_tokens()  # удаляем истекшие хэши токенов из базы данных
         return response
 
 
@@ -91,8 +70,6 @@ class CookieTokenRefreshView(TokenRefreshView):
 #    def post(self, request, *args, **kwargs):
 #        serializer = self.serializer_class(data=request.data,
 #                                           context={'request': request})
-#        print('serializer', serializer)
-#        print('self.serializer_class', self.serializer_class)
 #        try:
 #           serializer.is_valid(raise_exception=True)
 #        except serializers.ValidationError as e:
