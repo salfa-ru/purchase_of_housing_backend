@@ -503,4 +503,4 @@ class RealtyBatchView(GenericAPIView):
 
         # Сериалезуем
         serializer = self.get_serializer(result, many=True)
-        return Response(serializer.date)
+        return Response(serializer.data)

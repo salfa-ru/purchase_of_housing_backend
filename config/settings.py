@@ -78,6 +78,7 @@ INSTALLED_APPS = [
     'users.apps.UsersConfig',
     'djoser',
     'favorites',
+    'django_extensions',
 ]
 
 MIDDLEWARE = [
@@ -189,7 +190,7 @@ REST_FRAMEWORK = {
         # 'users.backends.CustomAuthentication',   # отключил, так как не пользуемся ИССОЙ!
         #'rest_framework.authentication.TokenAuthentication',
         'users.authentication.CookieJWTAuthentication',
-        #'rest_framework_simplejwt.authentication.JWTAuthentication',
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
     ],
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
     # 'EXCEPTION_HANDLER': 'config.exceptions.custom_exception_handler'

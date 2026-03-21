@@ -91,9 +91,13 @@ class FavoriteCreateView(generics.CreateAPIView):
         Если объявление уже в избранном — возвращает ошибку 400.
         Доступно только авторизованным пользователям.
     """
-
+    http_method_names = ['post']
     permission_classes = [IsAuthenticated]
     serializer_class = FavoriteSerializer
+
+    def post(self, request, *args, **kwargs):
+        print("🔥 POST в FavoriteCreateView")  # 👈 временная строка
+        return super().post(request, *args, **kwargs)
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
