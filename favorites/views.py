@@ -20,9 +20,18 @@ from drf_spectacular.utils import extend_schema, extend_schema_view, OpenApiPara
 )
 class FavoriteListView(generics.ListAPIView):
     """
-        Получение списка избранного пользователя.
-        Доступна фильтрация по trade_type, realty_type и ordering.
-        Возвращает список и количество непросмотренных.
+        Возвращает список избранных объявлений текущего пользователя.
+
+        Поддерживает фильтрацию:
+        - `trade_type` — тип сделки (sale/rent)
+        - `realty_type` — тип недвижимости (apartment/apartments/commercial)
+        - `ordering` — сортировка по дате добавления (added_at / -added_at)
+
+        Ответ содержит:
+        - `unviewed_count` — количество новых объявлений, добавленных после последнего посещения
+        - `results` — список объектов избранного с полными данными объявлений
+
+        Доступно только авторизованным пользователям.
     """
 
     permission_classes = [IsAuthenticated]
@@ -70,8 +79,17 @@ class FavoriteListView(generics.ListAPIView):
 )
 class FavoriteCreateView(generics.CreateAPIView):
     """
-        Добавление объявления в избранное.
-        Принимает: { "realty_id": 123 }
+        Добавляет объявление в избранное текущего пользователя.
+
+        Ожидает JSON:
+        {
+            "realty_id": 123
+        }
+
+        Возвращает созданный объект избранного с вложенными данными объявления.
+
+        Если объявление уже в избранном — возвращает ошибку 400.
+        Доступно только авторизованным пользователям.
     """
 
     permission_classes = [IsAuthenticated]
@@ -88,8 +106,13 @@ class FavoriteCreateView(generics.CreateAPIView):
 )
 class FavoriteDeleteView(generics.DestroyAPIView):
     """
-    Удаление объявления из избранного.
-    Мгновенное удаление без подтверждения.
+        Удаляет объявление из избранного по ID записи избранного.
+
+        Удаление происходит мгновенно, без дополнительного подтверждения.
+        Пользователь может удалять только свои записи.
+
+        Возвращает статус 204 No Content при успешном удалении.
+        Доступно только авторизованным пользователям.
     """
 
     permission_classes = [IsAuthenticated]
@@ -113,9 +136,18 @@ class FavoriteDeleteView(generics.DestroyAPIView):
 )
 class FavoriteMarkViewedView(APIView):
     """
-        Сброс счётчика непросмотренных объявлений.
+        Сбрасывает счётчик новых объявлений в избранном.
+
         Вызывается при заходе пользователя на страницу /favorites.
-        Устанавливает is_viewed = True для всех непросмотренных записей пользователя.
+        Устанавливает флаг `is_viewed = True` для всех непросмотренных записей текущего пользователя.
+
+        Возвращает:
+        {
+            "status": "viewed",
+            "update_count": количество обновлённых записей
+        }
+
+        Доступно только авторизованным пользователям.
     """
 
     permission_classes = [IsAuthenticated]
