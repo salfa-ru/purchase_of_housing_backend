@@ -40,11 +40,11 @@ urlpatterns = [
     path('hidden-health/', lambda request: HttpResponse(status=200)),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
-if DEBUG:
-    urlpatterns += [
+#if DEBUG:
+#    urlpatterns += [
         # path('token-auth/', views.obtain_auth_token)
         #path('token-auth/', CustomAuthToken.as_view(), name='api_token_auth'),  # Use the custom view
-    ]
+#    ]
 
 # if settings.DEBUG:
 #     urlpatterns += static(

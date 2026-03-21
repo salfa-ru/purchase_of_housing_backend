@@ -269,6 +269,7 @@ class RealtyFilter(django_filters.FilterSet):
                     Q(street_similarity__gt=0.25) |
                     Q(metro_similarity__gt=0.25)
                 )
+        
         elif connection.vendor == 'sqlite':
             search_terms = [
                 term.strip() for term in value.split(',') if term.strip()

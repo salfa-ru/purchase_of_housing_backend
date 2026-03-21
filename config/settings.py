@@ -2,8 +2,6 @@ from datetime import timedelta
 import os
 from dotenv import load_dotenv
 
-from django.http import HttpResponse
-
 
 load_dotenv()
 
@@ -62,7 +60,9 @@ INSTALLED_APPS = [
     'drf_spectacular',
     'django_filters',
     'rest_framework',
-    'rest_framework.authtoken',
+    'rest_framework_simplejwt',
+    'rest_framework_simplejwt.token_blacklist',
+    #'rest_framework.authtoken',
     'django_q',
     'corsheaders',
     'complaints.apps.ComplaintsConfig',
@@ -84,8 +84,8 @@ MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.common.CommonMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
@@ -189,6 +189,7 @@ REST_FRAMEWORK = {
         # 'users.backends.CustomAuthentication',   # отключил, так как не пользуемся ИССОЙ!
         #'rest_framework.authentication.TokenAuthentication',
         'users.authentication.CookieJWTAuthentication',
+        #'rest_framework_simplejwt.authentication.JWTAuthentication',
     ],
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
     # 'EXCEPTION_HANDLER': 'config.exceptions.custom_exception_handler'
@@ -271,6 +272,8 @@ SIMPLE_JWT = {
 
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=5),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
+    'AUTH_HEADER_TYPES': ('Bearer',),
+    'JTI_CLAIM': 'jti',
 
     'REFRESH_COOKIE': 'refresh_token',  # Название ключа в куки, в котором хранится refresh токен
     'AUTH_COOKIE': 'access_token',  # Название ключа в куки, в котором хранится access токен

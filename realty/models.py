@@ -121,8 +121,6 @@ class Realty(models.Model):
 
         super().save(*args, **kwargs) # <-- YYY --- Сохраняем после манипуляций
 
-
-
     def __str__(self):
         return (
             f"{self.about_apartment.number_of_rooms.number_of_rooms}"
