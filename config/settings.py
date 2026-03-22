@@ -225,16 +225,16 @@ Q_CLUSTER = {
     'poll': 1,  # Poll every 1 second instead of 0.2
 }
 
-# CORS_ALLOWED_ORIGINS = [
-#     "http://localhost:5173",
-#     "http://127.0.0.1:5173",
-#     "https://estate.ktsf.ru",
-#     "https://front.test.estate.ktsf.ru",
-#     "https://house-react-ten.vercel.app"
-# ]
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+    "https://estate.ktsf.ru",
+    "https://front.test.estate.ktsf.ru",
+    "https://house-react-ten.vercel.app"
+]
 
 # REMOVE IN PRODUCTION
-CORS_ALLOW_ALL_ORIGINS = True
+#CORS_ALLOW_ALL_ORIGINS = True
 
 CORS_ALLOW_METHODS = [
     'DELETE',
@@ -278,6 +278,6 @@ SIMPLE_JWT = {
     'AUTH_COOKIE': 'access_token',  # Название ключа в куки, в котором хранится access токен
     'AUTH_COOKIE_SECURE': True,  # Куки должны передаваться только по HTTPS (True для production)
     'AUTH_COOKIE_HTTP_ONLY': True,  # Запрет доступа к куки через JavaScript
-    'AUTH_COOKIE_SAMESITE': 'Strict',  # Ограничение передачи куки при кросс-сайтовых запросах.
-    'AUTH_COOKIE_PATH': '/auth/',
+    'AUTH_COOKIE_SAMESITE': 'None',  # Ограничение передачи куки при кросс-сайтовых запросах.
+    'AUTH_COOKIE_PATH': '/',
 }
