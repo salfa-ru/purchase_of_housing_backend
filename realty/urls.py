@@ -7,7 +7,7 @@ from .views import (RealtyListView, LastRealtyListView, RealtyDetailView,
                     RealtyCountView, RealtyOwnerContactsView,
                     RealtyOwnerDataView, RealtyLKListView, SaleViewSet,
                     RentViewSet, ChangeStatusUpdateAPIView, RealtyFilterOptionsView,
-                    RealtyDeleteView)  # <-- YYY --- realty_удаление v1
+                    RealtyDeleteView, RealtyBatchView)  # <-- YYY --- realty_удаление v1
 
 
 app_name = "realty"
@@ -28,5 +28,6 @@ urlpatterns = [
     path('<int:pk>/status/', ChangeStatusUpdateAPIView.as_view(), name='change-status'),
     path('<int:pk>/delete/', RealtyDeleteView.as_view(), name='realty-delete'),  # <-- YYY --- realty_удаление v1
     path("", include(router.urls)),
-    path('filter-options/', RealtyFilterOptionsView.as_view(), name='filter-options')
+    path('filter-options/', RealtyFilterOptionsView.as_view(), name='filter-options'),
+    path('batch/' , RealtyBatchView.as_view(), name='realty-batch')
 ]
