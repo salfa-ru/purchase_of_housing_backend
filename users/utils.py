@@ -4,10 +4,9 @@ import hashlib
 from django.conf import settings
 from django.contrib.auth import get_user_model
 
-from rest_framework_simplejwt.exceptions import InvalidToken
 from rest_framework_simplejwt.settings import api_settings
 from rest_framework_simplejwt.tokens import RefreshToken
-from rest_framework_simplejwt.token_blacklist.models import BlacklistedToken, OutstandingToken
+from rest_framework_simplejwt.token_blacklist.models import OutstandingToken
 
 
 User = get_user_model()
@@ -72,12 +71,3 @@ def delete_expired_tokens():
     )
     if expired_hash_tokens.exists():
         expired_hash_tokens.delete()
-
-
-#def check_refresh_token(refresh_token):
-#    """Проверяет статус и срок действия refresh-токена."""
-#    refresh_token_hash = hash_token(refresh_token)
-#    refresh_token_id = OutstandingToken.objects.get(token=refresh_token_hash)
-#    if BlacklistedToken.objects.get(token_id=refresh_token_id).id():
-#        raise InvalidToken
-    
