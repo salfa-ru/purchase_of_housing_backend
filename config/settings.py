@@ -227,6 +227,7 @@ Q_CLUSTER = {
 
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
+    "https://localhost:5173",
     "http://127.0.0.1:5173",
     "https://estate.ktsf.ru",
     "https://front.test.estate.ktsf.ru",
@@ -260,6 +261,19 @@ CORS_ALLOW_HEADERS = [
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOW_ALL_LOCALHOST = True
 
+# Сессионные куки — для админки
+#SESSION_COOKIE_NAME = 'sessionid'
+#SESSION_COOKIE_PATH = '/'  # Для всего сайта
+#SESSION_COOKIE_SECURE = True
+#SESSION_COOKIE_HTTP_ONLY = True
+#SESSION_COOKIE_SAMESITE = 'Lax'
+
+# CSRF куки — для админки и форм
+#CSRF_COOKIE_NAME = 'csrftoken'
+#CSRF_COOKIE_PATH = '/'  # Для всего сайта
+#CSRF_COOKIE_SECURE = True
+#CSRF_COOKIE_HTTP_ONLY = False  # JS должен читать
+##CSRF_COOKIE_SAMESITE = 'Lax'
 #SESSION_COOKIE_SECURE = True
 #SESSION_COOKIE_HTTPONLY = True
 #SESSION_COOKIE_SAMESITE = 'Lax'
@@ -269,7 +283,7 @@ SIMPLE_JWT = {
     'ROTATE_REFRESH_TOKENS': True,  # Обновление refresh токена при замене access токена
     'BLACKLIST_AFTER_ROTATION': True,
 
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=5),
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),  # на проде поставить 5 мин.
     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
     'AUTH_HEADER_TYPES': ('Bearer',),
     'JTI_CLAIM': 'jti',

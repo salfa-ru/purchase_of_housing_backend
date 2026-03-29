@@ -2,8 +2,15 @@ from datetime import datetime
 import hashlib
 
 from django.conf import settings
+from django.contrib.auth import get_user_model
 
-from rest_framework_simplejwt.token_blacklist.models import OutstandingToken
+from rest_framework_simplejwt.exceptions import InvalidToken
+from rest_framework_simplejwt.settings import api_settings
+from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.token_blacklist.models import BlacklistedToken, OutstandingToken
+
+
+User = get_user_model()
 
 
 def hash_token(token):
@@ -15,7 +22,10 @@ def hash_token(token):
 
 def set_jwt_cookies(request, response, refresh_token):
     """Устанавливает JWT токены в HttpOnly cookies."""
-    secure = settings.SIMPLE_JWT['AUTH_COOKIE_SECURE']
+    if settings.DEBUG and request.scheme == 'http':
+        secure = False
+    else:
+        secure = settings.SIMPLE_JWT['AUTH_COOKIE_SECURE']
     response.set_cookie(
         key=settings.SIMPLE_JWT['REFRESH_COOKIE'],
         value=refresh_token,
@@ -33,9 +43,18 @@ def update_token_field(request, response):
     access_token = response.data.get('access')
     refresh_token = response.data.get('refresh')
     refresh_token_hash = hash_token(refresh_token)
+    refresh_token_obj = RefreshToken(refresh_token)
+    try:
+        username = request.data.get('username')
+        user_id = User.objects.get(username=username).id
+    except:
+        user_id = refresh_token_obj.payload.get(
+            api_settings.USER_ID_CLAIM,
+            None
+        )
     OutstandingToken.objects.filter(
-        user__username=request.data['username'],
-        token=response.data.get('refresh')
+        user_id=user_id,
+        token=refresh_token
     ).update(token=refresh_token_hash)
     if access_token and refresh_token:
         response = set_jwt_cookies(
@@ -53,3 +72,12 @@ def delete_expired_tokens():
     )
     if expired_hash_tokens.exists():
         expired_hash_tokens.delete()
+
+
+#def check_refresh_token(refresh_token):
+#    """Проверяет статус и срок действия refresh-токена."""
+#    refresh_token_hash = hash_token(refresh_token)
+#    refresh_token_id = OutstandingToken.objects.get(token=refresh_token_hash)
+#    if BlacklistedToken.objects.get(token_id=refresh_token_id).id():
+#        raise InvalidToken
+    

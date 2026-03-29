@@ -1,8 +1,12 @@
+from django.contrib.auth import get_user_model
 from django.http import JsonResponse
 from drf_spectacular.utils import extend_schema_view, extend_schema, OpenApiResponse
 from rest_framework import viewsets, mixins
 from rest_framework import generics
 from rest_framework import permissions
+from rest_framework.decorators import action
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.views import APIView
 
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.authtoken.models import Token
@@ -11,7 +15,11 @@ from rest_framework.response import Response    # <---xxx--- удаление п
 from rest_framework import serializers, status  # <---xxx--- удаление пользователя
 from rest_framework.exceptions import PermissionDenied, NotFound, ValidationError  # <---xxx---
 from rest_framework.permissions import AllowAny
-from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+from rest_framework_simplejwt.views import (
+    TokenObtainPairView, TokenRefreshView
+)
+from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
+from rest_framework_simplejwt.tokens import RefreshToken
 
 from django.conf import settings
 
@@ -35,7 +43,6 @@ class CookieTokenObtainPairView(TokenObtainPairView):
 
     def post(self, request, *args, **kwargs):
         response = super().post(request, *args, **kwargs)
-        #del response.data['access']
         response = update_token_field(request, response)
         del response.data['refresh']  # refresh токен передается в куки
         return response
@@ -53,13 +60,49 @@ class CookieTokenRefreshView(TokenRefreshView):
                 {"detail": "Refresh token not found"},
                 status=status.HTTP_401_UNAUTHORIZED
             )
-        request.data['refresh'] = old_refresh_token
-        response = super().post(request, *args, **kwargs)
+        data = request.data.copy()
+        data['refresh'] = old_refresh_token
+        serializer = self.get_serializer(data=data)
+        try:
+            serializer.is_valid(raise_exception=True)
+        except TokenError as e:
+            raise InvalidToken(e.args[0]) from e
+        response = Response(
+            serializer.validated_data,
+            status=status.HTTP_200_OK
+        )
         response = update_token_field(request, response)
-    #    del response.data['access']
         if 'refresh' in response.data:  # refresh токен передается в куки
             del response.data['refresh']
         delete_expired_tokens()  # удаляем истекшие хэши токенов из базы данных
+        return response
+
+
+class LogoutView(APIView):
+    """
+    Выход пользователя из системы.
+    Отзывает refresh-токен, делая его недействительным.
+    """
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        refresh_token = request.COOKIES.get('refresh_token')
+        if not refresh_token:
+            return Response(
+                {"detail": "Refresh token is required."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        # Создаем объект RefreshToken и добавляем в черный список
+        token = RefreshToken(refresh_token)
+        token.blacklist()  # Токен становится недействительным
+        response = Response(
+            {"detail": "Successfully logged out."},
+            status=status.HTTP_205_RESET_CONTENT
+        )
+        response.delete_cookie(
+            'refresh_token',
+            path=settings.SIMPLE_JWT['AUTH_COOKIE_PATH']
+        )
         return response
 
 
