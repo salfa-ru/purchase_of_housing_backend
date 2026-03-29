@@ -21,6 +21,7 @@ DEBUG = os.getenv('DEBUG', 'False').lower() == 'true'
 ALLOWED_HOSTS = [
     # os.getenv("DOMAIN"),
     # os.getenv("HOST_IP"),
+    'api.test.estate.ktsf.ru',
     "localhost",
     '127.0.0.1',
     "194.87.140.150",
