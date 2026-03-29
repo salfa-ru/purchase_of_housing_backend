@@ -23,6 +23,7 @@ ALLOWED_HOSTS = [
     # os.getenv("HOST_IP"),
     "localhost",
     '127.0.0.1',
+    "194.87.140.150",
 ]
 
 extra_hosts = os.getenv("EXTRA_ALLOWED_HOSTS")
