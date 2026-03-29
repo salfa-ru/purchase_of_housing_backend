@@ -8,14 +8,16 @@ from drf_spectacular.views import (
 )
 # from rest_framework.authtoken import views
 
-# from users.views import CustomAuthToken
-from users.views import CookieTokenObtainPairView, CookieTokenRefreshView
+#from users.views import CustomAuthToken
+from users.views import (
+    CookieTokenObtainPairView, CookieTokenRefreshView, LogoutView
+)
 from .settings import DEBUG
 
 
 urlpatterns = [
-    path('realty/', include('realty.urls')),
     path('admin/', admin.site.urls),
+    path('realty/', include('realty.urls')),
     path('users/', include('users.urls', namespace='users')),
     path('questions/', include('questions.urls', namespace='questions')),
     path('notifications/', include('notifications.urls', namespace='notifications')),
@@ -33,6 +35,7 @@ urlpatterns = [
         CookieTokenRefreshView.as_view(),
         name='token_refresh'
     ),
+    path('auth/logout/', LogoutView.as_view(), name='logout'),
 
     path('schema/', SpectacularAPIView.as_view(), name='schema'),
     path('swagger/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
