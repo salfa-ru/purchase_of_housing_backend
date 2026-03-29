@@ -24,6 +24,7 @@ urlpatterns = [
     path('chats/', include('chats.urls', namespace='chats')),
     path('realty-addresses/', include('realty_addresses.urls', namespace='realty-addresses')),
     path('complaints/', include('complaints.urls', namespace='complaints')),
+    path('favorites/', include('favorites.urls', namespace='favorites')),
     path(
         'auth/token-auth/',
         CookieTokenObtainPairView.as_view(),
