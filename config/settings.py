@@ -23,6 +23,8 @@ ALLOWED_HOSTS = [
     # os.getenv("HOST_IP"),
     "localhost",
     '127.0.0.1',
+    "api.test.estate.ktsf.ru",
+    "api.prod.estate.ktsf.ru",
 ]
 
 extra_hosts = os.getenv("EXTRA_ALLOWED_HOSTS")
@@ -31,7 +33,7 @@ if extra_hosts:
     ALLOWED_HOSTS += [host.strip() for host in extra_hosts.split(",")]
 
 
-
+# ========== CSRF TRUSTED ORIGINS ==========
 CSRF_TRUSTED_ORIGINS = [
     # f'http://{DOMAIN}',
     # f'https://{DOMAIN}',
@@ -44,6 +46,12 @@ CSRF_TRUSTED_ORIGINS = [
     # 'https://*',
     "https://localhost",
     "https://127.0.0.1",
+    "http://localhost:5173",
+    "https://localhost:5173",
+    "http://127.0.0.1:5173",
+    "https://127.0.0.1:5173",
+    "https://api.test.estate.ktsf.ru",
+    "https://api.prod.estate.ktsf.ru",
 ]
 
 extra_trusted_origins = os.getenv("EXTRA_CSRF_TRUSTED_ORIGINS")
@@ -212,6 +220,21 @@ SPECTACULAR_SETTINGS = {
         'filter': True,
         "persistAuthorization": True,
     },
+    'TAGS': [
+        {
+            'name': 'auth (token)',
+            'description': 'Получение и обновление JWT токенов. Токены используются для авторизации в защищённых эндпоинтах.'
+        },
+        {
+            'name': 'auth (djoser)',
+            'description': 'Управление пользователями: регистрация, активация, смена и сброс пароля, просмотр и редактирование профиля. '
+                           'Эндпоинты предоставлены библиотекой djoser.'
+        },
+        {
+            'name': 'users',
+            'description': 'Кастомные эндпоинты для работы с пользователями: смена номера телефона, новые сообщения, личный кабинет и т.д.'
+        },
+    ],
 }
 
 # Настройки Django Q2 для деактивации устаревших объявлений
@@ -228,14 +251,16 @@ Q_CLUSTER = {
     'poll': 1,  # Poll every 1 second instead of 0.2
 }
 
+# ========== CORS ==========
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
+    "https://localhost:5173",
     "http://127.0.0.1:5173",
-    "https://localhost",
-    "https://127.0.0.1",
+    "https://127.0.0.1:5173",
     "https://estate.ktsf.ru",
     "https://front.test.estate.ktsf.ru",
-    "https://house-react-ten.vercel.app"
+    "https://house-react-ten.vercel.app",
+    "https://api.test.estate.ktsf.ru",
 ]
 
 # REMOVE IN PRODUCTION
@@ -270,8 +295,9 @@ CORS_ALLOW_ALL_LOCALHOST = True
 #SESSION_COOKIE_SAMESITE = 'Lax'
 #SESSION_COOKIE_AGE = 3600
 
+# ========== JWT ==========
 SIMPLE_JWT = {
-    'ROTATE_REFRESH_TOKENS': True,  # Обновление refresh токена при замене access токена
+    'ROTATE_REFRESH_TOKENS': True,
     'BLACKLIST_AFTER_ROTATION': True,
 
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=5),
@@ -279,10 +305,11 @@ SIMPLE_JWT = {
     'AUTH_HEADER_TYPES': ('Bearer',),
     'JTI_CLAIM': 'jti',
 
-    'REFRESH_COOKIE': 'refresh_token',  # Название ключа в куки, в котором хранится refresh токен
-    'AUTH_COOKIE': 'access_token',  # Название ключа в куки, в котором хранится access токен
-    'AUTH_COOKIE_SECURE': True,  # Куки должны передаваться только по HTTPS (True для production)
-    'AUTH_COOKIE_HTTP_ONLY': True,  # Запрет доступа к куки через JavaScript
-    'AUTH_COOKIE_SAMESITE': 'None',  # Ограничение передачи куки при кросс-сайтовых запросах.
+    'REFRESH_COOKIE': 'refresh_token',
+    'AUTH_COOKIE': 'access_token',
+    # Условные настройки в зависимости от DEBUG
+    'AUTH_COOKIE_SECURE': not DEBUG,      # False в разработке, True в продакшене
+    'AUTH_COOKIE_HTTP_ONLY': True,
+    'AUTH_COOKIE_SAMESITE': 'Lax' if DEBUG else 'None',  # Lax для разработки
     'AUTH_COOKIE_PATH': '/',
 }

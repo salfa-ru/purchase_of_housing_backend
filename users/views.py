@@ -7,7 +7,7 @@ from rest_framework import permissions
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.authtoken.models import Token
 
-from rest_framework.response import Response    # <---xxx--- удаление пользователя
+from rest_framework.response import Response  # <---xxx--- удаление пользователя
 from rest_framework import serializers, status  # <---xxx--- удаление пользователя
 from rest_framework.exceptions import PermissionDenied, NotFound, ValidationError  # <---xxx---
 from rest_framework.permissions import AllowAny
@@ -26,21 +26,23 @@ from users.serializers import (
 )
 from users.utils import delete_expired_tokens, update_token_field
 
-#from django.contrib.auth import authenticate
 
+# from django.contrib.auth import authenticate
 
+@extend_schema(tags=['auth (token)'])
 class CookieTokenObtainPairView(TokenObtainPairView):
     authentication_classes = ()
     permission_classes = (AllowAny,)
 
     def post(self, request, *args, **kwargs):
         response = super().post(request, *args, **kwargs)
-        #del response.data['access']
+        # del response.data['access']
         response = update_token_field(request, response)
         del response.data['refresh']  # refresh токен передается в куки
         return response
 
 
+@extend_schema(tags=['auth (token)'])
 class CookieTokenRefreshView(TokenRefreshView):
     """Обновление токенов через refresh cookie."""
 
@@ -56,14 +58,14 @@ class CookieTokenRefreshView(TokenRefreshView):
         request.data['refresh'] = old_refresh_token
         response = super().post(request, *args, **kwargs)
         response = update_token_field(request, response)
-    #    del response.data['access']
+        #    del response.data['access']
         if 'refresh' in response.data:  # refresh токен передается в куки
             del response.data['refresh']
         delete_expired_tokens()  # удаляем истекшие хэши токенов из базы данных
         return response
 
 
-#class CustomAuthToken(ObtainAuthToken):
+# class CustomAuthToken(ObtainAuthToken):
 #    """ Замена для обработки мягко-удаленных пользователей
 #    Вообще, они при "удалении" еще и дезактивируются, так что
 #    добавление кастомной функции не является необходимостью. """
@@ -95,7 +97,7 @@ class CookieTokenRefreshView(TokenRefreshView):
 #            'user_id': user.pk,
 #            'email': user.email
 #        })
-        # Добавление токена в куки.
+# Добавление токена в куки.
 #        response.set_cookie(
 #            key='auth_token',
 #            value=token.key,
