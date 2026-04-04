@@ -25,6 +25,7 @@ ALLOWED_HOSTS = [
     '127.0.0.1',
     "api.test.estate.ktsf.ru",
     "api.prod.estate.ktsf.ru",
+    "194.87.140.150",
 ]
 
 extra_hosts = os.getenv("EXTRA_ALLOWED_HOSTS")
