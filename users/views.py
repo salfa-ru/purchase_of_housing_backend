@@ -1,15 +1,10 @@
-from django.contrib.auth import get_user_model
 from django.http import JsonResponse
 from drf_spectacular.utils import extend_schema_view, extend_schema, OpenApiResponse
 from rest_framework import viewsets, mixins
 from rest_framework import generics
 from rest_framework import permissions
-from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
-
-from rest_framework.authtoken.views import ObtainAuthToken
-from rest_framework.authtoken.models import Token
 
 from rest_framework.response import Response    # <---xxx--- удаление пользователя
 from rest_framework import serializers, status  # <---xxx--- удаление пользователя
@@ -34,9 +29,8 @@ from users.serializers import (
 )
 from users.utils import delete_expired_tokens, update_token_field
 
-#from django.contrib.auth import authenticate
 
-
+@extend_schema(tags=['auth (token)'])
 class CookieTokenObtainPairView(TokenObtainPairView):
     authentication_classes = ()
     permission_classes = (AllowAny,)
@@ -44,10 +38,12 @@ class CookieTokenObtainPairView(TokenObtainPairView):
     def post(self, request, *args, **kwargs):
         response = super().post(request, *args, **kwargs)
         response = update_token_field(request, response)
-        del response.data['refresh']  # refresh токен передается в куки
+        if not settings.DEBUG:  # для прода
+            del response.data['refresh']  # refresh токен передается в куки
         return response
 
 
+@extend_schema(tags=['auth (token)'])
 class CookieTokenRefreshView(TokenRefreshView):
     """Обновление токенов через refresh cookie."""
 
@@ -72,12 +68,14 @@ class CookieTokenRefreshView(TokenRefreshView):
             status=status.HTTP_200_OK
         )
         response = update_token_field(request, response)
-        if 'refresh' in response.data:  # refresh токен передается в куки
+        if 'refresh' in response.data and not settings.DEBUG:
+            # refresh токен передается в куки
             del response.data['refresh']
         delete_expired_tokens()  # удаляем истекшие хэши токенов из базы данных
         return response
 
 
+@extend_schema(tags=['auth (logout)'])
 class LogoutView(APIView):
     """
     Выход пользователя из системы.
@@ -104,49 +102,6 @@ class LogoutView(APIView):
             path=settings.SIMPLE_JWT['AUTH_COOKIE_PATH']
         )
         return response
-
-
-#class CustomAuthToken(ObtainAuthToken):
-#    """ Замена для обработки мягко-удаленных пользователей
-#    Вообще, они при "удалении" еще и дезактивируются, так что
-#    добавление кастомной функции не является необходимостью. """
-#    def post(self, request, *args, **kwargs):
-#        serializer = self.serializer_class(data=request.data,
-#                                           context={'request': request})
-#        try:
-#           serializer.is_valid(raise_exception=True)
-#        except serializers.ValidationError as e:
-#          # Handle authentication failure here
-#            # Attempt to authenticate the user to check the actual cause of the error
-#            username = request.data.get('username')  # Or 'email', depending on your setup
-#            password = request.data.get('password')
-#            user = authenticate(username=username, password=password)
-#           if user is None:
-#                return Response({"detail": "Невозможно войти с предоставленными учетными данными."},
-#                                status=status.HTTP_400_BAD_REQUEST)  # Bad Request
-#            else:
-#               # If user exists but other validations failed, reraise it
-#                return Response(e.detail,
-#                               status=status.HTTP_400_BAD_REQUEST)
-#        user = serializer.validated_data['user']
-#       # Check if user is deleted *here*
-#        if user.is_deleted:
-#            return Response({"detail": "Учетная запись пользователя удалена."},
-#                            status=status.HTTP_400_BAD_REQUEST)  # Bad Request
-#        token, created = Token.objects.get_or_create(user=user)
-#        response = JsonResponse({
-#            'user_id': user.pk,
-#            'email': user.email
-#        })
-        # Добавление токена в куки.
-#        response.set_cookie(
-#            key='auth_token',
-#            value=token.key,
-#            httponly=True,  # Запрет доступа из JavaScript
-#            secure=True,    # Только по HTTPS (в продакшне)
-#            samesite='Lax'  # Защита от CSRF (частично)
-#        )
-#        return response
 
 
 @extend_schema_view(
