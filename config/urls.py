@@ -17,25 +17,26 @@ from .settings import DEBUG
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('realty/', include('realty.urls')),
-    path('users/', include('users.urls', namespace='users')),
-    path('questions/', include('questions.urls', namespace='questions')),
-    path('notifications/', include('notifications.urls', namespace='notifications')),
-    path('chats/', include('chats.urls', namespace='chats')),
-    path('realty-addresses/', include('realty_addresses.urls', namespace='realty-addresses')),
-    path('complaints/', include('complaints.urls', namespace='complaints')),
-    path('favorites/', include('favorites.urls', namespace='favorites')),
+    path('api/realty/', include('realty.urls')),
+    path('api/users/', include('users.urls', namespace='users')),
+    path('api/questions/', include('questions.urls', namespace='questions')),
+    path('api/notifications/', include('notifications.urls', namespace='notifications')),
+    path('api/chats/', include('chats.urls', namespace='chats')),
+    path('api/realty-addresses/', include('realty_addresses.urls', namespace='realty-addresses')),
+    path('api/complaints/', include('complaints.urls', namespace='complaints')),
+    path('api/favorites/', include('favorites.urls', namespace='favorites')),
     path(
-        'auth/token-auth/',
+        'api/auth/token-auth/',
         CookieTokenObtainPairView.as_view(),
         name='token_obtain_pair'
         ),
     path(
-        'auth/token-refresh/',
+        'api/auth/token-refresh/',
         CookieTokenRefreshView.as_view(),
         name='token_refresh'
     ),
-    path('auth/logout/', LogoutView.as_view(), name='logout'),
+    path('api/auth/logout/', LogoutView.as_view(), name='logout'),
+    # path('api/auth/', include('djoser.urls')),          # эндпоинты для пользователей
 
     path('schema/', SpectacularAPIView.as_view(), name='schema'),
     path('swagger/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),

@@ -21,9 +21,10 @@ DEBUG = os.getenv('DEBUG', 'False').lower() == 'true'
 ALLOWED_HOSTS = [
     # os.getenv("DOMAIN"),
     # os.getenv("HOST_IP"),
-    'api.test.estate.ktsf.ru',
     "localhost",
     '127.0.0.1',
+    "api.test.estate.ktsf.ru",
+    "api.prod.estate.ktsf.ru",
     "194.87.140.150",
 ]
 
@@ -31,7 +32,6 @@ extra_hosts = os.getenv("EXTRA_ALLOWED_HOSTS")
 
 if extra_hosts:
     ALLOWED_HOSTS += [host.strip() for host in extra_hosts.split(",")]
-
 
 
 CSRF_TRUSTED_ORIGINS = [
@@ -44,7 +44,16 @@ CSRF_TRUSTED_ORIGINS = [
 
     # 'http://*',
     # 'https://*',
+    "https://localhost",
+    "https://127.0.0.1",
+    "http://localhost:5173",
+    "https://localhost:5173",
+    "http://127.0.0.1:5173",
+    "https://127.0.0.1:5173",
+    "https://api.test.estate.ktsf.ru",
+    "https://api.prod.estate.ktsf.ru",
 ]
+
 
 extra_trusted_origins = os.getenv("EXTRA_CSRF_TRUSTED_ORIGINS")
 
@@ -64,7 +73,6 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework_simplejwt',
     'rest_framework_simplejwt.token_blacklist',
-    #'rest_framework.authtoken',
     'django_q',
     'corsheaders',
     'complaints.apps.ComplaintsConfig',
@@ -80,7 +88,6 @@ INSTALLED_APPS = [
     'users.apps.UsersConfig',
     'djoser',
     'favorites',
-    'django_extensions',
 ]
 
 MIDDLEWARE = [
@@ -265,29 +272,12 @@ CORS_ALLOW_HEADERS = [
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOW_ALL_LOCALHOST = True
 
-# Сессионные куки — для админки
-#SESSION_COOKIE_NAME = 'sessionid'
-#SESSION_COOKIE_PATH = '/'  # Для всего сайта
-#SESSION_COOKIE_SECURE = True
-#SESSION_COOKIE_HTTP_ONLY = True
-#SESSION_COOKIE_SAMESITE = 'Lax'
-
-# CSRF куки — для админки и форм
-#CSRF_COOKIE_NAME = 'csrftoken'
-#CSRF_COOKIE_PATH = '/'  # Для всего сайта
-#CSRF_COOKIE_SECURE = True
-#CSRF_COOKIE_HTTP_ONLY = False  # JS должен читать
-##CSRF_COOKIE_SAMESITE = 'Lax'
-#SESSION_COOKIE_SECURE = True
-#SESSION_COOKIE_HTTPONLY = True
-#SESSION_COOKIE_SAMESITE = 'Lax'
-#SESSION_COOKIE_AGE = 3600
 
 SIMPLE_JWT = {
     'ROTATE_REFRESH_TOKENS': True,  # Обновление refresh токена при замене access токена
     'BLACKLIST_AFTER_ROTATION': True,
 
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),  # на проде поставить 5 мин.
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60) if DEBUG else timedelta(minutes=5),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
     'AUTH_HEADER_TYPES': ('Bearer',),
     'JTI_CLAIM': 'jti',
@@ -296,6 +286,6 @@ SIMPLE_JWT = {
     'AUTH_COOKIE': 'access_token',  # Название ключа в куки, в котором хранится access токен
     'AUTH_COOKIE_SECURE': True,  # Куки должны передаваться только по HTTPS (True для production)
     'AUTH_COOKIE_HTTP_ONLY': True,  # Запрет доступа к куки через JavaScript
-    'AUTH_COOKIE_SAMESITE': 'None',  # Ограничение передачи куки при кросс-сайтовых запросах.
-    'AUTH_COOKIE_PATH': '/',
+    'AUTH_COOKIE_SAMESITE': 'Lax' if not DEBUG else 'None',  # Ограничение передачи куки при кросс-сайтовых запросах.
+    'AUTH_COOKIE_PATH': '/api/',
 }
