@@ -230,3 +230,20 @@ class UserContactsSerializer(UserBaseSerializer):
                   'first_name',
                   'phone_qr_code'
                   )
+
+
+# ========== СМЕНА НОМЕРА ТЕЛЕФОНА ==========
+class ChangePhoneSerializer(serializers.Serializer):
+    new_phone_number = serializers.CharField(max_length=20)
+
+    def validate_new_phone_number(self, value):
+        from users.models import User
+        if User.objects.filter(phone_number=value).exists():
+            raise serializers.ValidationError("Этот номер телефона уже используется.")
+        return value
+
+    def save(self, **kwargs):
+        user = self.context['request'].user
+        user.phone_number = self.validated_data['new_phone_number']
+        user.save()
+        return user
