@@ -6,6 +6,8 @@ from rest_framework import permissions
 
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.authtoken.models import Token
+from rest_framework.views import APIView
+from rest_framework_simplejwt.tokens import RefreshToken
 
 from rest_framework.response import Response  # <---xxx--- удаление пользователя
 from rest_framework import serializers, status  # <---xxx--- удаление пользователя
@@ -107,6 +109,33 @@ class CookieTokenRefreshView(TokenRefreshView):
 #            samesite='Lax'  # Защита от CSRF (частично)
 #        )
 #        return response
+
+@extend_schema(tags=['auth (logout)'])
+class LogoutView(APIView):
+    """
+    Выход пользователя из системы.
+    Отзывает refresh-токен, делая его недействительным.
+    """
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        refresh_token = request.COOKIES.get('refresh_token')
+        if not refresh_token:
+            return Response(
+                {"detail": "Refresh token is required."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        token = RefreshToken(refresh_token)
+        token.blacklist()
+        response = Response(
+            {"detail": "Successfully logged out."},
+            status=status.HTTP_205_RESET_CONTENT
+        )
+        response.delete_cookie(
+            'refresh_token',
+            path=settings.SIMPLE_JWT['AUTH_COOKIE_PATH']
+        )
+        return response
 
 
 @extend_schema_view(
