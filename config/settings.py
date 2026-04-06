@@ -2,17 +2,13 @@ from datetime import timedelta
 import os
 from dotenv import load_dotenv
 
-
 load_dotenv()
 
-
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-
 
 SECRET_KEY = os.getenv('SECRET_KEY', 'default_key')
 
 DEBUG = os.getenv('DEBUG', 'False').lower() == 'true'
-
 
 # DOMAIN = os.getenv('DOMAIN')
 # ALLOWED_HOSTS = [DOMAIN, os.getenv('HOST_IP'), 'localhost', 'api.prod.estate.ktsf.ru']
@@ -32,7 +28,6 @@ extra_hosts = os.getenv("EXTRA_ALLOWED_HOSTS")
 
 if extra_hosts:
     ALLOWED_HOSTS += [host.strip() for host in extra_hosts.split(",")]
-
 
 CSRF_TRUSTED_ORIGINS = [
     # f'http://{DOMAIN}',
@@ -54,12 +49,10 @@ CSRF_TRUSTED_ORIGINS = [
     "https://api.prod.estate.ktsf.ru",
 ]
 
-
 extra_trusted_origins = os.getenv("EXTRA_CSRF_TRUSTED_ORIGINS")
 
 if extra_trusted_origins:
     CSRF_TRUSTED_ORIGINS += [host.strip() for host in extra_trusted_origins.split(",")]
-
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -121,7 +114,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'config.wsgi.application'
 
-
 USE_SQLITE = os.getenv('USE_SQLITE', 'False').lower() in ('true', '1', 'yes')
 
 if USE_SQLITE:
@@ -143,7 +135,6 @@ else:
         }
     }
 
-
 AUTH_USER_MODEL = 'users.User'
 
 AUTH_PASSWORD_VALIDATORS = [
@@ -161,20 +152,17 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 LANGUAGE_CODE = 'ru-ru'
 TIME_ZONE = 'Europe/Moscow'
 
 USE_I18N = True
 USE_TZ = True
 
-
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
@@ -197,14 +185,13 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         # 'users.backends.CustomAuthentication',   # отключил, так как не пользуемся ИССОЙ!
-        #'rest_framework.authentication.TokenAuthentication',
+        # 'rest_framework.authentication.TokenAuthentication',
         'users.authentication.CookieJWTAuthentication',
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ],
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
     # 'EXCEPTION_HANDLER': 'config.exceptions.custom_exception_handler'
 }
-
 
 SPECTACULAR_SETTINGS = {
     # 'SORT_ENDPOINTS': True,  # отключает сортировку эндпойнтов
@@ -246,7 +233,7 @@ CORS_ALLOWED_ORIGINS = [
 ]
 
 # REMOVE IN PRODUCTION
-#CORS_ALLOW_ALL_ORIGINS = True
+# CORS_ALLOW_ALL_ORIGINS = True
 
 CORS_ALLOW_METHODS = [
     'DELETE',
@@ -272,6 +259,16 @@ CORS_ALLOW_HEADERS = [
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOW_ALL_LOCALHOST = True
 
+# ========== DJOSER ==========
+DJOSER = {
+    'PASSWORD_RESET_CONFIRM_URL': 'password-reset/{uid}/{token}/',
+    'PASSWORD_RESET_SHOW_EMAIL_NOT_FOUND': True,
+    'SEND_ACTIVATION_EMAIL': False,
+    'SET_PASSWORD_RETYPE': False,
+}
+
+# URL для редиректа после сброса пароля
+LOGIN_URL = '/auth/token-auth/'
 
 SIMPLE_JWT = {
     'ROTATE_REFRESH_TOKENS': True,  # Обновление refresh токена при замене access токена
@@ -289,3 +286,6 @@ SIMPLE_JWT = {
     'AUTH_COOKIE_SAMESITE': 'Lax' if not DEBUG else 'None',  # Ограничение передачи куки при кросс-сайтовых запросах.
     'AUTH_COOKIE_PATH': '/api/',
 }
+
+# ========== EMAIL НАСТРОЙКИ (для сброса пароля) ==========
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'  # письма в консоль
