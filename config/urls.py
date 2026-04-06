@@ -38,18 +38,15 @@ urlpatterns = [
     path('auth/token-refresh/', CookieTokenRefreshView.as_view(), name='token_refresh'),
     path('auth/logout/', LogoutView.as_view(), name='logout'),
 
-    # Сброс пароля — подтверждение (стандартная вьюха Django)
-
     path('password-reset/done/',
          auth_views.PasswordResetCompleteView.as_view(),
          name='password_reset_complete'),
 
-    # Подтверждение сброса пароля
     path('password-reset/<uidb64>/<token>/',
          auth_views.PasswordResetConfirmView.as_view(),
          name='password_reset_confirm'),
 
-    path('auth/', include(router_djoser.urls)),
+    path('api/auth/', include(router_djoser.urls)),  # ← добавили 'api/'
 
     path('schema/', SpectacularAPIView.as_view(), name='schema'),
     path('swagger/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
