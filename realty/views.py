@@ -313,6 +313,15 @@ class RealtyLKListView(generics.ListAPIView):
             .order_by('-published_at')
         )
 
+    def list(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True, context={'request': request})
+            return self.get_paginated_response(serializer.data)
+        serializer = self.get_serializer(queryset, many=True, context={'request': request})
+        return Response(serializer.data)
+
 
 ...
 
@@ -457,7 +466,8 @@ class RealtyDeleteView(generics.DestroyAPIView):
     summary='Получение нескольких объявлений по списку ID',
     description='Возвращает массив объявлений в том же порядке, что и запрошенные ID. Оптимизация для функции сравнения.',
     parameters=[
-        OpenApiParameter(name='ids', description='Список ID через запятую (например, ids=1,2,3)', required=True, type=str),
+        OpenApiParameter(name='ids', description='Список ID через запятую (например, ids=1,2,3)', required=True,
+                         type=str),
     ],
     responses={200: realty_serializers.RealtyBaseSerializer(many=True)}
 )
