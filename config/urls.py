@@ -25,7 +25,7 @@ for url in router_djoser.urls:
 
 urlpatterns = [
     path('api/realty/', include('realty.urls')),
-    path('api/admin/', admin.site.urls),
+    path('admin/', admin.site.urls),
     path('api/users/', include('users.urls', namespace='users')),
     path('api/questions/', include('questions.urls', namespace='questions')),
     path('api/notifications/', include('notifications.urls', namespace='notifications')),
