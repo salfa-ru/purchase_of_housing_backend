@@ -1,20 +1,16 @@
 from rest_framework import serializers
-from django.core.validators import FileExtensionValidator
-from config import constants
-
 from .models import RealtyPhoto
 
 
 class RealtyPhotoSerializer(serializers.ModelSerializer):
-    image = serializers.ImageField(validators=[
-            FileExtensionValidator(
-                allowed_extensions=constants.IMAGE_EXTENSIONS)],
-            )
+    image = serializers.SerializerMethodField()
 
     class Meta:
         model = RealtyPhoto
-        fields = (
-            "id",
-            "image",
-            # "sorter" ,
-            )
+        fields = ("id", "image")
+
+    def get_image(self, obj):
+        request = self.context.get('request')
+        if obj.image and request:
+            return request.build_absolute_uri(obj.image.url)
+        return None
