@@ -24,25 +24,25 @@ for url in router_djoser.urls:
         url.callback.cls = extend_schema(tags=['auth (djoser)'])(url.callback.cls)
 
 urlpatterns = [
-    path('realty/', include('realty.urls')),
-    path('admin/', admin.site.urls),
-    path('users/', include('users.urls', namespace='users')),
-    path('questions/', include('questions.urls', namespace='questions')),
-    path('notifications/', include('notifications.urls', namespace='notifications')),
-    path('chats/', include('chats.urls', namespace='chats')),
-    path('realty-addresses/', include('realty_addresses.urls', namespace='realty-addresses')),
-    path('complaints/', include('complaints.urls', namespace='complaints')),
-    path('favorites/', include('favorites.urls', namespace='favorites')),
+    path('api/realty/', include('realty.urls')),
+    path('api/admin/', admin.site.urls),
+    path('api/users/', include('users.urls', namespace='users')),
+    path('api/questions/', include('questions.urls', namespace='questions')),
+    path('api/notifications/', include('notifications.urls', namespace='notifications')),
+    path('api/chats/', include('chats.urls', namespace='chats')),
+    path('api/realty-addresses/', include('realty_addresses.urls', namespace='realty-addresses')),
+    path('api/complaints/', include('complaints.urls', namespace='complaints')),
+    path('api/favorites/', include('favorites.urls', namespace='favorites')),
 
-    path('auth/token-auth/', CookieTokenObtainPairView.as_view(), name='token_obtain_pair'),
-    path('auth/token-refresh/', CookieTokenRefreshView.as_view(), name='token_refresh'),
-    path('auth/logout/', LogoutView.as_view(), name='logout'),
+    path('api/auth/token-auth/', CookieTokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('api/auth/token-refresh/', CookieTokenRefreshView.as_view(), name='token_refresh'),
+    path('api/auth/logout/', LogoutView.as_view(), name='logout'),
 
-    path('password-reset/done/',
+    path('api/password-reset/done/',
          auth_views.PasswordResetCompleteView.as_view(),
          name='password_reset_complete'),
 
-    path('password-reset/<uidb64>/<token>/',
+    path('api/password-reset/<uidb64>/<token>/',
          auth_views.PasswordResetConfirmView.as_view(),
          name='password_reset_confirm'),
 
