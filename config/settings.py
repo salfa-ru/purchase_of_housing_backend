@@ -5,6 +5,8 @@ from dotenv import load_dotenv
 load_dotenv()
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+DATA_DIR = os.path.join(BASE_DIR, 'data')
+os.makedirs(DATA_DIR, exist_ok=True)
 
 SECRET_KEY = os.getenv('SECRET_KEY', 'default_key')
 
@@ -120,7 +122,7 @@ if USE_SQLITE:
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+            'NAME': os.path.join(DATA_DIR, 'db.sqlite3'),
         }
     }
 else:
@@ -261,14 +263,14 @@ CORS_ALLOW_ALL_LOCALHOST = True
 
 # ========== DJOSER ==========
 DJOSER = {
-    'PASSWORD_RESET_CONFIRM_URL': 'password-reset/{uid}/{token}/',
+    'PASSWORD_RESET_CONFIRM_URL': 'api/password-reset/{uid}/{token}/',
     'PASSWORD_RESET_SHOW_EMAIL_NOT_FOUND': True,
     'SEND_ACTIVATION_EMAIL': False,
     'SET_PASSWORD_RETYPE': False,
 }
 
 # URL для редиректа после сброса пароля
-LOGIN_URL = '/auth/token-auth/'
+LOGIN_URL = 'api/auth/token-auth/'
 
 SIMPLE_JWT = {
     'ROTATE_REFRESH_TOKENS': True,  # Обновление refresh токена при замене access токена
