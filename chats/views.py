@@ -54,8 +54,10 @@ class MessagesPagination(ConfigurablePagination):
                                      f'(по умолчанию {constants.CHATS_PAGESIZE_DEFAULT}, '
                                      f'максимум {constants.CHATS_PAGESIZE_MAX}), '
                                      f'настраивается константами CHATS_PAGESIZE'),
-        OpenApiParameter(name='i_block', type=bool, location=OpenApiParameter.QUERY, description='Фильтр: показывать только чаты, где я заблокировал собеседника (true/false)'),
-        OpenApiParameter(name='i_am_blocked', type=bool, location=OpenApiParameter.QUERY, description='Фильтр: показывать только чаты, где меня заблокировал собеседник (true/false)'),
+        OpenApiParameter(name='i_block', type=bool, location=OpenApiParameter.QUERY,
+                         description='Фильтр: показывать только чаты, где я заблокировал собеседника (true/false)'),
+        OpenApiParameter(name='i_am_blocked', type=bool, location=OpenApiParameter.QUERY,
+                         description='Фильтр: показывать только чаты, где меня заблокировал собеседник (true/false)'),
     ]
 )
 class ChatListAPIView(generics.ListAPIView):
@@ -122,32 +124,34 @@ class ChatListAPIView(generics.ListAPIView):
             filtered_chats.append(chat)
         return filtered_chats
 
-    def list(self, request, *args, **kwargs):  # Переопределяем метод list ДЛЯ ПОЛУЧЕНИЯ UNREAD TOTAL
+    def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
         page = self.paginate_queryset(queryset)
 
-        # Считаем общее количество непрочитанных сообщений
+        # Считаем непрочитанные сообщения ТОЛЬКО для отфильтрованных чатов
+        # Получаем ID чатов из отфильтрованного queryset
+        chat_ids = [chat.chat_id for chat in queryset]
+
         unread_total = Message.objects.filter(
             user_to=request.user,
             is_new=True,
-            is_deleted_to=False
+            is_deleted_to=False,
+            chat_id__in=chat_ids  # <-- ключевое изменение: только эти чаты
         ).count()
-
 
         if page is not None:
             serializer = self.get_serializer(page, many=True, context={'request': request})
             paginated_response = self.get_paginated_response(serializer.data)
-
-            # Создаем новый словарь и добавляем unread_total в начало  # <----------
             new_data = {'unread_total': unread_total}
-            new_data.update(paginated_response.data)  # Добавляем остальные данные
-            paginated_response.data = new_data  # Заменяем данные
+            new_data.update(paginated_response.data)
+            paginated_response.data = new_data
             return paginated_response
 
-        serializer = self.get_serializer(queryset, many=True)
+        serializer = self.get_serializer(queryset, many=True, context={'request': request})
         response_data = serializer.data
-        response_data.insert(0, {'unread_total': unread_total})
-        return Response(response_data)
+        # Вставляем unread_total в начало
+        return Response([{'unread_total': unread_total}] + response_data)
+
 
 @extend_schema(
     summary='Получение списка сообщений в чате по chat_id ИЛИ realty_id',
@@ -179,7 +183,6 @@ class ChatMessagesAPIView(generics.CreateAPIView):
         realty_id = request.data.get('realty_id')
 
         if (chat_id is not None and realty_id is not None) or (chat_id is None and realty_id is None):
-
             # Уродливо показывается - зато как 400 ошибка
             raise exceptions.ValidationError(detail="Нужен либо chat_id либо realty_id, а не оба (или ни одного)")
 
