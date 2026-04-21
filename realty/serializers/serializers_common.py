@@ -60,7 +60,7 @@ class RealtyLKSerializer(serializers.Serializer):
 
     def to_representation(self, instance):
         representation = {
-            'short_realty_data': realty_serializers.ShortRealtySerializer(instance).data,
+            'short_realty_data': realty_serializers.ShortRealtySerializer(instance, context=self.context).data,
             'realty_status': instance.realty_status_id,
 
             # Зачем здесь это вообще - ведь здесь не будут показаны удаленные
