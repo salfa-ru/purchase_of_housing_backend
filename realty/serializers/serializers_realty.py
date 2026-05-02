@@ -559,6 +559,15 @@ class ShortRealtySerializer(serializers.ModelSerializer):
     realty_status = serializers.IntegerField(source='realty_status_id', read_only=True)
     realty_status_full = serializers.CharField(source='realty_status.status', read_only=True)
 
+    # ========== ДЛЯ КОММЕРЧЕСКОЙ НЕДВИЖИМОСТИ ==========
+    is_commercial = serializers.SerializerMethodField()
+    commercial_type = serializers.CharField(source='commercial_type', read_only=True)
+
+
+    def get_is_commercial(self, obj):
+        return obj.realty_type.is_commercial
+
+
     class Meta:
         model = realty_models.Realty
         fields = ("id",
