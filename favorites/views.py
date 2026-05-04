@@ -10,6 +10,7 @@ from drf_spectacular.utils import extend_schema, extend_schema_view, OpenApiPara
 
 
 @extend_schema(
+    tags=['favorites'],
     summary='Получение списка избранного пользователя',
     description='Возвращает список объявлений в избранном с количеством непросмотренных. Поддерживает фильтрацию по trade_type, realty_type и ordering.',
     parameters=[
@@ -72,6 +73,7 @@ class FavoriteListView(generics.ListAPIView):
 
 
 @extend_schema(
+    tags=['favorites'],
     summary='Добавление объявления в избранное',
     description='Принимает realty_id и добавляет объявление в избранное текущего пользователя',
     request=FavoriteSerializer,
@@ -104,6 +106,7 @@ class FavoriteCreateView(generics.CreateAPIView):
 
 
 @extend_schema(
+    tags=['favorites'],
     summary='Удаление объявления из избранного',
     description='Мгновенное удаление без подтверждения. Возвращает 204 No Content.',
     responses={204: None}
@@ -134,6 +137,7 @@ class FavoriteDeleteView(generics.DestroyAPIView):
 
 
 @extend_schema(
+    tags=['favorites'],
     summary='Сброс счётчика непросмотренных',
     description='Помечает все объявления в избранном как просмотренные (is_viewed = True)',
     responses={200: None}
