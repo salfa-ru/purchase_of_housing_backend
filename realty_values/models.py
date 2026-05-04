@@ -141,6 +141,11 @@ class RealtyType(models.Model):
         verbose_name="Коммерческая недвижимость"
     )
 
+    is_commercial = models.BooleanField(
+        default=False,
+        verbose_name="Коммерческая недвижимость"
+    )
+
     class Meta:
         verbose_name = "Тип недвижимости"
         verbose_name_plural = "Типы недвижимости"

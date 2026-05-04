@@ -52,12 +52,12 @@ class RealtyFilter(django_filters.FilterSet):
         lookup_expr='icontains',
         label='Улица или метро'
     )
-    #address_street = django_filters.BaseInFilter(
+    # address_street = django_filters.BaseInFilter(
     #    method='filter_address',
     #    label='Улица или метро',
     #    help_text='Можно ввести несколько значений, через запятую без пробелов '
     #              'или добавить значение в новый строковый элемент.'
-    #)
+    # )
     address_house_number = django_filters.CharFilter(
         field_name='address__house_number',
         lookup_expr='icontains',
@@ -173,6 +173,19 @@ class RealtyFilter(django_filters.FilterSet):
                   '"-price" - по убыванию цены.',
     )
 
+    is_commercial = django_filters.BooleanFilter(
+        field_name='realty_type__is_commercial',
+        label='Тип недвижимости (жилая/коммерческая)',
+        help_text='true - коммерческая, false - жилая'
+    )
+
+    commercial_type = django_filters.CharFilter(
+        field_name='commercial_type',
+        lookup_expr='exact',
+        label='Тип коммерческой недвижимости',
+        help_text='office, retail, warehouse, free_use, industrial'
+    )
+
     class Meta:
         model = Realty
         fields = []
@@ -219,25 +232,25 @@ class RealtyFilter(django_filters.FilterSet):
 
     def filter_address(self, queryset, name, value):
         ABBREVIATIONS = [
-            r'\b[Уу]л(?:\.|-ца)?\.?\b',                    # улица
-            r'\b[Пп]р(?:\.|-кт)?\.?\b',                    # проспект
-            r'\b[Пп]ер\.?\b',                              # переулок
-            r'\b[Пп]л\.?\b',                               # площадь
-            r'\b[Шш](?:\.)?\.?\b',                          # шоссе
-            r'\b[Мм]кр(?:\.)?\.?\b',                        # микрорайон
-            r'\b[Нн]аб(?:\.)?\.?\b',                        # набережная
-            r'\b[Пп]р-д(?:\.)?\.?\b',                       # проезд
-            r'\b[Кк]в(?:\.)?\.?\b',                         # квартал
-            r'\b[Бб]-р(?:\.)?\.?\b',                        # бульвар
-            r'\b[Лл]ин(?:\.)?\.?\b',                        # линия
-            r'\b[Тт]уп(?:\.)?\.?\b',                        # тупик
-            r'\b[Аа]л(?:\.)?\.?\b',                         # аллея
-            r'\b[Вв]ъезд\b',                                # въезд
-            r'\b[Дд]ор(?:\.)?\.?\b',                        # дорога
-            r'\b[Пп]ос(?:\.)?\.?\b',                        # поселок
-            r'\b[Дд]ер(?:\.)?\.?\b',                        # деревня
-            r'\b[Сс]т(?:\.)?\.?\b',                         # станция
-            r'\b[Кк]м(?:\.)?\.?\b',                         # километр
+            r'\b[Уу]л(?:\.|-ца)?\.?\b',  # улица
+            r'\b[Пп]р(?:\.|-кт)?\.?\b',  # проспект
+            r'\b[Пп]ер\.?\b',  # переулок
+            r'\b[Пп]л\.?\b',  # площадь
+            r'\b[Шш](?:\.)?\.?\b',  # шоссе
+            r'\b[Мм]кр(?:\.)?\.?\b',  # микрорайон
+            r'\b[Нн]аб(?:\.)?\.?\b',  # набережная
+            r'\b[Пп]р-д(?:\.)?\.?\b',  # проезд
+            r'\b[Кк]в(?:\.)?\.?\b',  # квартал
+            r'\b[Бб]-р(?:\.)?\.?\b',  # бульвар
+            r'\b[Лл]ин(?:\.)?\.?\b',  # линия
+            r'\b[Тт]уп(?:\.)?\.?\b',  # тупик
+            r'\b[Аа]л(?:\.)?\.?\b',  # аллея
+            r'\b[Вв]ъезд\b',  # въезд
+            r'\b[Дд]ор(?:\.)?\.?\b',  # дорога
+            r'\b[Пп]ос(?:\.)?\.?\b',  # поселок
+            r'\b[Дд]ер(?:\.)?\.?\b',  # деревня
+            r'\b[Сс]т(?:\.)?\.?\b',  # станция
+            r'\b[Кк]м(?:\.)?\.?\b',  # километр
             r'\b[Уу]лица\b',
             r'\b[Пп]роспект\b',
             r'\b[Пп]ереулок\b',
@@ -259,17 +272,17 @@ class RealtyFilter(django_filters.FilterSet):
         ]
         if connection.vendor == 'postgresql':
             return queryset.annotate(
-                    street_similarity=TrigramSimilarity(
-                        'address__street__name', value
-                    ),
-                    metro_similarity=TrigramSimilarity(
-                        'address__metro__name', value
-                    )
-                ).filter(
-                    Q(street_similarity__gt=0.25) |
-                    Q(metro_similarity__gt=0.25)
+                street_similarity=TrigramSimilarity(
+                    'address__street__name', value
+                ),
+                metro_similarity=TrigramSimilarity(
+                    'address__metro__name', value
                 )
-        
+            ).filter(
+                Q(street_similarity__gt=0.25) |
+                Q(metro_similarity__gt=0.25)
+            )
+
         elif connection.vendor == 'sqlite':
             search_terms = [
                 term.strip() for term in value.split(',') if term.strip()
@@ -284,9 +297,9 @@ class RealtyFilter(django_filters.FilterSet):
                     for element in parts:
                         for pattern in ABBREVIATIONS:
                             if re.search(
-                                pattern,
-                                element,
-                                re.IGNORECASE
+                                    pattern,
+                                    element,
+                                    re.IGNORECASE
                             ):
                                 element_index = parts.index(element)
                     parts.pop(element_index)
@@ -299,39 +312,39 @@ class RealtyFilter(django_filters.FilterSet):
             return queryset.filter(query).distinct()
         else:
             return queryset
-        #if value:
-            # Create a Q object for each value
+        # if value:
+        # Create a Q object for each value
         #    q_objects = Q()
         #    for v in value:
-                # Split the search value into words
+        # Split the search value into words
         #        words = v.strip().split()
         #        if not words:
         #            continue
-                
-                # For each value, create a condition where ALL words must be present
-                # This allows searching for multi-word addresses like "Ленинский проспект"
-                # All words must be in the same field (either all in street name or all in metro name)
+
+        # For each value, create a condition where ALL words must be present
+        # This allows searching for multi-word addresses like "Ленинский проспект"
+        # All words must be in the same field (either all in street name or all in metro name)
         #        street_q = Q()
         #        metro_q = Q()
-                
+
         #        for word in words:
-                    # Capitalize first letter, lowercase the rest
+        # Capitalize first letter, lowercase the rest
         #            word = word[0].upper() + word[1:].lower() if len(word) > 1 else word.upper()
-                    # Each word must be present in street name
+        # Each word must be present in street name
         #            if street_q:
         #                street_q &= Q(address__street__name__icontains=word)
         #            else:
         #                street_q = Q(address__street__name__icontains=word)
-                    # Each word must be present in metro name
+        # Each word must be present in metro name
         #            if metro_q:
         #                metro_q &= Q(address__metro__name__icontains=word)
         #            else:
         #                metro_q = Q(address__metro__name__icontains=word)
-                
-                # Either all words in street OR all words in metro
+
+        # Either all words in street OR all words in metro
         #        value_q = street_q | metro_q
-                
-                # Different values in the list are combined with OR
+
+        # Different values in the list are combined with OR
         #        q_objects |= value_q
         #    return queryset.filter(q_objects)
-        #return queryset
+        # return queryset

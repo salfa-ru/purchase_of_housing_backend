@@ -127,7 +127,7 @@ class Realty(models.Model):
         verbose_name = "Недвижимость"
         verbose_name_plural = "Недвижимость"
 
-    def save(self, *args, **kwargs):    # <-- YYY --- realty_удаление v1
+    def save(self, *args, **kwargs):  # <-- YYY --- realty_удаление v1
         """ При сохранении - устанавливаем дату удаления если объявление удалилось! """
 
         if self.is_deleted and self.deleted_at is None:  # <-- YYY --- Если только что удалили
@@ -135,7 +135,7 @@ class Realty(models.Model):
         elif not self.is_deleted:  # <-- YYY --- Если запись снова сделали "не удаленной"
             self.deleted_at = None  # <-- YYY --- Убираем дату удаления, если она была
 
-        super().save(*args, **kwargs) # <-- YYY --- Сохраняем после манипуляций
+        super().save(*args, **kwargs)  # <-- YYY --- Сохраняем после манипуляций
 
     def __str__(self):
         return (
