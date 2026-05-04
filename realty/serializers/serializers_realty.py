@@ -561,7 +561,7 @@ class ShortRealtySerializer(serializers.ModelSerializer):
 
     # ========== ДЛЯ КОММЕРЧЕСКОЙ НЕДВИЖИМОСТИ ==========
     is_commercial = serializers.SerializerMethodField()
-    commercial_type = serializers.CharField(source='commercial_type', read_only=True)
+    commercial_type = serializers.CharField(read_only=True)
 
 
     def get_is_commercial(self, obj):
@@ -576,6 +576,8 @@ class ShortRealtySerializer(serializers.ModelSerializer):
                   "is_deleted",  # <-- YYY --- realty_удаление v1 ---- а почему нет в большом?
                   "photos",
                   "price",
+                  "is_commercial",
+                  "commercial_type",
                   "number_of_rooms",
                   "realty_type",
                   "area",
