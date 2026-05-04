@@ -232,6 +232,7 @@ class RealtyCreateSerializer(serializers.ModelSerializer):
             "uploaded_photos_to_remove",
             "photos_upload",  # Add the new field
             "warnings",  # Add warnings field to output
+            "commercial_type",
         ]
 
     def get_warnings(self, obj):
@@ -609,6 +610,8 @@ class ShortRealtySerializer(serializers.ModelSerializer):
                   "published_at",
                   "commission",
                   "rent",
+                  "is_commercial",
+                  "commercial_type",
                   )
 
     def get_floors_number(self, obj) -> str:
