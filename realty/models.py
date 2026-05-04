@@ -13,6 +13,14 @@ from config.constants import DESCRIPTION_LENGTH, NULLABLE_FIELD, MIN_PRICE
 class Realty(models.Model):
     """Base Realty model."""
 
+    COMMERCIAL_TYPE_CHOICES = [
+        ('office', 'Офис'),
+        ('retail', 'Торговое помещение'),
+        ('warehouse', 'Склад'),
+        ('free_use', 'Помещение свободного назначения'),
+        ('industrial', 'Производственное помещение'),
+    ]
+
     owner = models.ForeignKey(
         user_models.User,
         on_delete=models.PROTECT,
@@ -93,15 +101,6 @@ class Realty(models.Model):
         auto_now=True,
         verbose_name="Последнее изменение",
     )
-
-    # ========== ДЛЯ КОММЕРЧЕСКОЙ НЕДВИЖИМОСТИ ==========
-    COMMERCIAL_TYPE_CHOICES = [
-        ('office', 'Офис'),
-        ('retail', 'Торговое помещение'),
-        ('warehouse', 'Склад'),
-        ('free_use', 'Помещение свободного назначения'),
-        ('industrial', 'Производственное помещение'),
-    ]
 
     commercial_type = models.CharField(
         max_length=20,

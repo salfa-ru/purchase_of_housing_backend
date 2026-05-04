@@ -136,6 +136,10 @@ class RealtyType(models.Model):
         max_length=constants.CHAR_LENGTH,
         verbose_name="Тип недвижимости",
     )
+    is_commercial = models.BooleanField(
+        default=False,
+        verbose_name="Коммерческая недвижимость"
+    )
 
     is_commercial = models.BooleanField(
         default=False,
