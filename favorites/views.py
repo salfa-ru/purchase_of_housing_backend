@@ -25,7 +25,7 @@ class FavoriteListView(generics.ListAPIView):
 
         Поддерживает фильтрацию:
         - `trade_type` — тип сделки (sale/rent)
-        - `realty_type` — тип недвижимости (apartment/apartments/commercial)
+        - `is_commercial` — тип недвижимости (true — коммерческая, false — жилая)
         - `ordering` — сортировка по дате добавления (added_at / -added_at)
 
         Ответ содержит:
@@ -42,16 +42,21 @@ class FavoriteListView(generics.ListAPIView):
         user = self.request.user
         queryset = Favorite.objects.filter(user=user)
 
-        # Фильтрация
+        # Фильтрация по типу сделки (sale/rent)
         trade_type = self.request.query_params.get('trade_type')
-        realty_type = self.request.query_params.get('realty_type')
-        ordering = self.request.query_params.get('ordering', 'added_at')
-
         if trade_type:
             queryset = queryset.filter(realty__trade_type=trade_type)
-        if realty_type:
-            queryset = queryset.filter(realty__realty_type__type=realty_type)
 
+        # Фильтрация по типу недвижимости (жилая/коммерческая)
+        is_commercial = self.request.query_params.get('is_commercial')
+        if is_commercial is not None:
+            if is_commercial.lower() == 'true':
+                queryset = queryset.filter(realty__realty_type__is_commercial=True)
+            elif is_commercial.lower() == 'false':
+                queryset = queryset.filter(realty__realty_type__is_commercial=False)
+
+        # Сортировка
+        ordering = self.request.query_params.get('ordering', 'added_at')
         return queryset.order_by(ordering)
 
     def list(self, request, *args, **kwargs):
