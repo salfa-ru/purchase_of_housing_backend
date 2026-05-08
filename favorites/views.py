@@ -12,10 +12,10 @@ from drf_spectacular.utils import extend_schema, extend_schema_view, OpenApiPara
 @extend_schema(
     tags=['favorites'],
     summary='Получение списка избранного пользователя',
-    description='Возвращает список объявлений в избранном с количеством непросмотренных. Поддерживает фильтрацию по trade_type, realty_type и ordering.',
+    description='Возвращает список объявлений в избранном с количеством непросмотренных. Поддерживает фильтрацию по trade_type, is_commercial и ordering.',
     parameters=[
         OpenApiParameter(name='trade_type', description='sale или rent', required=False, type=str),
-        OpenApiParameter(name='realty_type', description='apartment, apartments, commercial', required=False, type=str),
+        OpenApiParameter(name='is_commercial', description='true — коммерческая, false — жилая', required=False, type=bool),
         OpenApiParameter(name='ordering', description='-added_at (сначала новые)', required=False, type=str),
     ]
 )
@@ -45,7 +45,10 @@ class FavoriteListView(generics.ListAPIView):
         # Фильтрация по типу сделки (sale/rent)
         trade_type = self.request.query_params.get('trade_type')
         if trade_type:
-            queryset = queryset.filter(realty__trade_type=trade_type)
+            if trade_type.lower() == 'sale':
+                queryset = queryset.filter(realty__sale_profile__isnull=False)
+            elif trade_type.lower() == 'rent':
+                queryset = queryset.filter(realty__rent_profile__isnull=False)
 
         # Фильтрация по типу недвижимости (жилая/коммерческая)
         is_commercial = self.request.query_params.get('is_commercial')
