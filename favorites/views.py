@@ -12,10 +12,10 @@ from drf_spectacular.utils import extend_schema, extend_schema_view, OpenApiPara
 @extend_schema(
     tags=['favorites'],
     summary='Получение списка избранного пользователя',
-    description='Возвращает список объявлений в избранном с количеством непросмотренных. Поддерживает фильтрацию по trade_type, realty_type и ordering.',
+    description='Возвращает список объявлений в избранном с количеством непросмотренных. Поддерживает фильтрацию по trade_type, is_commercial и ordering.',
     parameters=[
         OpenApiParameter(name='trade_type', description='sale или rent', required=False, type=str),
-        OpenApiParameter(name='realty_type', description='apartment, apartments, commercial', required=False, type=str),
+        OpenApiParameter(name='is_commercial', description='true — коммерческая, false — жилая', required=False, type=bool),
         OpenApiParameter(name='ordering', description='-added_at (сначала новые)', required=False, type=str),
     ]
 )
@@ -25,7 +25,7 @@ class FavoriteListView(generics.ListAPIView):
 
         Поддерживает фильтрацию:
         - `trade_type` — тип сделки (sale/rent)
-        - `realty_type` — тип недвижимости (apartment/apartments/commercial)
+        - `is_commercial` — тип недвижимости (true — коммерческая, false — жилая)
         - `ordering` — сортировка по дате добавления (added_at / -added_at)
 
         Ответ содержит:
@@ -42,16 +42,24 @@ class FavoriteListView(generics.ListAPIView):
         user = self.request.user
         queryset = Favorite.objects.filter(user=user)
 
-        # Фильтрация
+        # Фильтрация по типу сделки (sale/rent)
         trade_type = self.request.query_params.get('trade_type')
-        realty_type = self.request.query_params.get('realty_type')
-        ordering = self.request.query_params.get('ordering', 'added_at')
-
         if trade_type:
-            queryset = queryset.filter(realty__trade_type=trade_type)
-        if realty_type:
-            queryset = queryset.filter(realty__realty_type__type=realty_type)
+            if trade_type.lower() == 'sale':
+                queryset = queryset.filter(realty__sale_profile__isnull=False)
+            elif trade_type.lower() == 'rent':
+                queryset = queryset.filter(realty__rent_profile__isnull=False)
 
+        # Фильтрация по типу недвижимости (жилая/коммерческая)
+        is_commercial = self.request.query_params.get('is_commercial')
+        if is_commercial is not None:
+            if is_commercial.lower() == 'true':
+                queryset = queryset.filter(realty__realty_type__is_commercial=True)
+            elif is_commercial.lower() == 'false':
+                queryset = queryset.filter(realty__realty_type__is_commercial=False)
+
+        # Сортировка
+        ordering = self.request.query_params.get('ordering', 'added_at')
         return queryset.order_by(ordering)
 
     def list(self, request, *args, **kwargs):
