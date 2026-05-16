@@ -2,9 +2,10 @@ from rest_framework import generics, status
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
-
+from realty.models import Realty
 from .models import Favorite
 from .serializers import FavoriteSerializer
+from rest_framework.exceptions import ValidationError, NotFound
 from django.shortcuts import get_object_or_404
 from drf_spectacular.utils import extend_schema, extend_schema_view, OpenApiParameter
 
@@ -15,7 +16,8 @@ from drf_spectacular.utils import extend_schema, extend_schema_view, OpenApiPara
     description='Возвращает список объявлений в избранном с количеством непросмотренных. Поддерживает фильтрацию по trade_type, is_commercial и ordering.',
     parameters=[
         OpenApiParameter(name='trade_type', description='sale или rent', required=False, type=str),
-        OpenApiParameter(name='is_commercial', description='true — коммерческая, false — жилая', required=False, type=bool),
+        OpenApiParameter(name='is_commercial', description='true — коммерческая, false — жилая', required=False,
+                         type=bool),
         OpenApiParameter(name='ordering', description='-added_at (сначала новые)', required=False, type=str),
     ]
 )
@@ -106,8 +108,35 @@ class FavoriteCreateView(generics.CreateAPIView):
     serializer_class = FavoriteSerializer
 
     def post(self, request, *args, **kwargs):
-        print("🔥 POST в FavoriteCreateView")  # 👈 временная строка
         return super().post(request, *args, **kwargs)
+
+    def create(self, request, *args, **kwargs):
+        """Переопределяем create для добавления проверок"""
+
+        # 1. Проверяем, что realty_id передан
+        realty_id = request.data.get('realty_id')
+        if not realty_id:
+            raise ValidationError({'realty_id': 'Это поле обязательно'})
+
+        # 2. Проверяем, существует ли объявление
+        try:
+            realty = Realty.objects.get(id=realty_id)
+        except Realty.DoesNotExist:
+            raise NotFound({'detail': 'Объявление не найдено'})
+
+        # 3. Проверяем, не добавлено ли уже в избранное
+        if Favorite.objects.filter(user=request.user, realty=realty).exists():
+            raise ValidationError({'detail': 'Объявление уже добавлено в избранное'})
+
+        # 4. Создаём объект избранного
+        favorite = Favorite.objects.create(
+            user=request.user,
+            realty=realty
+        )
+
+        # 5. Сериализуем и возвращаем ответ
+        serializer = self.get_serializer(favorite)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
