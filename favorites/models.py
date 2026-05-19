@@ -1,6 +1,7 @@
 from django.db import models
-from users import models as user_models
+
 from realty.models import Realty
+from users import models as user_models
 
 
 class Favorite(models.Model):

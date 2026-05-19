@@ -21,7 +21,7 @@ def get_queryset_by_ids(user, data):
 
 
 def create_notification(realty, notification_type: str):
-    """ Отправка Уведомления владельцу объявления """
+    """Отправка Уведомления владельцу объявления"""
 
     # находим тип уведомления
     template = NotificationTemplate.objects.get(code=notification_type)
@@ -33,5 +33,7 @@ def create_notification(realty, notification_type: str):
         realty=realty,
     )
 
-    print(f"DEBUG - notifications/utils.py - create_notification():")
-    print(f"        Пользователю {realty.owner} отправлено оповещение '{notification_type}' об объявлении #{realty.id}")
+    print('DEBUG - notifications/utils.py - create_notification():')
+    print(
+        f"        Пользователю {realty.owner} отправлено оповещение '{notification_type}' об объявлении #{realty.id}"
+    )

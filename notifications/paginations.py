@@ -4,6 +4,7 @@ from rest_framework.response import Response
 
 class NotificationPagination(PageNumberPagination):
     """Пагинатор для уведомлений в личном кабинете."""
+
     page_size_query_param = None
     page_size = 10
 
@@ -11,15 +12,17 @@ class NotificationPagination(PageNumberPagination):
         """
         Constructs the paginated response with custom fields.
         """
-        return Response({
-            'count': self.page.paginator.count,
-            'page_size': self.get_page_size(self.request),
-            'pages_total': self.page.paginator.num_pages,
-            'current_page': self.page.number,
-            'next': self.get_next_link(),
-            'previous': self.get_previous_link(),
-            'results': data,
-        })
+        return Response(
+            {
+                'count': self.page.paginator.count,
+                'page_size': self.get_page_size(self.request),
+                'pages_total': self.page.paginator.num_pages,
+                'current_page': self.page.number,
+                'next': self.get_next_link(),
+                'previous': self.get_previous_link(),
+                'results': data,
+            }
+        )
 
     def get_paginated_response_schema(self, schema):
         """For openapi documentation."""

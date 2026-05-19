@@ -1,39 +1,48 @@
 from django.utils import timezone
 from django_filters.rest_framework import DjangoFilterBackend
-
-from drf_spectacular.utils import extend_schema, extend_schema_view, OpenApiParameter
 from drf_spectacular.helpers import forced_singular_serializer
-from rest_framework import generics, permissions, viewsets, views, status  # <-- YYY --- realty_удаление v1
+from drf_spectacular.utils import OpenApiParameter, extend_schema, extend_schema_view
+from rest_framework import (  # <-- YYY --- realty_удаление v1
+    generics,
+    permissions,
+    status,
+    views,
+    viewsets,
+)
 from rest_framework.generics import GenericAPIView
-from rest_framework.response import Response
 from rest_framework.pagination import LimitOffsetPagination
+from rest_framework.response import Response
 
 from config import constants
-from realty.models import Realty
-from realty.pagination import LimitRealtyPagination, MyRealtyPagination, PaginatedResponseSerializer
-from realty.serializers.serializers_realty import RealtyBaseSerializer
-from realty_addresses import models as realty_addresses_models
-from realty_values import models as realty_values_models
-from realty_displays.models import DisplayFullInfo, DisplayInSearch
-from realty_displays.utils import increment_counter
 from realty import models as realty_models
+from realty.filters import RealtyFilter
+from realty.models import Realty
+from realty.pagination import (
+    LimitRealtyPagination,
+    MyRealtyPagination,
+    PaginatedResponseSerializer,
+)
+from realty.serializers import serializers_common as common_serializers
 from realty.serializers import serializers_realty as realty_serializers
 from realty.serializers import serializers_rent as rent_serializers
 from realty.serializers import serializers_sale as sale_serializers
-from realty.serializers import serializers_common as common_serializers
-from realty.filters import RealtyFilter
+from realty.serializers.serializers_realty import RealtyBaseSerializer
+from realty_addresses import models as realty_addresses_models
+from realty_displays.models import DisplayFullInfo, DisplayInSearch
+from realty_displays.utils import increment_counter
+from realty_values import models as realty_values_models
 
 
 class BaseViewSet(viewsets.ModelViewSet):
     """Base viewset."""
 
-    http_method_names = ["post"]
+    http_method_names = ['post']
 
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
 
     def get_permissions(self):
-        if self.request.method in ["GET", "HEAD", "OPTIONS"]:
+        if self.request.method in ['GET', 'HEAD', 'OPTIONS']:
             permission_classes = [permissions.AllowAny]
         else:
             permission_classes = [permissions.IsAuthenticated]
@@ -47,12 +56,12 @@ class RealtyBaseViewSet(BaseViewSet):
     queryset = realty_models.Realty.objects.all()
 
     def get_serializer_class(self):
-        if self.action == "create":
+        if self.action == 'create':
             return realty_serializers.RealtyCreateSerializer
         return realty_serializers.RealtyBaseSerializer
 
 
-@extend_schema(tags=["Управление объявлениями о продаже недвижимости"])
+@extend_schema(tags=['Управление объявлениями о продаже недвижимости'])
 @extend_schema_view(
     partial_update=extend_schema(
         summary='Частичное изменение объявления о продаже недвижимости.',
@@ -79,7 +88,7 @@ class SaleViewSet(BaseViewSet):
         return sale_serializers.SaleCreateSerializer
 
 
-@extend_schema(tags=["Управление объявлениями об аренде недвижимости"])
+@extend_schema(tags=['Управление объявлениями об аренде недвижимости'])
 @extend_schema_view(
     partial_update=extend_schema(
         summary='Частичное изменение объявления об аренде недвижимости.',
@@ -120,8 +129,7 @@ class RentViewSet(BaseViewSet):
     #     return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
-@extend_schema(
-    summary='Получение списка последних 3х объявлений. Доступна фильтрация.')
+@extend_schema(summary='Получение списка последних 3х объявлений. Доступна фильтрация.')
 class LastRealtyListView(generics.ListAPIView):
     """Viewing last 3 Realty objects."""
 
@@ -132,11 +140,15 @@ class LastRealtyListView(generics.ListAPIView):
     pagination_class.default_limit = 3
 
     # TODO найти решение без пагинации. Требуется вывод последних 3х объектов.
-    queryset = realty_models.Realty.objects.all().filter(
-        realty_status__status=constants.ADVERTISMENT_STATUS,
-        is_deleted=False,
-        owner__is_deleted=False  # <-- YYY --- realty_удаление v1
-    ).order_by('-published_at')
+    queryset = (
+        realty_models.Realty.objects.all()
+        .filter(
+            realty_status__status=constants.ADVERTISMENT_STATUS,
+            is_deleted=False,
+            owner__is_deleted=False,  # <-- YYY --- realty_удаление v1
+        )
+        .order_by('-published_at')
+    )
 
 
 ...
@@ -144,7 +156,8 @@ class LastRealtyListView(generics.ListAPIView):
 
 @extend_schema(
     summary='Получение списка всех объявлений. Доступна фильтрация. '
-            'Есть пагинация по 10 объектов.')
+    'Есть пагинация по 10 объектов.'
+)
 class RealtyListView(generics.ListAPIView):
     """Viewing Realty objects queryset."""
 
@@ -162,11 +175,11 @@ class RealtyListView(generics.ListAPIView):
         return realty_models.Realty.objects.filter(
             realty_status__status=constants.ADVERTISMENT_STATUS,
             is_deleted=False,
-            owner__is_deleted=False  # Показывать только объявления активных владельцев
+            owner__is_deleted=False,  # Показывать только объявления активных владельцев
         ).order_by('-published_at')
 
     def list(self, request, *args, **kwargs):
-        """ Запуск увеличения счетчика показа в поиске с защитой от накрутки."""
+        """Запуск увеличения счетчика показа в поиске с защитой от накрутки."""
 
         response = super().list(request, *args, **kwargs)
         realty_ids = [realty_data['id'] for realty_data in response.data['results']]
@@ -177,15 +190,17 @@ class RealtyListView(generics.ListAPIView):
 
             # Увеличиваем счетчик для поиска
             increment_counter(
-                request, realty, DisplayInSearch,
+                request,
+                realty,
+                DisplayInSearch,
                 constants.COUNTER_VIEW_IN_SEARCH_MIN_TIME_INTERVAL,
-                "DisplayInSearch_time")
+                'DisplayInSearch_time',
+            )
 
         return response
 
 
-@extend_schema(
-    summary='Получение объявления по его id')
+@extend_schema(summary='Получение объявления по его id')
 class RealtyDetailView(generics.RetrieveAPIView):
     """Viewing Realty object by <id>."""
 
@@ -201,11 +216,11 @@ class RealtyDetailView(generics.RetrieveAPIView):
             #  и не показывал те, что смотреть нельзя!
             #  realty_status__status=constants.ADVERTISMENT_STATUS,
             is_deleted=False,
-            owner__is_deleted=False  # Показывать только объявления активных владельцев
+            owner__is_deleted=False,  # Показывать только объявления активных владельцев
         )
 
     def retrieve(self, request, *args, **kwargs):
-        """ Увеличение счетчика полных просмотров """
+        """Увеличение счетчика полных просмотров"""
 
         realty = self.get_object()
 
@@ -214,18 +229,21 @@ class RealtyDetailView(generics.RetrieveAPIView):
             return super().retrieve(request, *args, **kwargs)
 
         # Увеличиваем счетчик, передавая нужные параметры
-        increment_counter(request, realty, DisplayFullInfo,
-                          constants.COUNTER_FULL_VIEW_MIN_TIME_INTERVAL,
-                          "DisplayFullInfo_time",
-                          timezone.now().date())
+        increment_counter(
+            request,
+            realty,
+            DisplayFullInfo,
+            constants.COUNTER_FULL_VIEW_MIN_TIME_INTERVAL,
+            'DisplayFullInfo_time',
+            timezone.now().date(),
+        )
 
         return super().retrieve(request, *args, **kwargs)
 
 
 @extend_schema(
     summary='Количество найденных объявлений по фильтрам',
-    responses=forced_singular_serializer(
-        common_serializers.CountRealtySerializer)
+    responses=forced_singular_serializer(common_serializers.CountRealtySerializer),
 )
 class RealtyCountView(generics.ListAPIView):
     """Endpoint to get the count of filtered realty objects."""
@@ -233,7 +251,7 @@ class RealtyCountView(generics.ListAPIView):
     queryset = realty_models.Realty.objects.all().filter(
         realty_status__status=constants.ADVERTISMENT_STATUS,
         is_deleted=False,
-        owner__is_deleted=False  # Показывать только объявления активных владельцев
+        owner__is_deleted=False,  # Показывать только объявления активных владельцев
     )
     serializer_class = common_serializers.CountRealtySerializer
     filter_backends = (DjangoFilterBackend,)
@@ -245,8 +263,7 @@ class RealtyCountView(generics.ListAPIView):
         return Response({'count': count})
 
 
-@extend_schema(
-    summary='Получение информации о владельце объявления')
+@extend_schema(summary='Получение информации о владельце объявления')
 class RealtyOwnerDataView(generics.RetrieveAPIView):
     """Endpoint to get realty's owner data."""
 
@@ -254,8 +271,7 @@ class RealtyOwnerDataView(generics.RetrieveAPIView):
     serializer_class = common_serializers.RealtyOwnerDataSerializer
 
 
-@extend_schema(
-    summary='Получение контактов владельца объявления')
+@extend_schema(summary='Получение контактов владельца объявления')
 class RealtyOwnerContactsView(generics.RetrieveAPIView):
     """Endpoint to get realty's owner contacts."""
 
@@ -271,20 +287,17 @@ class RealtyOwnerContactsView(generics.RetrieveAPIView):
             name='page_size',
             type=int,
             description=(
-                    f'Количество объявлений на странице (по умолчанию '
-                    f'{constants.MY_REALTY_PAGESIZE_DEFAULT}, максимум '
-                    f'{constants.MY_REALTY_PAGESIZE_MAX})'
+                f'Количество объявлений на странице (по умолчанию '
+                f'{constants.MY_REALTY_PAGESIZE_DEFAULT}, максимум '
+                f'{constants.MY_REALTY_PAGESIZE_MAX})'
             ),
-            required=False
+            required=False,
         ),
         OpenApiParameter(
-            name='page',
-            type=int,
-            description='Номер страницы',
-            required=False
-        )
+            name='page', type=int, description='Номер страницы', required=False
+        ),
     ],
-    responses={200: PaginatedResponseSerializer}
+    responses={200: PaginatedResponseSerializer},
 )
 class RealtyLKListView(generics.ListAPIView):
     """
@@ -304,22 +317,23 @@ class RealtyLKListView(generics.ListAPIView):
     pagination_class = MyRealtyPagination
 
     def get_queryset(self):
-        return (
-            realty_models.Realty.objects
-            .filter(owner_id=self.request.user,
-                    is_deleted=False,
-                    owner__is_deleted=False  # <-- YYY --- realty_удаление v1
-                    )
-            .order_by('-published_at')
-        )
+        return realty_models.Realty.objects.filter(
+            owner_id=self.request.user,
+            is_deleted=False,
+            owner__is_deleted=False,  # <-- YYY --- realty_удаление v1
+        ).order_by('-published_at')
 
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
         page = self.paginate_queryset(queryset)
         if page is not None:
-            serializer = self.get_serializer(page, many=True, context={'request': request})
+            serializer = self.get_serializer(
+                page, many=True, context={'request': request}
+            )
             return self.get_paginated_response(serializer.data)
-        serializer = self.get_serializer(queryset, many=True, context={'request': request})
+        serializer = self.get_serializer(
+            queryset, many=True, context={'request': request}
+        )
         return Response(serializer.data)
 
 
@@ -327,9 +341,11 @@ class RealtyLKListView(generics.ListAPIView):
 
 
 @extend_schema(
-    summary='Изменение статуса объявления (может только владелец объявления) .')
+    summary='Изменение статуса объявления (может только владелец объявления) .'
+)
 class ChangeStatusUpdateAPIView(generics.UpdateAPIView):
     """Endpoint for change status in realty"""
+
     queryset = realty_models.Realty.objects.all()
     serializer_class = common_serializers.RealtyStatusUpdateSerializer
     permission_classes = [permissions.IsAuthenticated]
@@ -338,8 +354,7 @@ class ChangeStatusUpdateAPIView(generics.UpdateAPIView):
         serializer.save()
 
 
-@extend_schema(
-    summary='получение данных для фронта.')
+@extend_schema(summary='получение данных для фронта.')
 class RealtyFilterOptionsView(views.APIView):
     """
     API для получения всех возможных значений фильтров.
@@ -348,96 +363,124 @@ class RealtyFilterOptionsView(views.APIView):
     def get(self, request, *args, **kwargs):
         # Получаем данные
         data = {
-            "realty_type": [{"id": rt.id, "type": rt.type} for rt in
-                            realty_values_models.RealtyType.objects.all()
-                            ],
-            "address": {
-                "street": {
-                    "zone": [
-                        {"id": bt.id, "name": bt.name} for bt in
-                        realty_addresses_models.Zone.objects.all()
+            'realty_type': [
+                {'id': rt.id, 'type': rt.type}
+                for rt in realty_values_models.RealtyType.objects.all()
+            ],
+            'address': {
+                'street': {
+                    'zone': [
+                        {'id': bt.id, 'name': bt.name}
+                        for bt in realty_addresses_models.Zone.objects.all()
                     ],
-                    "district": [
-                        {"id": bt.id, "name": bt.name} for bt in
-                        realty_addresses_models.District.objects.all()
+                    'district': [
+                        {'id': bt.id, 'name': bt.name}
+                        for bt in realty_addresses_models.District.objects.all()
                     ],
-                    "city": [
-                        {"id": bt.id, "name": bt.name} for bt in
-                        realty_addresses_models.City.objects.all()
+                    'city': [
+                        {'id': bt.id, 'name': bt.name}
+                        for bt in realty_addresses_models.City.objects.all()
                     ],
-
                 },
-                "metro": [
-                    {"id": bt.id, "name": bt.name, "name_full": bt.name_full, "color": bt.line.color} for bt in
-                    realty_addresses_models.Metro.objects.all()
+                'metro': [
+                    {
+                        'id': bt.id,
+                        'name': bt.name,
+                        'name_full': bt.name_full,
+                        'color': bt.line.color,
+                    }
+                    for bt in realty_addresses_models.Metro.objects.all()
+                ],
+            },
+            'about_building': {
+                'type': [
+                    {'id': bt.id, 'type': bt.type}
+                    for bt in realty_values_models.BuildingType.objects.all()
                 ]
             },
-
-            "about_building": {
-                "type": [{"id": bt.id, "type": bt.type} for bt in
-                         realty_values_models.BuildingType.objects.all()
-                         ]
+            'about_apartment': {
+                'rooms_number': [
+                    {
+                        'id': apt.id,
+                        'number_of_rooms': apt.number_of_rooms,
+                    }
+                    for apt in realty_values_models.RoomsNumber.objects.all()
+                ]
             },
-            "about_apartment": {"rooms_number": [
-                {"id": apt.id, "number_of_rooms": apt.number_of_rooms, }
-                for apt in realty_values_models.RoomsNumber.objects.all()
-            ]},
-            "common_characteristics": {
-                "repair_types": [{"id": rt.id, "type": rt.type} for rt in
-                                 realty_values_models.RepairType.objects.all()
-                                 ],
-                "bathroom_types": [{"id": bt.id, "type": bt.type} for bt in
-                                   realty_values_models.BathroomType.objects.all()],
+            'common_characteristics': {
+                'repair_types': [
+                    {'id': rt.id, 'type': rt.type}
+                    for rt in realty_values_models.RepairType.objects.all()
+                ],
+                'bathroom_types': [
+                    {'id': bt.id, 'type': bt.type}
+                    for bt in realty_values_models.BathroomType.objects.all()
+                ],
             },
-            "owner_type": {
-                "trade_participant": [
-                    {"id": apt.id, "participant": apt.participant, }
+            'owner_type': {
+                'trade_participant': [
+                    {
+                        'id': apt.id,
+                        'participant': apt.participant,
+                    }
                     for apt in realty_values_models.TradeParticipant.objects.all()
                 ]
             },
-            "communication_method": [
-                {"id": apt.id, "method": apt.method, }
+            'communication_method': [
+                {
+                    'id': apt.id,
+                    'method': apt.method,
+                }
                 for apt in realty_values_models.CommunicationMethod.objects.all()
             ],
-            "realty_status": {
-                "realty_adv_status": [
-                    {"id": apt.id, "status": apt.status, }
+            'realty_status': {
+                'realty_adv_status': [
+                    {
+                        'id': apt.id,
+                        'status': apt.status,
+                    }
                     for apt in realty_values_models.RealtyAdvStatus.objects.all()
                 ]
             },
-
-            "sales_parameters": {
-                "housing_type": [
-                    {"id": apt.id, "type": apt.type}
+            'sales_parameters': {
+                'housing_type': [
+                    {'id': apt.id, 'type': apt.type}
                     for apt in realty_values_models.HousingType.objects.all()
                 ],
-                "sale_type": [
-                    {"id": apt.id, "type": apt.type}
+                'sale_type': [
+                    {'id': apt.id, 'type': apt.type}
                     for apt in realty_values_models.SaleType.objects.all()
-                ]
+                ],
             },
-            "rent": {
-                "lease_payments": {
-                    "counters_payment": {
-                        "trade_participant": [
-                            {"id": apt.id, "participant": apt.participant, }
+            'rent': {
+                'lease_payments': {
+                    'counters_payment': {
+                        'trade_participant': [
+                            {
+                                'id': apt.id,
+                                'participant': apt.participant,
+                            }
                             for apt in realty_values_models.TradeParticipant.objects.all()
                         ]
                     },
-                    "communal_payment": {
-                        "trade_participant": [
-                            {"id": apt.id, "participant": apt.participant, }
+                    'communal_payment': {
+                        'trade_participant': [
+                            {
+                                'id': apt.id,
+                                'participant': apt.participant,
+                            }
                             for apt in realty_values_models.TradeParticipant.objects.all()
                         ]
-                    }
+                    },
                 }
-            }
+            },
         }
         return Response(data)
 
 
 @extend_schema(
-    summary='Удаление объявление (soft delete)')  # <-- YYY --- Добавлен эндпоинт soft delete - realty_удаление v1
+    summary='Удаление объявление (soft delete)'
+)  # <-- YYY --- Добавлен эндпоинт soft delete - realty_удаление v1
 class RealtyDeleteView(generics.DestroyAPIView):
     queryset = realty_models.Realty.objects.all()
     permission_classes = [permissions.IsAuthenticated]
@@ -446,14 +489,16 @@ class RealtyDeleteView(generics.DestroyAPIView):
         instance = self.get_object()
         if instance.owner != request.user:
             return Response(
-                {"detail": "У вас нет прав на удаление этого объявления."},
-                status=status.HTTP_403_FORBIDDEN
+                {'detail': 'У вас нет прав на удаление этого объявления.'},
+                status=status.HTTP_403_FORBIDDEN,
             )
 
-        if instance.is_deleted:  # <-- YYY --- Проверка на то, что объявление уже удалено
+        if (
+            instance.is_deleted
+        ):  # <-- YYY --- Проверка на то, что объявление уже удалено
             return Response(
-                {"detail": "Объявление уже удалено."},
-                status=status.HTTP_400_BAD_REQUEST  # <-- YYY --- realty_удаление v1
+                {'detail': 'Объявление уже удалено.'},
+                status=status.HTTP_400_BAD_REQUEST,  # <-- YYY --- realty_удаление v1
             )
 
         instance.is_deleted = True
@@ -466,17 +511,22 @@ class RealtyDeleteView(generics.DestroyAPIView):
     summary='Получение нескольких объявлений по списку ID',
     description='Возвращает массив объявлений в том же порядке, что и запрошенные ID. Оптимизация для функции сравнения.',
     parameters=[
-        OpenApiParameter(name='ids', description='Список ID через запятую (например, ids=1,2,3)', required=True,
-                         type=str),
+        OpenApiParameter(
+            name='ids',
+            description='Список ID через запятую (например, ids=1,2,3)',
+            required=True,
+            type=str,
+        ),
     ],
-    responses={200: realty_serializers.RealtyBaseSerializer(many=True)}
+    responses={200: realty_serializers.RealtyBaseSerializer(many=True)},
 )
 class RealtyBatchView(GenericAPIView):
     """
-        Получение нескольких объявлений по списку ID.
-        GET /realty/batch/?ids=1,2,3
-        Возвращает массив объектов в том же порядке, что и запрошенные ID.
+    Получение нескольких объявлений по списку ID.
+    GET /realty/batch/?ids=1,2,3
+    Возвращает массив объектов в том же порядке, что и запрошенные ID.
     """
+
     serializer_class = RealtyBaseSerializer
     queryset = Realty.objects.all()
 
@@ -487,7 +537,7 @@ class RealtyBatchView(GenericAPIView):
         if not ids_param:
             return Response(
                 {'error': 'Parameter "ids" is required'},
-                status=status.HTTP_400_BAD_REQUEST
+                status=status.HTTP_400_BAD_REQUEST,
             )
             # Разбираем строку "1,2,3" в список чисел
         try:
@@ -495,7 +545,7 @@ class RealtyBatchView(GenericAPIView):
         except ValueError:
             return Response(
                 {'error': 'Invalid ID format. Use comma-separated numbers'},
-                status=status.HTTP_400_BAD_REQUEST
+                status=status.HTTP_400_BAD_REQUEST,
             )
 
         # Получаем обьекты

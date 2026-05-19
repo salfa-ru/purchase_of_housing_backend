@@ -3,18 +3,17 @@
 from django.db.models import Q
 from django.utils import timezone
 from drf_spectacular.utils import extend_schema_field
-
-from rest_framework import serializers, fields
+from rest_framework import fields, serializers, status
 from rest_framework.exceptions import APIException
-from rest_framework import status
 
-from chats.models import Message, Blocking, Chat
+from chats.models import Blocking, Chat, Message
 from realty.models import Realty
 from users.models import User
 
 
 class RealtyNestedIdSerializer(serializers.ModelSerializer):
     """Serializer for just the Realty ID."""
+
     class Meta:
         model = Realty
         fields = ['id']
@@ -22,16 +21,19 @@ class RealtyNestedIdSerializer(serializers.ModelSerializer):
 
 class CreateMessageRequestSerializer(serializers.Serializer):
     """Сериализатор для создания нового сообщения"""
+
     chat_id = serializers.IntegerField(min_value=1, required=False)
     realty_id = serializers.IntegerField(min_value=1, required=False)
     message = serializers.CharField(max_length=255)
 
     def validate(self, data):
         """Проверяем, что передан либо chat_id, либо realty_id, но не оба"""
-        if ('chat_id' not in data and 'realty_id' not in data) or \
-           ('chat_id' in data and 'realty_id' in data):
-
-            raise ValidationCustomDetailError(detail="Должен быть передан либо chat_id, либо realty_id")
+        if ('chat_id' not in data and 'realty_id' not in data) or (
+            'chat_id' in data and 'realty_id' in data
+        ):
+            raise ValidationCustomDetailError(
+                detail='Должен быть передан либо chat_id, либо realty_id'
+            )
 
         return data
 
@@ -43,13 +45,17 @@ class RealtyForChatSerializer(serializers.ModelSerializer):
     realty_status = serializers.SerializerMethodField()
 
     # owner = serializers.CharField(source='owner.username')
-    owner = serializers.SerializerMethodField()  # <-- YYY --- Меняем на SerializerMethodField
+    owner = (
+        serializers.SerializerMethodField()
+    )  # <-- YYY --- Меняем на SerializerMethodField
     photo = serializers.SerializerMethodField()
     realty_type = serializers.SlugRelatedField(
         slug_field='type',
         read_only=True,
     )
-    number_of_rooms = serializers.CharField(source='about_apartment.number_of_rooms.number_of_rooms')
+    number_of_rooms = serializers.CharField(
+        source='about_apartment.number_of_rooms.number_of_rooms'
+    )
     area = serializers.FloatField(source='about_apartment.area')
     floor = serializers.IntegerField(source='about_apartment.floor')
     floors_number = serializers.IntegerField(source='about_apartment.floors_number')
@@ -60,9 +66,11 @@ class RealtyForChatSerializer(serializers.ModelSerializer):
     def get_owner(self, obj):  # <-- YYY --- Добавляем метод get_owner
         """Отображаем владельца в зависимости от его статуса."""
         if obj.owner.is_active:  # <-- YYY --- Проверяем is_active, а не is_deleted
-            return obj.owner.first_name  # <-- YYY --- Возвращаем username, если владелец активен
+            return (
+                obj.owner.first_name
+            )  # <-- YYY --- Возвращаем username, если владелец активен
         else:
-            return "Пользователь удален"  # <-- YYY --- Возвращаем строку, если владелец удален
+            return 'Пользователь удален'  # <-- YYY --- Возвращаем строку, если владелец удален
 
     def get_photo(self, obj) -> str | None:
         photo = obj.realty_photos.first()
@@ -76,7 +84,7 @@ class RealtyForChatSerializer(serializers.ModelSerializer):
             return {
                 'id': instance.id,
                 'is_deleted': instance.is_deleted,
-                'owner': self.get_owner(instance)
+                'owner': self.get_owner(instance),
             }
         else:
             # Если объявление не удалено, возвращаем стандартное представление
@@ -99,7 +107,6 @@ class RealtyForChatSerializer(serializers.ModelSerializer):
         ]
 
 
-
 class UserInfoSerializer(serializers.ModelSerializer):
     """Сериализатор для краткой информации о пользователе"""
 
@@ -110,14 +117,15 @@ class UserInfoSerializer(serializers.ModelSerializer):
         fields = ['id', 'name', 'is_deleted']
 
     def get_name(self, obj):
-        """ Если is_deleted=True - возвращает username с добавкой (Пользователь удален) ."""
+        """Если is_deleted=True - возвращает username с добавкой (Пользователь удален) ."""
         if obj.is_deleted:
-            return f"Заготовка - пользователь удален ({obj.first_name})"
+            return f'Заготовка - пользователь удален ({obj.first_name})'
         return obj.first_name
 
 
 class MessageSerializer(serializers.ModelSerializer):
     """Сериализатор одного сообщения внутри чата"""
+
     direction = serializers.SerializerMethodField()
     read_at = serializers.DateTimeField(read_only=True, required=False)  # Add read_at
 
@@ -128,18 +136,18 @@ class MessageSerializer(serializers.ModelSerializer):
             'message',
             'created_at',
             'direction',  # in / out
-            'is_new',     # для получателя
-            'read_at',    # получателем
-
+            'is_new',  # для получателя
+            'read_at',  # получателем
         ]
 
     def get_direction(self, obj) -> str:
         current_user = self.context['request'].user
-        return "in" if obj.user_to == current_user else "out"
+        return 'in' if obj.user_to == current_user else 'out'
 
 
 class ChatMessagesSerializer(serializers.ModelSerializer):
     """Сериализатор для отображения чата с сообщениями - в краткой или в полной форме!"""
+
     me = serializers.SerializerMethodField()
     user = serializers.SerializerMethodField()
     user_is_owner = serializers.SerializerMethodField()
@@ -175,8 +183,7 @@ class ChatMessagesSerializer(serializers.ModelSerializer):
             'created_at',
             'is_new',
             'read_at',  # Add read at
-
-            'unread'  # Добавляем новое поле
+            'unread',  # Добавляем новое поле
         ]
 
     def to_representation(self, instance):
@@ -185,30 +192,46 @@ class ChatMessagesSerializer(serializers.ModelSerializer):
         request = self.context.get('request')
 
         # Check if we're in /chats/ or /chats/blacklist/
-        if request and (request.path == '/chats/' or request.path == '/chats/blacklist/'):
+        if request and (
+            request.path == '/chats/' or request.path == '/chats/blacklist/'
+        ):
             # Remove the messages list
             data.pop('messages', None)
 
             # Get the last message for this chat
             current_user = request.user
-            last_message = instance.messages.filter(
-                Q(user_from=current_user, is_deleted_from=False) |
-                Q(user_to=current_user, is_deleted_to=False)
-            ).order_by('-created_at').first()
+            last_message = (
+                instance.messages.filter(
+                    Q(user_from=current_user, is_deleted_from=False)
+                    | Q(user_to=current_user, is_deleted_to=False)
+                )
+                .order_by('-created_at')
+                .first()
+            )
 
             if last_message:
                 # Add flattened last message info
                 data['msg_id'] = last_message.msg_id
                 data['message'] = last_message.message
-                data['direction'] = "in" if last_message.user_to == current_user else "out"
+                data['direction'] = (
+                    'in' if last_message.user_to == current_user else 'out'
+                )
 
                 # data['created_at'] = last_message.created_at
                 # Use DRF's DateTimeField to format the date.
                 date_field = fields.DateTimeField()
-                data['created_at'] = date_field.to_representation(last_message.created_at)
-                data['read_at'] = date_field.to_representation(last_message.read_at)  # Add read_at
+                data['created_at'] = date_field.to_representation(
+                    last_message.created_at
+                )
+                data['read_at'] = date_field.to_representation(
+                    last_message.read_at
+                )  # Add read_at
 
-                data['is_new'] = last_message.is_new if last_message.user_to == current_user else False
+                data['is_new'] = (
+                    last_message.is_new
+                    if last_message.user_to == current_user
+                    else False
+                )
         else:
             # Remove the flattened fields for other endpoints
             data.pop('msg_id', None)
@@ -225,12 +248,12 @@ class ChatMessagesSerializer(serializers.ModelSerializer):
     def get_unread(self, obj) -> int | None:  # <------- Corrected type hint
         """Считаем количество непрочитанных сообщений в чате."""
         request = self.context.get('request')
-        if request and (request.path == '/chats/' or request.path == '/chats/blacklist/'):
+        if request and (
+            request.path == '/chats/' or request.path == '/chats/blacklist/'
+        ):
             current_user = request.user
             return obj.messages.filter(
-                user_to=current_user,
-                is_new=True,
-                is_deleted_to=False
+                user_to=current_user, is_new=True, is_deleted_to=False
             ).count()
         return None
 
@@ -254,29 +277,35 @@ class ChatMessagesSerializer(serializers.ModelSerializer):
         request = self.context.get('request')
 
         # If we're in /chats/ or /chats/blacklist/, return empty list
-        if request and (request.path == '/chats/' or request.path == '/chats/blacklist/'):
+        if request and (
+            request.path == '/chats/' or request.path == '/chats/blacklist/'
+        ):
             return []
 
         current_user = self.context['request'].user
         messages = obj.messages.filter(
-            Q(user_from=current_user, is_deleted_from=False) |
-            Q(user_to=current_user, is_deleted_to=False)
+            Q(user_from=current_user, is_deleted_from=False)
+            | Q(user_to=current_user, is_deleted_to=False)
         ).order_by('-created_at')  # <--- СОРТИРОВКА СООБЩЕНИЙ.  Newest first  <---
 
-        """ Важное исправление - сначала показываем, что сообщения новые 
+        """ Важное исправление - сначала показываем, что сообщения новые
         и только делаем прочитанными (все равно будучи не уверенными, что пользователь их прочитает) """
 
         # TODO - ПРОВЕРИТЬ - Установка даты чтения сообщения получателем (место 2 из 2)
-        print("ПРОВЕРИТЬ - Установка даты чтения сообщения получателем (место 2 из 2)!")
+        print('ПРОВЕРИТЬ - Установка даты чтения сообщения получателем (место 2 из 2)!')
 
         # Serialize the messages *before* marking them as read.
-        serialized_messages = MessageSerializer(messages, many=True, context=self.context).data
+        serialized_messages = MessageSerializer(
+            messages, many=True, context=self.context
+        ).data
 
         # *Now* mark unread messages as read, after serialization.
-        unread_message_ids = messages.filter(user_to=current_user, is_new=True).values_list('msg_id', flat=True)
+        unread_message_ids = messages.filter(
+            user_to=current_user, is_new=True
+        ).values_list('msg_id', flat=True)
         Message.objects.filter(msg_id__in=unread_message_ids).update(
             is_new=False,
-            read_at=timezone.now()  # Add this line to set read_at timestamp
+            read_at=timezone.now(),  # Add this line to set read_at timestamp
         )
 
         return serialized_messages
@@ -287,21 +316,20 @@ class ChatMessagesSerializer(serializers.ModelSerializer):
         current_user = self.context['request'].user
         other_user = obj.client if current_user == obj.owner else obj.owner
         return Blocking.objects.filter(
-            user_who=current_user,
-            user_whom=other_user
+            user_who=current_user, user_whom=other_user
         ).exists()
 
     def get_i_am_blocked(self, obj) -> bool:
         current_user = self.context['request'].user
         other_user = obj.client if current_user == obj.owner else obj.owner
         return Blocking.objects.filter(
-            user_who=other_user,
-            user_whom=current_user
+            user_who=other_user, user_whom=current_user
         ).exists()
 
 
 class CreateMessageResponseSerializer(serializers.ModelSerializer):
     """Сериализатор тела ответа при создании нового сообщения"""
+
     chat_id = serializers.IntegerField(source='chat.chat_id')
     realty = RealtyNestedIdSerializer(source='chat.realty')  # Nested, only ID
     # me = serializers.SerializerMethodField()
@@ -311,7 +339,9 @@ class CreateMessageResponseSerializer(serializers.ModelSerializer):
     user_is_owner = serializers.SerializerMethodField()
     direction = serializers.SerializerMethodField()
     is_new = serializers.BooleanField(read_only=True, required=False)
-    read_at = serializers.DateTimeField(read_only=True, required=False)  # Add read at - но вообще-то не нужно
+    read_at = serializers.DateTimeField(
+        read_only=True, required=False
+    )  # Add read at - но вообще-то не нужно
 
     class Meta:
         model = Message
@@ -329,7 +359,6 @@ class CreateMessageResponseSerializer(serializers.ModelSerializer):
             'read_at',  # Add read at - но вообще-то не нужно
             # 'user_from',
             # 'user_to',
-
             # 'is_deleted_from',
             # 'is_deleted_to',
         ]
@@ -339,21 +368,23 @@ class CreateMessageResponseSerializer(serializers.ModelSerializer):
 
     def get_direction(self, obj) -> str:
         current_user = self.context['request'].user
-        return "in" if obj.user_to == current_user else "out"
+        return 'in' if obj.user_to == current_user else 'out'
 
 
 class IdsListSerializer(serializers.Serializer):
     """Сериализатор списка id-шников чатов.
     Используется в множественном удалении и блокировке"""
+
     chat_ids = serializers.ListField(  # Переименовано с 'ids' на 'chat_ids'
         child=serializers.IntegerField(min_value=1),
         allow_empty=True,
-        help_text="Список ID чатов (chat_ids)"
+        help_text='Список ID чатов (chat_ids)',
     )
 
 
 class BlockingSerializer(serializers.ModelSerializer):
     """Сериализатор блокировки"""
+
     user_who = serializers.SlugRelatedField(read_only=True, slug_field='username')
     user_whom = serializers.SlugRelatedField(read_only=True, slug_field='username')
 
@@ -370,28 +401,31 @@ class BlockingSerializer(serializers.ModelSerializer):
 
 # region  Блокировка
 
+
 class UserInfoIdNameSerializer(serializers.Serializer):
     """Serializer for user ID and name."""
+
     id = serializers.IntegerField()
     name = serializers.CharField(source='username')
 
 
 class BlockingRequestSerializer(serializers.Serializer):
     """Serializer for blocking requests."""
+
     chat_ids = serializers.ListField(
         child=serializers.IntegerField(min_value=1),
         required=False,
-        help_text="List of Chat IDs"
+        help_text='List of Chat IDs',
     )
     user_ids = serializers.ListField(
         child=serializers.IntegerField(min_value=1),
         required=False,
-        help_text="List of User IDs"
+        help_text='List of User IDs',
     )
     realty_ids = serializers.ListField(
         child=serializers.IntegerField(min_value=1),
         required=False,
-        help_text="List of Realty IDs"
+        help_text='List of Realty IDs',
     )
 
     def validate(self, data):
@@ -401,7 +435,7 @@ class BlockingRequestSerializer(serializers.Serializer):
 
         if len(provided_fields) != 1:
             raise ValidationCustomDetailError(
-                detail="Provide exactly one of: chat_ids, user_ids, or realty_ids."
+                detail='Provide exactly one of: chat_ids, user_ids, or realty_ids.'
             )
 
         return data
@@ -409,26 +443,27 @@ class BlockingRequestSerializer(serializers.Serializer):
 
 class ValidationCustomDetailError(APIException):
     status_code = status.HTTP_400_BAD_REQUEST
-    default_detail = "Validation error"
+    default_detail = 'Validation error'
     default_code = 'invalid'
 
 
 class UnblockingRequestSerializer(serializers.Serializer):
     """Serializer for unblocking requests (same structure as blocking)."""
+
     chat_ids = serializers.ListField(
         child=serializers.IntegerField(min_value=1),
         required=False,
-        help_text="List of Chat IDs"
+        help_text='List of Chat IDs',
     )
     user_ids = serializers.ListField(
         child=serializers.IntegerField(min_value=1),
         required=False,
-        help_text="List of User IDs"
+        help_text='List of User IDs',
     )
     realty_ids = serializers.ListField(
         child=serializers.IntegerField(min_value=1),
         required=False,
-        help_text="List of Realty IDs"
+        help_text='List of Realty IDs',
     )
 
     def validate(self, data):
@@ -438,13 +473,14 @@ class UnblockingRequestSerializer(serializers.Serializer):
 
         if len(provided_fields) != 1:
             raise ValidationCustomDetailError(
-                detail="Provide exactly one of: chat_ids, user_ids, or realty_ids."
+                detail='Provide exactly one of: chat_ids, user_ids, or realty_ids.'
             )
         return data
 
 
 class BlockingResponseSerializer(serializers.Serializer):
     """Serializer for the blocking/unblocking response."""
+
     current_user = serializers.CharField()
     blocked_users = UserInfoIdNameSerializer(many=True)
     blocked_chats = serializers.ListField(child=serializers.IntegerField())

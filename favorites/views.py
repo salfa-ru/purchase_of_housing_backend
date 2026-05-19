@@ -1,13 +1,14 @@
+from drf_spectacular.utils import OpenApiParameter, extend_schema
 from rest_framework import generics, status
-from rest_framework.response import Response
+from rest_framework.exceptions import NotFound, ValidationError
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
 from rest_framework.views import APIView
+
 from realty.models import Realty
+
 from .models import Favorite
 from .serializers import FavoriteSerializer
-from rest_framework.exceptions import ValidationError, NotFound
-from django.shortcuts import get_object_or_404
-from drf_spectacular.utils import extend_schema, extend_schema_view, OpenApiParameter
 
 
 @extend_schema(
@@ -15,26 +16,37 @@ from drf_spectacular.utils import extend_schema, extend_schema_view, OpenApiPara
     summary='Получение списка избранного пользователя',
     description='Возвращает список объявлений в избранном с количеством непросмотренных. Поддерживает фильтрацию по trade_type, is_commercial и ordering.',
     parameters=[
-        OpenApiParameter(name='trade_type', description='sale или rent', required=False, type=str),
-        OpenApiParameter(name='is_commercial', description='true — коммерческая, false — жилая', required=False,
-                         type=bool),
-        OpenApiParameter(name='ordering', description='-added_at (сначала новые)', required=False, type=str),
-    ]
+        OpenApiParameter(
+            name='trade_type', description='sale или rent', required=False, type=str
+        ),
+        OpenApiParameter(
+            name='is_commercial',
+            description='true — коммерческая, false — жилая',
+            required=False,
+            type=bool,
+        ),
+        OpenApiParameter(
+            name='ordering',
+            description='-added_at (сначала новые)',
+            required=False,
+            type=str,
+        ),
+    ],
 )
 class FavoriteListView(generics.ListAPIView):
     """
-        Возвращает список избранных объявлений текущего пользователя.
+    Возвращает список избранных объявлений текущего пользователя.
 
-        Поддерживает фильтрацию:
-        - `trade_type` — тип сделки (sale/rent)
-        - `is_commercial` — тип недвижимости (true — коммерческая, false — жилая)
-        - `ordering` — сортировка по дате добавления (added_at / -added_at)
+    Поддерживает фильтрацию:
+    - `trade_type` — тип сделки (sale/rent)
+    - `is_commercial` — тип недвижимости (true — коммерческая, false — жилая)
+    - `ordering` — сортировка по дате добавления (added_at / -added_at)
 
-        Ответ содержит:
-        - `unviewed_count` — количество новых объявлений, добавленных после последнего посещения
-        - `results` — список объектов избранного с полными данными объявлений
+    Ответ содержит:
+    - `unviewed_count` — количество новых объявлений, добавленных после последнего посещения
+    - `results` — список объектов избранного с полными данными объявлений
 
-        Доступно только авторизованным пользователям.
+    Доступно только авторизованным пользователям.
     """
 
     permission_classes = [IsAuthenticated]
@@ -66,7 +78,7 @@ class FavoriteListView(generics.ListAPIView):
 
     def list(self, request, *args, **kwargs):
         """
-            Переопределяем, чтоб добавить unviewed_count в ответ.
+        Переопределяем, чтоб добавить unviewed_count в ответ.
         """
 
         queryset = self.get_queryset()
@@ -76,10 +88,7 @@ class FavoriteListView(generics.ListAPIView):
         unviewed_count = queryset.filter(is_viewed=False).count()
 
         # Возвращаем объект с двумя полями
-        return Response({
-            'unviewed_count': unviewed_count,
-            'results': serializer.data
-        })
+        return Response({'unviewed_count': unviewed_count, 'results': serializer.data})
 
 
 @extend_schema(
@@ -87,22 +96,23 @@ class FavoriteListView(generics.ListAPIView):
     summary='Добавление объявления в избранное',
     description='Принимает realty_id и добавляет объявление в избранное текущего пользователя',
     request=FavoriteSerializer,
-    responses={201: FavoriteSerializer}
+    responses={201: FavoriteSerializer},
 )
 class FavoriteCreateView(generics.CreateAPIView):
     """
-        Добавляет объявление в избранное текущего пользователя.
+    Добавляет объявление в избранное текущего пользователя.
 
-        Ожидает JSON:
-        {
-            "realty_id": 123
-        }
+    Ожидает JSON:
+    {
+        "realty_id": 123
+    }
 
-        Возвращает созданный объект избранного с вложенными данными объявления.
+    Возвращает созданный объект избранного с вложенными данными объявления.
 
-        Если объявление уже в избранном — возвращает ошибку 400.
-        Доступно только авторизованным пользователям.
+    Если объявление уже в избранном — возвращает ошибку 400.
+    Доступно только авторизованным пользователям.
     """
+
     http_method_names = ['post']
     permission_classes = [IsAuthenticated]
     serializer_class = FavoriteSerializer
@@ -121,18 +131,15 @@ class FavoriteCreateView(generics.CreateAPIView):
         # 2. Проверяем, существует ли объявление
         try:
             realty = Realty.objects.get(id=realty_id)
-        except Realty.DoesNotExist:
-            raise NotFound({'detail': 'Объявление не найдено'})
+        except Realty.DoesNotExist as err:
+            raise NotFound({'detail': 'Объявление не найдено'}) from err
 
         # 3. Проверяем, не добавлено ли уже в избранное
         if Favorite.objects.filter(user=request.user, realty=realty).exists():
             raise ValidationError({'detail': 'Объявление уже добавлено в избранное'})
 
         # 4. Создаём объект избранного
-        favorite = Favorite.objects.create(
-            user=request.user,
-            realty=realty
-        )
+        favorite = Favorite.objects.create(user=request.user, realty=realty)
 
         # 5. Сериализуем и возвращаем ответ
         serializer = self.get_serializer(favorite)
@@ -146,17 +153,17 @@ class FavoriteCreateView(generics.CreateAPIView):
     tags=['favorites'],
     summary='Удаление объявления из избранного',
     description='Мгновенное удаление без подтверждения. Возвращает 204 No Content.',
-    responses={204: None}
+    responses={204: None},
 )
 class FavoriteDeleteView(generics.DestroyAPIView):
     """
-        Удаляет объявление из избранного по ID записи избранного.
+    Удаляет объявление из избранного по ID записи избранного.
 
-        Удаление происходит мгновенно, без дополнительного подтверждения.
-        Пользователь может удалять только свои записи.
+    Удаление происходит мгновенно, без дополнительного подтверждения.
+    Пользователь может удалять только свои записи.
 
-        Возвращает статус 204 No Content при успешном удалении.
-        Доступно только авторизованным пользователям.
+    Возвращает статус 204 No Content при успешном удалении.
+    Доступно только авторизованным пользователям.
     """
 
     permission_classes = [IsAuthenticated]
@@ -177,34 +184,33 @@ class FavoriteDeleteView(generics.DestroyAPIView):
     tags=['favorites'],
     summary='Сброс счётчика непросмотренных',
     description='Помечает все объявления в избранном как просмотренные (is_viewed = True)',
-    responses={200: None}
+    responses={200: None},
 )
 class FavoriteMarkViewedView(APIView):
     """
-        Сбрасывает счётчик новых объявлений в избранном.
+    Сбрасывает счётчик новых объявлений в избранном.
 
-        Вызывается при заходе пользователя на страницу /favorites.
-        Устанавливает флаг `is_viewed = True` для всех непросмотренных записей текущего пользователя.
+    Вызывается при заходе пользователя на страницу /favorites.
+    Устанавливает флаг `is_viewed = True` для всех непросмотренных записей текущего пользователя.
 
-        Возвращает:
-        {
-            "status": "viewed",
-            "update_count": количество обновлённых записей
-        }
+    Возвращает:
+    {
+        "status": "viewed",
+        "update_count": количество обновлённых записей
+    }
 
-        Доступно только авторизованным пользователям.
+    Доступно только авторизованным пользователям.
     """
 
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
         # Обновляем все непросмотренные записи текущего пользователя
-        updated = Favorite.objects.filter(
-            user=request.user,
-            is_viewed=False
-        ).update(is_viewed=True)
+        updated = Favorite.objects.filter(user=request.user, is_viewed=False).update(
+            is_viewed=True
+        )
 
-        return Response({
-            'status': 'viewed',
-            'update_count': updated
-        }, status=status.HTTP_204_NO_CONTENT)
+        return Response(
+            {'status': 'viewed', 'update_count': updated},
+            status=status.HTTP_204_NO_CONTENT,
+        )

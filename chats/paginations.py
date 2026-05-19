@@ -9,10 +9,13 @@ class ConfigurablePagination(PageNumberPagination):
     Custom pagination class that allows configuring page size and max page size
     based on provided parameters.
     """
-    page_size_query_param = 'page_size'  # Parameter to control page size
-    page_query_param = 'page'            # Standard page parameter
 
-    def __init__(self, pagesize_default=10, pagesize_max=50, pagination_config_name="ITEMS"):
+    page_size_query_param = 'page_size'  # Parameter to control page size
+    page_query_param = 'page'  # Standard page parameter
+
+    def __init__(
+        self, pagesize_default=10, pagesize_max=50, pagination_config_name='ITEMS'
+    ):
         """
         Initializes the pagination with custom settings.
 
@@ -25,10 +28,12 @@ class ConfigurablePagination(PageNumberPagination):
         self.page_size = pagesize_default
         self.max_page_size = pagesize_max
         self.pagination_config_name = pagination_config_name
-        self.page_size_query_description = (f"Количество объектов на странице. "
-                                            f"По умолчанию {pagesize_default}, "
-                                            f"максимум {pagesize_max}. "
-                                            f"({pagination_config_name}_PAGESIZE_MAX)")
+        self.page_size_query_description = (
+            f'Количество объектов на странице. '
+            f'По умолчанию {pagesize_default}, '
+            f'максимум {pagesize_max}. '
+            f'({pagination_config_name}_PAGESIZE_MAX)'
+        )
 
     def get_page_size(self, request):
         """
@@ -54,15 +59,17 @@ class ConfigurablePagination(PageNumberPagination):
         """
         Constructs the paginated response with custom fields.
         """
-        return Response({
-            'count': self.page.paginator.count,
-            'page_size': self.get_page_size(self.request),
-            'pages_total': self.page.paginator.num_pages,
-            'current_page': self.page.number,
-            'next': self.get_next_link(),
-            'previous': self.get_previous_link(),
-            'results': data,
-        })
+        return Response(
+            {
+                'count': self.page.paginator.count,
+                'page_size': self.get_page_size(self.request),
+                'pages_total': self.page.paginator.num_pages,
+                'current_page': self.page.number,
+                'next': self.get_next_link(),
+                'previous': self.get_previous_link(),
+                'results': data,
+            }
+        )
 
     def get_paginated_response_schema(self, schema):
         """For openapi documentation."""

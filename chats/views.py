@@ -2,27 +2,41 @@
 
 from django.db.models import Q
 from django.utils import timezone
-
-from rest_framework import generics, status, serializers, permissions, exceptions
+from drf_spectacular.utils import (
+    OpenApiParameter,
+    OpenApiResponse,
+    extend_schema,
+    inline_serializer,
+)
+from rest_framework import exceptions, generics, permissions, serializers, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from drf_spectacular.utils import extend_schema, inline_serializer, OpenApiParameter, OpenApiResponse
-
-from chats.models import Chat, Blocking, Message
+from chats.models import Blocking, Chat, Message
 from chats.paginations import ConfigurablePagination
 from chats.serializers import (
-    ChatMessagesSerializer, CreateMessageResponseSerializer, IdsListSerializer,
-    BlockingSerializer, CreateMessageRequestSerializer, MessageSerializer,
-    BlockingRequestSerializer, UserInfoIdNameSerializer, BlockingResponseSerializer, UnblockingRequestSerializer,
+    BlockingRequestSerializer,
+    BlockingResponseSerializer,
+    BlockingSerializer,
+    ChatMessagesSerializer,
+    CreateMessageRequestSerializer,
+    CreateMessageResponseSerializer,
+    IdsListSerializer,
+    MessageSerializer,
+    UnblockingRequestSerializer,
+    UserInfoIdNameSerializer,
 )
 from chats.services import (
-    create_message, get_chats_by_ids, get_chat_by_chat_id,
-    get_realty_by_realty_id, get_chats_sorted, get_users_to_block_unblock, get_chats_from_users,
+    create_message,
+    get_chat_by_chat_id,
+    get_chats_by_ids,
+    get_chats_from_users,
+    get_chats_sorted,
     get_realties_from_users,
+    get_realty_by_realty_id,
+    get_users_to_block_unblock,
 )
 from config import constants
-
 
 # TODO - Внимание! При пагинации сообщений в чате - может быть непрочитанные будут на предыдущей странице!
 # I came up with this approach: well, I have paginator there, and so while I am asking for "the last page"
@@ -33,32 +47,51 @@ from config import constants
 
 class ChatsPagination(ConfigurablePagination):
     """Pagination for Chat lists (/chats/ and /chats/blacklist/)."""
+
     page_size = constants.CHATS_PAGESIZE_DEFAULT
     max_page_size = constants.CHATS_PAGESIZE_MAX
-    pagination_config_name = "CHATS"
+    pagination_config_name = 'CHATS'
 
 
 class MessagesPagination(ConfigurablePagination):
     """Pagination for messages within a chat (/chats/show-chat/)."""
+
     page_size = constants.MESSAGES_PAGESIZE_DEFAULT
     max_page_size = constants.MESSAGES_PAGESIZE_MAX
-    pagination_config_name = "MESSAGES"
+    pagination_config_name = 'MESSAGES'
 
 
 @extend_schema(
     summary='Получение списка чатов пользователя. Только заблокированные - через эндпойнт /blacklist',
     parameters=[
-        OpenApiParameter(name='page', type=int, location=OpenApiParameter.QUERY, description='Номер страницы'),
-        OpenApiParameter(name='page_size', type=int, location=OpenApiParameter.QUERY,
-                         description=f'Количество объектов на странице '
-                                     f'(по умолчанию {constants.CHATS_PAGESIZE_DEFAULT}, '
-                                     f'максимум {constants.CHATS_PAGESIZE_MAX}), '
-                                     f'настраивается константами CHATS_PAGESIZE'),
-        OpenApiParameter(name='i_block', type=bool, location=OpenApiParameter.QUERY,
-                         description='Фильтр: показывать только чаты, где я заблокировал собеседника (true/false)'),
-        OpenApiParameter(name='i_am_blocked', type=bool, location=OpenApiParameter.QUERY,
-                         description='Фильтр: показывать только чаты, где меня заблокировал собеседник (true/false)'),
-    ]
+        OpenApiParameter(
+            name='page',
+            type=int,
+            location=OpenApiParameter.QUERY,
+            description='Номер страницы',
+        ),
+        OpenApiParameter(
+            name='page_size',
+            type=int,
+            location=OpenApiParameter.QUERY,
+            description=f'Количество объектов на странице '
+            f'(по умолчанию {constants.CHATS_PAGESIZE_DEFAULT}, '
+            f'максимум {constants.CHATS_PAGESIZE_MAX}), '
+            f'настраивается константами CHATS_PAGESIZE',
+        ),
+        OpenApiParameter(
+            name='i_block',
+            type=bool,
+            location=OpenApiParameter.QUERY,
+            description='Фильтр: показывать только чаты, где я заблокировал собеседника (true/false)',
+        ),
+        OpenApiParameter(
+            name='i_am_blocked',
+            type=bool,
+            location=OpenApiParameter.QUERY,
+            description='Фильтр: показывать только чаты, где меня заблокировал собеседник (true/false)',
+        ),
+    ],
 )
 class ChatListAPIView(generics.ListAPIView):
     """Получение списка чатов пользователя.
@@ -72,6 +105,7 @@ class ChatListAPIView(generics.ListAPIView):
     В качестве значения "i_am_blocked" и "i_block" могут быть  <ul>
     <li>Истинные значения: <strong> "true", "1", "yes", "on" </strong> </li>
     <li>Ложные значения:  <strong>"false", "0", "no", "off" </strong></li></ul>"""
+
     serializer_class = ChatMessagesSerializer
     permission_classes = [permissions.IsAuthenticated]
     pagination_class = ChatsPagination
@@ -80,17 +114,19 @@ class ChatListAPIView(generics.ListAPIView):
         user = self.request.user
         chats = get_chats_sorted(user)
 
-        is_blacklist = self.kwargs.get("blacklist", False)
+        is_blacklist = self.kwargs.get('blacklist', False)
 
         # Получаем query-параметры
-        i_block_param = self.request.query_params.get("i_block")
-        i_am_blocked_param = self.request.query_params.get("i_am_blocked")
+        i_block_param = self.request.query_params.get('i_block')
+        i_am_blocked_param = self.request.query_params.get('i_am_blocked')
 
         def parse_bool(val):
             if val is None:
                 return None
-            if val.lower() in ("true", "1", "yes", "on"): return True
-            if val.lower() in ("false", "0", "no", "off"): return False
+            if val.lower() in ('true', '1', 'yes', 'on'):
+                return True
+            if val.lower() in ('false', '0', 'no', 'off'):
+                return False
             return None
 
         i_block = parse_bool(i_block_param)
@@ -100,16 +136,20 @@ class ChatListAPIView(generics.ListAPIView):
         for chat in chats:
             # Фильтрация по наличию сообщений (как было)
             has_messages = chat.messages.filter(
-                Q(user_from=user, is_deleted_from=False) |
-                Q(user_to=user, is_deleted_to=False)
+                Q(user_from=user, is_deleted_from=False)
+                | Q(user_to=user, is_deleted_to=False)
             ).exists()
             if not has_messages:
                 continue
 
             # Фильтрация по блокировкам
             other_user = chat.owner if chat.client == user else chat.client
-            i_block_val = Blocking.objects.filter(user_who=user, user_whom=other_user).exists()
-            i_am_blocked_val = Blocking.objects.filter(user_who=other_user, user_whom=user).exists()
+            i_block_val = Blocking.objects.filter(
+                user_who=user, user_whom=other_user
+            ).exists()
+            i_am_blocked_val = Blocking.objects.filter(
+                user_who=other_user, user_whom=user
+            ).exists()
 
             if i_block is not None and i_block != i_block_val:
                 continue
@@ -136,18 +176,22 @@ class ChatListAPIView(generics.ListAPIView):
             user_to=request.user,
             is_new=True,
             is_deleted_to=False,
-            chat_id__in=chat_ids  # <-- ключевое изменение: только эти чаты
+            chat_id__in=chat_ids,  # <-- ключевое изменение: только эти чаты
         ).count()
 
         if page is not None:
-            serializer = self.get_serializer(page, many=True, context={'request': request})
+            serializer = self.get_serializer(
+                page, many=True, context={'request': request}
+            )
             paginated_response = self.get_paginated_response(serializer.data)
             new_data = {'unread_total': unread_total}
             new_data.update(paginated_response.data)
             paginated_response.data = new_data
             return paginated_response
 
-        serializer = self.get_serializer(queryset, many=True, context={'request': request})
+        serializer = self.get_serializer(
+            queryset, many=True, context={'request': request}
+        )
         response_data = serializer.data
         # Вставляем unread_total в начало
         return Response([{'unread_total': unread_total}] + response_data)
@@ -160,20 +204,30 @@ class ChatListAPIView(generics.ListAPIView):
         fields={
             'chat_id': serializers.IntegerField(min_value=1, required=False),
             'realty_id': serializers.IntegerField(min_value=1, required=False),
-        }
+        },
     ),
     parameters=[
-        OpenApiParameter(name='page', type=int, location=OpenApiParameter.QUERY, description='Номер страницы'),
-        OpenApiParameter(name='page_size', type=int, location=OpenApiParameter.QUERY,
-                         description=f'Количество объектов на странице '
-                                     f'(по умолчанию {constants.MESSAGES_PAGESIZE_DEFAULT}, '
-                                     f'максимум {constants.MESSAGES_PAGESIZE_MAX}), '
-                                     f'настраивается константами MESSAGES_PAGESIZE'),
+        OpenApiParameter(
+            name='page',
+            type=int,
+            location=OpenApiParameter.QUERY,
+            description='Номер страницы',
+        ),
+        OpenApiParameter(
+            name='page_size',
+            type=int,
+            location=OpenApiParameter.QUERY,
+            description=f'Количество объектов на странице '
+            f'(по умолчанию {constants.MESSAGES_PAGESIZE_DEFAULT}, '
+            f'максимум {constants.MESSAGES_PAGESIZE_MAX}), '
+            f'настраивается константами MESSAGES_PAGESIZE',
+        ),
     ],
     responses={200: ChatMessagesSerializer},
 )
 class ChatMessagesAPIView(generics.CreateAPIView):
     """Получение списка сообщений в чате по chat_id ИЛИ realty_id"""
+
     serializer_class = ChatMessagesSerializer
     permission_classes = [permissions.IsAuthenticated]
     pagination_class = MessagesPagination
@@ -182,18 +236,20 @@ class ChatMessagesAPIView(generics.CreateAPIView):
         chat_id = request.data.get('chat_id')
         realty_id = request.data.get('realty_id')
 
-        if (chat_id is not None and realty_id is not None) or (chat_id is None and realty_id is None):
+        if (chat_id is not None and realty_id is not None) or (
+            chat_id is None and realty_id is None
+        ):
             # Уродливо показывается - зато как 400 ошибка
-            raise exceptions.ValidationError(detail="Нужен либо chat_id либо realty_id, а не оба (или ни одного)")
+            raise exceptions.ValidationError(
+                detail='Нужен либо chat_id либо realty_id, а не оба (или ни одного)'
+            )
 
         if chat_id:
             return get_chat_by_chat_id(user=request.user, chat_id=chat_id)
         elif realty_id:
             realty = get_realty_by_realty_id(realty_id=realty_id)
             chat, created = Chat.objects.get_or_create(
-                realty=realty,
-                owner=realty.owner,
-                client=request.user
+                realty=realty, owner=realty.owner, client=request.user
             )
             return chat
 
@@ -201,37 +257,47 @@ class ChatMessagesAPIView(generics.CreateAPIView):
         try:
             chat = self.get_chat(request)
         except exceptions.ValidationError as e:
-            return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'detail': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
         messages = chat.messages.filter(
-            Q(user_from=request.user, is_deleted_from=False) |
-            Q(user_to=request.user, is_deleted_to=False)
+            Q(user_from=request.user, is_deleted_from=False)
+            | Q(user_to=request.user, is_deleted_to=False)
         )
         if not messages.exists():
-            return Response({"detail": "Чат пуст"}, status=status.HTTP_404_NOT_FOUND)
+            return Response({'detail': 'Чат пуст'}, status=status.HTTP_404_NOT_FOUND)
 
         page = self.paginate_queryset(messages.order_by('-created_at'))
 
         # TODO - ПРОВЕРИТЬ - Установка даты чтения сообщения получателем (место 1 из 2)
-        print("ПРОВЕРИТЬ - Установка даты чтения сообщения получателем (место 1 из 2)!")
+        print('ПРОВЕРИТЬ - Установка даты чтения сообщения получателем (место 1 из 2)!')
         if page is not None:
-            serializer = ChatMessagesSerializer(instance=chat, context={'request': request})
-            paginated_messages = MessageSerializer(page, many=True, context={'request': request}).data
+            serializer = ChatMessagesSerializer(
+                instance=chat, context={'request': request}
+            )
+            paginated_messages = MessageSerializer(
+                page, many=True, context={'request': request}
+            ).data
             response_data = serializer.data
             response_data['messages'] = paginated_messages
 
             # --- MODIFICATION STARTS HERE ---
             unread_messages = messages.filter(user_to=request.user, is_new=True)
-            unread_messages.update(is_new=False, read_at=timezone.now())  # Set is_new and read_at
+            unread_messages.update(
+                is_new=False, read_at=timezone.now()
+            )  # Set is_new and read_at
             # --- MODIFICATION ENDS HERE ---
             return self.get_paginated_response(response_data)
 
         else:
-            serializer = ChatMessagesSerializer(instance=chat, context={'request': request})
+            serializer = ChatMessagesSerializer(
+                instance=chat, context={'request': request}
+            )
 
             # --- MODIFICATION STARTS HERE ---
             unread_messages = messages.filter(user_to=request.user, is_new=True)
-            unread_messages.update(is_new=False, read_at=timezone.now())  # Set is_new and read_at
+            unread_messages.update(
+                is_new=False, read_at=timezone.now()
+            )  # Set is_new and read_at
             # --- MODIFICATION ENDS HERE ---
 
             return Response(serializer.data)
@@ -240,18 +306,26 @@ class ChatMessagesAPIView(generics.CreateAPIView):
 @extend_schema(
     summary='Отправка сообщения',
     request=CreateMessageRequestSerializer,
-    responses={201: CreateMessageResponseSerializer,
-               403: OpenApiResponse(response={
-                   "type": "object",
-                   "properties": {
-                       "detail": {"type": "string", "example": "Пользователь удален. Отправка сообщений невозможна."}
-                   }
-               })
-               })
+    responses={
+        201: CreateMessageResponseSerializer,
+        403: OpenApiResponse(
+            response={
+                'type': 'object',
+                'properties': {
+                    'detail': {
+                        'type': 'string',
+                        'example': 'Пользователь удален. Отправка сообщений невозможна.',
+                    }
+                },
+            }
+        ),
+    },
+)
 class MessageCreateAPIView(generics.CreateAPIView):
     """Универсальный эндпоинт создания сообщения.
     Принимает либо chat_id (для существующего чата),
     либо realty_id (для создания нового чата)"""
+
     serializer_class = CreateMessageResponseSerializer
     permission_classes = [permissions.IsAuthenticated]
 
@@ -263,7 +337,7 @@ class MessageCreateAPIView(generics.CreateAPIView):
             user_from=self.request.user,
             message_text=serializer.validated_data['message'],
             chat_id=serializer.validated_data.get('chat_id'),
-            realty_id=serializer.validated_data.get('realty_id')
+            realty_id=serializer.validated_data.get('realty_id'),
         )
 
         response_serializer = self.get_serializer(message)
@@ -277,17 +351,21 @@ class MessageCreateAPIView(generics.CreateAPIView):
         200: inline_serializer(  # Use inline_serializer for a custom response
             name='MessagesInChatsDeleteResponse',
             fields={
-                'deleted_chat_ids': serializers.ListField(child=serializers.IntegerField()),
+                'deleted_chat_ids': serializers.ListField(
+                    child=serializers.IntegerField()
+                ),
                 'detail': serializers.CharField(),
-            }
+            },
         ),
         400: inline_serializer(
             name='MessagesInChatsDeleteError',
             fields={
-                'not_found_or_empty_chats': serializers.ListField(child=serializers.IntegerField()),
+                'not_found_or_empty_chats': serializers.ListField(
+                    child=serializers.IntegerField()
+                ),
                 'found_chats': serializers.ListField(child=serializers.IntegerField()),
                 'detail': serializers.CharField(),
-            }
+            },
         ),
     },
 )
@@ -298,6 +376,7 @@ class ChatsDeleteAPIView(generics.CreateAPIView):
     Если хотя бы в одном из указанных чатов нет сообщений для удаления,
     удаление не производится, и возвращается ошибка.
     """
+
     permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request, *args, **kwargs):
@@ -307,12 +386,11 @@ class ChatsDeleteAPIView(generics.CreateAPIView):
 
         # 1. Получаем чаты, доступные пользователю, и проверяем их наличие.
         try:
-            chats = get_chats_by_ids(
-                current_user=request.user,
-                data=request.data
-            )
-        except exceptions.NotFound as e:  # перехват ошибки, брошенной в get_chats_by_ids
-            return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            chats = get_chats_by_ids(current_user=request.user, data=request.data)
+        except (
+            exceptions.NotFound
+        ) as e:  # перехват ошибки, брошенной в get_chats_by_ids
+            return Response({'detail': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
         found_chat_ids = [chat.chat_id for chat in chats]
         not_found_chat_ids = list(set(chat_ids) - set(found_chat_ids))
@@ -321,9 +399,11 @@ class ChatsDeleteAPIView(generics.CreateAPIView):
         chats_without_messages = []
         for chat in chats:
             has_messages = Message.objects.filter(
-                Q(chat=chat) &
-                (Q(user_from=request.user, is_deleted_from=False) |
-                 Q(user_to=request.user, is_deleted_to=False))
+                Q(chat=chat)
+                & (
+                    Q(user_from=request.user, is_deleted_from=False)
+                    | Q(user_to=request.user, is_deleted_to=False)
+                )
             ).exists()
             if not has_messages:
                 chats_without_messages.append(chat.chat_id)
@@ -332,19 +412,27 @@ class ChatsDeleteAPIView(generics.CreateAPIView):
         if chats_without_messages or not_found_chat_ids:
             response_data = {
                 'not_found_or_empty_chats': not_found_chat_ids + chats_without_messages,
-                'found_chats': [chat_id for chat_id in found_chat_ids if chat_id not in chats_without_messages],
+                'found_chats': [
+                    chat_id
+                    for chat_id in found_chat_ids
+                    if chat_id not in chats_without_messages
+                ],
                 'detail': 'Удаление не произошло.  '
-                          'Некоторые чаты не найдены или не содержат сообщений для удаления.'
+                'Некоторые чаты не найдены или не содержат сообщений для удаления.',
             }
             return Response(response_data, status=status.HTTP_400_BAD_REQUEST)
 
         # 4. Если все чаты найдены и содержат сообщения, удаляем.
-        Message.objects.filter(chat__in=chats, user_from=request.user).update(is_deleted_from=True)
-        Message.objects.filter(chat__in=chats, user_to=request.user).update(is_deleted_to=True)
+        Message.objects.filter(chat__in=chats, user_from=request.user).update(
+            is_deleted_from=True
+        )
+        Message.objects.filter(chat__in=chats, user_to=request.user).update(
+            is_deleted_to=True
+        )
 
         response_data = {
             'deleted_chat_ids': found_chat_ids,
-            'detail': 'Чаты успешно удалены.'
+            'detail': 'Чаты успешно удалены.',
         }
         return Response(response_data, status=status.HTTP_200_OK)
 
@@ -357,7 +445,8 @@ class ChatsDeleteAPIView(generics.CreateAPIView):
 class ChatsBlockingCreateAPIView(generics.CreateAPIView):
     """Блокировка переписок по chat_ids, user_ids, или realty_ids
     <strong> (только по одному из трех параметров). </strong> Рекомендую в основном пользоваться chat_id.<br>
-    Блокировка не дает текущему пользователю написать тому, кого он заблокировал. Себя заблокировать нельзя. """
+    Блокировка не дает текущему пользователю написать тому, кого он заблокировал. Себя заблокировать нельзя."""
+
     permission_classes = [permissions.IsAuthenticated]
     serializer_class = BlockingSerializer  # For creating Blocking instances
 
@@ -372,19 +461,18 @@ class ChatsBlockingCreateAPIView(generics.CreateAPIView):
                 current_user,
                 chat_ids=validated_data.get('chat_ids'),
                 user_ids=validated_data.get('user_ids'),
-                realty_ids=validated_data.get('realty_ids')
+                realty_ids=validated_data.get('realty_ids'),
             )
         except exceptions.NotFound as e:
-            return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'detail': str(e)}, status=status.HTTP_400_BAD_REQUEST)
         except exceptions.ValidationError as e:  # Catch self-blocking attempt
-            return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'detail': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
         # Create Blocking instances
         blocking_list = []
         for user in users_to_block:
             blocking, created = Blocking.objects.get_or_create(
-                user_who=current_user,
-                user_whom=user
+                user_who=current_user, user_whom=user
             )
             blocking_list.append(blocking)  # add any way, created or not
 
@@ -392,10 +480,10 @@ class ChatsBlockingCreateAPIView(generics.CreateAPIView):
         blocked_realties = get_realties_from_users(current_user, users_to_block)
 
         response_data = {
-            'current_user_debug': f"#{current_user.id} - {current_user.first_name}",
-            "blocked_users": UserInfoIdNameSerializer(users_to_block, many=True).data,
-            "blocked_chat_ids": blocked_chats,
-            "blocked_realty_ids": blocked_realties
+            'current_user_debug': f'#{current_user.id} - {current_user.first_name}',
+            'blocked_users': UserInfoIdNameSerializer(users_to_block, many=True).data,
+            'blocked_chat_ids': blocked_chats,
+            'blocked_realty_ids': blocked_realties,
         }
 
         return Response(response_data, status=status.HTTP_201_CREATED)
@@ -411,6 +499,7 @@ class ChatRemoveBlocking(APIView):
     <strong> (только по одному из трех параметров). </strong> Рекомендую в основном пользоваться chat_id.<br>
     Разблокировка по realty_id или user_id может быть удобна для написания сообщений по новому объявлению
     пользователя, который заблокирован в других чатах"""
+
     permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request, *args, **kwargs):
@@ -425,18 +514,17 @@ class ChatRemoveBlocking(APIView):
                 current_user,
                 chat_ids=validated_data.get('chat_ids'),
                 user_ids=validated_data.get('user_ids'),
-                realty_ids=validated_data.get('realty_ids')
+                realty_ids=validated_data.get('realty_ids'),
             )
         except exceptions.NotFound as e:
-            return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'detail': str(e)}, status=status.HTTP_400_BAD_REQUEST)
         except exceptions.ValidationError as e:  # Catch self-unblocking attempt
-            return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'detail': str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
         unblock_count = 0
         for user in users_to_unblock:
             deleted_count, _ = Blocking.objects.filter(
-                user_who=current_user,
-                user_whom=user
+                user_who=current_user, user_whom=user
             ).delete()
             unblock_count += deleted_count
 
@@ -444,13 +532,17 @@ class ChatRemoveBlocking(APIView):
         blocked_realties = get_realties_from_users(current_user, users_to_unblock)
 
         response_data = {
-            'current_user_debug': f"#{current_user.id} - {current_user.username}",
-            "unblocked_users": UserInfoIdNameSerializer(users_to_unblock, many=True).data,  # it shows users anyway
-            "unblocked_chats": blocked_chats,
-            "unblocked_realties": blocked_realties
+            'current_user_debug': f'#{current_user.id} - {current_user.username}',
+            'unblocked_users': UserInfoIdNameSerializer(
+                users_to_unblock, many=True
+            ).data,  # it shows users anyway
+            'unblocked_chats': blocked_chats,
+            'unblocked_realties': blocked_realties,
         }
 
         if unblock_count > 0:
             return Response(response_data, status=status.HTTP_200_OK)  # response_data
         else:
-            return Response(response_data, status=status.HTTP_200_OK)  # it's not an error
+            return Response(
+                response_data, status=status.HTTP_200_OK
+            )  # it's not an error

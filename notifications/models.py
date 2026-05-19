@@ -7,15 +7,19 @@ from users import models as users_models
 
 class NotificationTemplate(models.Model):
     """Notification Template model."""
+
     code = models.CharField(
-        max_length=NOTIFICATION_LENGTH['code'], verbose_name='Код',
+        max_length=NOTIFICATION_LENGTH['code'],
+        verbose_name='Код',
     )
     part1 = models.CharField(
-        max_length=NOTIFICATION_LENGTH['part1'], verbose_name='Первая часть',
+        max_length=NOTIFICATION_LENGTH['part1'],
+        verbose_name='Первая часть',
     )
     part2 = models.CharField(
-        max_length=NOTIFICATION_LENGTH['part2'], verbose_name='Вторая часть',
-        **NULLABLE_FIELD
+        max_length=NOTIFICATION_LENGTH['part2'],
+        verbose_name='Вторая часть',
+        **NULLABLE_FIELD,
     )
 
     class Meta:
@@ -47,16 +51,15 @@ class Notification(models.Model):
         verbose_name='Недвижимость',
         related_name='notifications',
     )
-    created_at = models.DateTimeField(
-        auto_now_add=True,
-        verbose_name='Дата+Время'
-    )
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name='Дата+Время')
     is_new = models.BooleanField(default=True, verbose_name='Новое')
 
     class Meta:
         verbose_name = 'Уведомление'
         verbose_name_plural = 'Уведомления'
-        ordering = ['-created_at', ]
+        ordering = [
+            '-created_at',
+        ]
 
     def __str__(self):
         return f'{self.template} --- {self.realty}'

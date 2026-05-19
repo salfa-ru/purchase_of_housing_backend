@@ -85,4 +85,3 @@ services:
 networks:
   real_network:
     driver: bridge
-

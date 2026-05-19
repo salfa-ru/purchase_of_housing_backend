@@ -1,4 +1,5 @@
 from rest_framework import serializers
+
 from .models import RealtyPhoto
 
 
@@ -7,7 +8,7 @@ class RealtyPhotoSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = RealtyPhoto
-        fields = ("id", "image")
+        fields = ('id', 'image')
 
     def get_image(self, obj):
         request = self.context.get('request')

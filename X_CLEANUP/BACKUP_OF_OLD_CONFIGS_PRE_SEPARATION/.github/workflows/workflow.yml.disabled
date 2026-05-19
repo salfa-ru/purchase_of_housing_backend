@@ -32,13 +32,13 @@ jobs:
         uses: actions/checkout@v3
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
-      - name: Login to Docker 
+      - name: Login to Docker
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
       - name: Push to Docker Hub
-        uses: docker/build-push-action@v4 
+        uses: docker/build-push-action@v4
         with:
           context: .
           push: true
@@ -76,13 +76,13 @@ jobs:
           # key: ${{ secrets.SSH_KEY }}
           password: ${{ secrets.PASSPHRASE }}
           script: |
-            
+
             #  if ! docker volume inspect pgdata_alfa >/dev/null 2>&1; then
             #    docker volume create pgdata_alfa
             # fi
-    
+
             cd purchase_of_housing_backend
-            
+
             rm -f .env
             touch .env
             echo POSTGRES_DB=${{ secrets.POSTGRES_DB }} >> .env
@@ -93,38 +93,38 @@ jobs:
             echo SECRET_KEY="${{ secrets.SECRET_KEY }}" >> .env
             echo HOST_IP="${{ secrets.HOST_IP }}" >> .env
             echo DOMAIN="${{ secrets.DOMAIN }}" >> .env
-            
+
             echo DEBUG=${{ secrets.DEBUG }} >> .env
             # echo DEBUG=False >> .env
-            
+
             # echo DEBUG=True >> .env
             # echo USE_SQLITE=True >> .env
-            
+
             # Добавьте эти команды перед docker compose pull
             echo "=== Checking postgres data directory ==="
             sudo ls -la /opt/postgres_data
             echo "=== Directory contents before deployment ==="
-             
-            # Подтягиваем новые образы       
+
+            # Подтягиваем новые образы
             sudo docker compose pull # Сначала pull
-            
+
             # Останавливаем текущие контейнеры, сохраняя volumes
             sudo docker compose down --volumes=false
 
             # Запускаем сервисы
             sudo docker compose up -d
-            
+
             # После docker compose up -d добавьте:
             echo "=== Checking postgres data directory after deployment ==="
             sudo ls -la /opt/postgres_data
             echo "=== Directory contents after deployment ==="
-            
+
             echo "=== Checking PostgreSQL logs ==="
             sudo docker compose logs db
-            
+
             echo "=== Checking Environment Variables ==="
             sudo docker compose exec -T backend env | grep -E "POSTGRES|DB_"
-            
+
             echo "=== Checking Database Connection ==="
             sudo docker compose exec -T backend python manage.py shell -c "
             from django.db import connections
@@ -134,10 +134,10 @@ jobs:
                 print('Database connection successful')
             except OperationalError as e:
                 print(f'Database connection failed: {e}')"
-            
+
             echo "=== PostgreSQL Configuration ==="
             sudo docker compose exec -T db psql -U $POSTGRES_USER -d $POSTGRES_DB -c "\l+"
-    
+
             echo "=== Database state ==="
             sudo docker compose exec -T backend python manage.py shell -c "
             import os
@@ -153,23 +153,23 @@ jobs:
                 print(f'User count: {User.objects.count()}')
             except Exception as e:
                 print(f'Error: {str(e)}')"
-            
-            
+
+
             # Ждем, пока база данных будет готова
             echo "Waiting for database to be ready..."
             sleep 10
-            
+
             # Выполняем миграции
             sudo docker compose exec -T backend python manage.py makemigrations
             sudo docker compose exec -T backend python manage.py migrate
             sudo docker compose exec -T backend python manage.py collectstatic --no-input
-            
+
             # Проверяем наличие данных в базе и загружаем их, если база пуста
             echo "========  Checking if database is empty...           ========="
             RECORD_COUNT=$(sudo docker compose exec -T backend python manage.py shell -c "from users.models import User; print(User.objects.count())")
-            
+
             # показывает 4 пользователя из командной строки после запуска приложения!
-            
+
             if [ "$RECORD_COUNT" = "0" ]
             then
               echo "========  Database is empty, loading initial data... ========"
@@ -177,15 +177,15 @@ jobs:
             else
               echo "++++++++  SOMETHING IN THE DATABASE!!!!              ++++++++"
             fi
-            
+
             # В любом случае обновляем разрешения модераторов!!!
             echo "Updating moderator permissions..."
             sudo docker compose exec -T backend python manage.py fix_moderator_permissions
-                        
+
             # Запускаем qcluster!???
             sudo docker compose exec -T backend bash -c "
               nohup python manage.py qcluster > /dev/null 2>&1 &"
-          
+
 
 # Изменил права на папку pgdata:
 # ls -ld /var/lib/docker/volumes/pgdata_alfa/_data

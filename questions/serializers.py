@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from questions.models import QuestionSection, QuestionType, Question, DocumentTemplate
+from questions.models import DocumentTemplate, Question, QuestionSection, QuestionType
 
 
 class DocumentTemplateSerializer(serializers.ModelSerializer):
@@ -17,6 +17,7 @@ class DocumentTemplateSerializer(serializers.ModelSerializer):
 
 class QuestionFullSerializer(serializers.ModelSerializer):
     """Получения полной информации по вопросу, включая файлы."""
+
     document_templates = DocumentTemplateSerializer(many=True, read_only=True)
 
     class Meta:
@@ -31,6 +32,7 @@ class QuestionFullSerializer(serializers.ModelSerializer):
 
 class QuestionSectionFullSerializer(serializers.ModelSerializer):
     """Получение полной информации по всем вопросам в разделе"""
+
     questions = QuestionFullSerializer(many=True, read_only=True)
 
     class Meta:
@@ -57,6 +59,7 @@ class QuestionShortSerializer(serializers.ModelSerializer):
 class QuestionSectionShortSerializer(serializers.ModelSerializer):
     """Получения списка разделов со списком входящих в него вопросов.
     Используется внутри матрешки 'тип вопросов-разделы-список вопросов'"""
+
     questions = QuestionShortSerializer(many=True, read_only=True)
 
     class Meta:

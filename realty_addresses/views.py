@@ -1,39 +1,44 @@
 from django.db.models import Q
 from django_filters.rest_framework import DjangoFilterBackend
-
 from drf_spectacular.utils import extend_schema
-from rest_framework import status
+from rest_framework import generics, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework import generics
 
 from config import constants
 from realty.filters import RealtyFilter
 from realty.models import Realty
 from realty.serializers.serializers_realty import ShortRealtySerializer
-from realty_addresses.serializers import (
-    MapPointsSerializer, MapPointsRequestSerializer,
-    GetAnnouncementsInMapPointRequestSerializer, MetroSerializer)
-from realty_values import models as models_values
-from .models import Metro
 from realty_addresses.filters import MetroFilter
+from realty_addresses.serializers import (
+    GetAnnouncementsInMapPointRequestSerializer,
+    MapPointsRequestSerializer,
+    MapPointsSerializer,
+    MetroSerializer,
+)
+from realty_values import models as models_values
+
+from .models import Metro
 
 
 @extend_schema(
     summary='Получение списка точек на карте с объявлениями',
     description=(
-            'Возвращает список точек с объявлениями в пределах заданного прямоугольника. '
-            'Необходимо указать координаты верхнего левого и нижнего правого углов, '
-            'а также (опционально) параметры для фильтрации.'
+        'Возвращает список точек с объявлениями в пределах заданного прямоугольника. '
+        'Необходимо указать координаты верхнего левого и нижнего правого углов, '
+        'а также (опционально) параметры для фильтрации.'
     ),
     request=MapPointsRequestSerializer,
     responses=MapPointsSerializer(many=True),
 )
 class GetlistMapPointsAPIView(APIView):
-    """ Get list realty's point in map"""
-    queryset = Realty.objects.all().filter(
-        realty_status__status=constants.ADVERTISMENT_STATUS
-    ).order_by('-published_at')
+    """Get list realty's point in map"""
+
+    queryset = (
+        Realty.objects.all()
+        .filter(realty_status__status=constants.ADVERTISMENT_STATUS)
+        .order_by('-published_at')
+    )
     filter_backends = (DjangoFilterBackend,)
     filterset_class = RealtyFilter
 
@@ -47,23 +52,20 @@ class GetlistMapPointsAPIView(APIView):
         bottom_right_longitude = request.data.get('bottom_right_longitude')
 
         # получаем ID статуса объявления со значением Активно
-        realty_status = models_values.RealtyAdvStatus.objects.get(
-            status="Активно").pk
+        realty_status = models_values.RealtyAdvStatus.objects.get(status='Активно').pk
 
         queryset = Realty.objects.filter(
-            Q(address__latitude__gte=bottom_right_latitude) &
-            Q(address__latitude__lte=top_left_latitude) &
-            Q(address__longitude__gte=top_left_longitude) &
-            Q(address__longitude__lte=bottom_right_longitude) &
-            Q(realty_status=realty_status)
+            Q(address__latitude__gte=bottom_right_latitude)
+            & Q(address__latitude__lte=top_left_latitude)
+            & Q(address__longitude__gte=top_left_longitude)
+            & Q(address__longitude__lte=bottom_right_longitude)
+            & Q(realty_status=realty_status)
         )
 
-        filterset = self.filterset_class(
-            request.query_params, queryset=queryset)
+        filterset = self.filterset_class(request.query_params, queryset=queryset)
 
         if not filterset.is_valid():
-            return Response(
-                filterset.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response(filterset.errors, status=status.HTTP_400_BAD_REQUEST)
         queryset = filterset.qs
 
         response_serializer = MapPointsSerializer(queryset, many=True)
@@ -74,24 +76,26 @@ class GetlistMapPointsAPIView(APIView):
 @extend_schema(
     summary='Получение списка объявлений по заданной точке на карте ',
     description=(
-            'Возвращает список объявлений в точке на карте. '
-            'Необходимо указать координаты широты и долготы, '
-            'а также (опционально) параметры для фильтрации.'
+        'Возвращает список объявлений в точке на карте. '
+        'Необходимо указать координаты широты и долготы, '
+        'а также (опционально) параметры для фильтрации.'
     ),
     request=GetAnnouncementsInMapPointRequestSerializer,
     responses=ShortRealtySerializer(many=True),
 )
 class GetListAnnouncementsInMapPoint(APIView):
     """Get List realty in point"""
-    queryset = Realty.objects.all().filter(
-        realty_status__status=constants.ADVERTISMENT_STATUS
-    ).order_by('-published_at')
+
+    queryset = (
+        Realty.objects.all()
+        .filter(realty_status__status=constants.ADVERTISMENT_STATUS)
+        .order_by('-published_at')
+    )
     filter_backends = (DjangoFilterBackend,)
     filterset_class = RealtyFilter
 
     def post(self, request, *args, **kwargs):
-        serializer = GetAnnouncementsInMapPointRequestSerializer(
-            data=request.data)
+        serializer = GetAnnouncementsInMapPointRequestSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
         latitude = request.data.get('latitude')
@@ -99,25 +103,23 @@ class GetListAnnouncementsInMapPoint(APIView):
 
         if latitude is None or longitude is None:
             return Response(
-                {"error": "Пожалуйста, укажите все необходимые данные!"},
-                status=status.HTTP_400_BAD_REQUEST)
+                {'error': 'Пожалуйста, укажите все необходимые данные!'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
 
         # получаем ID статуса объявления со значением Активно
-        realty_status = models_values.RealtyAdvStatus.objects.get(
-            status="Активно").pk
+        realty_status = models_values.RealtyAdvStatus.objects.get(status='Активно').pk
 
         queryset = Realty.objects.filter(
-            Q(address__latitude=latitude) &
-            Q(address__longitude=longitude) &
-            Q(realty_status=realty_status)
+            Q(address__latitude=latitude)
+            & Q(address__longitude=longitude)
+            & Q(realty_status=realty_status)
         )
 
-        filterset = self.filterset_class(
-            request.query_params, queryset=queryset)
+        filterset = self.filterset_class(request.query_params, queryset=queryset)
 
         if not filterset.is_valid():
-            return Response(
-                filterset.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response(filterset.errors, status=status.HTTP_400_BAD_REQUEST)
 
         queryset = filterset.qs
 
@@ -134,12 +136,13 @@ class GetListAnnouncementsInMapPoint(APIView):
         'Поиск осуществляется по частичному совпадению и не чувствителен к регистру. '
         'Возвращает 404, если станции не найдены.'
     ),
-    responses={200: MetroSerializer(many=True), 404: None}
+    responses={200: MetroSerializer(many=True), 404: None},
 )
 class MetroStationsAPIView(generics.ListAPIView):
     """
     API endpoint for retrieving metro stations with optional filtering.
     """
+
     serializer_class = MetroSerializer
     queryset = Metro.objects.select_related('line').all()
     filter_backends = (DjangoFilterBackend,)
@@ -149,8 +152,8 @@ class MetroStationsAPIView(generics.ListAPIView):
         queryset = self.filter_queryset(self.get_queryset())
         if not queryset.exists():
             return Response(
-                {"detail": "Станции метро не найдены."},
-                status=status.HTTP_404_NOT_FOUND
+                {'detail': 'Станции метро не найдены.'},
+                status=status.HTTP_404_NOT_FOUND,
             )
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)

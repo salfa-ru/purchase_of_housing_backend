@@ -1,8 +1,8 @@
 from datetime import datetime
 
 import jwt
-from rest_framework import exceptions, authentication
 from cryptography.hazmat.primitives import serialization
+from rest_framework import authentication, exceptions
 
 from config.constants import ConstantsAuth
 from users.models import User
@@ -34,8 +34,11 @@ class CustomAuthentication(authentication.BaseAuthentication):
 
         user = self._get_user_by_id(token_data['user_id'], token)
 
-        if (token_data.get('updated_at') and
-                user.updated_at.timestamp() != datetime.fromisoformat(token_data.get('updated_at')).timestamp()):
+        if (
+            token_data.get('updated_at')
+            and user.updated_at.timestamp()
+            != datetime.fromisoformat(token_data.get('updated_at')).timestamp()
+        ):
             update_user_from_esa(user, token)
 
         return user, token
@@ -48,10 +51,12 @@ class CustomAuthentication(authentication.BaseAuthentication):
     @staticmethod
     def _check_auth_header(auth_header):
         """Проверка заголовок Authorization"""
-        if (not auth_header
-                or auth_header[0] != ConstantsAuth.AUTH_HEADER_PREFIX
-                or len(auth_header) == 1
-                or len(auth_header) > 2):
+        if (
+            not auth_header
+            or auth_header[0] != ConstantsAuth.AUTH_HEADER_PREFIX
+            or len(auth_header) == 1
+            or len(auth_header) > 2
+        ):
             return None
         return True
 
@@ -60,7 +65,7 @@ class CustomAuthentication(authentication.BaseAuthentication):
         """Проверка токена и получение данных их него
         (id пользователя и дата последнего изменения профиля)"""
 
-        with open(ConstantsAuth.AUTH_KEY_PATH, "rb") as key_file:
+        with open(ConstantsAuth.AUTH_KEY_PATH, 'rb') as key_file:
             public_key = serialization.load_pem_public_key(key_file.read())
         try:
             payload = jwt.decode(
@@ -69,19 +74,21 @@ class CustomAuthentication(authentication.BaseAuthentication):
                 algorithms=['RS256'],
                 audience=ConstantsAuth.TOKEN_AUD,
             )
-        except jwt.ExpiredSignatureError:
+        except jwt.ExpiredSignatureError as err:
             msg = 'Token has expired'
-            raise exceptions.AuthenticationFailed(detail=msg)
-        except jwt.InvalidTokenError:
-            msg = f'Invalid token'
-            raise exceptions.AuthenticationFailed(detail=msg)
+            raise exceptions.AuthenticationFailed(detail=msg) from err
+        except jwt.InvalidTokenError as err:
+            msg = 'Invalid token'
+            raise exceptions.AuthenticationFailed(detail=msg) from err
 
         if not payload.get(ConstantsAuth.PREFIX_USER_ID_IN_TOKEN):
             msg = 'Token does not contain user_id'
             raise exceptions.AuthenticationFailed(detail=msg)
 
-        return {'user_id': payload.get(ConstantsAuth.PREFIX_USER_ID_IN_TOKEN),
-                'updated_at': payload.get(ConstantsAuth.PREFIX_UPDATED_DATE_IN_TOKEN)}
+        return {
+            'user_id': payload.get(ConstantsAuth.PREFIX_USER_ID_IN_TOKEN),
+            'updated_at': payload.get(ConstantsAuth.PREFIX_UPDATED_DATE_IN_TOKEN),
+        }
 
     @staticmethod
     def _get_user_by_id(user_id, token):

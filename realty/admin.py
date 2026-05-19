@@ -1,10 +1,11 @@
 from django.contrib import admin
-
 from django.utils.html import format_html
-from .forms import RealtyForm
-from .models import Realty, Sale, Rent
-from .utils import get_apartment_short_info
+
 from realty_photos.models import RealtyPhoto
+
+from .forms import RealtyForm
+from .models import Realty, Rent, Sale
+from .utils import get_apartment_short_info
 
 
 class RealtyPhotoInline(admin.TabularInline):
@@ -15,12 +16,17 @@ class RealtyPhotoInline(admin.TabularInline):
 
     def photo_id(self, obj):
         return obj.id
+
     photo_id.short_description = 'ID'
 
     def image_tag(self, obj):
         if obj.image:
-            return format_html('<img src="{}" style="max-width:100px; max-height:100px;" />', obj.image.url)
-        return "No Image"
+            return format_html(
+                '<img src="{}" style="max-width:100px; max-height:100px;" />',
+                obj.image.url,
+            )
+        return 'No Image'
+
     image_tag.short_description = 'Image'
 
 
@@ -37,29 +43,32 @@ class RentInline(admin.StackedInline):
 @admin.register(Realty)
 class RealtyAdmin(admin.ModelAdmin):
     form = RealtyForm
-    list_display = ('id',
-                    'apartment',
-                    'address_short',
-                    'owner',
-                    'price',
-                    'trade_type_short',
-                    'realty_status',
-                    'changed_at',
-                    'is_deleted',
-                    'owner_is_deleted')
-    list_display_links = ('id', 'apartment',)
-    list_filter = ('realty_status',
-                   'owner_type',
-                   'is_deleted')
+    list_display = (
+        'id',
+        'apartment',
+        'address_short',
+        'owner',
+        'price',
+        'trade_type_short',
+        'realty_status',
+        'changed_at',
+        'is_deleted',
+        'owner_is_deleted',
+    )
+    list_display_links = (
+        'id',
+        'apartment',
+    )
+    list_filter = ('realty_status', 'owner_type', 'is_deleted')
 
     class Media:
-        """ Отключение кнопок "Сохранить", если никаких изменений еще не внесено """
+        """Отключение кнопок "Сохранить", если никаких изменений еще не внесено"""
+
         js = ('js/disable_save_if_unchanged.js',)
 
-
     def get_readonly_fields(self, request, obj=None):
-        """ Регулируем редактируемость полей для админа/модератора.
-        Хотя в permissions модератор может менять realty, нужно, чтобы можно было менять только Статус """
+        """Регулируем редактируемость полей для админа/модератора.
+        Хотя в permissions модератор может менять realty, нужно, чтобы можно было менять только Статус"""
 
         if request.user.is_superuser:
             # единственные read-only поля для админа:
@@ -67,12 +76,13 @@ class RealtyAdmin(admin.ModelAdmin):
         else:
             # для модератора - все поля read-only, кроме Статуса
             if obj:
-                return [f.name for f in obj._meta.fields if f.name != 'realty_status'] + list(self.readonly_fields)
+                return [
+                    f.name for f in obj._meta.fields if f.name != 'realty_status'
+                ] + list(self.readonly_fields)
             return self.readonly_fields
 
-
     def get_fields(self, request, obj=None):
-        """ Ставим ID и Статус сверху, дату редактирования в конце """
+        """Ставим ID и Статус сверху, дату редактирования в конце"""
 
         # Получаем все поля
         fields = [f.name for f in Realty._meta.fields]
@@ -85,10 +95,9 @@ class RealtyAdmin(admin.ModelAdmin):
         # Возвращаем поля в желаемом, удобном порядке
         return ['id', 'realty_status'] + fields + ['changed_at']
 
-
     def get_form(self, request, obj=None, **kwargs):
-        """ Переписываю форму, чтобы в forms.py можно было узнать, какой пользователь сохранял объявление.
-        Так Админ (но не Модератор) может менять в Realty все что угодно, включая статус БЕЗ ограничений! """
+        """Переписываю форму, чтобы в forms.py можно было узнать, какой пользователь сохранял объявление.
+        Так Админ (но не Модератор) может менять в Realty все что угодно, включая статус БЕЗ ограничений!"""
 
         form_class = super().get_form(request, obj, **kwargs)
 
@@ -99,22 +108,24 @@ class RealtyAdmin(admin.ModelAdmin):
 
         return FormWithRequest
 
-    def owner_is_deleted(self, obj):  # <-- YYY --- Создаем метод для отображения owner.is_deleted
+    def owner_is_deleted(
+        self, obj
+    ):  # <-- YYY --- Создаем метод для отображения owner.is_deleted
         return obj.owner.is_deleted
 
     owner_is_deleted.boolean = True  # <-- YYY --- Отображать как флажок
-    owner_is_deleted.short_description = "Владелец удален"  # <-- YYY --- Задаем описание
-
+    owner_is_deleted.short_description = (
+        'Владелец удален'  # <-- YYY --- Задаем описание
+    )
 
     def apartment(self, obj):
-        """ Выдача инфо о квартире короткой строкой"""
+        """Выдача инфо о квартире короткой строкой"""
         return get_apartment_short_info(obj)
-
 
     def address_short(self, obj):
         return (
-            f"{obj.address.street.name}, "
-            f"{obj.address.house_number}"
+            f'{obj.address.street.name}, '
+            f'{obj.address.house_number}'
             f'{"корп." + obj.address.corpus if obj.address.corpus else ""}'
             f'{"стр." + obj.address.building if obj.address.building else ""}'
             f'{"вл." + obj.address.ownership if obj.address.ownership else ""}'
@@ -123,34 +134,38 @@ class RealtyAdmin(admin.ModelAdmin):
     def trade_type_short(self, obj):
         return obj.trade_type
 
-    apartment.short_description = "Квартира"
-    address_short.short_description = "Адрес"
-    trade_type_short.short_description = "Тип сделки"
+    apartment.short_description = 'Квартира'
+    address_short.short_description = 'Адрес'
+    trade_type_short.short_description = 'Тип сделки'
 
     def get_inlines(self, request, obj=None):
         """Использование inline формы только для уже созданной модели"""
-        inlines = [RealtyPhotoInline] # Always include photo inline
-        if obj and obj.trade_type == "sale":
+        inlines = [RealtyPhotoInline]  # Always include photo inline
+        if obj and obj.trade_type == 'sale':
             inlines.append(SaleInline)
-        elif obj and obj.trade_type == "rent":
+        elif obj and obj.trade_type == 'rent':
             inlines.append(RentInline)
         return inlines
 
 
 @admin.register(Sale)
 class SaleAdmin(admin.ModelAdmin):
-    list_display = ('id',
-                    'realty',
-                    'sales_parameters',)
+    list_display = (
+        'id',
+        'realty',
+        'sales_parameters',
+    )
     list_display_links = ('realty',)
     readonly_fields = ('id',)
 
 
 @admin.register(Rent)
 class RentAdmin(admin.ModelAdmin):
-    list_display = ('id',
-                    'realty',
-                    'rental_features',
-                    'lease_payments',)
+    list_display = (
+        'id',
+        'realty',
+        'rental_features',
+        'lease_payments',
+    )
     list_display_links = ('realty',)
     readonly_fields = ('id',)

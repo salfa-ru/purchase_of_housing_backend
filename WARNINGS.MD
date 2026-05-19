@@ -16,4 +16,4 @@ Operations to perform:
   Apply all migrations: admin, auth, authtoken, chats, complaints, contenttypes, django_q, notifications, questions, realty, realty_addresses, realty_displays, realty_photos, realty_specificities, realty_values, sessions, users
 Running migrations:
   Applying realty_displays.0002_alter_displayinsearch_realty_and_more... OK
-(venv) apple@philippios-imac Realty % 
+(venv) apple@philippios-imac Realty %

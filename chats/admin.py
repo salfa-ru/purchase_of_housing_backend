@@ -1,17 +1,17 @@
 # chats/admin.py
 
 from django.contrib import admin
+from django.forms import ModelForm
 from django.urls import reverse
 from django.utils.html import format_html
-from django.forms import ModelForm
 
-from chats.models import Message, Blocking, Chat
+from chats.models import Blocking, Chat, Message
 
 
 class MessageAdminForm(ModelForm):
-    """ Переопределенная форма, ограничивающая выбор отправителя в сообщениях
+    """Переопределенная форма, ограничивающая выбор отправителя в сообщениях
     --- Отправитель нового сообщения - его создатель
-    --- Запрещено (не суперюзеру) менять отправителя """
+    --- Запрещено (не суперюзеру) менять отправителя"""
 
     class Meta:
         model = Message
@@ -23,22 +23,30 @@ class MessageAdminForm(ModelForm):
 
         ...
         if self.request and not self.request.user.is_superuser:
-            if self.instance.pk:  # Существующая запись - запрет на изменение отправителя!
-                self.fields['user_from'].queryset = self.fields['user_from'].queryset.filter(
-                    id=self.instance.user_from.id
+            if (
+                self.instance.pk
+            ):  # Существующая запись - запрет на изменение отправителя!
+                self.fields['user_from'].queryset = self.fields[
+                    'user_from'
+                ].queryset.filter(id=self.instance.user_from.id)
+                self.fields['user_from'].help_text = (
+                    'У существующего сообщения отправителя менять нельзя.<br>'
+                    "<span style='color: red;'>"
+                    'Хмм, а остальное, получается, можно? </span>'
                 )
-                self.fields['user_from'].help_text = ("У существующего сообщения отправителя менять нельзя.<br>"
-                                                      "<span style='color: red;'>"
-                                                      "Хмм, а остальное, получается, можно? </span>")
 
             else:  # Новая запись - автоматически выбирается текущий пользователь (модератор)
-                self.fields['user_from'].queryset = self.fields['user_from'].queryset.filter(
-                    id=self.request.user.id
-                )
+                self.fields['user_from'].queryset = self.fields[
+                    'user_from'
+                ].queryset.filter(id=self.request.user.id)
                 self.fields['user_from'].initial = self.request.user
-                self.fields['user_from'].help_text = "Новое сообщение можно создать только от своего имени."
+                self.fields[
+                    'user_from'
+                ].help_text = 'Новое сообщение можно создать только от своего имени.'
 
-            self.fields['user_from'].empty_label = None  # запрет на выбор ПУСТОГО отправителя
+            self.fields[
+                'user_from'
+            ].empty_label = None  # запрет на выбор ПУСТОГО отправителя
 
 
 @admin.register(Message)
@@ -55,7 +63,6 @@ class MessageAdmin(admin.ModelAdmin):
         'read_at',
         'is_deleted_from',
         'is_deleted_to',
-
     )
     list_filter = ('chat', 'user_from', 'user_to', 'created_at', 'is_new')
 
@@ -66,11 +73,15 @@ class MessageAdmin(admin.ModelAdmin):
         Creates a clickable link to the object's change form.
         Uses the object's __str__ representation as the link text.
         """
-        url = reverse(f'admin:{obj._meta.app_label}_{obj._meta.model_name}_change', args=[obj.pk])
+        url = reverse(
+            f'admin:{obj._meta.app_label}_{obj._meta.model_name}_change', args=[obj.pk]
+        )
         return format_html('<a href="{}">{}</a>', url, str(obj))  # Safely inject HTML
 
     str_link.short_description = 'Сообщение'  # Optional: Nice column header
-    str_link.admin_order_field = '__str__'    # Optional: Enable sorting (if __str__ is sortable)
+    str_link.admin_order_field = (
+        '__str__'  # Optional: Enable sorting (if __str__ is sortable)
+    )
 
     def get_form(self, request, obj=None, **kwargs):
         admin_form = super().get_form(request, obj, **kwargs)

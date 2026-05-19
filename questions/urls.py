@@ -1,7 +1,11 @@
 from django.urls import path
 
 from questions.apps import QuestionsConfig
-from questions.views import QuestionSectionListAPIView, QuestionSectionRetrieveAPIView, AllQuestionsListAPIView
+from questions.views import (
+    AllQuestionsListAPIView,
+    QuestionSectionListAPIView,
+    QuestionSectionRetrieveAPIView,
+)
 
 app_name = QuestionsConfig.name
 
