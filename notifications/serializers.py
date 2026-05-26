@@ -1,5 +1,3 @@
-from typing import Dict, Optional
-
 from rest_framework import serializers
 
 from notifications.models import Notification, NotificationTemplate
@@ -22,17 +20,22 @@ class NotificationTemplateSerializer(serializers.ModelSerializer):
 class RealtyForNotificationSerializer(serializers.ModelSerializer):
     """Сериализатор информации об объявлении.
     Используется внутри NotificationSerializer."""
-    realty_type = serializers.SlugRelatedField(slug_field='type',
-                                               read_only=True, )
+
+    realty_type = serializers.SlugRelatedField(
+        slug_field='type',
+        read_only=True,
+    )
     number_of_rooms = serializers.CharField(
-        source='about_apartment.number_of_rooms.number_of_rooms')
+        source='about_apartment.number_of_rooms.number_of_rooms'
+    )
     area = serializers.FloatField(source='about_apartment.area')
     floor = serializers.IntegerField(source='about_apartment.floor')
-    floors_number = serializers.IntegerField(
-        source='about_apartment.floors_number')
+    floors_number = serializers.IntegerField(source='about_apartment.floors_number')
 
     realty_status = serializers.IntegerField(source='realty_status_id', read_only=True)
-    realty_status_full = serializers.CharField(source='realty_status.status', read_only=True)
+    realty_status_full = serializers.CharField(
+        source='realty_status.status', read_only=True
+    )
 
     class Meta:
         model = Realty
@@ -52,6 +55,7 @@ class RealtyForNotificationSerializer(serializers.ModelSerializer):
 
 class NotificationSerializer(serializers.ModelSerializer):
     """Notification base serializer"""
+
     realty = RealtyForNotificationSerializer()
 
     # оригинальный сериалайзер, выдающий текст Уведомлений без изменений типа "Ваше объявление №___ опубликовано"
@@ -70,8 +74,9 @@ class NotificationSerializer(serializers.ModelSerializer):
             'is_new',
         ]
 
-    def get_template(self, obj) -> Dict[str, Optional[str]]:  # внутри output-а могут быть строки или ничего
-
+    def get_template(
+        self, obj
+    ) -> dict[str, str | None]:  # внутри output-а могут быть строки или ничего
         # Получаем оригинальные темплейты из стандартного сериализатора
         template_data = NotificationTemplateSerializer(obj.template).data
 
@@ -80,8 +85,9 @@ class NotificationSerializer(serializers.ModelSerializer):
 
         # Вставляем номер объявление вместо подчеркивания - ищем его только в первой части
         if '№___' in template_data['part1']:
-            template_data['part1'] = (template_data['part1'].
-                                      replace('№___', f"№{str(obj.realty.id)} ({realty_brief_info})"))
+            template_data['part1'] = template_data['part1'].replace(
+                '№___', f'№{str(obj.realty.id)} ({realty_brief_info})'
+            )
 
         return template_data
 
@@ -89,7 +95,5 @@ class NotificationSerializer(serializers.ModelSerializer):
 class IdsNotifListSerializer(serializers.Serializer):
     """Сериализатор списка id-шников.
     Используется в множественном удалении и смене статуса"""
-    ids = serializers.ListField(
-        child=serializers.IntegerField(),
-        allow_empty=True
-    )
+
+    ids = serializers.ListField(child=serializers.IntegerField(), allow_empty=True)

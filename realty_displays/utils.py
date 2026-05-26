@@ -1,9 +1,9 @@
-from django.utils import timezone
 from django.db.models import F
+from django.utils import timezone
 
 
 def is_unique_view(request, realty_id, timeout, key):
-    session_key = f"{key}_{realty_id}"
+    session_key = f'{key}_{realty_id}'
     last_viewed = request.session.get(session_key)
 
     if last_viewed:
@@ -36,7 +36,9 @@ def increment_counter(request, realty, model, timeout, key, date=None):
             # Handle duplicates gracefully - get the first one and clean up
             counter = model.objects.filter(realty=realty, date=date).first()
             # Delete other duplicates
-            model.objects.filter(realty=realty, date=date).exclude(id=counter.id).delete()
+            model.objects.filter(realty=realty, date=date).exclude(
+                id=counter.id
+            ).delete()
     else:
         try:
             counter, created = model.objects.get_or_create(realty=realty)

@@ -4,9 +4,9 @@ from rest_framework import serializers
 
 from config import constants
 from realty import models as realty_models
-from realty_values import models as values_models
-from realty_specificities import models as specificities_models
 from realty.serializers import serializers_realty as realty_serializers
+from realty_specificities import models as specificities_models
+from realty_values import models as values_models
 
 
 class SaleReadSerializer(serializers.ModelSerializer):
@@ -27,7 +27,7 @@ class SaleCreateSerializer(realty_serializers.RealtyCreateSerializer):
         realty = super().create(validated_data)
         validated_data['realty'] = realty
 
-        if "sales_parameters" not in validated_data:
+        if 'sales_parameters' not in validated_data:
             housing_type, _ = values_models.HousingType.objects.get_or_create(
                 type=constants.HOUSING_TYPE
             )
@@ -39,13 +39,10 @@ class SaleCreateSerializer(realty_serializers.RealtyCreateSerializer):
                     housing_type=housing_type, sale_type=sale_type
                 )
             )
-            validated_data["sales_parameters"] = sales_parameters
+            validated_data['sales_parameters'] = sales_parameters
 
-        validated_data.pop("owner", None)
-        validated_data = {
-            'realty': realty,
-            'sales_parameters': sales_parameters
-        }
+        validated_data.pop('owner', None)
+        validated_data = {'realty': realty, 'sales_parameters': sales_parameters}
         realty_models.Sale.objects.create(**validated_data)
         return realty
 
@@ -56,15 +53,10 @@ class SaleCreateSerializer(realty_serializers.RealtyCreateSerializer):
         return instance
 
     def to_representation(self, instance):
-
         if isinstance(instance, realty_models.Sale):
-            return SaleReadSerializer(
-                instance
-            ).data
+            return SaleReadSerializer(instance).data
         elif isinstance(instance, realty_models.Realty):
-            return realty_serializers.RealtyBaseSerializer(
-                instance
-            ).data
+            return realty_serializers.RealtyBaseSerializer(instance).data
 
 
 class ShortSaleSerializer(serializers.ModelSerializer):
@@ -74,4 +66,4 @@ class ShortSaleSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = realty_models.Sale
-        fields = ("realty",)
+        fields = ('realty',)

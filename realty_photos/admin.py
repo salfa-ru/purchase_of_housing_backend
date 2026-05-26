@@ -6,7 +6,11 @@ from realty_photos.models import RealtyPhoto
 
 @admin.register(RealtyPhoto)
 class RealtyPhotoAdmin(admin.ModelAdmin):
-    list_display = ('preview', 'filename', 'realty',)
+    list_display = (
+        'preview',
+        'filename',
+        'realty',
+    )
 
     fields = [
         'realty',

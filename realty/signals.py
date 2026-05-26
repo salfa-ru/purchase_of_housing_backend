@@ -1,18 +1,18 @@
-from django.dispatch import receiver
 from django.db.models.signals import pre_save
+from django.dispatch import receiver
 from django.utils import timezone
 from django_q.tasks import Schedule
 
-from realty.models import Realty
+from config.constants import MAX_LISTING_DURATION
+
 # from realty_values import models as values_models
 from notifications.utils import create_notification
-
-from config.constants import MAX_LISTING_DURATION
+from realty.models import Realty
 
 # TODO - Вопрос о целесообразности использования сигналов:
 
-""" Из документации Django:  SIGNALS CAN MAKE YOUR CODE HARDER TO MAINTAIN. 
-Consider implementing a helper method on a custom manager, to both update your models 
+""" Из документации Django:  SIGNALS CAN MAKE YOUR CODE HARDER TO MAINTAIN.
+Consider implementing a helper method on a custom manager, to both update your models
 and perform additional logic, or else overriding model methods before using model signals"""
 
 # TODO - Сохранение объявления - ДОБАВИТЬ ОПОВЕЩЕНИЕ ДЛЯ УДАЛЕНИЯ ОБЪЯВЛЕНИЯ
@@ -20,10 +20,10 @@ and perform additional logic, or else overriding model methods before using mode
 
 @receiver(pre_save, sender=Realty)
 def handle_realty_save(sender, instance, **kwargs):
-    """ Обработка сохранения объявления:
+    """Обработка сохранения объявления:
     - установка статуса "на модерации" новому объявлению
     - создание уведомлений при смене статусов
-    - создание задач для django q2 на деактивацию объявлений """
+    - создание задач для django q2 на деактивацию объявлений"""
 
     if hasattr(instance, '_pre_save_in_progress'):
         return  # Предотвращаем рекурсию
@@ -33,9 +33,8 @@ def handle_realty_save(sender, instance, **kwargs):
     is_new = instance.id is None
 
     if is_new:
-
-        """ 
-        Логика перенесена в serializers - во избежание двойного сохранения записи 
+        """
+        Логика перенесена в serializers - во избежание двойного сохранения записи
         # Новое объявление - устанавливаем статус 'На модерации'
         instance.realty_status = values_models.RealtyAdvStatus.objects.get(id=2)
         instance.save()  # Сохраняем, чтобы получить id
@@ -62,14 +61,15 @@ def handle_realty_save(sender, instance, **kwargs):
         new_is_deleted = instance.is_deleted
 
         if old_is_deleted != new_is_deleted and new_is_deleted is True:
-            create_notification(instance, "deleted")
-            Schedule.objects.filter(func="realty.tasks.expire_realty", args=instance.id).delete()
-            print("Deleted, sent message to Host about it")
+            create_notification(instance, 'deleted')
+            Schedule.objects.filter(
+                func='realty.tasks.expire_realty', args=instance.id
+            ).delete()
+            print('Deleted, sent message to Host about it')
 
         ...
 
         if new_status != old_status:
-
             """ СОЗДАНИЕ ИЛИ УДАЛЕНИЕ ЗАДАЧ НА ДЕАКТИВАЦИЮ ОБЪЯВЛЕНИЯ"""
 
             # Объявление Активировано
@@ -79,11 +79,11 @@ def handle_realty_save(sender, instance, **kwargs):
 
                 # Планируем время деактивации (создаем запись в таблице Django_Q)
                 Schedule.objects.create(
-                    func="realty.tasks.expire_realty",
-                    name=f"Deactivation of Realty #{instance.id}",
+                    func='realty.tasks.expire_realty',
+                    name=f'Deactivation of Realty #{instance.id}',
                     args=instance.id,  # записываем туда id объявления
                     schedule_type=Schedule.ONCE,
-                    next_run=timezone.now() + MAX_LISTING_DURATION
+                    next_run=timezone.now() + MAX_LISTING_DURATION,
                 )
 
             # Объявление Деактивировано
@@ -92,33 +92,37 @@ def handle_realty_save(sender, instance, **kwargs):
 
                 # Удаляем запланированную деактивацию из Django_Q,
                 # иначе объявление, активированное еще раз, отключится по старому графику
-                Schedule.objects.filter(func="realty.tasks.expire_realty", args=instance.id).delete()
+                Schedule.objects.filter(
+                    func='realty.tasks.expire_realty', args=instance.id
+                ).delete()
 
-            print(f"DEBUG - realty/signals.py - handle_realty_save() - @pre_save")
-            print(f"        Статус realty #{instance.id}: '{old_status.status}' --> '{new_status.status}'.")
+            print('DEBUG - realty/signals.py - handle_realty_save() - @pre_save')
+            print(
+                f"        Статус realty #{instance.id}: '{old_status.status}' --> '{new_status.status}'."
+            )
 
             """ ОТПРАВКА УВЕДОМЛЕНИЙ """
 
             if new_status.id == 1:  # стало Активно
-                create_notification(instance, "published")
+                create_notification(instance, 'published')
 
             elif new_status.id == 2:  # ушло на Модерацию
-                create_notification(instance, "on_moderation")
+                create_notification(instance, 'on_moderation')
 
-            elif new_status.id == 3:      # ОТКЛОНЕНО:
-                if old_status.id == 1:    # было активно, но заблокировано Админом
-                    create_notification(instance, "blocked")
+            elif new_status.id == 3:  # ОТКЛОНЕНО:
+                if old_status.id == 1:  # было активно, но заблокировано Админом
+                    create_notification(instance, 'blocked')
                 elif old_status.id == 2:  # было на модерации, но отклонено Админом
-                    create_notification(instance, "rejected")
+                    create_notification(instance, 'rejected')
 
             """ НОВОЕ - Перенесено в Архив из Модерации"""
             if new_status.id == 4:  # стало в Архиве
                 if old_status.id == 2:  # было на Модерации
-                    create_notification(instance, "archived")
+                    create_notification(instance, 'archived')
 
-            """ ВНИМАНИЕ! Уведомления о переносе АКТИВНЫХ объявлений В АРХИВ 
-            отправляются только при истечении срока публикации деактивирующей функцией из tasks.py. 
-            При ручном переносе объявлений в архив уведомления не отправляются. 
+            """ ВНИМАНИЕ! Уведомления о переносе АКТИВНЫХ объявлений В АРХИВ
+            отправляются только при истечении срока публикации деактивирующей функцией из tasks.py.
+            При ручном переносе объявлений в архив уведомления не отправляются.
             elif new_status.id == 4:
                 create_notification(instance, "expired")
             """

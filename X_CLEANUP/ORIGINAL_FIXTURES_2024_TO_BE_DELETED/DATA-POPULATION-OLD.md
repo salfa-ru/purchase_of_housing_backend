@@ -7,11 +7,11 @@
 python manage.py loaddata data.json
 ```
 ### Вариант 2
-Грузим данные со значениями (values, questions, шаблоны в notifications) 
+Грузим данные со значениями (values, questions, шаблоны в notifications)
 ```
 python manage.py loaddata data_values.json
 ```
-Грузим все остальные данные 
+Грузим все остальные данные
 ```
 python manage.py loaddata data_other.json
 ```
@@ -25,4 +25,3 @@ python manage.py loaddata data_other.json
 # Сейчас все эти значения <br>рассортированы и разложены в папке Z_DATA - <br>в каждом json – данные одной таблицы
 ### По хорошему, нужно бы почистить эти старые джейсоны.
 Также в скором возникнет проблема - как дополнять станции метро, нехватающие Округа/районы и даже города
-

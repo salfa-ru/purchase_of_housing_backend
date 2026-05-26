@@ -1,11 +1,11 @@
-from rest_framework import serializers
 from django.core import validators
 from django.core.exceptions import ValidationError
+from rest_framework import serializers
 
+from config import constants
 from realty_specificities import models as spec_models
 from realty_values import models as values_models
 from realty_values import serializers as values_serializers
-from config import constants
 
 
 class AboutBuildingSerializer(serializers.ModelSerializer):
@@ -15,11 +15,10 @@ class AboutBuildingSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = spec_models.AboutBuilding
-        fields = "__all__"
+        fields = '__all__'
 
 
 class AboutBuildingCreateSerializer(serializers.ModelSerializer):
-
     type = serializers.PrimaryKeyRelatedField(
         queryset=values_models.BuildingType.objects.all(),
         required=False,
@@ -27,7 +26,7 @@ class AboutBuildingCreateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = spec_models.AboutBuilding
-        fields = "__all__"
+        fields = '__all__'
 
 
 class AboutApartmentSerializer(serializers.ModelSerializer):
@@ -37,7 +36,7 @@ class AboutApartmentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = spec_models.AboutApartment
-        fields = "__all__"
+        fields = '__all__'
 
 
 class AboutApartmentCreateSerializer(serializers.ModelSerializer):
@@ -55,15 +54,21 @@ class AboutApartmentCreateSerializer(serializers.ModelSerializer):
         ],
     )
     floor = serializers.IntegerField(
-        validators=(validators.MinValueValidator(constants.MIN_FLOOR),
-                    validators.MaxValueValidator(constants.MAX_FLOOR)))
+        validators=(
+            validators.MinValueValidator(constants.MIN_FLOOR),
+            validators.MaxValueValidator(constants.MAX_FLOOR),
+        )
+    )
     floors_number = serializers.IntegerField(
-        validators=(validators.MinValueValidator(constants.MIN_FLOOR),
-                    validators.MaxValueValidator(constants.MAX_FLOOR)))
+        validators=(
+            validators.MinValueValidator(constants.MIN_FLOOR),
+            validators.MaxValueValidator(constants.MAX_FLOOR),
+        )
+    )
 
     class Meta:
         model = spec_models.AboutApartment
-        fields = "__all__"
+        fields = '__all__'
 
     def validate(self, data):
         floor = data.get('floor')
@@ -97,7 +102,7 @@ class CommonCharacteristicsCreateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = spec_models.CommonCharacteristics
-        fields = "__all__"
+        fields = '__all__'
 
 
 class CommonCharacteristicsSerializer(serializers.ModelSerializer):
@@ -108,7 +113,7 @@ class CommonCharacteristicsSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = spec_models.CommonCharacteristics
-        fields = "__all__"
+        fields = '__all__'
 
 
 class RentalFeaturesSerilalizer(serializers.ModelSerializer):
@@ -116,7 +121,7 @@ class RentalFeaturesSerilalizer(serializers.ModelSerializer):
 
     class Meta:
         model = spec_models.RentalFeatures
-        fields = "__all__"
+        fields = '__all__'
 
 
 class LeasePaymentsCreateSerializer(serializers.ModelSerializer):
@@ -136,14 +141,12 @@ class LeasePaymentsCreateSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = spec_models.LeasePayments
-        fields = "__all__"
+        fields = '__all__'
 
     def validate_deposit(self, value):
         """Deposit value check."""
         if value < 0:
-            raise serializers.ValidationError(
-                "Залог не может быть отрицательным."
-            )
+            raise serializers.ValidationError('Залог не может быть отрицательным.')
         return value
 
 
@@ -155,7 +158,7 @@ class LeasePaymentsSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = spec_models.LeasePayments
-        fields = "__all__"
+        fields = '__all__'
 
 
 class SalesParametersSerializer(serializers.ModelSerializer):
@@ -166,7 +169,7 @@ class SalesParametersSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = spec_models.SalesParameters
-        fields = "__all__"
+        fields = '__all__'
 
 
 class RentalFeaturesSerializer(serializers.ModelSerializer):
@@ -175,7 +178,13 @@ class RentalFeaturesSerializer(serializers.ModelSerializer):
     class Meta:
         model = spec_models.RentalFeatures
         fields = [
-            'fridge', 'internet', 'conditioner', 'tv',
-            'dishwasher', 'washing_machine', 'garbage_chute',
-            'kids_allowed', 'animals_allowed'
+            'fridge',
+            'internet',
+            'conditioner',
+            'tv',
+            'dishwasher',
+            'washing_machine',
+            'garbage_chute',
+            'kids_allowed',
+            'animals_allowed',
         ]

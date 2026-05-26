@@ -1,13 +1,11 @@
-from datetime import datetime
 import hashlib
+from datetime import datetime
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
-
 from rest_framework_simplejwt.settings import api_settings
-from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.token_blacklist.models import OutstandingToken
-
+from rest_framework_simplejwt.tokens import RefreshToken
 
 User = get_user_model()
 
@@ -42,28 +40,18 @@ def update_token_field(request, response):
     try:
         username = request.data.get('username')
         user_id = User.objects.get(username=username).id
-    except:
-        user_id = refresh_token_obj.payload.get(
-            api_settings.USER_ID_CLAIM,
-            None
-        )
-    OutstandingToken.objects.filter(
-        user_id=user_id,
-        token=refresh_token
-    ).update(token=refresh_token_hash)
+    except User.DoesNotExist:
+        user_id = refresh_token_obj.payload.get(api_settings.USER_ID_CLAIM, None)
+    OutstandingToken.objects.filter(user_id=user_id, token=refresh_token).update(
+        token=refresh_token_hash
+    )
     if access_token and refresh_token:
-        response = set_jwt_cookies(
-            request,
-            response,
-            refresh_token
-        )
+        response = set_jwt_cookies(request, response, refresh_token)
     return response
 
 
 def delete_expired_tokens():
     """Удаляет записи устаревших хэшов токенов из базы данных."""
-    expired_hash_tokens = OutstandingToken.objects.filter(
-        expires_at__lt=datetime.now()
-    )
+    expired_hash_tokens = OutstandingToken.objects.filter(expires_at__lt=datetime.now())
     if expired_hash_tokens.exists():
         expired_hash_tokens.delete()

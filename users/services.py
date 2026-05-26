@@ -1,6 +1,6 @@
 import requests
-
 from rest_framework import exceptions
+
 from config.constants import ConstantsAuth
 from users.models import User
 
@@ -46,10 +46,10 @@ def get_profile_from_esa(token):
         responce = requests.get(ConstantsAuth.URL_GET_PROFILE, headers=headers)
     except requests.exceptions.RequestException as e:
         msg = f'In ESA profile RequestException: {e}'
-        raise exceptions.AuthenticationFailed(detail=msg)
+        raise exceptions.AuthenticationFailed(detail=msg) from e
 
     if not check_esa_fields(responce.json()):
-        msg = f'In ESA profile wrong fields'
+        msg = 'In ESA profile wrong fields'
         raise exceptions.AuthenticationFailed(detail=msg)
 
     return responce.json()
@@ -59,9 +59,11 @@ def check_esa_fields(user_data):
     """Проверяем, что при получении профиля все поля пришли из ЕСА"""
 
     # TODO добавить login, когда появится в ЕСА
-    return (user_data.get('email')
-            and user_data.get('first_name')
-            and user_data.get('last_name')
-            and user_data.get('phone')
-            and user_data.get('email')
-            and user_data.get('updated_at'))
+    return (
+        user_data.get('email')
+        and user_data.get('first_name')
+        and user_data.get('last_name')
+        and user_data.get('phone')
+        and user_data.get('email')
+        and user_data.get('updated_at')
+    )

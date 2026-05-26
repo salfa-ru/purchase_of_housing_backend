@@ -1,22 +1,23 @@
 from datetime import datetime
 
-from django.core.validators import FileExtensionValidator
 from django.core.exceptions import ValidationError
+from django.core.validators import FileExtensionValidator
 from rest_framework import serializers
 
-from config.constants import IMAGE_EXTENSIONS, MAX_AVATAR_SIZE
+from config.constants import IMAGE_EXTENSIONS
 from users.models import User, validate_avatar_size
 
 
 class UserBaseSerializer(serializers.ModelSerializer):
     """Базовый сериализатор для профиля (retrieve, put, patch)."""
+
     avatar = serializers.ImageField(
         required=False,
         # если нужно иметь возможность удалить аватар, добавить allow_null=True,
         validators=[
             FileExtensionValidator(allowed_extensions=IMAGE_EXTENSIONS),
-            validate_avatar_size
-        ]
+            validate_avatar_size,
+        ],
     )
 
     def to_internal_value(self, data):
@@ -46,31 +47,45 @@ class UserBaseSerializer(serializers.ModelSerializer):
             'is_deleted': {'default': False},
         }
 
-    def validate(self, data):  # <---xxx--- Добавляем валидацию на уникальность email и phone number
+    def validate(
+        self, data
+    ):  # <---xxx--- Добавляем валидацию на уникальность email и phone number
         """
         Проверяет, что email и phone_number не принадлежат удаленным пользователям.
         """
         email = data.get('email', getattr(self.instance, 'email', None))
-        phone_number = data.get('phone_number', getattr(self.instance, 'phone_number', None))
+        phone_number = data.get(
+            'phone_number', getattr(self.instance, 'phone_number', None)
+        )
 
         if email:
-            existing_user_email = User.objects.filter(email=email, is_deleted=True).first()
-            if existing_user_email and (not self.instance or self.instance != existing_user_email):
+            existing_user_email = User.objects.filter(
+                email=email, is_deleted=True
+            ).first()
+            if existing_user_email and (
+                not self.instance or self.instance != existing_user_email
+            ):
                 raise ValidationError(
-                    "Пользователь с таким адресом электронной почты уже существует и удален, обратитесь в поддержку для восстановления аккаунта или введите другой имейл.")
+                    'Пользователь с таким адресом электронной почты уже существует и удален, обратитесь в поддержку для восстановления аккаунта или введите другой имейл.'
+                )
 
         if phone_number:
-            existing_user_phone = User.objects.filter(phone_number=phone_number, is_deleted=True).first()
-            if existing_user_phone and (not self.instance or self.instance != existing_user_phone):
+            existing_user_phone = User.objects.filter(
+                phone_number=phone_number, is_deleted=True
+            ).first()
+            if existing_user_phone and (
+                not self.instance or self.instance != existing_user_phone
+            ):
                 raise ValidationError(
-                    "Пользователь с таким номером телефона уже существует и удален, обратитесь в поддержку для восстановления аккаунта или введите другой номер телефона.")
+                    'Пользователь с таким номером телефона уже существует и удален, обратитесь в поддержку для восстановления аккаунта или введите другой номер телефона.'
+                )
 
         return data
 
 
 class UserSelfProfileSerializer(UserBaseSerializer):
     """Используется для полного обновления профиля,
-     для 'своих' пользователей."""
+    для 'своих' пользователей."""
 
     class Meta(UserBaseSerializer.Meta):
         fields = UserBaseSerializer.Meta.fields + [
@@ -79,8 +94,7 @@ class UserSelfProfileSerializer(UserBaseSerializer):
         extra_kwargs_add = {
             'password': {'write_only': True},
         }
-        extra_kwargs = {**UserBaseSerializer.Meta.extra_kwargs,
-                        **extra_kwargs_add}
+        extra_kwargs = {**UserBaseSerializer.Meta.extra_kwargs, **extra_kwargs_add}
 
 
 class UserFullSerializer(UserSelfProfileSerializer):
@@ -105,13 +119,15 @@ class UserFullSerializer(UserSelfProfileSerializer):
             'date_joined': {'read_only': True},
             'phone_qr_code': {'read_only': True},
         }
-        extra_kwargs = {**UserSelfProfileSerializer.Meta.extra_kwargs,
-                        **extra_kwargs_add}
+        extra_kwargs = {
+            **UserSelfProfileSerializer.Meta.extra_kwargs,
+            **extra_kwargs_add,
+        }
 
 
 class UserESAProfileSerializer(UserBaseSerializer):
     """Используется для частичного обновления профиля,
-     для пользователей из ЕСА."""
+    для пользователей из ЕСА."""
 
     class Meta(UserBaseSerializer.Meta):
         extra_kwargs_add = {
@@ -120,8 +136,7 @@ class UserESAProfileSerializer(UserBaseSerializer):
             'email': {'read_only': True},
             'phone_number': {'read_only': True},
         }
-        extra_kwargs = {**UserBaseSerializer.Meta.extra_kwargs,
-                        **extra_kwargs_add}
+        extra_kwargs = {**UserBaseSerializer.Meta.extra_kwargs, **extra_kwargs_add}
 
 
 class UserPersonalAccountSerializer(serializers.ModelSerializer):
@@ -155,8 +170,8 @@ class UserNewMsgsSerializer(serializers.ModelSerializer):
 
     def get_have_new_msgs(self, instance) -> bool:
         return bool(
-            instance.messages_received.filter(is_new=True).count() +
-            instance.notifications.filter(is_new=True).count()
+            instance.messages_received.filter(is_new=True).count()
+            + instance.notifications.filter(is_new=True).count()
         )
 
     class Meta:
@@ -173,14 +188,15 @@ class UserDataSerializer(UserBaseSerializer):
     registered_for = serializers.SerializerMethodField()
 
     class Meta(UserBaseSerializer.Meta):
-        fields = ('id',
-                  'first_name',
-                  'last_name',
-                  'registered_for',
-                  'avatar',
-                  "phone_number",
-                  "phone_qr_code",
-                  )
+        fields = (
+            'id',
+            'first_name',
+            'last_name',
+            'registered_for',
+            'avatar',
+            'phone_number',
+            'phone_qr_code',
+        )
 
     def get_registered_for(self, obj) -> str:
         now = datetime.now()
@@ -225,11 +241,7 @@ class UserContactsSerializer(UserBaseSerializer):
     """Сериализатор для отображения карточки контактов."""
 
     class Meta(UserBaseSerializer.Meta):
-        fields = ('id',
-                  'phone_number',
-                  'first_name',
-                  'phone_qr_code'
-                  )
+        fields = ('id', 'phone_number', 'first_name', 'phone_qr_code')
 
 
 # ========== СМЕНА НОМЕРА ТЕЛЕФОНА ==========
@@ -238,8 +250,9 @@ class ChangePhoneSerializer(serializers.Serializer):
 
     def validate_new_phone_number(self, value):
         from users.models import User
+
         if User.objects.filter(phone_number=value).exists():
-            raise serializers.ValidationError("Этот номер телефона уже используется.")
+            raise serializers.ValidationError('Этот номер телефона уже используется.')
         return value
 
     def save(self, **kwargs):

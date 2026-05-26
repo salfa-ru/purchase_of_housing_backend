@@ -1,7 +1,7 @@
 from datetime import timedelta
+
 from django.db.models import Sum
 from django.utils import timezone
-
 from rest_framework import serializers
 
 
@@ -25,11 +25,18 @@ class CounterViewsSerializer(serializers.Serializer):
         last_30_days = timezone.now() - timedelta(days=29)
 
         views_30_days = instance.display_full_info.filter(
-            date__gte=last_30_days).aggregate(total=Sum('count'))['total']
-        representation['full_views_in_30_days'] = views_30_days if views_30_days is not None else None
+            date__gte=last_30_days
+        ).aggregate(total=Sum('count'))['total']
+        representation['full_views_in_30_days'] = (
+            views_30_days if views_30_days is not None else None
+        )
 
         today = timezone.now().date()
-        views_today = instance.display_full_info.filter(date=today).aggregate(total=Sum('count'))['total']
-        representation['full_views_today'] = views_today if views_today is not None else None
+        views_today = instance.display_full_info.filter(date=today).aggregate(
+            total=Sum('count')
+        )['total']
+        representation['full_views_today'] = (
+            views_today if views_today is not None else None
+        )
 
         return representation

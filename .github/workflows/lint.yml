@@ -1,0 +1,31 @@
+﻿name: Code Quality
+
+on:
+  push:
+    branches: [ dev ] # Когда пушат в dev
+  pull_request:
+    branches: [ dev ] # Когда создают PR в dev
+
+
+jobs:
+  ruff:
+    name: Ruff Linter  # Название задачи
+    runs-on: ubuntu-latest # На какой ОС запускать
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4 # Скачать код
+
+      - name: Setup Python
+        uses: actions/setup-python@v5 # Установить Python
+        with:
+          python-version: '3.11' # Версия 3.11
+
+      - name: Install ruff
+        run: pip install ruff==0.4.4  # Установить ruff
+
+      - name: Run ruff linter
+        run: ruff check . --output-format=github  # Проверить стиль
+
+      - name: Check formatting
+        run: ruff format --check . # Проверить форматирование

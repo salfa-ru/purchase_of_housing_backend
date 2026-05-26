@@ -1,4 +1,4 @@
-from django.core.validators import MinValueValidator, MaxValueValidator
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
 from config import constants
@@ -7,85 +7,77 @@ from config import constants
 class City(models.Model):
     """City model."""
 
-    name = models.CharField(
-        max_length=constants.CHAR_LENGTH, verbose_name="Город"
-    )
+    name = models.CharField(max_length=constants.CHAR_LENGTH, verbose_name='Город')
 
     class Meta:
-        ordering = ["name"]
-        verbose_name = "Город"
-        verbose_name_plural = "Города"
+        ordering = ['name']
+        verbose_name = 'Город'
+        verbose_name_plural = 'Города'
 
     def __str__(self):
-        return f"{self.name}"
+        return f'{self.name}'
 
 
 class District(models.Model):
     """District model."""
 
-    name = models.CharField(
-        max_length=constants.CHAR_LENGTH, verbose_name="Округ"
-    )
+    name = models.CharField(max_length=constants.CHAR_LENGTH, verbose_name='Округ')
 
     class Meta:
-        ordering = ["name"]
-        verbose_name = "Округ"
-        verbose_name_plural = "Округа"
+        ordering = ['name']
+        verbose_name = 'Округ'
+        verbose_name_plural = 'Округа'
 
     def __str__(self):
-        return f"{self.name}"
+        return f'{self.name}'
 
 
 class Zone(models.Model):
     """Zone model."""
 
-    name = models.CharField(
-        max_length=constants.CHAR_LENGTH, verbose_name="Район"
-    )
+    name = models.CharField(max_length=constants.CHAR_LENGTH, verbose_name='Район')
 
     class Meta:
-        ordering = ["name"]
-        verbose_name = "Район"
-        verbose_name_plural = "Районы"
+        ordering = ['name']
+        verbose_name = 'Район'
+        verbose_name_plural = 'Районы'
 
     def __str__(self):
-        return f"{self.name}"
+        return f'{self.name}'
 
 
 class Street(models.Model):
     """Street model."""
 
-    name = models.CharField(
-        max_length=constants.CHAR_LENGTH, verbose_name="Улица"
-    )
+    name = models.CharField(max_length=constants.CHAR_LENGTH, verbose_name='Улица')
     zone = models.ForeignKey(
         Zone,
-        verbose_name="Район",
+        verbose_name='Район',
         on_delete=models.PROTECT,
-        related_name="streets",
+        related_name='streets',
         **constants.NULLABLE_FIELD,
     )
     district = models.ForeignKey(
         District,
-        verbose_name="Округ",
+        verbose_name='Округ',
         on_delete=models.PROTECT,
-        related_name="streets",
+        related_name='streets',
         **constants.NULLABLE_FIELD,
     )
     city = models.ForeignKey(
         City,
-        verbose_name="Город",
+        verbose_name='Город',
         on_delete=models.PROTECT,
-        related_name="streets",
+        related_name='streets',
     )
 
     class Meta:
-        ordering = ["name"]
-        verbose_name = "Улица"
-        verbose_name_plural = "Улицы"
+        ordering = ['name']
+        verbose_name = 'Улица'
+        verbose_name_plural = 'Улицы'
 
     def __str__(self):
-        return f"{self.name}, {self.zone}, {self.district}, {self.city}"
+        return f'{self.name}, {self.zone}, {self.district}, {self.city}'
 
 
 class MetroLine(models.Model):
@@ -93,32 +85,36 @@ class MetroLine(models.Model):
     Metro Line model.
     Хранит информацию о линиях метро.
     """
+
     id = models.IntegerField(primary_key=True)
 
     line_id = models.CharField(
         max_length=10,
         unique=True,
-        verbose_name="Идентификатор линии",
-        help_text="Привычный код станции (например, '1', '8A', 'D1')"
+        verbose_name='Идентификатор линии',
+        help_text="Привычный код станции (например, '1', '8A', 'D1')",
     )
-    name = models.CharField(max_length=150, verbose_name="Название линии")
-    name_full = models.CharField(max_length=150, verbose_name="Полное Название линии")
+    name = models.CharField(max_length=150, verbose_name='Название линии')
+    name_full = models.CharField(max_length=150, verbose_name='Полное Название линии')
 
-    city = models.CharField(max_length=50, verbose_name="Город", default="Москва")
+    city = models.CharField(max_length=50, verbose_name='Город', default='Москва')
 
-    color = models.CharField(max_length=6, verbose_name="Цвет линии (HEX)",
-                                 help_text="Шестнадцатеричный код цвета без '#'")
+    color = models.CharField(
+        max_length=6,
+        verbose_name='Цвет линии (HEX)',
+        help_text="Шестнадцатеричный код цвета без '#'",
+    )
 
     class Meta:
-        ordering = ["name"]
-        verbose_name = "Линия метро"
-        verbose_name_plural = "Линии метро"
+        ordering = ['name']
+        verbose_name = 'Линия метро'
+        verbose_name_plural = 'Линии метро'
 
     def __str__(self):
         if self.name != self.name_full:
-            return f"{self.name_full} ({self.name}) ({self.line_id})"
+            return f'{self.name_full} ({self.name}) ({self.line_id})'
         else:
-            return f"{self.name_full} ({self.line_id})"
+            return f'{self.name_full} ({self.line_id})'
 
 
 class Metro(models.Model):
@@ -127,110 +123,104 @@ class Metro(models.Model):
     """
 
     id = models.IntegerField(primary_key=True)
-    name = models.CharField(
-        max_length=150,
-        verbose_name="Название станции (краткое)"
-    )
+    name = models.CharField(max_length=150, verbose_name='Название станции (краткое)')
     name_full = models.CharField(
         max_length=250,
-        verbose_name="Полное название станции",
+        verbose_name='Полное название станции',
         help_text="Например, 'Авиамоторная (D3)'",
         # TODO - Нужно позже удалить:
-        default=""
+        default='',
     )
     line = models.ForeignKey(
         MetroLine,
         on_delete=models.CASCADE,
         related_name='stations',
-        verbose_name="Линия метро",
+        verbose_name='Линия метро',
         # TODO - Нужно позже удалить:
-        default=1  # По умолчанию устанавливаем значение 1 - только для успешной миграции!
-
+        default=1,  # По умолчанию устанавливаем значение 1 - только для успешной миграции!
     )
-    latitude = models.FloatField(verbose_name="Широта", null=True, blank=True)
-    longitude = models.FloatField(verbose_name="Долгота", null=True, blank=True)
-    is_closed = models.BooleanField(null=True, blank=True, verbose_name="Станция закрыта")
+    latitude = models.FloatField(verbose_name='Широта', null=True, blank=True)
+    longitude = models.FloatField(verbose_name='Долгота', null=True, blank=True)
+    is_closed = models.BooleanField(
+        null=True, blank=True, verbose_name='Станция закрыта'
+    )
 
     class Meta:
-        ordering = ["name", "line__id"]
-        verbose_name = "Станция метро"
-        verbose_name_plural = "Станции метро"
+        ordering = ['name', 'line__id']
+        verbose_name = 'Станция метро'
+        verbose_name_plural = 'Станции метро'
 
     def __str__(self):
         # Используем name_full, так как оно более информативно
-        return f"{self.name_full}"
+        return f'{self.name_full}'
 
 
 class Address(models.Model):
     """Address model."""
 
     house_number = models.CharField(
-        max_length=constants.CHAR_LENGTH,
-        verbose_name="Номер дома"
+        max_length=constants.CHAR_LENGTH, verbose_name='Номер дома'
     )
     street = models.ForeignKey(
         Street,
-        verbose_name="Улица",
+        verbose_name='Улица',
         on_delete=models.PROTECT,
-        related_name="addresses",
+        related_name='addresses',
         **constants.NULLABLE_FIELD,  # не забыть вернуть к обязательному!
     )
     corpus = models.CharField(
         max_length=constants.CHAR_LENGTH,
-        verbose_name="Корпус",
+        verbose_name='Корпус',
         **constants.NULLABLE_FIELD,
     )
     building = models.CharField(
         max_length=constants.CHAR_LENGTH,
-        verbose_name="Строение",
+        verbose_name='Строение',
         **constants.NULLABLE_FIELD,
     )
     ownership = models.CharField(
         max_length=constants.CHAR_LENGTH,
-        verbose_name="Владение",
+        verbose_name='Владение',
         **constants.NULLABLE_FIELD,
     )
-    latitude = models.FloatField(
-        verbose_name='Широта'
-    )
-    longitude = models.FloatField(
-        verbose_name='Долгота'
-    )
+    latitude = models.FloatField(verbose_name='Широта')
+    longitude = models.FloatField(verbose_name='Долгота')
     metro = models.ForeignKey(
         Metro,
-        verbose_name="Метро",
+        verbose_name='Метро',
         on_delete=models.PROTECT,
-        related_name="addresses",
+        related_name='addresses',
         **constants.NULLABLE_FIELD,
     )
     minutes_to_metro = models.PositiveSmallIntegerField(
-        verbose_name="Минут до метро",
+        verbose_name='Минут до метро',
         **constants.NULLABLE_FIELD,
         validators=[
             MinValueValidator(
                 constants.MIN_TIME,
-                message='Минимальное время не может быть меньше 1 минуты!'),
+                message='Минимальное время не может быть меньше 1 минуты!',
+            ),
             MaxValueValidator(
                 constants.MAX_TIME,
-                message='Минимальное время не может быть больше 60 минут!'
-            )
-        ]
+                message='Минимальное время не может быть больше 60 минут!',
+            ),
+        ],
     )
 
     class Meta:
-        ordering = ["street"]
-        verbose_name = "Адрес"
-        verbose_name_plural = "Адреса"
+        ordering = ['street']
+        verbose_name = 'Адрес'
+        verbose_name_plural = 'Адреса'
 
     def __str__(self):
         return (
-            f"{self.street}, "
-            f"{self.house_number}, "
-            f"{self.corpus}, "
-            f"{self.building}, "
-            f"{self.ownership}, "
-            f"{self.latitude}, "
-            f"{self.longitude}, "
-            f"{self.metro}, "
-            f"{self.minutes_to_metro}"
+            f'{self.street}, '
+            f'{self.house_number}, '
+            f'{self.corpus}, '
+            f'{self.building}, '
+            f'{self.ownership}, '
+            f'{self.latitude}, '
+            f'{self.longitude}, '
+            f'{self.metro}, '
+            f'{self.minutes_to_metro}'
         )

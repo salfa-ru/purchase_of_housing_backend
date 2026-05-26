@@ -1,14 +1,13 @@
 from io import BytesIO
 
 import qrcode
+from django.contrib.auth.models import AbstractUser, UserManager
 from django.core.exceptions import ValidationError
 from django.core.files.base import ContentFile
 from django.core.validators import FileExtensionValidator
 from django.db import models
-from django.contrib.auth.models import AbstractUser, UserManager
 from django.db.models.signals import pre_save
 from django.dispatch import receiver
-from django.conf import settings
 from django.utils import timezone  # <---xxx--- для удаления пользователей
 
 from config import constants
@@ -26,34 +25,32 @@ class CustomUserManager(UserManager):
     """Переопределение работы менеджера, для того чтобы работала команда createsuperuser.
     Для superuser задаются значения для обязательных полей."""
 
-    def create_superuser(self, username, email=None, password=None,
-                         **extra_fields):
+    def create_superuser(self, username, email=None, password=None, **extra_fields):
         email = username + '@email.com'
-        extra_fields.setdefault("is_staff", True)
-        extra_fields.setdefault("is_superuser", True)
-        extra_fields.setdefault("first_name", username)
-        extra_fields.setdefault("last_name", username)
-        extra_fields.setdefault("phone_number", username + '_phone')
-        return super().create_superuser(username, email, password,
-                                        **extra_fields)
+        extra_fields.setdefault('is_staff', True)
+        extra_fields.setdefault('is_superuser', True)
+        extra_fields.setdefault('first_name', username)
+        extra_fields.setdefault('last_name', username)
+        extra_fields.setdefault('phone_number', username + '_phone')
+        return super().create_superuser(username, email, password, **extra_fields)
 
 
 class User(AbstractUser):
     """Custom User model."""
+
     objects = CustomUserManager()
     REQUIRED_FIELDS = []
 
-    first_name = models.CharField(verbose_name='Имя',
-                                  max_length=constants.NAME_LENGTH)
-    last_name = models.CharField(verbose_name='Фамилия',
-                                 max_length=constants.NAME_LENGTH,
-                                 **constants.NULLABLE_FIELD)
+    first_name = models.CharField(verbose_name='Имя', max_length=constants.NAME_LENGTH)
+    last_name = models.CharField(
+        verbose_name='Фамилия',
+        max_length=constants.NAME_LENGTH,
+        **constants.NULLABLE_FIELD,
+    )
     email = models.EmailField(verbose_name='email', unique=True)
 
     uuid_esa = models.UUIDField(
-        editable=False,
-        verbose_name='UUID из ЕСА',
-        **constants.NULLABLE_FIELD
+        editable=False, verbose_name='UUID из ЕСА', **constants.NULLABLE_FIELD
     )
 
     avatar = models.ImageField(
@@ -61,7 +58,7 @@ class User(AbstractUser):
         verbose_name='Аватарка',
         validators=[
             FileExtensionValidator(allowed_extensions=IMAGE_EXTENSIONS),
-            validate_avatar_size
+            validate_avatar_size,
         ],
         **constants.NULLABLE_FIELD,
     )
@@ -89,10 +86,15 @@ class User(AbstractUser):
         **constants.NULLABLE_FIELD,
     )
 
-    is_deleted = models.BooleanField(default=False, verbose_name='Удален',   # <---xxx---
-                                     help_text="<span style='color: DarkRed;'><strong>"  # DarkOrange
-                                               "Удаление</strong> (отключение) пользователя и его объявлений</span>")
-    deleted_at = models.DateTimeField(verbose_name='Дата удаления', null=True, blank=True)  # <---xxx---
+    is_deleted = models.BooleanField(
+        default=False,
+        verbose_name='Удален',  # <---xxx---
+        help_text="<span style='color: DarkRed;'><strong>"  # DarkOrange
+        'Удаление</strong> (отключение) пользователя и его объявлений</span>',
+    )
+    deleted_at = models.DateTimeField(
+        verbose_name='Дата удаления', null=True, blank=True
+    )  # <---xxx---
 
     def clean(self):
         super().clean()
@@ -101,9 +103,9 @@ class User(AbstractUser):
 
     def save(self, *args, **kwargs):
         """Хэшируем пароль.
-         Меняем username для 'своих' пользователей (при замене email).
-         Создаем QR-code, если изменился телефон.
-         Удаляем старую аватарку (файл), если аватарка меняется."""
+        Меняем username для 'своих' пользователей (при замене email).
+        Создаем QR-code, если изменился телефон.
+        Удаляем старую аватарку (файл), если аватарка меняется."""
         password_previous = None
         email_previous = None
         phone_number_previous = None
@@ -121,17 +123,20 @@ class User(AbstractUser):
 
         # Хэшируем пароль
         if not self.is_superuser and (
-                self._state.adding or self.password != password_previous):
+            self._state.adding or self.password != password_previous
+        ):
             self.set_password(self.password)
 
         # Меняем username для 'своих' пользователей
-        if not uuid_esa and (
-                self._state.adding or self.email != email_previous):
+        if not uuid_esa and (self._state.adding or self.email != email_previous):
             self.username = self.email
 
         # Создаем QR-код при создании пользователя или обновлении номера телефона,
         # старый при необходимости удаляем
-        if (self._state.adding or self.phone_number != phone_number_previous) and not self.is_deleted:  # <---xxx--- добавляем условие, что пользователь не удален
+        if (
+            (self._state.adding or self.phone_number != phone_number_previous)
+            and not self.is_deleted
+        ):  # <---xxx--- добавляем условие, что пользователь не удален
             img = create_qrcode(self.phone_number)
             file_name = f'{self.phone_number}.png'
             self.phone_qr_code.save(
@@ -139,7 +144,9 @@ class User(AbstractUser):
                 ContentFile(img.read()),
                 save=False,
             )
-            if user_previous and not user_previous.is_deleted:  # <---xxx--- добавляем условие, что предыдущий пользователь не удален
+            if (
+                user_previous and not user_previous.is_deleted
+            ):  # <---xxx--- добавляем условие, что предыдущий пользователь не удален
                 user_previous.phone_qr_code.delete()
 
         # Удаляем старую аватарку при замене
@@ -148,9 +155,9 @@ class User(AbstractUser):
 
         return super().save(*args, **kwargs)
 
-    def soft_delete(self):   # <---xxx--- Передумал переопределять настоящее удаление!
+    def soft_delete(self):  # <---xxx--- Передумал переопределять настоящее удаление!
         self.is_active = False
-        self.is_deleted = True            # <---xxx---
+        self.is_deleted = True  # <---xxx---
         self.deleted_at = timezone.now()  # <---xxx---
         self.save()
 

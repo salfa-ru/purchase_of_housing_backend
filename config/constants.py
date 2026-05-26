@@ -34,14 +34,14 @@ MAX_TIME = 60
 # тип пользователя для MVP
 USER_TYPE_DEFAULT = 'Собственник'
 
-REALTY_STATUS = "На модерации"
+REALTY_STATUS = 'На модерации'
 
 # тип жилья для MVP
-HOUSING_TYPE = "Вторичное жилье"
+HOUSING_TYPE = 'Вторичное жилье'
 
 
 # тип продажи для MVP
-SALE_TYPE = "Свободная продажа"
+SALE_TYPE = 'Свободная продажа'
 
 
 # тип сделки
@@ -72,11 +72,13 @@ COUNTER_VIEW_IN_SEARCH_MIN_TIME_INTERVAL = timedelta(hours=0, minutes=0, seconds
 # срок жизни объявления, плановое значение - 30 дней
 # MAX_LISTING_DURATION = timedelta(days=30, hours=0, minutes=0, seconds=0)
 
+
 def parse_dd_hh_mm_ss(val):
-    d, h, m, s = (int(x) for x in val.split(":"))
+    d, h, m, s = (int(x) for x in val.split(':'))
     return timedelta(days=d, hours=h, minutes=m, seconds=s)
 
-MAX_LISTING_DURATION_raw = os.getenv("MAX_LISTING_DURATION_DD_HH_MM_SS")
+
+MAX_LISTING_DURATION_raw = os.getenv('MAX_LISTING_DURATION_DD_HH_MM_SS')
 
 MAX_LISTING_DURATION = (
     parse_dd_hh_mm_ss(MAX_LISTING_DURATION_raw)
@@ -84,7 +86,7 @@ MAX_LISTING_DURATION = (
     else timedelta(days=30)
 )
 
-print ("MAX_LISTING_DURATION", MAX_LISTING_DURATION)
+print('MAX_LISTING_DURATION', MAX_LISTING_DURATION)
 
 # Показ собственных объявлений в Личном кабинете, настройки Пагинации
 MY_REALTY_PAGESIZE_DEFAULT = 10

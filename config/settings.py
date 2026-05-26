@@ -1,5 +1,6 @@
-from datetime import timedelta
 import os
+from datetime import timedelta
+
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -19,42 +20,40 @@ DEBUG = os.getenv('DEBUG', 'False').lower() == 'true'
 ALLOWED_HOSTS = [
     # os.getenv("DOMAIN"),
     # os.getenv("HOST_IP"),
-    "localhost",
+    'localhost',
     '127.0.0.1',
-    "api.test.estate.ktsf.ru",
-    "api.prod.estate.ktsf.ru",
-    "194.87.140.150",
+    'api.test.estate.ktsf.ru',
+    'api.prod.estate.ktsf.ru',
+    '194.87.140.150',
 ]
 
-extra_hosts = os.getenv("EXTRA_ALLOWED_HOSTS")
+extra_hosts = os.getenv('EXTRA_ALLOWED_HOSTS')
 
 if extra_hosts:
-    ALLOWED_HOSTS += [host.strip() for host in extra_hosts.split(",")]
+    ALLOWED_HOSTS += [host.strip() for host in extra_hosts.split(',')]
 
 CSRF_TRUSTED_ORIGINS = [
     # f'http://{DOMAIN}',
     # f'https://{DOMAIN}',
-
     # This is not right
     # "https://api.prod.estate.ktsf.ru",
     # "https://api.test.estate.ktsf.ru",
-
     # 'http://*',
     # 'https://*',
-    "https://localhost",
-    "https://127.0.0.1",
-    "http://localhost:5173",
-    "https://localhost:5173",
-    "http://127.0.0.1:5173",
-    "https://127.0.0.1:5173",
-    "https://api.test.estate.ktsf.ru",
-    "https://api.prod.estate.ktsf.ru",
+    'https://localhost',
+    'https://127.0.0.1',
+    'http://localhost:5173',
+    'https://localhost:5173',
+    'http://127.0.0.1:5173',
+    'https://127.0.0.1:5173',
+    'https://api.test.estate.ktsf.ru',
+    'https://api.prod.estate.ktsf.ru',
 ]
 
-extra_trusted_origins = os.getenv("EXTRA_CSRF_TRUSTED_ORIGINS")
+extra_trusted_origins = os.getenv('EXTRA_CSRF_TRUSTED_ORIGINS')
 
 if extra_trusted_origins:
-    CSRF_TRUSTED_ORIGINS += [host.strip() for host in extra_trusted_origins.split(",")]
+    CSRF_TRUSTED_ORIGINS += [host.strip() for host in extra_trusted_origins.split(',')]
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -133,7 +132,7 @@ else:
             'USER': os.getenv('POSTGRES_USER', 'django'),
             'PASSWORD': os.getenv('POSTGRES_PASSWORD', ''),
             'HOST': os.getenv('DB_HOST', ''),
-            'PORT': os.getenv('DB_PORT', 5432)
+            'PORT': os.getenv('DB_PORT', 5432),
         }
     }
 
@@ -198,7 +197,6 @@ REST_FRAMEWORK = {
 SPECTACULAR_SETTINGS = {
     # 'SORT_ENDPOINTS': True,  # отключает сортировку эндпойнтов
     # 'SORT_OPERATIONS': False,  # отключает сортировку операций внутри эндпойнта
-
     'TITLE': 'Недвижимость',
     'DESCRIPTION': 'Документация для приложения purchase_of_housing_backend',
     'VERSION': '1.0.1',
@@ -207,7 +205,7 @@ SPECTACULAR_SETTINGS = {
     'SWAGGER_UI_SETTINGS': {
         'defaultModelsExpandDepth': 0,  # Hides schemas by default, -1 --> removes
         'filter': True,
-        "persistAuthorization": True,
+        'persistAuthorization': True,
     },
 }
 
@@ -226,12 +224,12 @@ Q_CLUSTER = {
 }
 
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:5173",
-    "https://localhost:5173",
-    "http://127.0.0.1:5173",
-    "https://estate.ktsf.ru",
-    "https://front.test.estate.ktsf.ru",
-    "https://house-react-ten.vercel.app"
+    'http://localhost:5173',
+    'https://localhost:5173',
+    'http://127.0.0.1:5173',
+    'https://estate.ktsf.ru',
+    'https://front.test.estate.ktsf.ru',
+    'https://house-react-ten.vercel.app',
 ]
 
 # REMOVE IN PRODUCTION
@@ -275,17 +273,17 @@ LOGIN_URL = 'api/auth/token-auth/'
 SIMPLE_JWT = {
     'ROTATE_REFRESH_TOKENS': True,  # Обновление refresh токена при замене access токена
     'BLACKLIST_AFTER_ROTATION': True,
-
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60) if DEBUG else timedelta(minutes=5),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
     'AUTH_HEADER_TYPES': ('Bearer',),
     'JTI_CLAIM': 'jti',
-
     'REFRESH_COOKIE': 'refresh_token',  # Название ключа в куки, в котором хранится refresh токен
     'AUTH_COOKIE': 'access_token',  # Название ключа в куки, в котором хранится access токен
     'AUTH_COOKIE_SECURE': True,  # Куки должны передаваться только по HTTPS (True для production)
     'AUTH_COOKIE_HTTP_ONLY': True,  # Запрет доступа к куки через JavaScript
-    'AUTH_COOKIE_SAMESITE': 'Lax' if not DEBUG else 'None',  # Ограничение передачи куки при кросс-сайтовых запросах.
+    'AUTH_COOKIE_SAMESITE': 'Lax'
+    if not DEBUG
+    else 'None',  # Ограничение передачи куки при кросс-сайтовых запросах.
     'AUTH_COOKIE_PATH': '/api/',
 }
 

@@ -28,9 +28,9 @@ class RealtyPhoto(models.Model):
 
 @receiver(post_delete, sender=RealtyPhoto)
 def delete_realty_photo_file(sender, instance, **kwargs):
-
     if instance.image:
         instance.image.delete(save=False)
+
 
 #     if not instance.id:
 #         return

@@ -6,4 +6,4 @@ class RealtyConfig(AppConfig):
     name = 'realty'
 
     def ready(self):
-        import realty.signals
+        pass

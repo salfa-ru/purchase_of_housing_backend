@@ -1,19 +1,22 @@
 from drf_spectacular.utils import extend_schema, inline_serializer
-from rest_framework import generics, status, serializers
+from rest_framework import generics, serializers, status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from notifications.models import Notification
 from notifications.paginations import NotificationPagination
-from notifications.serializers import NotificationSerializer, IdsNotifListSerializer
+from notifications.serializers import IdsNotifListSerializer, NotificationSerializer
 from notifications.utils import get_queryset_by_ids
 
 
 @extend_schema(summary='Получение списка уведомлений пользователя')
 class NotificationListAPIView(generics.ListAPIView):
     """Получение списка уведомлений пользователя."""
+
     serializer_class = NotificationSerializer
-    permission_classes = [IsAuthenticated, ]
+    permission_classes = [
+        IsAuthenticated,
+    ]
     pagination_class = NotificationPagination
 
     def get_queryset(self):
@@ -30,9 +33,10 @@ class NotificationListAPIView(generics.ListAPIView):
             is_new=True,
         ).count()
 
-
         if page is not None:
-            serializer = self.get_serializer(page, many=True, context={'request': request})
+            serializer = self.get_serializer(
+                page, many=True, context={'request': request}
+            )
             paginated_response = self.get_paginated_response(serializer.data)
 
             # Создаем новый словарь и добавляем unread_total в начало  # <----------
@@ -48,20 +52,21 @@ class NotificationListAPIView(generics.ListAPIView):
 
 
 @extend_schema(
-    request=IdsNotifListSerializer,
-    summary='Смена статуса уведомлений на "прочитано"'
+    request=IdsNotifListSerializer, summary='Смена статуса уведомлений на "прочитано"'
 )
 class NotificationUpdateAPIView(generics.UpdateAPIView):
     """Смена статуса уведомлений is_new=False.
     На вход нужно подать список id-шников."""
-    permission_classes = [IsAuthenticated, ]
-    http_method_names = ["patch"]
+
+    permission_classes = [
+        IsAuthenticated,
+    ]
+    http_method_names = ['patch']
     serializer_class = NotificationSerializer
 
     def update(self, request, *args, **kwargs):
         queryset, _ = get_queryset_by_ids(
-            user=self.request.user,
-            data=self.request.data
+            user=self.request.user, data=self.request.data
         )
         for obj in queryset:
             obj.is_new = False
@@ -73,22 +78,26 @@ class NotificationUpdateAPIView(generics.UpdateAPIView):
 @extend_schema(
     request=IdsNotifListSerializer,
     summary='Множественное удаление уведомлений',
-    responses={200: inline_serializer(
-        name='NotificationDelete',
-        fields={
-            'detail': serializers.CharField(),
-        }
-    )},
+    responses={
+        200: inline_serializer(
+            name='NotificationDelete',
+            fields={
+                'detail': serializers.CharField(),
+            },
+        )
+    },
 )
 class NotificationDeleteAPIView(generics.CreateAPIView):
     """Множественное удаление уведомлений.
     На вход нужно подать список id-шников."""
-    permission_classes = [IsAuthenticated, ]
+
+    permission_classes = [
+        IsAuthenticated,
+    ]
 
     def post(self, request, *args, **kwargs):
         queryset, ids = get_queryset_by_ids(
-            user=self.request.user,
-            data=self.request.data
+            user=self.request.user, data=self.request.data
         )
         for obj in queryset:
             obj.delete()
