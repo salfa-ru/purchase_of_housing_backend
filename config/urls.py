@@ -4,7 +4,6 @@ from django.contrib import admin
 from django.contrib.auth import views as auth_views
 from django.http import HttpResponse
 from django.urls import include, path
-from djoser.views import UserViewSet
 from drf_spectacular.utils import extend_schema
 from drf_spectacular.views import (
     SpectacularAPIView,
@@ -13,13 +12,19 @@ from drf_spectacular.views import (
 )
 from rest_framework.routers import DefaultRouter
 
-from users.views import CookieTokenObtainPairView, CookieTokenRefreshView, LogoutView
+from users.views import (
+    CookieTokenObtainPairView,
+    CookieTokenRefreshView,
+    CustomUserViewSet,
+    LogoutView,
+)
 
 # ========== Роутер для djoser с отдельным тегом ==========
 router_djoser = DefaultRouter()
 router_djoser.include_root_view = False
-router_djoser.register(r'users', UserViewSet, basename='user')
+router_djoser.register(r'users', CustomUserViewSet, basename='user')
 
+# Оборачиваем в тег для Swagger
 for url in router_djoser.urls:
     if hasattr(url.callback, 'cls'):
         url.callback.cls = extend_schema(tags=['auth (djoser)'])(url.callback.cls)

@@ -121,11 +121,13 @@ class User(AbstractUser):
             uuid_esa = user_previous.uuid_esa
             avatar_previous = user_previous.avatar
 
-        # Хэшируем пароль
+        # Хэшируем пароль (только если он сырой, а не уже хеширован)
         if not self.is_superuser and (
             self._state.adding or self.password != password_previous
         ):
-            self.set_password(self.password)
+            # Проверяем, не хеширован ли уже пароль
+            if not self.password.startswith('pbkdf2_sha256$'):
+                self.set_password(self.password)
 
         # Меняем username для 'своих' пользователей
         if not uuid_esa and (self._state.adding or self.email != email_previous):
@@ -134,20 +136,20 @@ class User(AbstractUser):
         # Создаем QR-код при создании пользователя или обновлении номера телефона,
         # старый при необходимости удаляем
         if (
-            (self._state.adding or self.phone_number != phone_number_previous)
-            and not self.is_deleted
-        ):  # <---xxx--- добавляем условие, что пользователь не удален
-            img = create_qrcode(self.phone_number)
-            file_name = f'{self.phone_number}.png'
-            self.phone_qr_code.save(
-                file_name,
-                ContentFile(img.read()),
-                save=False,
-            )
-            if (
-                user_previous and not user_previous.is_deleted
-            ):  # <---xxx--- добавляем условие, что предыдущий пользователь не удален
-                user_previous.phone_qr_code.delete()
+            self._state.adding or self.phone_number != phone_number_previous
+        ) and not self.is_deleted:
+            if self.phone_number:
+                img = create_qrcode(self.phone_number)
+                file_name = f'{self.phone_number}.png'
+                self.phone_qr_code.save(
+                    file_name,
+                    ContentFile(img.read()),
+                    save=False,
+                )
+                if user_previous and not user_previous.is_deleted:
+                    user_previous.phone_qr_code.delete()
+            else:
+                self.phone_qr_code = None  # Если нет телефона — QR-код не создаём
 
         # Удаляем старую аватарку при замене
         if user_previous and self.avatar != avatar_previous:
