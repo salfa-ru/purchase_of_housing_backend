@@ -1,9 +1,16 @@
 from django.conf import settings
-from drf_spectacular.utils import OpenApiResponse, extend_schema, extend_schema_view
+from djoser.views import UserViewSet
+from drf_spectacular.utils import (
+    OpenApiExample,
+    OpenApiResponse,
+    extend_schema,
+    extend_schema_view,
+)
 from rest_framework import (
     generics,
     mixins,
     permissions,
+    serializers,
     status,  # <---xxx--- удаление пользователя
     viewsets,
 )
@@ -32,6 +39,131 @@ from users.serializers import (
 from users.utils import delete_expired_tokens, update_token_field
 
 # from django.contrib.auth import authenticate
+
+
+# Схема для запроса регистрации (только для Swagger, не влияет на логику)
+class _RegistrationRequestSerializer(serializers.Serializer):
+    username = serializers.CharField()
+    password = serializers.CharField(write_only=True)
+    re_password = serializers.CharField(write_only=True)
+    email = serializers.EmailField()
+    phone_number = serializers.CharField()
+    first_name = serializers.CharField(required=False)
+    last_name = serializers.CharField(required=False)
+
+
+# Схема для ответа (только для Swagger)
+class _RegistrationResponseSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    username = serializers.CharField()
+    email = serializers.EmailField()
+    phone_number = serializers.CharField()
+    first_name = serializers.CharField()
+    last_name = serializers.CharField()
+
+
+@extend_schema(
+    tags=['auth (djoser)'],
+    summary='Регистрация пользователя',
+    description="""
+    Создание нового пользователя.
+
+    **Обязательные поля:**
+    - username (логин)
+    - password (пароль)
+    - re_password (подтверждение пароля)
+    - email
+    - phone_number (уникальный номер телефона)
+
+    **Опциональные поля:**
+    - first_name (имя)
+    - last_name (фамилия)
+
+    **Примечание:** После регистрации username автоматически становится равен email.
+    Для входа используйте email в качестве username.
+    """,
+    request=_RegistrationRequestSerializer,
+    responses={
+        201: OpenApiResponse(
+            description='Пользователь успешно создан',
+            response=_RegistrationResponseSerializer,
+        ),
+        400: OpenApiResponse(description='Ошибка валидации'),
+    },
+    examples=[
+        OpenApiExample(
+            'Пример запроса',
+            value={
+                'username': 'ivan123',
+                'password': 'securepass123',
+                're_password': 'securepass123',
+                'email': 'ivan@example.com',
+                'phone_number': '+79991234567',
+                'first_name': 'Иван',
+                'last_name': 'Петров',
+            },
+            request_only=True,
+        ),
+    ],
+)
+class CustomUserViewSet(UserViewSet):
+    """Кастомный ViewSet для пользователей с улучшенной документацией Swagger."""
+
+    @extend_schema(summary='Получить список пользователей (только для админа)')
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+
+    @extend_schema(summary='Получить пользователя по ID')
+    def retrieve(self, request, *args, **kwargs):
+        return super().retrieve(request, *args, **kwargs)
+
+    @extend_schema(summary='Обновить пользователя (полностью)')
+    def update(self, request, *args, **kwargs):
+        return super().update(request, *args, **kwargs)
+
+    @extend_schema(summary='Обновить пользователя (частично)')
+    def partial_update(self, request, *args, **kwargs):
+        return super().partial_update(request, *args, **kwargs)
+
+    @extend_schema(summary='Удалить пользователя')
+    def destroy(self, request, *args, **kwargs):
+        return super().destroy(request, *args, **kwargs)
+
+    @extend_schema(summary='Активация пользователя')
+    def activation(self, request, *args, **kwargs):
+        return super().activation(request, *args, **kwargs)
+
+    @extend_schema(summary='Повторная отправка активации')
+    def resend_activation(self, request, *args, **kwargs):
+        return super().resend_activation(request, *args, **kwargs)
+
+    @extend_schema(summary='Сброс пароля')
+    def reset_password(self, request, *args, **kwargs):
+        return super().reset_password(request, *args, **kwargs)
+
+    @extend_schema(summary='Подтверждение сброса пароля')
+    def reset_password_confirm(self, request, *args, **kwargs):
+        return super().reset_password_confirm(request, *args, **kwargs)
+
+    @extend_schema(summary='Сброс username')
+    def reset_username(self, request, *args, **kwargs):
+        return super().reset_username(request, *args, **kwargs)
+
+    @extend_schema(summary='Подтверждение сброса username')
+    def reset_username_confirm(self, request, *args, **kwargs):
+        return super().reset_username_confirm(request, *args, **kwargs)
+
+    @extend_schema(summary='Установить новый пароль (для авторизованных)')
+    def set_password(self, request, *args, **kwargs):
+        return super().set_password(request, *args, **kwargs)
+
+    @extend_schema(summary='Установить новый username (для авторизованных)')
+    def set_username(self, request, *args, **kwargs):
+        return super().set_username(request, *args, **kwargs)
+
+    @extend_schema(summary='Получить свой профиль')
+    def me(self, request, *args, **kwargs):
+        return super().me(request, *args, **kwargs)
 
 
 @extend_schema(tags=['auth (token)'])

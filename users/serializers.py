@@ -2,6 +2,8 @@ from datetime import datetime
 
 from django.core.exceptions import ValidationError
 from django.core.validators import FileExtensionValidator
+from djoser.serializers import UserCreateSerializer as BaseUserCreateSerializer
+from drf_spectacular.utils import OpenApiExample, extend_schema_serializer
 from rest_framework import serializers
 
 from config.constants import IMAGE_EXTENSIONS
@@ -260,3 +262,39 @@ class ChangePhoneSerializer(serializers.Serializer):
         user.phone_number = self.validated_data['new_phone_number']
         user.save()
         return user
+
+
+@extend_schema_serializer(
+    examples=[
+        OpenApiExample(
+            'Пример регистрации',
+            value={
+                'username': 'user123',
+                'password': 'securepass123',
+                're_password': 'securepass123',
+                'email': 'user@example.com',
+                'phone_number': '+79991234567',
+                'first_name': 'Иван',
+                'last_name': 'Петров',
+            },
+            request_only=True,
+        ),
+    ]
+)
+class UserCreateSerializer(BaseUserCreateSerializer):
+    """Сериализатор для регистрации нового пользователя.
+    Расширяет стандартный сериализатор djoser полями phone_number, first_name, last_name.
+    """
+
+    # Явно объявляем поля, которые хотим добавить
+    phone_number = serializers.CharField(required=True)
+    first_name = serializers.CharField(required=False, allow_blank=True)
+    last_name = serializers.CharField(required=False, allow_blank=True)
+
+    class Meta(BaseUserCreateSerializer.Meta):
+        model = User
+        fields = BaseUserCreateSerializer.Meta.fields + (
+            'phone_number',
+            'first_name',
+            'last_name',
+        )

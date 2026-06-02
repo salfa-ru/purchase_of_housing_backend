@@ -261,10 +261,19 @@ CORS_ALLOW_ALL_LOCALHOST = True
 
 # ========== DJOSER ==========
 DJOSER = {
+    'USER_CREATE_PASSWORD_RETYPE': True,  # Требует re_password при регистрации
+    'USER_EMAIL_REQUIRED': True,  # Email обязателен
+    'SEND_ACTIVATION_EMAIL': False,  # Не отправляем письмо для активации
+    'SET_PASSWORD_RETYPE': True,  # Подтверждение при смене пароля
+    'PASSWORD_RESET_CONFIRM_RETYPE': True,  # Подтверждение при сбросе пароля
+    'USERNAME_RESET_CONFIRM_RETYPE': True,  # Подтверждение при сбросе username
     'PASSWORD_RESET_CONFIRM_URL': 'api/password-reset/{uid}/{token}/',
     'PASSWORD_RESET_SHOW_EMAIL_NOT_FOUND': True,
-    'SEND_ACTIVATION_EMAIL': False,
-    'SET_PASSWORD_RETYPE': False,
+    'SERIALIZERS': {
+        'user_create': 'users.serializers.UserCreateSerializer',
+        'user': 'users.serializers.UserCreateSerializer',
+        'current_user': 'users.serializers.UserCreateSerializer',
+    },
 }
 
 # URL для редиректа после сброса пароля
