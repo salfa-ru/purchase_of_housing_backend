@@ -18,7 +18,6 @@ from rest_framework.response import Response
 from config import constants
 from realty import models as realty_models
 from realty.filters import RealtyFilter
-from realty.models import Realty
 from realty.pagination import (
     LimitRealtyPagination,
     MyRealtyPagination,
