@@ -4,11 +4,15 @@ from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 
 from .views import (
+    CatalogRentCommercialView,
+    CatalogRentResidentialView,
+    CatalogSaleCommercialView,
+    CatalogSaleResidentialView,
     ChangeStatusUpdateAPIView,
     LastRealtyListView,
     RealtyBatchView,
     RealtyCountView,
-    RealtyDeleteView,  # <-- YYY --- realty_удаление v1
+    RealtyDeleteView,
     RealtyDetailView,
     RealtyFilterOptionsView,
     RealtyListView,
@@ -37,10 +41,29 @@ urlpatterns = [
         '<int:pk>/contacts/', RealtyOwnerContactsView.as_view(), name='owner-contacts'
     ),
     path('<int:pk>/status/', ChangeStatusUpdateAPIView.as_view(), name='change-status'),
-    path(
-        '<int:pk>/delete/', RealtyDeleteView.as_view(), name='realty-delete'
-    ),  # <-- YYY --- realty_удаление v1
+    path('<int:pk>/delete/', RealtyDeleteView.as_view(), name='realty-delete'),
     path('', include(router.urls)),
     path('filter-options/', RealtyFilterOptionsView.as_view(), name='filter-options'),
     path('batch/', RealtyBatchView.as_view(), name='realty-batch'),
+    # Каталоги недвижимости (4 типа)
+    path(
+        'catalog/sale/residential/',
+        CatalogSaleResidentialView.as_view(),
+        name='catalog-sale-residential',
+    ),
+    path(
+        'catalog/sale/commercial/',
+        CatalogSaleCommercialView.as_view(),
+        name='catalog-sale-commercial',
+    ),
+    path(
+        'catalog/rent/residential/',
+        CatalogRentResidentialView.as_view(),
+        name='catalog-rent-residential',
+    ),
+    path(
+        'catalog/rent/commercial/',
+        CatalogRentCommercialView.as_view(),
+        name='catalog-rent-commercial',
+    ),
 ]

@@ -9,14 +9,15 @@ from rest_framework import (  # <-- YYY --- realty_удаление v1
     views,
     viewsets,
 )
+from rest_framework.filters import OrderingFilter
 from rest_framework.generics import GenericAPIView
 from rest_framework.pagination import LimitOffsetPagination
+from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
 from config import constants
 from realty import models as realty_models
 from realty.filters import RealtyFilter
-from realty.models import Realty
 from realty.pagination import (
     LimitRealtyPagination,
     MyRealtyPagination,
@@ -26,11 +27,13 @@ from realty.serializers import serializers_common as common_serializers
 from realty.serializers import serializers_realty as realty_serializers
 from realty.serializers import serializers_rent as rent_serializers
 from realty.serializers import serializers_sale as sale_serializers
-from realty.serializers.serializers_realty import RealtyBaseSerializer
 from realty_addresses import models as realty_addresses_models
 from realty_displays.models import DisplayFullInfo, DisplayInSearch
 from realty_displays.utils import increment_counter
 from realty_values import models as realty_values_models
+
+from .models import Realty
+from .serializers.serializers_realty import RealtyBaseSerializer
 
 
 class BaseViewSet(viewsets.ModelViewSet):
@@ -564,3 +567,155 @@ class RealtyBatchView(GenericAPIView):
         # Сериалезуем
         serializer = self.get_serializer(result, many=True)
         return Response(serializer.data)
+
+
+# ========== КАТАЛОГИ НЕДВИЖИМОСТИ (4 типа) ==========
+class BaseCatalogView(generics.ListAPIView):
+    """Базовый класс для каталогов с предустановленными фильтрами."""
+
+    permission_classes = [AllowAny]
+    serializer_class = RealtyBaseSerializer
+    filter_backends = [DjangoFilterBackend, OrderingFilter]
+    ordering_fields = ['price', 'published_at']
+    ordering = ['-published_at']  # сначала новые
+
+    def get_queryset(self):
+        return Realty.objects.filter(
+            is_deleted=False,
+            realty_status=1,  # Активно
+            **self.get_extra_filters(),
+        )
+
+    def get_extra_filters(self):
+        """Метод для переопределения фильтров в дочерних классах."""
+        return {}
+
+    def filter_queryset(self, queryset):
+        # Ручная фильтрация по цене
+        queryset = super().filter_queryset(queryset)
+
+        price_min = self.request.query_params.get('price_min')
+        price_max = self.request.query_params.get('price_max')
+
+        if price_min:
+            queryset = queryset.filter(price__gte=price_min)
+        if price_max:
+            queryset = queryset.filter(price__lte=price_max)
+
+        return queryset
+
+
+@extend_schema(
+    tags=['realty'],
+    summary='Каталог: продажа жилой недвижимости',
+    description='Возвращает список квартир, домов и другой жилой недвижимости на продажу',
+    parameters=[
+        OpenApiParameter(
+            name='price_min', description='Мин. цена', required=False, type=int
+        ),
+        OpenApiParameter(
+            name='price_max', description='Макс. цена', required=False, type=int
+        ),
+        OpenApiParameter(
+            name='ordering',
+            description='Сортировка (price, -price, published_at)',
+            required=False,
+            type=str,
+        ),
+    ],
+)
+class CatalogSaleResidentialView(BaseCatalogView):
+    """Каталог: продажа жилой недвижимости"""
+
+    def get_extra_filters(self):
+        return {
+            'sale_profile__isnull': False,  # есть продажа
+            'realty_type__is_commercial': False,  # жилая
+        }
+
+
+@extend_schema(
+    tags=['realty'],
+    summary='Каталог: продажа жилой недвижимости',
+    description='Возвращает список квартир, домов и другой жилой недвижимости на продажу',
+    parameters=[
+        OpenApiParameter(
+            name='price_min', description='Мин. цена', required=False, type=int
+        ),
+        OpenApiParameter(
+            name='price_max', description='Макс. цена', required=False, type=int
+        ),
+        OpenApiParameter(
+            name='ordering',
+            description='Сортировка (price, -price, published_at)',
+            required=False,
+            type=str,
+        ),
+    ],
+)
+class CatalogSaleCommercialView(BaseCatalogView):
+    """Каталог: продажа коммерческой недвижимости"""
+
+    def get_extra_filters(self):
+        return {
+            'sale_profile__isnull': False,  # есть продажа
+            'realty_type__is_commercial': True,  # коммерческая
+        }
+
+
+@extend_schema(
+    tags=['realty'],
+    summary='Каталог: продажа жилой недвижимости',
+    description='Возвращает список квартир, домов и другой жилой недвижимости на продажу',
+    parameters=[
+        OpenApiParameter(
+            name='price_min', description='Мин. цена', required=False, type=int
+        ),
+        OpenApiParameter(
+            name='price_max', description='Макс. цена', required=False, type=int
+        ),
+        OpenApiParameter(
+            name='ordering',
+            description='Сортировка (price, -price, published_at)',
+            required=False,
+            type=str,
+        ),
+    ],
+)
+class CatalogRentResidentialView(BaseCatalogView):
+    """Каталог: аренда жилой недвижимости"""
+
+    def get_extra_filters(self):
+        return {
+            'rent_profile__isnull': False,  # есть аренда
+            'realty_type__is_commercial': False,  # жилая
+        }
+
+
+@extend_schema(
+    tags=['realty'],
+    summary='Каталог: продажа жилой недвижимости',
+    description='Возвращает список квартир, домов и другой жилой недвижимости на продажу',
+    parameters=[
+        OpenApiParameter(
+            name='price_min', description='Мин. цена', required=False, type=int
+        ),
+        OpenApiParameter(
+            name='price_max', description='Макс. цена', required=False, type=int
+        ),
+        OpenApiParameter(
+            name='ordering',
+            description='Сортировка (price, -price, published_at)',
+            required=False,
+            type=str,
+        ),
+    ],
+)
+class CatalogRentCommercialView(BaseCatalogView):
+    """Каталог: аренда коммерческой недвижимости"""
+
+    def get_extra_filters(self):
+        return {
+            'rent_profile__isnull': False,  # есть аренда
+            'realty_type__is_commercial': True,  # коммерческая
+        }
