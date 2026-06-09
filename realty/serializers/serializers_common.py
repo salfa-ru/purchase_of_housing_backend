@@ -4,6 +4,7 @@ from django.core.exceptions import ValidationError
 from rest_framework import serializers
 
 from realty import models as realty_models
+from realty.models import Realty
 from realty.serializers import serializers_realty as realty_serializers
 from realty_displays import serializers as displays_serializers
 from users.serializers import UserContactsSerializer, UserDataSerializer
@@ -51,26 +52,40 @@ class RealtyOwnerContactsSerializer(serializers.ModelSerializer):
         )
 
 
-class RealtyLKSerializer(serializers.Serializer):
-    """Serializer for Realty objects with added view counts and status."""
+class RealtyLKSerializer(serializers.ModelSerializer):
+    """Сериализатор для объектов недвижимости с добавлением счетчиков просмотров и статуса."""
 
-    short_realty_data = realty_serializers.ShortRealtySerializer()
-    counter_views = displays_serializers.CounterViewsSerializer()
-    realty_status = serializers.IntegerField(source='realty_status_id')
+    short_realty_data = realty_serializers.ShortRealtySerializer(read_only=True)
+    counter_views = displays_serializers.CounterViewsSerializer(read_only=True)
+    realty_status = serializers.IntegerField(source='realty_status_id', read_only=True)
 
-    # Зачем здесь это вообще - ведь здесь не будут показаны удаленные
-    is_deleted = serializers.BooleanField(
-        read_only=True, source='short_realty_data.is_deleted'
-    )  # <-- YYY --- realty_удаление v1
+    # Добавляем поля типа недвижимости
+    realty_type = serializers.CharField(source='realty_type.type', read_only=True)
+    is_commercial = serializers.BooleanField(
+        source='realty_type.is_commercial', read_only=True
+    )
+
+    class Meta:
+        model = Realty
+        fields = [
+            'short_realty_data',
+            'realty_status',
+            'counter_views',
+            'realty_type',
+            'is_commercial',
+        ]
 
     def to_representation(self, instance):
+        # Базовое представление
         representation = {
             'short_realty_data': realty_serializers.ShortRealtySerializer(
                 instance, context=self.context
             ).data,
             'realty_status': instance.realty_status_id,
-            # Зачем здесь это вообще - ведь здесь не будут показаны удаленные
-            'is_deleted': instance.is_deleted,  # <-- YYY --- realty_удаление v1
+            'realty_type': instance.realty_type.type if instance.realty_type else None,
+            'is_commercial': instance.realty_type.is_commercial
+            if instance.realty_type
+            else False,
         }
 
         # статусы из realty_values_realtyadvstatus
@@ -79,16 +94,12 @@ class RealtyLKSerializer(serializers.Serializer):
         # 3 - Отклонено
         # 4 - В архиве
 
-        if (
-            instance.realty_status_id == 1
-        ):  # Выдавать ответ только если объявление Активно
+        if instance.realty_status_id == 1:
             representation['counter_views'] = (
                 displays_serializers.CounterViewsSerializer(instance).data
             )
         else:
-            representation[
-                'counter_views'
-            ] = {}  # пустой ответ если объявление не активно
+            representation['counter_views'] = {}
 
         return representation
 
