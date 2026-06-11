@@ -109,6 +109,13 @@ class _RegistrationResponseSerializer(serializers.Serializer):
 class CustomUserViewSet(UserViewSet):
     """Кастомный ViewSet для пользователей с улучшенной документацией Swagger."""
 
+    def get_serializer_class(self):
+        if self.action == 'create':
+            from users.serializers import UserCreateSerializer
+
+            return UserCreateSerializer
+        return super().get_serializer_class()
+
     @extend_schema(summary='Получить список пользователей (только для админа)')
     def list(self, request, *args, **kwargs):
         return super().list(request, *args, **kwargs)

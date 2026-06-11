@@ -282,19 +282,37 @@ class ChangePhoneSerializer(serializers.Serializer):
     ]
 )
 class UserCreateSerializer(BaseUserCreateSerializer):
-    """Сериализатор для регистрации нового пользователя.
-    Расширяет стандартный сериализатор djoser полями phone_number, first_name, last_name.
-    """
+    """Сериализатор для регистрации нового пользователя."""
 
-    # Явно объявляем поля, которые хотим добавить
     phone_number = serializers.CharField(required=True)
     first_name = serializers.CharField(required=False, allow_blank=True)
     last_name = serializers.CharField(required=False, allow_blank=True)
+    email = serializers.EmailField(required=True)
 
     class Meta(BaseUserCreateSerializer.Meta):
         model = User
-        fields = BaseUserCreateSerializer.Meta.fields + (
+        fields = (
+            'id',
+            'username',
+            'password',
+            'email',
             'phone_number',
             'first_name',
             'last_name',
         )
+        extra_kwargs = {
+            'password': {'write_only': True},
+            'email': {'required': True},
+            'phone_number': {'required': True},
+        }
+
+    def validate(self, attrs):
+        print('=== UserCreateSerializer.validate ===')
+        print(f'Received attrs: {attrs}')
+        try:
+            result = super().validate(attrs)
+            print(f'Super validate result: {result}')
+            return result
+        except Exception as e:
+            print(f'Validation error: {e}')
+            raise
