@@ -125,13 +125,13 @@ class User(AbstractUser):
         if not self.is_superuser and (
             self._state.adding or self.password != password_previous
         ):
-            # Проверяем, не хеширован ли уже пароль
-            if not self.password.startswith('pbkdf2_sha256$'):
+            if self.password and not self.password.startswith('pbkdf2_sha256$'):
                 self.set_password(self.password)
 
-        # Меняем username для 'своих' пользователей
+        # Меняем username для 'своих' пользователей (только если email есть)
         if not uuid_esa and (self._state.adding or self.email != email_previous):
-            self.username = self.email
+            if self.email:
+                self.username = self.email
 
         # Создаем QR-код при создании пользователя или обновлении номера телефона,
         # старый при необходимости удаляем
@@ -149,7 +149,7 @@ class User(AbstractUser):
                 if user_previous and not user_previous.is_deleted:
                     user_previous.phone_qr_code.delete()
             else:
-                self.phone_qr_code = None  # Если нет телефона — QR-код не создаём
+                self.phone_qr_code = None
 
         # Удаляем старую аватарку при замене
         if user_previous and self.avatar != avatar_previous:
