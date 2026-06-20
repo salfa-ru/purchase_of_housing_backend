@@ -35,6 +35,33 @@ class CreateMessageRequestSerializer(serializers.Serializer):
                 detail='Должен быть передан либо chat_id, либо realty_id'
             )
 
+        # Проверяем статус объявления (4 = В архиве)
+        chat_id = data.get('chat_id')
+        realty_id = data.get('realty_id')
+
+        realty = None
+
+        # Если передан chat_id, получаем объявление через чат
+        if chat_id:
+            try:
+                chat = Chat.objects.get(pk=chat_id)
+                realty = chat.realty
+            except Chat.DoesNotExist:
+                raise ValidationCustomDetailError(detail='Чат не найден')
+
+        # Если передан realty_id, проверяем напрямую
+        elif realty_id:
+            try:
+                realty = Realty.objects.get(pk=realty_id)
+            except Realty.DoesNotExist:
+                raise ValidationCustomDetailError(detail='Объявление не найдено')
+
+        # Статус 4 = В архиве
+        if realty and realty.realty_status_id == 4:
+            raise ValidationCustomDetailError(
+                detail='Невозможно отправить сообщение в архивное объявление'
+            )
+
         return data
 
 
