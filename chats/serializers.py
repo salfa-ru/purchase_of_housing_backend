@@ -46,15 +46,17 @@ class CreateMessageRequestSerializer(serializers.Serializer):
             try:
                 chat = Chat.objects.get(pk=chat_id)
                 realty = chat.realty
-            except Chat.DoesNotExist:
-                raise ValidationCustomDetailError(detail='Чат не найден')
+            except Chat.DoesNotExist as err:
+                raise ValidationCustomDetailError(detail='Чат не найден') from err
 
         # Если передан realty_id, проверяем напрямую
         elif realty_id:
             try:
                 realty = Realty.objects.get(pk=realty_id)
-            except Realty.DoesNotExist:
-                raise ValidationCustomDetailError(detail='Объявление не найдено')
+            except Realty.DoesNotExist as err:
+                raise ValidationCustomDetailError(
+                    detail='Объявление не найдено'
+                ) from err
 
         # Статус 4 = В архиве
         if realty and realty.realty_status_id == 4:
