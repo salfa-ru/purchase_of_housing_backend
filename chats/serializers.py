@@ -24,7 +24,7 @@ class CreateMessageRequestSerializer(serializers.Serializer):
 
     chat_id = serializers.IntegerField(min_value=1, required=False)
     realty_id = serializers.IntegerField(min_value=1, required=False)
-    message = serializers.CharField(max_length=255)
+    message = serializers.CharField(max_length=1000)
 
     def validate(self, data):
         """Проверяем, что передан либо chat_id, либо realty_id, но не оба"""
