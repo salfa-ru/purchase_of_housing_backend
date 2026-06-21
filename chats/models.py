@@ -69,7 +69,10 @@ class Message(models.Model):
         verbose_name='Получатель',
         related_name='messages_received',
     )
-    message = models.TextField(verbose_name='Сообщение')
+    message = models.TextField(
+        verbose_name='Сообщение',
+        max_length=1000,
+    )
     created_at = models.DateTimeField(
         verbose_name='Дата + Время создания', auto_now_add=True
     )
