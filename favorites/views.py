@@ -40,6 +40,7 @@ class FavoriteListView(generics.ListAPIView):
     Поддерживает фильтрацию:
     - `trade_type` — тип сделки (sale/rent)
     - `is_commercial` — тип недвижимости (true — коммерческая, false — жилая)
+    - `realty_type` — тип недвижимости (Квартира, Апартаменты, Дом и т.д.)
     - `ordering` — сортировка по дате добавления (added_at / -added_at)
 
     Ответ содержит:
@@ -71,6 +72,11 @@ class FavoriteListView(generics.ListAPIView):
                 queryset = queryset.filter(realty__realty_type__is_commercial=True)
             elif is_commercial.lower() == 'false':
                 queryset = queryset.filter(realty__realty_type__is_commercial=False)
+
+        # Фильтрация по типу недвижимости (Квартира, Апартаменты, Дом и т.д.)
+        realty_type = self.request.query_params.get('realty_type')
+        if realty_type:
+            queryset = queryset.filter(realty__realty_type__type=realty_type)
 
         # Сортировка
         ordering = self.request.query_params.get('ordering', 'added_at')
