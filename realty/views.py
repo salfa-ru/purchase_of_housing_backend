@@ -17,7 +17,7 @@ from rest_framework.response import Response
 
 from config import constants
 from realty import models as realty_models
-from realty.filters import RealtyFilter
+from realty.filters import CatalogPriceFilter, RealtyFilter
 from realty.pagination import (
     LimitRealtyPagination,
     MyRealtyPagination,
@@ -576,6 +576,7 @@ class BaseCatalogView(generics.ListAPIView):
     permission_classes = [AllowAny]
     serializer_class = RealtyBaseSerializer
     filter_backends = [DjangoFilterBackend, OrderingFilter]
+    filterset_class = CatalogPriceFilter
     ordering_fields = ['price', 'published_at']
     ordering = ['-published_at']  # сначала новые
 
@@ -589,20 +590,6 @@ class BaseCatalogView(generics.ListAPIView):
     def get_extra_filters(self):
         """Метод для переопределения фильтров в дочерних классах."""
         return {}
-
-    def filter_queryset(self, queryset):
-        # Ручная фильтрация по цене
-        queryset = super().filter_queryset(queryset)
-
-        price_min = self.request.query_params.get('price_min')
-        price_max = self.request.query_params.get('price_max')
-
-        if price_min:
-            queryset = queryset.filter(price__gte=price_min)
-        if price_max:
-            queryset = queryset.filter(price__lte=price_max)
-
-        return queryset
 
 
 @extend_schema(
