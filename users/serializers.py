@@ -8,6 +8,7 @@ from rest_framework import serializers
 
 from config.constants import IMAGE_EXTENSIONS
 from users.models import User, validate_avatar_size
+from users.validators import validate_person_name
 
 
 class UserBaseSerializer(serializers.ModelSerializer):
@@ -102,6 +103,13 @@ class UserSelfProfileSerializer(UserBaseSerializer):
 class UserFullSerializer(UserSelfProfileSerializer):
     """Сериализатор для list, create, delete.
     Полные данные по пользователю."""
+
+    first_name = serializers.CharField(
+        required=True, allow_blank=False, validators=[validate_person_name]
+    )
+    last_name = serializers.CharField(
+        required=True, allow_blank=False, validators=[validate_person_name]
+    )
 
     class Meta(UserSelfProfileSerializer.Meta):
         fields = UserSelfProfileSerializer.Meta.fields + [
@@ -285,8 +293,12 @@ class UserCreateSerializer(BaseUserCreateSerializer):
     """Сериализатор для регистрации нового пользователя."""
 
     phone_number = serializers.CharField(required=True)
-    first_name = serializers.CharField(required=False, allow_blank=True)
-    last_name = serializers.CharField(required=False, allow_blank=True)
+    first_name = serializers.CharField(
+        required=True, allow_blank=False, validators=[validate_person_name]
+    )
+    last_name = serializers.CharField(
+        required=True, allow_blank=False, validators=[validate_person_name]
+    )
     email = serializers.EmailField(required=True)
 
     class Meta(BaseUserCreateSerializer.Meta):
@@ -305,14 +317,3 @@ class UserCreateSerializer(BaseUserCreateSerializer):
             'email': {'required': True},
             'phone_number': {'required': True},
         }
-
-    def validate(self, attrs):
-        print('=== UserCreateSerializer.validate ===')
-        print(f'Received attrs: {attrs}')
-        try:
-            result = super().validate(attrs)
-            print(f'Super validate result: {result}')
-            return result
-        except Exception as e:
-            print(f'Validation error: {e}')
-            raise
