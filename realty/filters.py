@@ -10,7 +10,18 @@ from config import constants
 from .models import Realty
 
 
-class RealtyFilter(django_filters.FilterSet):
+class PriceRangeFilterSet(django_filters.FilterSet):
+    """Базовый filterset с диапазоном цены. Переиспользуется поиском и каталогом."""
+
+    price_min = django_filters.NumberFilter(
+        field_name='price', lookup_expr='gte', label='Минимальная цена'
+    )
+    price_max = django_filters.NumberFilter(
+        field_name='price', lookup_expr='lte', label='Максимальная цена'
+    )
+
+
+class RealtyFilter(PriceRangeFilterSet):
     """Custom filterset for Realty model."""
 
     bathroom_type = django_filters.BaseInFilter(
@@ -34,12 +45,6 @@ class RealtyFilter(django_filters.FilterSet):
         help_text='Кол-во комнат. (Значения вводить с учетом регистра! '
         'Можно ввести несколько значений, через запятую без пробелов '
         'или добавить значение в новый строковый элемент.)',
-    )
-    price_min = django_filters.NumberFilter(
-        field_name='price', lookup_expr='gte', label='Минимальная цена'
-    )
-    price_max = django_filters.NumberFilter(
-        field_name='price', lookup_expr='lte', label='Максимальная цена'
     )
     address_metro = django_filters.CharFilter(
         field_name='address__metro__name', lookup_expr='icontains', label='Метро'
@@ -310,3 +315,9 @@ class RealtyFilter(django_filters.FilterSet):
         #        q_objects |= value_q
         #    return queryset.filter(q_objects)
         # return queryset
+
+
+class CatalogPriceFilter(PriceRangeFilterSet):
+    class Meta:
+        model = Realty
+        fields = []
