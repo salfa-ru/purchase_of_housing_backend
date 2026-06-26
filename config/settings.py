@@ -280,19 +280,20 @@ DJOSER = {
 LOGIN_URL = 'api/auth/token-auth/'
 
 SIMPLE_JWT = {
-    'ROTATE_REFRESH_TOKENS': True,  # Обновление refresh токена при замене access токена
+    'ROTATE_REFRESH_TOKENS': True,
     'BLACKLIST_AFTER_ROTATION': True,
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60) if DEBUG else timedelta(minutes=5),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
     'AUTH_HEADER_TYPES': ('Bearer',),
     'JTI_CLAIM': 'jti',
-    'REFRESH_COOKIE': 'refresh_token',  # Название ключа в куки, в котором хранится refresh токен
-    'AUTH_COOKIE': 'access_token',  # Название ключа в куки, в котором хранится access токен
-    'AUTH_COOKIE_SECURE': True,  # Куки должны передаваться только по HTTPS (True для production)
-    'AUTH_COOKIE_HTTP_ONLY': True,  # Запрет доступа к куки через JavaScript
-    'AUTH_COOKIE_SAMESITE': 'Lax'
+    'REFRESH_COOKIE': 'refresh_token',
+    'AUTH_COOKIE': 'access_token',
+    # Профессиональные настройки: разделяем локальную и боевую среду
+    'AUTH_COOKIE_SECURE': not DEBUG,  # True в продакшене (HTTPS), False локально (HTTP)
+    'AUTH_COOKIE_HTTP_ONLY': True,  # Защита от XSS (всегда True)
+    'AUTH_COOKIE_SAMESITE': 'None'
     if not DEBUG
-    else 'None',  # Ограничение передачи куки при кросс-сайтовых запросах.
+    else 'Lax',  # Продакшен: None (кросс-домен), локально: Lax
     'AUTH_COOKIE_PATH': '/api/',
 }
 
