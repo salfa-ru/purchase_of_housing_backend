@@ -191,14 +191,22 @@ class CookieTokenRefreshView(TokenRefreshView):
     """Обновление токенов через refresh cookie."""
 
     def post(self, request, *args, **kwargs):
-        old_refresh_token = request.COOKIES.get(settings.SIMPLE_JWT['REFRESH_COOKIE'])
-        if not old_refresh_token:
+        # 1. Сначала пробуем взять токен из тела запроса
+        refresh_token = request.data.get('refresh')
+
+        # 2. Если в теле нет — пробуем из куки
+        if not refresh_token:
+            refresh_token = request.COOKIES.get(settings.SIMPLE_JWT['REFRESH_COOKIE'])
+
+        # 3. Если нигде нет — ошибка
+        if not refresh_token:
             return Response(
                 {'detail': 'Refresh token not found'},
                 status=status.HTTP_401_UNAUTHORIZED,
             )
+
         data = request.data.copy()
-        data['refresh'] = old_refresh_token
+        data['refresh'] = refresh_token
         serializer = self.get_serializer(data=data)
         try:
             serializer.is_valid(raise_exception=True)
@@ -207,9 +215,8 @@ class CookieTokenRefreshView(TokenRefreshView):
         response = Response(serializer.validated_data, status=status.HTTP_200_OK)
         response = update_token_field(request, response)
         if 'refresh' in response.data and not settings.DEBUG:
-            # refresh токен передается в куки
             del response.data['refresh']
-        delete_expired_tokens()  # удаляем истекшие хэши токенов из базы данных
+        delete_expired_tokens()
         return response
 
 
