@@ -8,10 +8,10 @@ class RealtyPhotoSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = RealtyPhoto
-        fields = ('id', 'image')
+        fields = ['id', 'image']
 
     def get_image(self, obj):
         request = self.context.get('request')
-        if obj.image and request:
+        if request:
             return request.build_absolute_uri(obj.image.url)
-        return None
+        return obj.image.url
