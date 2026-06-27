@@ -299,3 +299,12 @@ SIMPLE_JWT = {
 
 # ========== EMAIL НАСТРОЙКИ (для сброса пароля) ==========
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'  # письма в консоль
+
+
+# ========== НАСТРОЙКИ ДЛЯ HTTPS (через nginx) ==========
+# Доверяем заголовки от nginx
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+# Используем заголовки от nginx для формирования URL
+USE_X_FORWARDED_HOST = True
+USE_X_FORWARDED_PORT = True
