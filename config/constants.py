@@ -92,6 +92,10 @@ print('MAX_LISTING_DURATION', MAX_LISTING_DURATION)
 MY_REALTY_PAGESIZE_DEFAULT = 10
 MY_REALTY_PAGESIZE_MAX = 50
 
+# Эндпоинт /api/realty/latest/, настройки limit/offset пагинации
+LATEST_REALTY_LIMIT_DEFAULT = 3
+LATEST_REALTY_LIMIT_MAX = 100
+
 # Настройка Пагинации Чатов, и сообщений внутри Чатов
 CHATS_PAGESIZE_DEFAULT = 10
 CHATS_PAGESIZE_MAX = 50

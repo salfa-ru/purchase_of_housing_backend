@@ -9,16 +9,17 @@ from rest_framework import (  # <-- YYY --- realty_удаление v1
     views,
     viewsets,
 )
+from rest_framework.exceptions import ValidationError
 from rest_framework.filters import OrderingFilter
 from rest_framework.generics import GenericAPIView
-from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
 from config import constants
 from realty import models as realty_models
-from realty.filters import CatalogPriceFilter, RealtyFilter
+from realty.filters import CatalogPriceFilter, LatestRealtyFilter, RealtyFilter
 from realty.pagination import (
+    LatestRealtyPagination,
     LimitRealtyPagination,
     MyRealtyPagination,
     PaginatedResponseSerializer,
@@ -138,9 +139,8 @@ class LastRealtyListView(generics.ListAPIView):
 
     serializer_class = realty_serializers.ShortRealtySerializer
     filter_backends = (DjangoFilterBackend,)
-    filterset_class = RealtyFilter
-    pagination_class = LimitOffsetPagination
-    pagination_class.default_limit = 3
+    filterset_class = LatestRealtyFilter
+    pagination_class = LatestRealtyPagination
 
     # TODO найти решение без пагинации. Требуется вывод последних 3х объектов.
     queryset = (
@@ -152,6 +152,19 @@ class LastRealtyListView(generics.ListAPIView):
         )
         .order_by('-published_at')
     )
+
+    def filter_queryset(self, queryset):
+        trade_type = self.request.query_params.get('trade_type')
+        if trade_type is not None and not trade_type.strip():
+            raise ValidationError(
+                {
+                    'trade_type': (
+                        'Значение не может быть пустым. '
+                        'Допустимые значения: sale, rent.'
+                    )
+                }
+            )
+        return super().filter_queryset(queryset)
 
 
 ...

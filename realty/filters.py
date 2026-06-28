@@ -4,10 +4,14 @@ import django_filters
 from django.contrib.postgres.search import TrigramSimilarity
 from django.db import connection
 from django.db.models import F, Q
+from rest_framework.exceptions import ValidationError
 
 from config import constants
 
 from .models import Realty
+
+TRADE_TYPE_SALE_VALUES = frozenset({'sale', constants.SALE_TRADE_TYPE.lower()})
+TRADE_TYPE_RENT_VALUES = frozenset({'rent', constants.RENT_TRADE_TYPE.lower()})
 
 
 class PriceRangeFilterSet(django_filters.FilterSet):
@@ -321,3 +325,22 @@ class CatalogPriceFilter(PriceRangeFilterSet):
     class Meta:
         model = Realty
         fields = []
+
+
+class LatestRealtyFilter(RealtyFilter):
+    """RealtyFilter со строгой валидацией trade_type для эндпоинта /api/realty/latest/."""
+
+    def filter_trade_type(self, queryset, name, value):
+        normalized = value.strip().lower()
+        if normalized in TRADE_TYPE_SALE_VALUES:
+            return queryset.filter(sale_profile__isnull=False)
+        if normalized in TRADE_TYPE_RENT_VALUES:
+            return queryset.filter(rent_profile__isnull=False)
+        raise ValidationError(
+            {
+                name: (
+                    f"Недопустимое значение '{value}'. "
+                    f'Допустимые значения: sale, rent.'
+                )
+            }
+        )
