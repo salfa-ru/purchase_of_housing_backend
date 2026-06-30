@@ -2,7 +2,7 @@ from collections import OrderedDict
 
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
-from rest_framework.pagination import PageNumberPagination
+from rest_framework.pagination import LimitOffsetPagination, PageNumberPagination
 from rest_framework.response import Response
 
 from config import constants
@@ -14,6 +14,39 @@ class LimitRealtyPagination(PageNumberPagination):
 
     page_size_query_param = None
     page_size = 10
+
+
+class LatestRealtyPagination(LimitOffsetPagination):
+    """LimitOffset-пагинация для /api/realty/latest/ со строгой валидацией."""
+
+    default_limit = constants.LATEST_REALTY_LIMIT_DEFAULT
+    max_limit = constants.LATEST_REALTY_LIMIT_MAX
+
+    def get_limit(self, request):
+        if self.limit_query_param not in request.query_params:
+            return self.default_limit
+        raw = request.query_params[self.limit_query_param]
+        try:
+            limit = int(raw)
+        except (TypeError, ValueError) as err:
+            raise ValidationError(
+                {'limit': 'Должно быть положительным целым числом.'}
+            ) from err
+        if limit <= 0:
+            raise ValidationError({'limit': 'Должно быть положительным целым числом.'})
+        return min(limit, self.max_limit)
+
+    def get_offset(self, request):
+        if self.offset_query_param not in request.query_params:
+            return 0
+        raw = request.query_params[self.offset_query_param]
+        try:
+            offset = int(raw)
+        except (TypeError, ValueError) as err:
+            raise ValidationError({'offset': 'Должно быть целым числом >= 0.'}) from err
+        if offset < 0:
+            raise ValidationError({'offset': 'Должно быть целым числом >= 0.'})
+        return offset
 
 
 class PaginatedResponseSerializer(serializers.Serializer):
