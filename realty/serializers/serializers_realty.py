@@ -660,3 +660,28 @@ class ShortRealtySerializer(serializers.ModelSerializer):
                 ).data
             }
         return None
+
+
+class RealtyPublicSerializer(ShortRealtySerializer):
+    """Realty list serializer for anonymous users — минимальный набор полей."""
+
+    class Meta(ShortRealtySerializer.Meta):
+        fields = (
+            'id',
+            'realty_status',
+            'realty_status_full',
+            'photos',
+            'price',
+            'is_commercial',
+            'commercial_type',
+            'number_of_rooms',
+            'realty_type',
+            'area',
+            'street',
+            'house_number',
+            'metro',
+            'metro_color',
+            'floors_number',
+            'published_at',
+            'rent',
+        )
