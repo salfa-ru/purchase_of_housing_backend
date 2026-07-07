@@ -86,6 +86,60 @@ class UserBaseSerializer(serializers.ModelSerializer):
         return data
 
 
+class UserProfileUpdateSerializer(serializers.ModelSerializer):
+    """
+    Сериализатор для обновления профиля пользователя.
+    Используется в публичном API для обычных пользователей.
+
+    Разрешённые поля:
+    - first_name (имя)
+    - last_name (фамилия)
+    - avatar (аватарка)
+
+    Служебные поля (is_deleted, is_active, is_staff, is_superuser, id)
+    НЕДОСТУПНЫ для изменения через этот сериализатор.
+    """
+
+    # Явно переопределяем поля без валидаторов модели,
+    # чтобы обычный пользователь мог обновлять профиль без ограничений
+    first_name = serializers.CharField(required=False, allow_blank=True, max_length=40)
+    last_name = serializers.CharField(required=False, allow_blank=True, max_length=40)
+    avatar = serializers.ImageField(required=False, allow_null=True)
+
+    class Meta:
+        model = User
+        fields = ['first_name', 'last_name', 'avatar']
+
+    def validate_first_name(self, value):
+        """Дополнительная валидация для имени (если нужна)."""
+        # Здесь можно добавить бизнес-логику, если потребуется
+        return value
+
+    def validate_last_name(self, value):
+        """Дополнительная валидация для фамилии (если нужна)."""
+        return value
+
+    def validate(self, attrs):
+        """
+        Общая валидация для всех полей.
+        Можно добавить проверки, требующие нескольких полей.
+        """
+        # Если нужно добавить логику, например:
+        # if attrs.get('first_name') and attrs.get('last_name'):
+        #     # какая-то проверка
+        return attrs
+
+
+class AdminUserUpdateSerializer(UserBaseSerializer):
+    """
+    Сериализатор для администратора.
+    Позволяет изменять служебные поля.
+    """
+
+    class Meta(UserBaseSerializer.Meta):
+        fields = UserBaseSerializer.Meta.fields + ['is_active', 'is_staff']
+
+
 class UserSelfProfileSerializer(UserBaseSerializer):
     """Используется для полного обновления профиля,
     для 'своих' пользователей."""

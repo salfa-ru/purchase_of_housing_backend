@@ -34,6 +34,7 @@ from users.serializers import (
     UserFullSerializer,
     UserNewMsgsSerializer,
     UserPersonalAccountSerializer,
+    UserProfileUpdateSerializer,
     UserSelfProfileSerializer,
 )
 from users.utils import delete_expired_tokens, update_token_field
@@ -368,6 +369,10 @@ class UserProfileRetrieveUpdateAPIView(generics.RetrieveUpdateAPIView):
         return self.request.user
 
     def get_serializer_class(self):
+        # Для обновления профиля — ограниченный сериализатор
+        if self.request.method in ['PUT', 'PATCH']:
+            return UserProfileUpdateSerializer
+        # Для просмотра профиля — полный сериализатор
         if not self.request.user.uuid_esa:
             return UserSelfProfileSerializer
         return UserESAProfileSerializer
