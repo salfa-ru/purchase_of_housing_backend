@@ -182,10 +182,16 @@ class RealtyListView(generics.ListAPIView):
     #     realty_status__status=constants.ADVERTISMENT_STATUS
     # )  # .order_by('-published_at')
 
-    serializer_class = realty_serializers.ShortRealtySerializer
     filter_backends = (DjangoFilterBackend,)
     pagination_class = LimitRealtyPagination
     filterset_class = RealtyFilter
+
+    def get_serializer_class(self):
+        """Анонимам — публичный сериализатор без данных владельца/адреса,
+        авторизованным — полный ShortRealtySerializer."""
+        if self.request.user and self.request.user.is_authenticated:
+            return realty_serializers.ShortRealtySerializer
+        return realty_serializers.RealtyPublicSerializer
 
     def get_queryset(self):  # <-- YYY --- Переопределяем get_queryset для фильтрации
         return realty_models.Realty.objects.filter(
