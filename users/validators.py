@@ -7,3 +7,8 @@ validate_person_name = RegexValidator(
         'Только кириллица, пробел, тире, дефис, от 2 до 40 символов.'
     ),
 )
+
+validate_phone_number = RegexValidator(
+    regex=r'^(\+7|8)\d{10}$',
+    message='Введите номер телефона в формате +7XXXXXXXXXX или 8XXXXXXXXXX.',
+)
