@@ -65,19 +65,26 @@ class RealtyBaseViewSet(BaseViewSet):
         return realty_serializers.RealtyBaseSerializer
 
 
-@extend_schema(tags=['Управление объявлениями о продаже недвижимости'])
+@extend_schema(tags=['Недвижимость | Продажа'])
 @extend_schema_view(
-    partial_update=extend_schema(
-        summary='Частичное изменение объявления о продаже недвижимости.',
-    ),
-    # retrieve=extend_schema(
-    #     summary=('Просмотр информации объявления о продаже по id записи.'),
-    # ),
     create=extend_schema(
         summary='Создание объявления о продаже недвижимости.',
+        description='Создаёт новое объявление о продаже недвижимости. '
+        'Требуется авторизация. Все обязательные поля должны быть заполнены.',
     ),
+    partial_update=extend_schema(
+        summary='Частичное изменение объявления о продаже недвижимости.',
+        description='Обновляет отдельные поля объявления о продаже. '
+        'Доступно только владельцу объявления.',
+    ),
+    # Если нужно добавить другие методы:
     # list=extend_schema(
-    #     summary=('Просмотр списка объявлений о продаже недвижимости.'),
+    #     summary='Просмотр списка объявлений о продаже',
+    #     description='Возвращает список всех объявлений о продаже. Доступна фильтрация.',
+    # ),
+    # retrieve=extend_schema(
+    #     summary='Просмотр объявления о продаже',
+    #     description='Возвращает детальную информацию о продаже по id.',
     # ),
 )
 class SaleViewSet(BaseViewSet):
@@ -92,20 +99,18 @@ class SaleViewSet(BaseViewSet):
         return sale_serializers.SaleCreateSerializer
 
 
-@extend_schema(tags=['Управление объявлениями об аренде недвижимости'])
+@extend_schema(tags=['Недвижимость | Аренда'])
 @extend_schema_view(
-    partial_update=extend_schema(
-        summary='Частичное изменение объявления об аренде недвижимости.',
-    ),
-    # retrieve=extend_schema(
-    #     summary=('Просмотр информации объявления об аренде по id записи.'),
-    # ),
     create=extend_schema(
         summary='Создание объявления об аренде недвижимости.',
+        description='Создаёт новое объявление об аренде недвижимости. '
+        'Требуется авторизация. Все обязательные поля должны быть заполнены.',
     ),
-    # list=extend_schema(
-    #     summary=('Просмотр списка объявлений об аренде недвижимости.'),
-    # ),
+    partial_update=extend_schema(
+        summary='Частичное изменение объявления об аренде недвижимости.',
+        description='Обновляет отдельные поля объявления об аренде. '
+        'Доступно только владельцу объявления.',
+    ),
 )
 class RentViewSet(BaseViewSet):
     """Rent Viewset."""
@@ -133,7 +138,11 @@ class RentViewSet(BaseViewSet):
     #     return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
-@extend_schema(summary='Получение списка последних 3х объявлений. Доступна фильтрация.')
+@extend_schema(
+    tags=['Недвижимость | Основные'],
+    summary='Получение списка последних 3 объявлений',
+    description='Возвращает последние 3 активных объявления. Доступна фильтрация по trade_type.',
+)
 class LastRealtyListView(generics.ListAPIView):
     """Viewing last 3 Realty objects."""
 
@@ -171,8 +180,9 @@ class LastRealtyListView(generics.ListAPIView):
 
 
 @extend_schema(
+    tags=['Недвижимость | Основные'],
     summary='Получение списка всех объявлений. Доступна фильтрация. '
-    'Есть пагинация по 10 объектов.'
+    'Есть пагинация по 10 объектов.',
 )
 class RealtyListView(generics.ListAPIView):
     """Viewing Realty objects queryset."""
@@ -222,7 +232,9 @@ class RealtyListView(generics.ListAPIView):
         return response
 
 
-@extend_schema(summary='Получение объявления по его id')
+@extend_schema(
+    tags=['Недвижимость | Основные'], summary='Получение объявления по его id'
+)
 class RealtyDetailView(generics.RetrieveAPIView):
     """Viewing Realty object by <id>."""
 
@@ -264,7 +276,9 @@ class RealtyDetailView(generics.RetrieveAPIView):
 
 
 @extend_schema(
+    tags=['Недвижимость | Основные'],
     summary='Количество найденных объявлений по фильтрам',
+    description='Возвращает количество объявлений, соответствующих переданным фильтрам.',
     responses=forced_singular_serializer(common_serializers.CountRealtySerializer),
 )
 class RealtyCountView(generics.ListAPIView):
@@ -285,7 +299,12 @@ class RealtyCountView(generics.ListAPIView):
         return Response({'count': count})
 
 
-@extend_schema(summary='Получение информации о владельце объявления')
+@extend_schema(
+    tags=['Недвижимость | Владелец'],
+    summary='Получение информации о владельце объявления',
+    description='Возвращает данные владельца: id, имя, телефон, QR-код телефона. '
+    'Доступно только авторизованным пользователям.',
+)
 class RealtyOwnerDataView(generics.RetrieveAPIView):
     """Endpoint to get realty's owner data."""
 
@@ -293,7 +312,12 @@ class RealtyOwnerDataView(generics.RetrieveAPIView):
     serializer_class = common_serializers.RealtyOwnerDataSerializer
 
 
-@extend_schema(summary='Получение контактов владельца объявления')
+@extend_schema(
+    tags=['Недвижимость | Владелец'],
+    summary='Получение контактов владельца объявления',
+    description='Возвращает контактные данные владельца: телефон и способ связи. '
+    'Доступно только авторизованным пользователям.',
+)
 class RealtyOwnerContactsView(generics.RetrieveAPIView):
     """Endpoint to get realty's owner contacts."""
 
@@ -303,20 +327,22 @@ class RealtyOwnerContactsView(generics.RetrieveAPIView):
 
 
 @extend_schema(
-    summary='Показ всех объявлений пользователя в ЛК - со счетчиками и статусом.',
+    tags=['Недвижимость | Основные'],
+    summary='Показ всех объявлений пользователя в ЛК',
+    description='Возвращает список объявлений текущего пользователя с пагинацией, '
+    'счётчиками просмотров и статусами.',
     parameters=[
         OpenApiParameter(
             name='page_size',
             type=int,
-            description=(
-                f'Количество объявлений на странице (по умолчанию '
-                f'{constants.MY_REALTY_PAGESIZE_DEFAULT}, максимум '
-                f'{constants.MY_REALTY_PAGESIZE_MAX})'
-            ),
+            description=f'Количество объявлений на странице (по умолчанию {constants.MY_REALTY_PAGESIZE_DEFAULT}, максимум {constants.MY_REALTY_PAGESIZE_MAX})',
             required=False,
         ),
         OpenApiParameter(
-            name='page', type=int, description='Номер страницы', required=False
+            name='page',
+            type=int,
+            description='Номер страницы',
+            required=False,
         ),
     ],
     responses={200: PaginatedResponseSerializer},
@@ -363,7 +389,11 @@ class RealtyLKListView(generics.ListAPIView):
 
 
 @extend_schema(
-    summary='Изменение статуса объявления (может только владелец объявления) .'
+    tags=['Недвижимость | Управление'],
+    summary='Изменение статуса объявления',
+    description='Изменяет статус объявления. Доступно только владельцу объявления. '
+    'Допустимые переходы: Активно → В архиве, На модерации → В архиве, '
+    'В архиве → На модерации.',
 )
 class ChangeStatusUpdateAPIView(generics.UpdateAPIView):
     """Endpoint for change status in realty"""
@@ -376,7 +406,12 @@ class ChangeStatusUpdateAPIView(generics.UpdateAPIView):
         serializer.save()
 
 
-@extend_schema(summary='получение данных для фронта.')
+@extend_schema(
+    tags=['Недвижимость | Основные'],
+    summary='Получение данных для фильтров',
+    description='Возвращает все возможные значения для фильтров: типы недвижимости, '
+    'статусы, метро, районы и т.д.',
+)
 class RealtyFilterOptionsView(views.APIView):
     """
     API для получения всех возможных значений фильтров.
@@ -501,8 +536,11 @@ class RealtyFilterOptionsView(views.APIView):
 
 
 @extend_schema(
-    summary='Удаление объявление (soft delete)'
-)  # <-- YYY --- Добавлен эндпоинт soft delete - realty_удаление v1
+    tags=['Недвижимость | Управление'],
+    summary='Удаление объявления (soft delete)',
+    description='Мягкое удаление объявления. Объявление становится недоступным для просмотра, '
+    'но остаётся в базе данных. Доступно только владельцу объявления.',
+)
 class RealtyDeleteView(generics.DestroyAPIView):
     queryset = realty_models.Realty.objects.all()
     permission_classes = [permissions.IsAuthenticated]
@@ -530,8 +568,10 @@ class RealtyDeleteView(generics.DestroyAPIView):
 
 
 @extend_schema(
+    tags=['Недвижимость | Основные'],
     summary='Получение нескольких объявлений по списку ID',
-    description='Возвращает массив объявлений в том же порядке, что и запрошенные ID. Оптимизация для функции сравнения.',
+    description='Возвращает массив объявлений в том же порядке, что и запрошенные ID. '
+    'Оптимизация для функции сравнения.',
     parameters=[
         OpenApiParameter(
             name='ids',
@@ -612,7 +652,7 @@ class BaseCatalogView(generics.ListAPIView):
 
 
 @extend_schema(
-    tags=['realty'],
+    tags=['Недвижимость | Каталоги'],
     summary='Каталог: продажа жилой недвижимости',
     description='Возвращает список квартир, домов и другой жилой недвижимости на продажу',
     parameters=[
@@ -641,9 +681,9 @@ class CatalogSaleResidentialView(BaseCatalogView):
 
 
 @extend_schema(
-    tags=['realty'],
-    summary='Каталог: продажа жилой недвижимости',
-    description='Возвращает список квартир, домов и другой жилой недвижимости на продажу',
+    tags=['Недвижимость | Каталоги'],
+    summary='Каталог: продажа коммерческой недвижимости',
+    description='Возвращает список коммерческой недвижимости на продажу (офисы, склады, помещения)',
     parameters=[
         OpenApiParameter(
             name='price_min', description='Мин. цена', required=False, type=int
@@ -670,9 +710,9 @@ class CatalogSaleCommercialView(BaseCatalogView):
 
 
 @extend_schema(
-    tags=['realty'],
-    summary='Каталог: продажа жилой недвижимости',
-    description='Возвращает список квартир, домов и другой жилой недвижимости на продажу',
+    tags=['Недвижимость | Каталоги'],
+    summary='Каталог: аренда жилой недвижимости',
+    description='Возвращает список квартир, домов и другой жилой недвижимости в аренду',
     parameters=[
         OpenApiParameter(
             name='price_min', description='Мин. цена', required=False, type=int
@@ -699,9 +739,9 @@ class CatalogRentResidentialView(BaseCatalogView):
 
 
 @extend_schema(
-    tags=['realty'],
-    summary='Каталог: продажа жилой недвижимости',
-    description='Возвращает список квартир, домов и другой жилой недвижимости на продажу',
+    tags=['Недвижимость | Каталоги'],
+    summary='Каталог: аренда коммерческой недвижимости',
+    description='Возвращает список коммерческой недвижимости в аренду (офисы, склады, помещения)',
     parameters=[
         OpenApiParameter(
             name='price_min', description='Мин. цена', required=False, type=int

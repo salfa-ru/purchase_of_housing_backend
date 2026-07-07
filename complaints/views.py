@@ -6,8 +6,9 @@ from complaints.serializers import ComplaintsSerializer
 
 
 @extend_schema(
+    tags=['Жалобы'],
     summary='Создание жалобы (передается в т.ч. id объявления, к которому жалоба '
-    'и в поле description вводится текст жалобы)'
+    'и в поле description вводится текст жалобы)',
 )
 class ComplaintsCreateAPIView(generics.CreateAPIView):
     """Endpoint to Create complaints"""

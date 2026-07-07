@@ -9,7 +9,9 @@ from notifications.serializers import IdsNotifListSerializer, NotificationSerial
 from notifications.utils import get_queryset_by_ids
 
 
-@extend_schema(summary='Получение списка уведомлений пользователя')
+@extend_schema(
+    tags=['Уведомления'], summary='Получение списка уведомлений пользователя'
+)
 class NotificationListAPIView(generics.ListAPIView):
     """Получение списка уведомлений пользователя."""
 
@@ -52,7 +54,9 @@ class NotificationListAPIView(generics.ListAPIView):
 
 
 @extend_schema(
-    request=IdsNotifListSerializer, summary='Смена статуса уведомлений на "прочитано"'
+    tags=['Уведомления'],
+    request=IdsNotifListSerializer,
+    summary='Смена статуса уведомлений на "прочитано"',
 )
 class NotificationUpdateAPIView(generics.UpdateAPIView):
     """Смена статуса уведомлений is_new=False.
@@ -76,6 +80,7 @@ class NotificationUpdateAPIView(generics.UpdateAPIView):
 
 
 @extend_schema(
+    tags=['Уведомления'],
     request=IdsNotifListSerializer,
     summary='Множественное удаление уведомлений',
     responses={

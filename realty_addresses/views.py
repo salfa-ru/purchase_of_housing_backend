@@ -22,6 +22,7 @@ from .models import Metro
 
 
 @extend_schema(
+    tags=['Адреса и карты'],
     summary='Получение списка точек на карте с объявлениями',
     description=(
         'Возвращает список точек с объявлениями в пределах заданного прямоугольника. '
@@ -74,6 +75,7 @@ class GetlistMapPointsAPIView(APIView):
 
 
 @extend_schema(
+    tags=['Адреса и карты'],
     summary='Получение списка объявлений по заданной точке на карте ',
     description=(
         'Возвращает список объявлений в точке на карте. '
@@ -129,6 +131,7 @@ class GetListAnnouncementsInMapPoint(APIView):
 
 
 @extend_schema(
+    tags=['Адреса и карты'],
     summary='Получение списка станций метро',
     description=(
         'Возвращает список станций метро с информацией о линиях. '

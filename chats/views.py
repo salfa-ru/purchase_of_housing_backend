@@ -62,6 +62,7 @@ class MessagesPagination(ConfigurablePagination):
 
 
 @extend_schema(
+    tags=['Чаты'],
     summary='Получение списка чатов пользователя. Только заблокированные - через эндпойнт /blacklist',
     parameters=[
         OpenApiParameter(
@@ -198,6 +199,7 @@ class ChatListAPIView(generics.ListAPIView):
 
 
 @extend_schema(
+    tags=['Чаты'],
     summary='Получение списка сообщений в чате по chat_id ИЛИ realty_id',
     request=inline_serializer(
         name='ChatOrRealtyId',
@@ -304,6 +306,7 @@ class ChatMessagesAPIView(generics.CreateAPIView):
 
 
 @extend_schema(
+    tags=['Чаты'],
     summary='Отправка сообщения',
     request=CreateMessageRequestSerializer,
     responses={
@@ -345,6 +348,7 @@ class MessageCreateAPIView(generics.CreateAPIView):
 
 
 @extend_schema(
+    tags=['Чаты'],
     request=IdsListSerializer,
     summary='Множественное удаление сообщений по ID чатов',
     responses={
@@ -438,6 +442,7 @@ class ChatsDeleteAPIView(generics.CreateAPIView):
 
 
 @extend_schema(
+    tags=['Чаты'],
     request=BlockingRequestSerializer,
     summary='Блокировка переписок',
     responses={201: BlockingResponseSerializer},
@@ -490,6 +495,7 @@ class ChatsBlockingCreateAPIView(generics.CreateAPIView):
 
 
 @extend_schema(
+    tags=['Чаты'],
     request=UnblockingRequestSerializer,
     summary='Разблокировка переписок',
     responses={200: BlockingResponseSerializer},

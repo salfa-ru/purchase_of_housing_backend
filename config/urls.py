@@ -27,7 +27,9 @@ router_djoser.register(r'users', CustomUserViewSet, basename='user')
 # Оборачиваем в тег для Swagger
 for url in router_djoser.urls:
     if hasattr(url.callback, 'cls'):
-        url.callback.cls = extend_schema(tags=['auth (djoser)'])(url.callback.cls)
+        url.callback.cls = extend_schema(tags=['Аутентификация (djoser)'])(
+            url.callback.cls
+        )
 
 urlpatterns = [
     path('api/realty/', include('realty.urls')),

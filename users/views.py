@@ -64,7 +64,7 @@ class _RegistrationResponseSerializer(serializers.Serializer):
 
 
 @extend_schema(
-    tags=['auth (djoser)'],
+    tags=['Аутентификация'],
     summary='Регистрация пользователя',
     description="""
     Создание нового пользователя.
@@ -174,7 +174,12 @@ class CustomUserViewSet(UserViewSet):
         return super().me(request, *args, **kwargs)
 
 
-@extend_schema(tags=['auth (token)'])
+@extend_schema(
+    tags=['Аутентификация'],
+    summary='Получение пары токенов (вход)',
+    description='Авторизация пользователя по username (email) и паролю. '
+    'Возвращает access и refresh токены.',
+)
 class CookieTokenObtainPairView(TokenObtainPairView):
     authentication_classes = ()
     permission_classes = (AllowAny,)
@@ -187,7 +192,12 @@ class CookieTokenObtainPairView(TokenObtainPairView):
         return response
 
 
-@extend_schema(tags=['auth (token)'])
+@extend_schema(
+    tags=['Аутентификация'],
+    summary='Обновление access токена',
+    description='Обновляет access токен с помощью refresh токена. '
+    'Refresh токен можно передать в теле запроса или в куках.',
+)
 class CookieTokenRefreshView(TokenRefreshView):
     """Обновление токенов через refresh cookie."""
 
@@ -221,7 +231,12 @@ class CookieTokenRefreshView(TokenRefreshView):
         return response
 
 
-@extend_schema(tags=['auth (logout)'])
+@extend_schema(
+    tags=['Аутентификация'],
+    summary='Выход из системы',
+    description='Отзывает refresh токен, делая его недействительным. '
+    'Токен добавляется в черный список.',
+)
 class LogoutView(APIView):
     """
     Выход пользователя из системы.
@@ -249,6 +264,9 @@ class LogoutView(APIView):
         return response
 
 
+@extend_schema(
+    tags=['Пользователи | Администрирование'],
+)
 @extend_schema_view(
     create=extend_schema(summary='Создание "своего" пользователя'),
     list=extend_schema(
@@ -285,12 +303,10 @@ class UserDevViewSet(
 
 
 @extend_schema(
+    tags=['Пользователи | Администрирование'],
     summary='Удаление пользователя по ID',
-    description='Должны удалиться все его объявления<ul>'
-    '<li>Надо проверить, что ему нельзя отправить сообщения'
-    '<li>Надо проверить, что его объявления удаляются!'
-    '<li>Если пользователь пытается удалить несуществующего пользователя, '
-    "в любом случае ошибка 'нет прав'",
+    description='Мягкое удаление пользователя. Все его объявления также удаляются. '
+    'Доступно только администратору или владельцу.',
     responses={
         200: OpenApiResponse(
             response={
@@ -341,6 +357,9 @@ class UserSoftDeleteAPIView(generics.DestroyAPIView):
         )  # Return the success message
 
 
+@extend_schema(
+    tags=['Пользователи | Профиль'],
+)
 @extend_schema_view(
     put=extend_schema(
         request=UserSelfProfileSerializer,
@@ -378,8 +397,11 @@ class UserProfileRetrieveUpdateAPIView(generics.RetrieveUpdateAPIView):
         return UserESAProfileSerializer
 
 
-@extend_schema_view(
-    get=extend_schema(summary='Просмотр краткой информации пользователя (в ЛК)'),
+@extend_schema(
+    tags=['Пользователи | Профиль'],
+    summary='Просмотр краткой информации пользователя (в ЛК)',
+    description='Возвращает краткую информацию пользователя для личного кабинета: '
+    'имя, аватар, количество новых сообщений и уведомлений.',
 )
 class UserPersonalAccountRetrieveAPIView(generics.RetrieveAPIView):
     """Получение краткой информации по пользователю.
@@ -393,8 +415,10 @@ class UserPersonalAccountRetrieveAPIView(generics.RetrieveAPIView):
         return self.request.user
 
 
-@extend_schema_view(
-    get=extend_schema(summary='Наличие новых сообщений или уведомлений'),
+@extend_schema(
+    tags=['Пользователи | Профиль'],
+    summary='Наличие новых сообщений или уведомлений',
+    description='Возвращает флаг наличия новых непрочитанных сообщений или уведомлений.',
 )
 class UserNewMsgsRetrieveAPIView(generics.RetrieveAPIView):
     """Получение информации о наличии новых сообщений или уведомлений.
@@ -410,7 +434,7 @@ class UserNewMsgsRetrieveAPIView(generics.RetrieveAPIView):
 
 # ========== СМЕНА НОМЕРА ТЕЛЕФОНА ==========
 @extend_schema(
-    tags=['users'],
+    tags=['Пользователи | Профиль'],
     summary='Смена номера телефона',
     description='Позволяет авторизованному пользователю сменить номер телефона.',
     request=ChangePhoneSerializer,
