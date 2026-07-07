@@ -12,7 +12,7 @@ from .serializers import FavoriteSerializer
 
 
 @extend_schema(
-    tags=['favorites'],
+    tags=['Избранные'],
     summary='Получение списка избранного пользователя',
     description='Возвращает список объявлений в избранном с количеством непросмотренных. Поддерживает фильтрацию по trade_type, is_commercial и ordering.',
     parameters=[
@@ -98,7 +98,7 @@ class FavoriteListView(generics.ListAPIView):
 
 
 @extend_schema(
-    tags=['favorites'],
+    tags=['Избранные'],
     summary='Добавление объявления в избранное',
     description='Принимает realty_id и добавляет объявление в избранное текущего пользователя',
     request=FavoriteSerializer,
@@ -156,7 +156,7 @@ class FavoriteCreateView(generics.CreateAPIView):
 
 
 @extend_schema(
-    tags=['favorites'],
+    tags=['Избранные'],
     summary='Удаление объявления из избранного',
     description='Мгновенное удаление без подтверждения. Возвращает 204 No Content.',
     responses={204: None},
@@ -187,7 +187,7 @@ class FavoriteDeleteView(generics.DestroyAPIView):
 
 
 @extend_schema(
-    tags=['favorites'],
+    tags=['Избранные'],
     summary='Сброс счётчика непросмотренных',
     description='Помечает все объявления в избранном как просмотренные (is_viewed = True)',
     responses={200: None},
