@@ -38,7 +38,6 @@ class UserBaseSerializer(serializers.ModelSerializer):
         model = User
         fields = [
             'id',
-            'is_deleted',
             'first_name',
             'last_name',
             'email',
@@ -47,7 +46,6 @@ class UserBaseSerializer(serializers.ModelSerializer):
         ]
         extra_kwargs = {
             'id': {'read_only': True},
-            'is_deleted': {'default': False},
         }
 
     def validate(
