@@ -96,4 +96,4 @@ class IdsNotifListSerializer(serializers.Serializer):
     """Сериализатор списка id-шников.
     Используется в множественном удалении и смене статуса"""
 
-    ids = serializers.ListField(child=serializers.IntegerField(), allow_empty=True)
+    ids = serializers.ListField(child=serializers.IntegerField(), allow_empty=False)

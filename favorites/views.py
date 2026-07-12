@@ -10,6 +10,14 @@ from realty.models import Realty
 from .models import Favorite
 from .serializers import FavoriteSerializer
 
+REALTY_TYPE_MAP = {
+    'apartment': 'Квартира',
+    'apartments': 'Квартира',
+    'flat': 'Квартира',
+    'house': 'Дом',
+    'commercial': 'Коммерческая',
+}
+
 
 @extend_schema(
     tags=['Избранные'],
@@ -40,7 +48,9 @@ class FavoriteListView(generics.ListAPIView):
     Поддерживает фильтрацию:
     - `trade_type` — тип сделки (sale/rent)
     - `is_commercial` — тип недвижимости (true — коммерческая, false — жилая)
-    - `realty_type` — тип недвижимости (Квартира, Апартаменты, Дом и т.д.)
+    - `realty_type` — тип недвижимости. Принимает как русские названия
+      (Квартира, Апартаменты, Дом и т.д.), так и английские алиасы
+      (apartment, apartments, flat, house, commercial). Регистр не важен.
     - `ordering` — сортировка по дате добавления (added_at / -added_at)
 
     Ответ содержит:
@@ -76,7 +86,8 @@ class FavoriteListView(generics.ListAPIView):
         # Фильтрация по типу недвижимости (Квартира, Апартаменты, Дом и т.д.)
         realty_type = self.request.query_params.get('realty_type')
         if realty_type:
-            queryset = queryset.filter(realty__realty_type__type=realty_type)
+            mapped_type = REALTY_TYPE_MAP.get(realty_type.lower(), realty_type)
+            queryset = queryset.filter(realty__realty_type__type__iexact=mapped_type)
 
         # Сортировка
         ordering = self.request.query_params.get('ordering', 'added_at')

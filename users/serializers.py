@@ -8,7 +8,7 @@ from rest_framework import serializers
 
 from config.constants import IMAGE_EXTENSIONS
 from users.models import User, validate_avatar_size
-from users.validators import validate_person_name
+from users.validators import validate_person_name, validate_phone_number
 
 
 class UserBaseSerializer(serializers.ModelSerializer):
@@ -310,7 +310,9 @@ class UserContactsSerializer(UserBaseSerializer):
 
 # ========== СМЕНА НОМЕРА ТЕЛЕФОНА ==========
 class ChangePhoneSerializer(serializers.Serializer):
-    new_phone_number = serializers.CharField(max_length=20)
+    new_phone_number = serializers.CharField(
+        max_length=20, validators=[validate_phone_number]
+    )
 
     def validate_new_phone_number(self, value):
         from users.models import User
@@ -346,7 +348,9 @@ class ChangePhoneSerializer(serializers.Serializer):
 class UserCreateSerializer(BaseUserCreateSerializer):
     """Сериализатор для регистрации нового пользователя."""
 
-    phone_number = serializers.CharField(required=True)
+    phone_number = serializers.CharField(
+        required=True, validators=[validate_phone_number]
+    )
     first_name = serializers.CharField(
         required=True, allow_blank=False, validators=[validate_person_name]
     )
