@@ -5,9 +5,11 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from config import constants
 from realty.models import Realty
 
 from .models import Favorite
+from .paginations import FavoritePagination
 from .serializers import FavoriteSerializer
 
 REALTY_TYPE_MAP = {
@@ -22,8 +24,14 @@ REALTY_TYPE_MAP = {
 @extend_schema(
     tags=['Избранные'],
     summary='Получение списка избранного пользователя',
-    description='Возвращает список объявлений в избранном с количеством непросмотренных. Поддерживает фильтрацию по trade_type, is_commercial и ordering.',
+    description='Возвращает страницу объявлений в избранном с количеством непросмотренных. Поддерживает фильтрацию по trade_type, is_commercial и ordering.',
     parameters=[
+        OpenApiParameter(
+            name='page',
+            description=f'Номер страницы (по {constants.FAVORITES_PAGESIZE_DEFAULT} объявления на странице)',
+            required=False,
+            type=int,
+        ),
         OpenApiParameter(
             name='trade_type', description='sale или rent', required=False, type=str
         ),
@@ -53,15 +61,20 @@ class FavoriteListView(generics.ListAPIView):
       (apartment, apartments, flat, house, commercial). Регистр не важен.
     - `ordering` — сортировка по дате добавления (added_at / -added_at)
 
+    Выдача постраничная, страница выбирается параметром `page`.
+
     Ответ содержит:
     - `unviewed_count` — количество новых объявлений, добавленных после последнего посещения
-    - `results` — список объектов избранного с полными данными объявлений
+      (считается по всему избранному, а не по текущей странице)
+    - `count`, `page_size`, `pages_total`, `current_page`, `next`, `previous` — навигация по страницам
+    - `results` — объекты избранного текущей страницы с полными данными объявлений
 
     Доступно только авторизованным пользователям.
     """
 
     permission_classes = [IsAuthenticated]
     serializer_class = FavoriteSerializer
+    pagination_class = FavoritePagination
 
     def get_queryset(self):
         user = self.request.user
@@ -99,12 +112,21 @@ class FavoriteListView(generics.ListAPIView):
         """
 
         queryset = self.get_queryset()
-        serializer = self.get_serializer(queryset, many=True)
+        page = self.paginate_queryset(queryset)
 
-        # Считаем количество непросмотренных
         unviewed_count = queryset.filter(is_viewed=False).count()
 
-        # Возвращаем объект с двумя полями
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            paginated_response = self.get_paginated_response(serializer.data)
+
+            paginated_response.data = {
+                'unviewed_count': unviewed_count,
+                **paginated_response.data,
+            }
+            return paginated_response
+
+        serializer = self.get_serializer(queryset, many=True)
         return Response({'unviewed_count': unviewed_count, 'results': serializer.data})
 
 

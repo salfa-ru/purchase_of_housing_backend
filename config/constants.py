@@ -96,6 +96,9 @@ MY_REALTY_PAGESIZE_MAX = 50
 LATEST_REALTY_LIMIT_DEFAULT = 3
 LATEST_REALTY_LIMIT_MAX = 100
 
+# Настройка Пагинации Избранного
+FAVORITES_PAGESIZE_DEFAULT = 4
+
 # Настройка Пагинации Чатов, и сообщений внутри Чатов
 CHATS_PAGESIZE_DEFAULT = 10
 CHATS_PAGESIZE_MAX = 50
