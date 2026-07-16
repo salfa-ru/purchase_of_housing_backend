@@ -202,12 +202,6 @@ SPECTACULAR_SETTINGS = {
     'VERSION': '1.0.1',
     'SERVE_INCLUDE_SCHEMA': False,
     'COMPONENT_SPLIT_REQUEST': True,
-    'SERVE_PERMISSIONS': ['rest_framework.permissions.IsAdminUser'],
-    'SERVE_AUTHENTICATION': [
-        'rest_framework.authentication.SessionAuthentication',
-        'users.authentication.CookieJWTAuthentication',
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
-    ],
     'SWAGGER_UI_SETTINGS': {
         'defaultModelsExpandDepth': 0,  # Hides schemas by default, -1 --> removes
         'filter': True,
