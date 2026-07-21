@@ -5,7 +5,7 @@ from django.conf import settings
 from django.contrib.auth import get_user_model
 from rest_framework_simplejwt.settings import api_settings
 from rest_framework_simplejwt.token_blacklist.models import OutstandingToken
-from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.tokens import AccessToken, RefreshToken
 
 User = get_user_model()
 
@@ -32,21 +32,65 @@ def set_jwt_cookies(request, response, refresh_token):
 
 
 def update_token_field(request, response):
-    """Заменяет токен на хэш токена."""
+    """
+    Обновляет токены: хэширует refresh, устанавливает cookie.
+    """
     access_token = response.data.get('access')
     refresh_token = response.data.get('refresh')
-    refresh_token_hash = hash_token(refresh_token)
-    refresh_token_obj = RefreshToken(refresh_token)
-    try:
-        username = request.data.get('username')
-        user_id = User.objects.get(username=username).id
-    except User.DoesNotExist:
-        user_id = refresh_token_obj.payload.get(api_settings.USER_ID_CLAIM, None)
-    OutstandingToken.objects.filter(user_id=user_id, token=refresh_token).update(
-        token=refresh_token_hash
-    )
-    if access_token and refresh_token:
-        response = set_jwt_cookies(request, response, refresh_token)
+
+    # 🔧 ДОБАВЛЯЕМ: сохраняем access токен
+    if access_token:
+        try:
+            access_token_obj = AccessToken(access_token)
+            jti = access_token_obj['jti']
+            user_id = access_token_obj['user_id']
+            expires_at = datetime.fromtimestamp(access_token_obj['exp'])
+
+            OutstandingToken.objects.get_or_create(
+                jti=jti,
+                defaults={
+                    'user_id': user_id,
+                    'token': access_token,
+                    'expires_at': expires_at,
+                },
+            )
+        except Exception:
+            pass
+
+    # Обрабатываем refresh токен
+    if refresh_token:
+        refresh_token_hash = hash_token(refresh_token)
+        refresh_token_obj = RefreshToken(refresh_token)
+
+        try:
+            username = request.data.get('username')
+            user_id = User.objects.get(username=username).id
+        except (User.DoesNotExist, AttributeError):
+            user_id = refresh_token_obj.payload.get(api_settings.USER_ID_CLAIM, None)
+
+        if user_id:
+            jti = refresh_token_obj.payload.get('jti')
+            expires_at = datetime.fromtimestamp(refresh_token_obj.payload.get('exp'))
+
+            OutstandingToken.objects.get_or_create(
+                jti=jti,
+                defaults={
+                    'user_id': user_id,
+                    'token': refresh_token,
+                    'expires_at': expires_at,
+                },
+            )
+            OutstandingToken.objects.filter(
+                user_id=user_id, token=refresh_token
+            ).update(token=refresh_token_hash)
+
+        if access_token and refresh_token:
+            response = set_jwt_cookies(request, response, refresh_token)
+
+    # Убираем refresh из тела ответа
+    if 'refresh' in response.data:
+        del response.data['refresh']
+
     return response
 
 

@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from django.conf import settings
 from djoser.views import UserViewSet
 from drf_spectacular.utils import (
@@ -23,7 +25,11 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response  # <---xxx--- удаление пользователя
 from rest_framework.views import APIView
 from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
-from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.token_blacklist.models import (
+    BlacklistedToken,
+    OutstandingToken,
+)
+from rest_framework_simplejwt.tokens import AccessToken, RefreshToken
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
 from users.models import User
@@ -178,7 +184,7 @@ class CustomUserViewSet(UserViewSet):
     tags=['Аутентификация'],
     summary='Получение пары токенов (вход)',
     description='Авторизация пользователя по username (email) и паролю. '
-    'Возвращает access и refresh токены.',
+    'Возвращает access токен. Refresh токен передается в HttpOnly cookie.',
 )
 class CookieTokenObtainPairView(TokenObtainPairView):
     authentication_classes = ()
@@ -187,27 +193,31 @@ class CookieTokenObtainPairView(TokenObtainPairView):
     def post(self, request, *args, **kwargs):
         response = super().post(request, *args, **kwargs)
         response = update_token_field(request, response)
-        if not settings.DEBUG:  # для прода
-            del response.data['refresh']  # refresh токен передается в куки
+
+        # 🔧 ИСПРАВЛЕНО: Убираем refresh из тела ВСЕГДА
+        if 'refresh' in response.data:
+            del response.data['refresh']
+
         return response
 
 
 @extend_schema(
     tags=['Аутентификация'],
     summary='Обновление access токена',
-    description='Обновляет access токен с помощью refresh токена. '
-    'Refresh токен можно передать в теле запроса или в куках.',
+    description='Обновляет access токен с помощью refresh токена из HttpOnly cookie.',
 )
 class CookieTokenRefreshView(TokenRefreshView):
     """Обновление токенов через refresh cookie."""
 
     def post(self, request, *args, **kwargs):
-        # 1. Сначала пробуем взять токен из тела запроса
-        refresh_token = request.data.get('refresh')
+        # 1. Сначала пробуем взять токен из куки
+        refresh_token = request.COOKIES.get(
+            settings.SIMPLE_JWT.get('REFRESH_COOKIE', 'refresh_token')
+        )
 
-        # 2. Если в теле нет — пробуем из куки
+        # 2. Если в куки нет — пробуем из тела (для обратной совместимости)
         if not refresh_token:
-            refresh_token = request.COOKIES.get(settings.SIMPLE_JWT['REFRESH_COOKIE'])
+            refresh_token = request.data.get('refresh')
 
         # 3. Если нигде нет — ошибка
         if not refresh_token:
@@ -219,14 +229,19 @@ class CookieTokenRefreshView(TokenRefreshView):
         data = request.data.copy()
         data['refresh'] = refresh_token
         serializer = self.get_serializer(data=data)
+
         try:
             serializer.is_valid(raise_exception=True)
         except TokenError as e:
             raise InvalidToken(e.args[0]) from e
+
         response = Response(serializer.validated_data, status=status.HTTP_200_OK)
         response = update_token_field(request, response)
-        if 'refresh' in response.data and not settings.DEBUG:
+
+        # 🔧 ИСПРАВЛЕНО: Убираем refresh из тела ВСЕГДА
+        if 'refresh' in response.data:
             del response.data['refresh']
+
         delete_expired_tokens()
         return response
 
@@ -238,29 +253,53 @@ class CookieTokenRefreshView(TokenRefreshView):
     'Токен добавляется в черный список.',
 )
 class LogoutView(APIView):
-    """
-    Выход пользователя из системы.
-    Отзывает refresh-токен, делая его недействительным.
-    """
-
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
+        # 1. Отзываем refresh-токен
         refresh_token = request.COOKIES.get('refresh_token')
-        if not refresh_token:
-            return Response(
-                {'detail': 'Refresh token is required.'},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-        # Создаем объект RefreshToken и добавляем в черный список
-        token = RefreshToken(refresh_token)
-        token.blacklist()  # Токен становится недействительным
+        if refresh_token:
+            try:
+                token = RefreshToken(refresh_token)
+                token.blacklist()
+            except Exception:
+                pass
+
+        # 2. Отзываем access-токен
+        auth_header = request.headers.get('Authorization', '')
+        if auth_header.startswith('Bearer '):
+            access_token = auth_header.split(' ')[1]
+            if access_token:
+                try:
+                    token = AccessToken(access_token)
+                    jti = token['jti']
+                    user_id = token['user_id']
+                    exp = datetime.fromtimestamp(token['exp'])
+
+                    # Создаем OutstandingToken (если его еще нет)
+                    outstanding, created = OutstandingToken.objects.get_or_create(
+                        jti=jti,
+                        defaults={
+                            'user_id': user_id,
+                            'token': access_token,
+                            'expires_at': exp,
+                        },
+                    )
+                    # Добавляем в черный список
+                    BlacklistedToken.objects.get_or_create(token=outstanding)
+                except Exception:
+                    pass
+
+        # 3. Удаляем cookie
         response = Response(
             {'detail': 'Successfully logged out.'}, status=status.HTTP_205_RESET_CONTENT
         )
         response.delete_cookie(
-            'refresh_token', path=settings.SIMPLE_JWT['AUTH_COOKIE_PATH']
+            'refresh_token',
+            path=settings.SIMPLE_JWT.get('AUTH_COOKIE_PATH', '/'),
+            domain=None,
         )
+
         return response
 
 
