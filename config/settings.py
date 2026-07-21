@@ -191,7 +191,7 @@ REST_FRAMEWORK = {
         # 'users.backends.CustomAuthentication',   # отключил, так как не пользуемся ИССОЙ!
         # 'rest_framework.authentication.TokenAuthentication',
         'users.authentication.CookieJWTAuthentication',
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
+        # 'rest_framework_simplejwt.authentication.JWTAuthentication',
     ],
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
     # 'EXCEPTION_HANDLER': 'config.exceptions.custom_exception_handler'
@@ -291,13 +291,13 @@ SIMPLE_JWT = {
     'JTI_CLAIM': 'jti',
     'REFRESH_COOKIE': 'refresh_token',
     'AUTH_COOKIE': 'access_token',
-    # Профессиональные настройки: разделяем локальную и боевую среду
+    # 🔧 ИСПРАВЛЯЕМ:
     'AUTH_COOKIE_SECURE': not DEBUG,  # True в продакшене (HTTPS), False локально (HTTP)
     'AUTH_COOKIE_HTTP_ONLY': True,  # Защита от XSS (всегда True)
     'AUTH_COOKIE_SAMESITE': 'None'
     if not DEBUG
-    else 'Lax',  # Продакшен: None (кросс-домен), локально: Lax
-    'AUTH_COOKIE_PATH': '/api/',
+    else 'Lax',  # Продакшен: None, локально: Lax
+    'AUTH_COOKIE_PATH': '/',  # ✅ вместо /api/
 }
 
 # ========== EMAIL НАСТРОЙКИ (для сброса пароля) ==========
