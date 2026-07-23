@@ -13,6 +13,10 @@ SECRET_KEY = os.getenv('SECRET_KEY', 'default_key')
 
 DEBUG = os.getenv('DEBUG', 'False').lower() == 'true'
 
+# Документация API (Swagger/Redoc/schema): True — открыта всем (тестовый стенд),
+# False/не задано — только админам (прод)
+DOCS_PUBLIC = os.getenv('DOCS_PUBLIC', 'False').lower() == 'true'
+
 # DOMAIN = os.getenv('DOMAIN')
 # ALLOWED_HOSTS = [DOMAIN, os.getenv('HOST_IP'), 'localhost', 'api.prod.estate.ktsf.ru']
 
@@ -205,6 +209,16 @@ SPECTACULAR_SETTINGS = {
     'VERSION': '1.0.1',
     'SERVE_INCLUDE_SCHEMA': False,
     'COMPONENT_SPLIT_REQUEST': True,
+    'SERVE_AUTHENTICATION': [
+        'rest_framework.authentication.SessionAuthentication',
+        'users.authentication.CookieJWTAuthentication',
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ],
+    'SERVE_PERMISSIONS': (
+        ['rest_framework.permissions.AllowAny']
+        if DOCS_PUBLIC
+        else ['rest_framework.permissions.IsAdminUser']
+    ),
     'SWAGGER_UI_SETTINGS': {
         'defaultModelsExpandDepth': 0,  # Hides schemas by default, -1 --> removes
         'filter': True,
