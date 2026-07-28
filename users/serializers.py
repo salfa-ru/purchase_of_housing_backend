@@ -1,3 +1,4 @@
+import re
 from datetime import datetime
 
 from django.core.exceptions import ValidationError
@@ -22,7 +23,6 @@ def capitalize_name(value):
         return value
 
     # 🔧 Убираем двойные тире
-    import re
 
     value = re.sub(r'-{2,}', '-', value)
 
