@@ -1,3 +1,4 @@
+import re
 from datetime import datetime
 
 from django.core.exceptions import ValidationError
@@ -13,11 +14,17 @@ from users.validators import validate_person_name, validate_phone_number
 
 def capitalize_name(value):
     """
-    Приводит имя/фамилию к формату: первая буква заглавная, остальные строчные.
-    Поддерживает двойные имена через дефис (Анна-Мария).
+    Приводит имя/фамилию к формату:
+    - первая буква заглавная, остальные строчные
+    - заменяет двойные тире на одно
+    - поддерживает двойные имена через дефис (Анна-Мария)
     """
     if not value:
         return value
+
+    # 🔧 Убираем двойные тире
+
+    value = re.sub(r'-{2,}', '-', value)
 
     # Разбиваем по дефису
     parts = value.split('-')
