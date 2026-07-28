@@ -11,6 +11,21 @@ from users.models import User, validate_avatar_size
 from users.validators import validate_person_name, validate_phone_number
 
 
+def capitalize_name(value):
+    """
+    Приводит имя/фамилию к формату: первая буква заглавная, остальные строчные.
+    Поддерживает двойные имена через дефис (Анна-Мария).
+    """
+    if not value:
+        return value
+
+    # Разбиваем по дефису
+    parts = value.split('-')
+    # Каждую часть капитализируем
+    capitalized_parts = [part.capitalize() for part in parts]
+    return '-'.join(capitalized_parts)
+
+
 class UserBaseSerializer(serializers.ModelSerializer):
     """Базовый сериализатор для профиля (retrieve, put, patch)."""
 
@@ -356,6 +371,12 @@ class UserCreateSerializer(BaseUserCreateSerializer):
         required=True, allow_blank=False, validators=[validate_person_name]
     )
     email = serializers.EmailField(required=True)
+
+    def validate_first_name(self, value):
+        return capitalize_name(value)
+
+    def validate_last_name(self, value):
+        return capitalize_name(value)
 
     class Meta(BaseUserCreateSerializer.Meta):
         model = User
