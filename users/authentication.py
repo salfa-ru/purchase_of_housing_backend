@@ -58,4 +58,4 @@ class CookieJWTAuthentication(JWTAuthentication):
                 raise AuthenticationFailed('User ID claim not found')
             return User.objects.get(id=user_id)
         except User.DoesNotExist:
-            raise AuthenticationFailed('User not found')
+            raise AuthenticationFailed('User not found') from None
