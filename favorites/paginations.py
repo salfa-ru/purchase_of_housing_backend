@@ -7,8 +7,9 @@ from config import constants
 class FavoritePagination(PageNumberPagination):
     """Пагинатор для избранного пользователя."""
 
-    page_size_query_param = None
+    page_size_query_param = 'page_size'
     page_size = constants.FAVORITES_PAGESIZE_DEFAULT
+    max_page_size = 100
 
     def get_paginated_response(self, data):
         """
