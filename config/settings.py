@@ -13,9 +13,9 @@ SECRET_KEY = os.getenv('SECRET_KEY', 'default_key')
 
 DEBUG = os.getenv('DEBUG', 'False').lower() == 'true'
 
-# Документация API (Swagger/Redoc/schema): True — открыта всем (тестовый стенд),
-# False/не задано — только админам (прод)
-DOCS_PUBLIC = os.getenv('DOCS_PUBLIC', 'False').lower() == 'true'
+# Документация API (Swagger/Redoc/schema): открыта всем на не-проде (DEBUG=True —
+# тест/локаль), на проде (DEBUG=False) — только админам.
+DOCS_PUBLIC = DEBUG
 
 # DOMAIN = os.getenv('DOMAIN')
 # ALLOWED_HOSTS = [DOMAIN, os.getenv('HOST_IP'), 'localhost', 'api.prod.estate.ktsf.ru']
