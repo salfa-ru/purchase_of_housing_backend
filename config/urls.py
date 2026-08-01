@@ -17,6 +17,7 @@ from users.views import (
     CookieTokenRefreshView,
     CustomUserViewSet,
     LogoutView,
+    SetPasswordView,
 )
 
 # ========== Роутер для djoser с отдельным тегом ==========
@@ -62,6 +63,7 @@ urlpatterns = [
         auth_views.PasswordResetCompleteView.as_view(),
         name='password_reset_complete',
     ),
+    path('api/users/me/set-password/', SetPasswordView.as_view(), name='set-password'),
     path(
         'api/password-reset/<uidb64>/<token>/',
         auth_views.PasswordResetConfirmView.as_view(),

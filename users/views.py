@@ -36,6 +36,7 @@ from users.models import User
 from users.permissions import IsAdminOrOwner
 from users.serializers import (
     ChangePhoneSerializer,
+    SetPasswordSerializer,
     UserESAProfileSerializer,
     UserFullSerializer,
     UserNewMsgsSerializer,
@@ -494,3 +495,57 @@ class ChangePhoneAPIView(generics.GenericAPIView):
         return Response(
             {'detail': 'Номер телефона успешно изменён.'}, status=status.HTTP_200_OK
         )
+
+
+@extend_schema(
+    tags=['Пользователи | Профиль'],
+    summary='Смена пароля',
+    description='Позволяет авторизованному пользователю сменить пароль.',
+    request={
+        'application/json': {
+            'type': 'object',
+            'properties': {
+                'current_password': {'type': 'string', 'description': 'Текущий пароль'},
+                'new_password': {'type': 'string', 'description': 'Новый пароль'},
+                're_new_password': {
+                    'type': 'string',
+                    'description': 'Подтверждение нового пароля',
+                },
+            },
+            'required': ['current_password', 'new_password', 're_new_password'],
+        }
+    },
+    responses={
+        200: OpenApiResponse(description='Пароль успешно изменён'),
+        400: OpenApiResponse(description='Ошибка валидации'),
+        401: OpenApiResponse(description='Не авторизован'),
+    },
+)
+class SetPasswordView(APIView):
+    """Смена пароля."""
+
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        user = request.user
+        serializer = SetPasswordSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        current_password = serializer.validated_data['current_password']
+        new_password = serializer.validated_data['new_password']
+
+        # Проверяем текущий пароль
+        if not user.check_password(current_password):
+            raise ValidationError({'current_password': 'Неверный текущий пароль.'})
+
+        # Проверяем, что новый пароль не совпадает с текущим
+        if current_password == new_password:
+            raise ValidationError(
+                {'new_password': 'Новый пароль не должен совпадать с текущим.'}
+            )
+
+        # Меняем пароль
+        user.set_password(new_password)
+        user.save()
+
+        return Response({'detail': 'Пароль успешно изменён.'})

@@ -401,3 +401,28 @@ class UserCreateSerializer(BaseUserCreateSerializer):
             'email': {'required': True},
             'phone_number': {'required': True},
         }
+
+
+class SetPasswordSerializer(serializers.Serializer):
+    current_password = serializers.CharField()
+    new_password = serializers.CharField()
+    re_new_password = serializers.CharField()
+
+    def validate(self, data):
+        from django.core.exceptions import ValidationError
+
+        from users.validators import LetterAndDigitPasswordValidator
+
+        # Проверяем, что пароли совпадают
+        if data['new_password'] != data['re_new_password']:
+            raise serializers.ValidationError(
+                {'re_new_password': 'Пароли не совпадают.'}
+            )
+
+        # Проверяем сложность пароля
+        try:
+            LetterAndDigitPasswordValidator().validate(data['new_password'])
+        except ValidationError as e:
+            raise serializers.ValidationError({'new_password': e.messages})
+
+        return data
