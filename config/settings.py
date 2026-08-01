@@ -202,8 +202,6 @@ REST_FRAMEWORK = {
 }
 
 SPECTACULAR_SETTINGS = {
-    # 'SORT_ENDPOINTS': True,  # отключает сортировку эндпойнтов
-    # 'SORT_OPERATIONS': False,  # отключает сортировку операций внутри эндпойнта
     'TITLE': 'Недвижимость',
     'DESCRIPTION': 'Документация для приложения purchase_of_housing_backend',
     'VERSION': '1.0.1',
@@ -211,7 +209,6 @@ SPECTACULAR_SETTINGS = {
     'COMPONENT_SPLIT_REQUEST': True,
     'SERVE_AUTHENTICATION': [
         'rest_framework.authentication.SessionAuthentication',
-        'users.authentication.CookieJWTAuthentication',
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ],
     'SERVE_PERMISSIONS': (
@@ -220,11 +217,29 @@ SPECTACULAR_SETTINGS = {
         else ['rest_framework.permissions.IsAdminUser']
     ),
     'SWAGGER_UI_SETTINGS': {
-        'defaultModelsExpandDepth': 0,  # Hides schemas by default, -1 --> removes
+        'defaultModelsExpandDepth': 0,
         'filter': True,
         'persistAuthorization': True,
+        'displayRequestDuration': True,
+        'docExpansion': 'none',
     },
+    'SWAGGER_UI_OAUTH2': {
+        'clientId': 'client',
+        'clientSecret': 'secret',
+        'realm': '',
+        'appName': 'A-Недвижимость',
+        'scopeSeparator': ' ',
+        'additionalQueryStringParams': {},
+    },
+    # 🔧 ДОБАВЛЯЕМ ЭТО:
+    'AUTHENTICATION_EXTENSIONS': [
+        'config.swagger.BearerTokenScheme',
+    ],
+    'SECURITY': [
+        {'BearerAuth': []},
+    ],
 }
+
 
 # Настройки Django Q2 для деактивации устаревших объявлений
 Q_CLUSTER = {
