@@ -4,6 +4,7 @@ import qrcode
 from django.contrib.auth.models import AbstractUser, UserManager
 from django.core.exceptions import ValidationError
 from django.core.files.base import ContentFile
+from django.core.files.images import get_image_dimensions
 from django.core.validators import FileExtensionValidator
 from django.db import models
 from django.db.models.signals import pre_save
@@ -11,7 +12,12 @@ from django.dispatch import receiver
 from django.utils import timezone  # <---xxx--- для удаления пользователей
 
 from config import constants
-from config.constants import IMAGE_EXTENSIONS, MAX_AVATAR_SIZE
+from config.constants import (
+    IMAGE_EXTENSIONS,
+    MAX_AVATAR_SIZE,
+    MIN_AVATAR_HEIGHT,
+    MIN_AVATAR_WIDTH,
+)
 from realty_values import models as values_models
 from users.validators import validate_email_length, validate_person_name
 
@@ -20,6 +26,19 @@ def validate_avatar_size(value):
     filesize = value.size
     if filesize > MAX_AVATAR_SIZE:
         raise ValidationError('The allowed file size has been exceeded')
+
+
+def validate_avatar_min_resolution(value):
+    """Проверяет, что аватарка не меньше MIN_AVATAR_WIDTH x MIN_AVATAR_HEIGHT."""
+    width, height = get_image_dimensions(value)
+    if width is None or height is None:
+        raise ValidationError('Не удалось определить разрешение изображения.')
+    if width < MIN_AVATAR_WIDTH or height < MIN_AVATAR_HEIGHT:
+        raise ValidationError(
+            f'Минимальное разрешение аватарки — '
+            f'{MIN_AVATAR_WIDTH}x{MIN_AVATAR_HEIGHT} px. '
+            f'Загружено {width}x{height} px.'
+        )
 
 
 class CustomUserManager(UserManager):
@@ -69,6 +88,7 @@ class User(AbstractUser):
         validators=[
             FileExtensionValidator(allowed_extensions=IMAGE_EXTENSIONS),
             validate_avatar_size,
+            validate_avatar_min_resolution,
         ],
         **constants.NULLABLE_FIELD,
     )

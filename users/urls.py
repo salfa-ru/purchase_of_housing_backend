@@ -5,6 +5,7 @@ from config.settings import DEBUG
 from users.apps import UsersConfig
 from users.views import (
     ChangePhoneAPIView,
+    UserAvatarAPIView,
     UserDevViewSet,
     UserNewMsgsRetrieveAPIView,
     UserPersonalAccountRetrieveAPIView,
@@ -23,6 +24,8 @@ router_dev.register(r'dev', UserDevViewSet, basename='dev')
 urlpatterns = [
     # Профиль пользователя
     path('profile/', UserProfileRetrieveUpdateAPIView.as_view(), name='profile'),
+    # Аватарка текущего пользователя (загрузка и удаление)
+    path('me/avatar/', UserAvatarAPIView.as_view(), name='avatar'),
     # Личный кабинет (краткая информация)
     path(
         'personal-account/',
