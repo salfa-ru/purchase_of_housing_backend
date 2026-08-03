@@ -49,14 +49,19 @@ validate_phone_number = RegexValidator(
 # ========== ВАЛИДАТОР ПАРОЛЯ ==========
 
 
-class LetterAndDigitPasswordValidator:
-    """Пароль должен содержать минимум одну латинскую букву и одну цифру."""
+class PasswordComplexityValidator:
+    """Пароль должен содержать строчные и заглавные латинские буквы и цифры."""
 
     def validate(self, password, user=None):
-        if not re.search(r'[A-Za-z]', password):
+        if not re.search(r'[a-z]', password):
             raise ValidationError(
-                'Пароль должен содержать хотя бы одну латинскую букву.',
-                code='password_no_letter',
+                'Пароль должен содержать хотя бы одну строчную латинскую букву.',
+                code='password_no_lower',
+            )
+        if not re.search(r'[A-Z]', password):
+            raise ValidationError(
+                'Пароль должен содержать хотя бы одну заглавную латинскую букву.',
+                code='password_no_upper',
             )
         if not re.search(r'[0-9]', password):
             raise ValidationError(
@@ -65,21 +70,21 @@ class LetterAndDigitPasswordValidator:
             )
 
     def get_help_text(self):
-        return 'Пароль должен содержать минимум одну латинскую букву и одну цифру.'
+        return 'Пароль должен содержать строчные и заглавные латинские буквы и цифры.'
 
 
-# ========== ВАЛИДАТОР ЗАГЛАВНЫХ БУКВ (ДЛЯ #28348) ==========
+class MaximumLengthPasswordValidator:
+    """Пароль не должен превышать заданную длину."""
 
-
-class ContainsUppercaseValidator:
-    """Проверяет, что пароль содержит хотя бы одну заглавную букву."""
+    def __init__(self, max_length=60):
+        self.max_length = max_length
 
     def validate(self, password, user=None):
-        if not re.search(r'[A-Z]', password):
+        if len(password) > self.max_length:
             raise ValidationError(
-                'Пароль должен содержать хотя бы одну заглавную букву.',
-                code='password_no_uppercase',
+                f'Пароль не должен превышать {self.max_length} символов.',
+                code='password_too_long',
             )
 
     def get_help_text(self):
-        return 'Пароль должен содержать хотя бы одну заглавную букву.'
+        return f'Пароль не должен превышать {self.max_length} символов.'

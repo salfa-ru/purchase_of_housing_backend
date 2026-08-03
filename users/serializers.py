@@ -1,6 +1,9 @@
 import re
 from datetime import datetime
 
+from django.contrib.auth.password_validation import (
+    validate_password as run_password_validators,
+)
 from django.core.exceptions import ValidationError
 from django.core.validators import FileExtensionValidator
 from djoser.serializers import UserCreateSerializer as BaseUserCreateSerializer
@@ -409,19 +412,14 @@ class SetPasswordSerializer(serializers.Serializer):
     re_new_password = serializers.CharField()
 
     def validate(self, data):
-        from django.core.exceptions import ValidationError
-
-        from users.validators import LetterAndDigitPasswordValidator
-
         # Проверяем, что пароли совпадают
         if data['new_password'] != data['re_new_password']:
             raise serializers.ValidationError(
                 {'re_new_password': 'Пароли не совпадают.'}
             )
 
-        # Проверяем сложность пароля
         try:
-            LetterAndDigitPasswordValidator().validate(data['new_password'])
+            run_password_validators(data['new_password'])
         except ValidationError as e:
             raise serializers.ValidationError({'new_password': e.messages})
 
