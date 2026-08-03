@@ -421,6 +421,6 @@ class SetPasswordSerializer(serializers.Serializer):
         try:
             run_password_validators(data['new_password'])
         except ValidationError as e:
-            raise serializers.ValidationError({'new_password': e.messages})
+            raise serializers.ValidationError({'new_password': e.messages}) from None
 
         return data
