@@ -158,6 +158,9 @@ AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'users.validators.LetterAndDigitPasswordValidator',
     },
+    {
+        'NAME': 'users.validators.ContainsUppercaseValidator',
+    },
 ]
 
 LANGUAGE_CODE = 'ru-ru'
