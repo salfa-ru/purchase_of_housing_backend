@@ -45,6 +45,32 @@ validate_phone_number = RegexValidator(
     message='Введите номер телефона в формате +7XXXXXXXXXX или 8XXXXXXXXXX.',
 )
 
+PHONE_NUMBER_ERROR = (
+    'Введите номер телефона в формате +7XXXXXXXXXX, 8XXXXXXXXXX '
+    'или 10 цифр без кода страны.'
+)
+
+
+def normalize_phone_number(value):
+    """
+    Приводит номер к виду +7XXXXXXXXXX.
+    Принимает 10 цифр, 8..., 7..., +7... — с пробелами, скобками и дефисами.
+    """
+    if not value:
+        return value
+
+    value = str(value).strip()
+    digits = re.sub(r'\D', '', value)
+
+    if len(digits) == 11 and digits[0] in ('7', '8'):
+        digits = f'7{digits[1:]}'
+    elif len(digits) == 10 and not value.startswith('+'):
+        digits = f'7{digits}'
+    else:
+        raise ValidationError(PHONE_NUMBER_ERROR, code='invalid_phone_number')
+
+    return f'+{digits}'
+
 
 # ========== ВАЛИДАТОР ПАРОЛЯ ==========
 

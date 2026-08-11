@@ -11,7 +11,11 @@ from rest_framework.validators import UniqueValidator
 
 from config.constants import IMAGE_EXTENSIONS
 from users.models import User, validate_avatar_size
-from users.validators import validate_person_name, validate_phone_number
+from users.validators import (
+    normalize_phone_number,
+    validate_person_name,
+    validate_phone_number,
+)
 
 
 def capitalize_name(value):
@@ -35,6 +39,27 @@ def capitalize_name(value):
     return '-'.join(capitalized_parts)
 
 
+def normalize_user_input(data):
+    """Приводит email и номер телефона во входных данных к единому виду."""
+    if not isinstance(data, dict):
+        return data
+
+    data = data.copy()
+
+    if data.get('email'):
+        data['email'] = data['email'].lower()
+
+    if data.get('phone_number'):
+        try:
+            data['phone_number'] = normalize_phone_number(data['phone_number'])
+        except ValidationError as error:
+            raise serializers.ValidationError(
+                {'phone_number': error.messages}
+            ) from error
+
+    return data
+
+
 class UserBaseSerializer(serializers.ModelSerializer):
     """Базовый сериализатор для профиля (retrieve, put, patch)."""
 
@@ -48,15 +73,7 @@ class UserBaseSerializer(serializers.ModelSerializer):
     )
 
     def to_internal_value(self, data):
-        # Проверяем, что data - это словарь и что ключ 'email' присутствует и имеет значение
-        if isinstance(data, dict) and 'email' in data and data['email']:
-            # Приводим email к нижнему регистру
-            data['email'] = data['email'].lower()
-            # Вызываем родительский метод с измененными данными
-            return super().to_internal_value(data)
-
-        # Если условие не выполнено, вызываем родительский метод с исходными данными
-        return super().to_internal_value(data)
+        return super().to_internal_value(normalize_user_input(data))
 
     class Meta:
         model = User
@@ -347,13 +364,25 @@ class UserContactsSerializer(UserBaseSerializer):
 # ========== СМЕНА НОМЕРА ТЕЛЕФОНА ==========
 class ChangePhoneSerializer(serializers.Serializer):
     new_phone_number = serializers.CharField(
-        max_length=20, validators=[validate_phone_number]
+        max_length=32, validators=[validate_phone_number]
     )
 
-    def validate_new_phone_number(self, value):
-        from users.models import User
+    def to_internal_value(self, data):
+        if isinstance(data, dict) and data.get('new_phone_number'):
+            data = data.copy()
+            try:
+                data['new_phone_number'] = normalize_phone_number(
+                    data['new_phone_number']
+                )
+            except ValidationError as error:
+                raise serializers.ValidationError(
+                    {'new_phone_number': error.messages}
+                ) from error
+        return super().to_internal_value(data)
 
-        if User.objects.filter(phone_number=value).exists():
+    def validate_new_phone_number(self, value):
+        user = self.context['request'].user
+        if User.objects.filter(phone_number=value).exclude(pk=user.pk).exists():
             raise serializers.ValidationError('Этот номер телефона уже используется.')
         return value
 
@@ -413,6 +442,9 @@ class UserCreateSerializer(BaseUserCreateSerializer):
             )
         ],
     )
+
+    def to_internal_value(self, data):
+        return super().to_internal_value(normalize_user_input(data))
 
     def validate_first_name(self, value):
         return capitalize_name(value)
@@ -475,4 +507,5 @@ class SetPasswordSerializer(serializers.Serializer):
             raise serializers.ValidationError(
                 {'new_password': error.messages}
             ) from error
+
         return data
