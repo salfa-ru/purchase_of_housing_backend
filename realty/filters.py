@@ -1,8 +1,4 @@
-import re
-
 import django_filters
-from django.contrib.postgres.search import TrigramSimilarity
-from django.db import connection
 from django.db.models import F, Q
 from rest_framework.exceptions import ValidationError
 
@@ -12,6 +8,39 @@ from .models import Realty
 
 TRADE_TYPE_SALE_VALUES = frozenset({'sale', constants.SALE_TRADE_TYPE.lower()})
 TRADE_TYPE_RENT_VALUES = frozenset({'rent', constants.RENT_TRADE_TYPE.lower()})
+
+STREET_TYPE_SYNONYMS = (
+    ('проспект', 'пр-кт', 'пр-т', 'просп', 'пр'),
+    ('улица', 'ул.', 'ул-ца', 'ул'),
+    ('шоссе', 'ш.', 'ш'),
+    ('переулок', 'пер.', 'пер'),
+    ('площадь', 'пл.', 'пл'),
+    ('бульвар', 'б-р', 'бул.', 'бул'),
+    ('набережная', 'наб.', 'наб'),
+    ('проезд', 'пр-д'),
+    ('микрорайон', 'мкр.', 'мкр'),
+    ('квартал', 'кв-л', 'кв.', 'кв'),
+    ('аллея', 'ал.', 'ал'),
+    ('тупик', 'туп.', 'туп'),
+    ('линия', 'лин.', 'лин'),
+    ('дорога', 'дор.', 'дор'),
+    ('поселок', 'посёлок', 'пос.', 'пос'),
+    ('деревня', 'дер.', 'дер'),
+    ('станция', 'ст.', 'ст'),
+)
+
+STREET_TYPE_SEARCHABLE = {
+    form
+    for group in STREET_TYPE_SYNONYMS
+    for form in group
+    if len(form) > 4 or not form.isalpha()
+}
+
+STREET_TYPE_LOOKUP = {
+    form.rstrip('.'): tuple(f for f in group if f in STREET_TYPE_SEARCHABLE)
+    for group in STREET_TYPE_SYNONYMS
+    for form in group
+}
 
 
 class PriceRangeFilterSet(django_filters.FilterSet):
@@ -54,7 +83,10 @@ class RealtyFilter(PriceRangeFilterSet):
         field_name='address__metro__name', lookup_expr='icontains', label='Метро'
     )
     address_street = django_filters.CharFilter(
-        method='filter_address', lookup_expr='icontains', label='Улица или метро'
+        method='filter_address',
+        label='Улица или метро',
+        help_text='Поиск по названию улицы или станции метро (частичное совпадение, '
+        'без учета регистра). Понимает сокращения: пр-кт, ул., ш. и т.п.',
     )
     # address_street = django_filters.BaseInFilter(
     #    method='filter_address',
@@ -214,111 +246,32 @@ class RealtyFilter(PriceRangeFilterSet):
             return queryset.filter(Q(commission__isnull=True) | Q(commission=0))
         return queryset
 
+    @staticmethod
+    def _address_word_q(field, word):
+        """Условие для одного слова запроса.
+        Тип улицы («пр-кт») ищется по всем своим написаниям сразу."""
+        variants = STREET_TYPE_LOOKUP.get(word.lower().rstrip('.'))
+        if not variants:
+            return Q(**{f'{field}__icontains': word})
+
+        query = Q()
+        for variant in variants:
+            query |= Q(**{f'{field}__icontains': variant})
+        return query
+
     def filter_address(self, queryset, name, value):
-        ABBREVIATIONS = [
-            r'\b[Уу]л(?:\.|-ца)?\.?\b',  # улица
-            r'\b[Пп]р(?:\.|-кт)?\.?\b',  # проспект
-            r'\b[Пп]ер\.?\b',  # переулок
-            r'\b[Пп]л\.?\b',  # площадь
-            r'\b[Шш](?:\.)?\.?\b',  # шоссе
-            r'\b[Мм]кр(?:\.)?\.?\b',  # микрорайон
-            r'\b[Нн]аб(?:\.)?\.?\b',  # набережная
-            r'\b[Пп]р-д(?:\.)?\.?\b',  # проезд
-            r'\b[Кк]в(?:\.)?\.?\b',  # квартал
-            r'\b[Бб]-р(?:\.)?\.?\b',  # бульвар
-            r'\b[Лл]ин(?:\.)?\.?\b',  # линия
-            r'\b[Тт]уп(?:\.)?\.?\b',  # тупик
-            r'\b[Аа]л(?:\.)?\.?\b',  # аллея
-            r'\b[Вв]ъезд\b',  # въезд
-            r'\b[Дд]ор(?:\.)?\.?\b',  # дорога
-            r'\b[Пп]ос(?:\.)?\.?\b',  # поселок
-            r'\b[Дд]ер(?:\.)?\.?\b',  # деревня
-            r'\b[Сс]т(?:\.)?\.?\b',  # станция
-            r'\b[Кк]м(?:\.)?\.?\b',  # километр
-            r'\b[Уу]лица\b',
-            r'\b[Пп]роспект\b',
-            r'\b[Пп]ереулок\b',
-            r'\b[Пп]лощадь\b',
-            r'\b[Шш]оссе\b',
-            r'\b[Мм]икрорайон\b',
-            r'\b[Нн]абережная\b',
-            r'\b[Пп]роезд\b',
-            r'\b[Кк]вартал\b',
-            r'\b[Бб]ульвар\b',
-            r'\b[Лл]иния\b',
-            r'\b[Тт]упик\b',
-            r'\b[Аа]ллея\b',
-            r'\b[Дд]орога\b',
-            r'\b[Пп]оселок\b',
-            r'\b[Дд]еревня\b',
-            r'\b[Сс]танция\b',
-            r'\b[А-Яа-я]{1,4}[.-][а-я]{0,3}\.?\b',
-        ]
-        if connection.vendor == 'postgresql':
-            return queryset.annotate(
-                street_similarity=TrigramSimilarity('address__street__name', value),
-                metro_similarity=TrigramSimilarity('address__metro__name', value),
-            ).filter(Q(street_similarity__gt=0.25) | Q(metro_similarity__gt=0.25))
-
-        elif connection.vendor == 'sqlite':
-            search_terms = [term.strip() for term in value.split(',') if term.strip()]
-            if not search_terms:
-                return queryset
-            query = Q()
-            element_index = 0
-            for term in search_terms:
-                parts = term.split(' ')
-                if len(parts) > 1:
-                    for element in parts:
-                        for pattern in ABBREVIATIONS:
-                            if re.search(pattern, element, re.IGNORECASE):
-                                element_index = parts.index(element)
-                    parts.pop(element_index)
-                    term = parts[0]
-                term = term.capitalize()
-                term_query = Q()
-                term_query |= Q(address__street__name__icontains=term)
-                term_query |= Q(address__metro__name__icontains=term)
-                query |= term_query
-            return queryset.filter(query).distinct()
-        else:
+        """Поиск по названию улицы или станции метро."""
+        words = value.split() if value else []
+        if not words:
             return queryset
-        # if value:
-        # Create a Q object for each value
-        #    q_objects = Q()
-        #    for v in value:
-        # Split the search value into words
-        #        words = v.strip().split()
-        #        if not words:
-        #            continue
 
-        # For each value, create a condition where ALL words must be present
-        # This allows searching for multi-word addresses like "Ленинский проспект"
-        # All words must be in the same field (either all in street name or all in metro name)
-        #        street_q = Q()
-        #        metro_q = Q()
+        street_q = Q()
+        metro_q = Q()
+        for word in words:
+            street_q &= self._address_word_q('address__street__name', word)
+            metro_q &= self._address_word_q('address__metro__name', word)
 
-        #        for word in words:
-        # Capitalize first letter, lowercase the rest
-        #            word = word[0].upper() + word[1:].lower() if len(word) > 1 else word.upper()
-        # Each word must be present in street name
-        #            if street_q:
-        #                street_q &= Q(address__street__name__icontains=word)
-        #            else:
-        #                street_q = Q(address__street__name__icontains=word)
-        # Each word must be present in metro name
-        #            if metro_q:
-        #                metro_q &= Q(address__metro__name__icontains=word)
-        #            else:
-        #                metro_q = Q(address__metro__name__icontains=word)
-
-        # Either all words in street OR all words in metro
-        #        value_q = street_q | metro_q
-
-        # Different values in the list are combined with OR
-        #        q_objects |= value_q
-        #    return queryset.filter(q_objects)
-        # return queryset
+        return queryset.filter(street_q | metro_q)
 
 
 class CatalogPriceFilter(PriceRangeFilterSet):
