@@ -13,6 +13,7 @@ from config.constants import IMAGE_EXTENSIONS
 from users.models import User, validate_avatar_size
 from users.validators import (
     normalize_phone_number,
+    validate_email_length,
     validate_person_name,
     validate_phone_number,
 )
@@ -436,6 +437,7 @@ class UserCreateSerializer(BaseUserCreateSerializer):
     email = serializers.EmailField(
         required=True,
         validators=[
+            validate_email_length,
             UniqueValidator(
                 queryset=User.objects.all(),
                 message='Пользователь с таким email уже существует.',
