@@ -2,9 +2,10 @@ from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 
 from config import constants
+from config.pagination import StrictPageSizeMixin
 
 
-class FavoritePagination(PageNumberPagination):
+class FavoritePagination(StrictPageSizeMixin, PageNumberPagination):
     """Пагинатор для избранного пользователя."""
 
     page_size_query_param = 'page_size'
