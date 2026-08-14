@@ -7,6 +7,7 @@ from rest_framework import fields, serializers, status
 from rest_framework.exceptions import APIException
 
 from chats.models import Blocking, Chat, Message
+from config.constants import MESSAGE_LENGTH
 from realty.models import Realty
 from users.models import User
 
@@ -24,7 +25,7 @@ class CreateMessageRequestSerializer(serializers.Serializer):
 
     chat_id = serializers.IntegerField(min_value=1, required=False)
     realty_id = serializers.IntegerField(min_value=1, required=False)
-    message = serializers.CharField(max_length=1000)
+    message = serializers.CharField(max_length=MESSAGE_LENGTH)
 
     def validate(self, data):
         """Проверяем, что передан либо chat_id, либо realty_id, но не оба"""
