@@ -423,6 +423,6 @@ class SetPasswordSerializer(serializers.Serializer):
         try:
             LetterAndDigitPasswordValidator().validate(data['new_password'])
         except ValidationError as e:
-            raise serializers.ValidationError({'new_password': e.messages})
+            raise serializers.ValidationError({'new_password': e.messages}) from e
 
         return data
