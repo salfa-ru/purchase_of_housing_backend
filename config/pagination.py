@@ -24,6 +24,12 @@ class StrictPageSizeMixin:
         if page_size <= 0:
             raise ValidationError({self.page_size_query_param: PAGE_SIZE_ERROR})
 
-        if self.max_page_size:
-            return min(page_size, self.max_page_size)
+        if self.max_page_size and page_size > self.max_page_size:
+            raise ValidationError(
+                {
+                    self.page_size_query_param: (
+                        f'Не должно превышать {self.max_page_size}.'
+                    )
+                }
+            )
         return page_size
