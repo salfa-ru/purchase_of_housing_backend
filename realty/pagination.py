@@ -35,7 +35,9 @@ class LatestRealtyPagination(LimitOffsetPagination):
             ) from err
         if limit <= 0:
             raise ValidationError({'limit': 'Должно быть положительным целым числом.'})
-        return min(limit, self.max_limit)
+        if limit > self.max_limit:
+            raise ValidationError({'limit': f'Не должно превышать {self.max_limit}.'})
+        return limit
 
     def get_offset(self, request):
         if self.offset_query_param not in request.query_params:
