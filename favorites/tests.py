@@ -19,10 +19,10 @@ from realty_values.models import (
 User = get_user_model()
 
 
-def create_realty(owner, **kwargs):
+def create_realty(owner, realty_type_name='Квартира', **kwargs):
     """Создаёт объявление со всеми обязательными связями."""
     realty_type, _ = RealtyType.objects.get_or_create(
-        type='Квартира', defaults={'is_commercial': False}
+        type=realty_type_name, defaults={'is_commercial': False}
     )
     owner_type, _ = TradeParticipant.objects.get_or_create(participant='Собственник')
     communication_method, _ = CommunicationMethod.objects.get_or_create(method='Звонок')
@@ -163,3 +163,90 @@ class FavoritePaginationTest(TestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['count'], self.TOTAL)
         self.assertEqual(len(response.data['results']), self.PAGE_SIZE)
+
+
+class FavoriteRealtyTypeFilterTest(TestCase):
+    """Фильтр избранного по типу недвижимости."""
+
+    def setUp(self):
+        self.client = APIClient()
+
+        self.user = User.objects.create_user(
+            username='typeuser',
+            password='testpass123',
+            email='type@test.com',
+            phone_number='+79000000004',
+        )
+        self.client.force_authenticate(user=self.user)
+
+        for _ in range(2):
+            Favorite.objects.create(
+                user=self.user, realty=create_realty(owner=self.user)
+            )
+        Favorite.objects.create(
+            user=self.user,
+            realty=create_realty(owner=self.user, realty_type_name='Апартаменты'),
+        )
+
+    def test_filter_by_russian_name(self):
+        """Тест: фильтр по названию из справочника"""
+        response = self.client.get('/api/favorites/?realty_type=Квартира')
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['count'], 2)
+
+    def test_filter_is_case_insensitive(self):
+        """Тест: регистр значения не важен"""
+        response = self.client.get('/api/favorites/?realty_type=квартира')
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['count'], 2)
+
+    def test_filter_by_english_alias(self):
+        """Тест: английский алиас типа"""
+        response = self.client.get('/api/favorites/?realty_type=apartment')
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['count'], 2)
+
+    def test_filter_by_several_types(self):
+        """Тест: несколько типов через запятую"""
+        response = self.client.get('/api/favorites/?realty_type=Квартира,Апартаменты')
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['count'], 3)
+
+    def test_spaces_after_comma_are_allowed(self):
+        """Тест: пробелы после запятой не мешают"""
+        response = self.client.get('/api/favorites/?realty_type=Квартира, Апартаменты')
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['count'], 3)
+
+    def test_unknown_type_returns_400(self):
+        """Тест: неизвестный тип → 400"""
+        response = self.client.get('/api/favorites/?realty_type=invalid')
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn('realty_type', response.data)
+
+    def test_unknown_type_in_list_returns_400(self):
+        """Тест: невалидный элемент перечисления отклоняет весь запрос"""
+        response = self.client.get('/api/favorites/?realty_type=Квартира,invalid')
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn('realty_type', response.data)
+
+    def test_empty_value_returns_400(self):
+        """Тест: пустое значение → 400"""
+        response = self.client.get('/api/favorites/?realty_type=')
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn('realty_type', response.data)
+
+    def test_without_param_returns_all(self):
+        """Тест: без параметра отдаётся всё избранное"""
+        response = self.client.get('/api/favorites/')
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['count'], 3)
