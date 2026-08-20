@@ -3,8 +3,10 @@
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 
+from config.pagination import StrictPageSizeMixin
 
-class ConfigurablePagination(PageNumberPagination):
+
+class ConfigurablePagination(StrictPageSizeMixin, PageNumberPagination):
     """
     Custom pagination class that allows configuring page size and max page size
     based on provided parameters.
@@ -34,26 +36,6 @@ class ConfigurablePagination(PageNumberPagination):
             f'максимум {pagesize_max}. '
             f'({pagination_config_name}_PAGESIZE_MAX)'
         )
-
-    def get_page_size(self, request):
-        """
-        Determines the page size, handling exceeding the maximum.
-        Overrides the base class to handle max_page_size.
-        """
-        if self.page_size_query_param:
-            try:
-                page_size = int(request.query_params[self.page_size_query_param])
-                if page_size > 0:  # Ensure it's positive
-                    # Crucial:  Limit to max_page_size
-                    return min(page_size, self.max_page_size)
-                elif page_size == 0:  # Handle page_size=0
-                    return None  # No pagination if page_size is 0
-                else:
-                    return self.page_size  # Negative, use default
-            except (KeyError, ValueError):
-                pass
-
-        return self.page_size  # default page_size
 
     def get_paginated_response(self, data):
         """
