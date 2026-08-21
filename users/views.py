@@ -528,7 +528,9 @@ class SetPasswordView(APIView):
 
     def post(self, request):
         user = request.user
-        serializer = SetPasswordSerializer(data=request.data)
+        serializer = SetPasswordSerializer(
+            data=request.data, context={'request': request}
+        )
         serializer.is_valid(raise_exception=True)
 
         current_password = serializer.validated_data['current_password']

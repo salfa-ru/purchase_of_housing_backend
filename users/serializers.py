@@ -1,6 +1,7 @@
 import re
 from datetime import datetime
 
+from django.contrib.auth import password_validation
 from django.core.exceptions import ValidationError
 from django.core.validators import FileExtensionValidator
 from djoser.serializers import UserCreateSerializer as BaseUserCreateSerializer
@@ -163,6 +164,20 @@ class AdminUserUpdateSerializer(UserBaseSerializer):
 class UserSelfProfileSerializer(UserBaseSerializer):
     """Используется для полного обновления профиля,
     для 'своих' пользователей."""
+
+    def validate_password(self, value):
+        """Прогоняем пароль через AUTH_PASSWORD_VALIDATORS из настроек.
+        DRF сам их не вызывает, поэтому делаем это явно."""
+        user = self.instance or User(
+            email=self.initial_data.get('email', ''),
+            first_name=self.initial_data.get('first_name', ''),
+            last_name=self.initial_data.get('last_name', ''),
+        )
+        try:
+            password_validation.validate_password(value, user)
+        except ValidationError as error:
+            raise serializers.ValidationError(list(error.messages)) from error
+        return value
 
     class Meta(UserBaseSerializer.Meta):
         fields = UserBaseSerializer.Meta.fields + [
@@ -409,20 +424,20 @@ class SetPasswordSerializer(serializers.Serializer):
     re_new_password = serializers.CharField()
 
     def validate(self, data):
-        from django.core.exceptions import ValidationError
-
-        from users.validators import LetterAndDigitPasswordValidator
-
         # Проверяем, что пароли совпадают
         if data['new_password'] != data['re_new_password']:
             raise serializers.ValidationError(
                 {'re_new_password': 'Пароли не совпадают.'}
             )
 
-        # Проверяем сложность пароля
+        request = self.context.get('request')
         try:
-            LetterAndDigitPasswordValidator().validate(data['new_password'])
-        except ValidationError as e:
-            raise serializers.ValidationError({'new_password': e.messages}) from e
+            password_validation.validate_password(
+                data['new_password'], getattr(request, 'user', None)
+            )
+        except ValidationError as error:
+            raise serializers.ValidationError(
+                {'new_password': error.messages}
+            ) from error
 
         return data
