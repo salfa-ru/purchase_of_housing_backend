@@ -3,7 +3,7 @@
 from django.db import models
 from django.db.models import UniqueConstraint
 
-from config.constants import SHORT_STR_LENGTH
+from config.constants import MESSAGE_LENGTH, SHORT_STR_LENGTH
 from realty import models as realty_models
 from users import models as users_models
 
@@ -71,7 +71,7 @@ class Message(models.Model):
     )
     message = models.TextField(
         verbose_name='Сообщение',
-        max_length=1000,
+        max_length=MESSAGE_LENGTH,
     )
     created_at = models.DateTimeField(
         verbose_name='Дата + Время создания', auto_now_add=True

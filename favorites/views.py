@@ -7,6 +7,7 @@ from rest_framework.views import APIView
 
 from config import constants
 from realty.models import Realty
+from realty_values.models import RealtyType
 
 from .models import Favorite
 from .paginations import FavoritePagination
@@ -19,6 +20,41 @@ REALTY_TYPE_MAP = {
     'house': 'Дом',
     'commercial': 'Коммерческая',
 }
+
+
+def resolve_realty_types(raw):
+    """
+    Разбирает параметр realty_type: запятая разделяет несколько типов.
+    Принимает русские названия из справочника и английские алиасы,
+    регистр не важен. Возвращает список канонических названий типов
+    для фильтрации.
+    """
+    known = {
+        value.lower(): value
+        for value in RealtyType.objects.values_list('type', flat=True)
+    }
+    resolved = []
+    unknown = []
+    for part in (item.strip() for item in raw.split(',')):
+        if not part:
+            continue
+        canonical = known.get(REALTY_TYPE_MAP.get(part.lower(), part).lower())
+        if canonical is None:
+            unknown.append(part)
+        elif canonical not in resolved:
+            resolved.append(canonical)
+
+    if unknown or not resolved:
+        allowed = ', '.join(sorted(known.values()))
+        if unknown:
+            listed = ', '.join(f"'{item}'" for item in unknown)
+            message = f'Недопустимое значение {listed}.'
+        else:
+            message = 'Значение не может быть пустым.'
+        raise ValidationError(
+            {'realty_type': f'{message} Допустимые значения: {allowed}.'}
+        )
+    return resolved
 
 
 @extend_schema(
@@ -42,6 +78,15 @@ REALTY_TYPE_MAP = {
             type=bool,
         ),
         OpenApiParameter(
+            name='realty_type',
+            description='Тип недвижимости: русское название из справочника '
+            '(Квартира, Апартаменты) или английский алиас (apartment, flat). '
+            'Регистр не важен. Несколько типов перечисляются через запятую: '
+            'Квартира,Апартаменты. Неизвестный тип — 400.',
+            required=False,
+            type=str,
+        ),
+        OpenApiParameter(
             name='ordering',
             description='-added_at (сначала новые)',
             required=False,
@@ -59,6 +104,8 @@ class FavoriteListView(generics.ListAPIView):
     - `realty_type` — тип недвижимости. Принимает как русские названия
       (Квартира, Апартаменты, Дом и т.д.), так и английские алиасы
       (apartment, apartments, flat, house, commercial). Регистр не важен.
+      Несколько типов перечисляются через запятую: `Квартира,Апартаменты`.
+      Неизвестный тип — 400 со списком допустимых значений.
     - `ordering` — сортировка по дате добавления (added_at / -added_at)
 
     Выдача постраничная, страница выбирается параметром `page`.
@@ -98,9 +145,10 @@ class FavoriteListView(generics.ListAPIView):
 
         # Фильтрация по типу недвижимости (Квартира, Апартаменты, Дом и т.д.)
         realty_type = self.request.query_params.get('realty_type')
-        if realty_type:
-            mapped_type = REALTY_TYPE_MAP.get(realty_type.lower(), realty_type)
-            queryset = queryset.filter(realty__realty_type__type__iexact=mapped_type)
+        if realty_type is not None:
+            queryset = queryset.filter(
+                realty__realty_type__type__in=resolve_realty_types(realty_type)
+            )
 
         # Сортировка
         ordering = self.request.query_params.get('ordering', 'added_at')

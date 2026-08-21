@@ -6,6 +6,7 @@ from rest_framework.pagination import LimitOffsetPagination, PageNumberPaginatio
 from rest_framework.response import Response
 
 from config import constants
+from config.pagination import StrictPageSizeMixin
 from realty.serializers import serializers_common as common_serializers
 
 
@@ -34,7 +35,9 @@ class LatestRealtyPagination(LimitOffsetPagination):
             ) from err
         if limit <= 0:
             raise ValidationError({'limit': 'Должно быть положительным целым числом.'})
-        return min(limit, self.max_limit)
+        if limit > self.max_limit:
+            raise ValidationError({'limit': f'Не должно превышать {self.max_limit}.'})
+        return limit
 
     def get_offset(self, request):
         if self.offset_query_param not in request.query_params:
@@ -65,29 +68,12 @@ class PaginatedResponseSerializer(serializers.Serializer):
     results = common_serializers.RealtyLKSerializer(many=True)
 
 
-class MyRealtyPagination(PageNumberPagination):
+class MyRealtyPagination(StrictPageSizeMixin, PageNumberPagination):
     """Custom pagination for my Realty queryset для ЛИЧНОГО КАБИНЕТА."""
 
     page_size_query_param = 'page_size'
-
-    def get_page_size(self, request):
-        def_page_size = constants.MY_REALTY_PAGESIZE_DEFAULT
-        max_page_size = constants.MY_REALTY_PAGESIZE_MAX
-
-        if not self.page_size_query_param:
-            return def_page_size
-
-        try:
-            page_size = int(
-                request.query_params.get(self.page_size_query_param, def_page_size)
-            )
-            if page_size > max_page_size:
-                raise ValidationError(
-                    f'Максимальное количество объявлений на странице: {max_page_size}'
-                )
-            return page_size
-        except ValueError:
-            return def_page_size
+    page_size = constants.MY_REALTY_PAGESIZE_DEFAULT
+    max_page_size = constants.MY_REALTY_PAGESIZE_MAX
 
     def get_paginated_response(self, data):
         return Response(
