@@ -21,6 +21,7 @@ from rest_framework.exceptions import (  # <---xxx---
     PermissionDenied,
     ValidationError,
 )
+from rest_framework.parsers import FormParser, MultiPartParser
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response  # <---xxx--- удаление пользователя
 from rest_framework.views import APIView
@@ -32,11 +33,18 @@ from rest_framework_simplejwt.token_blacklist.models import (
 from rest_framework_simplejwt.tokens import AccessToken, RefreshToken
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
+from config.constants import (
+    IMAGE_EXTENSIONS,
+    MAX_AVATAR_SIZE,
+    MIN_AVATAR_HEIGHT,
+    MIN_AVATAR_WIDTH,
+)
 from users.models import User
 from users.permissions import IsAdminOrOwner
 from users.serializers import (
     ChangePhoneSerializer,
     SetPasswordSerializer,
+    UserAvatarSerializer,
     UserESAProfileSerializer,
     UserFullSerializer,
     UserNewMsgsSerializer,
@@ -142,6 +150,24 @@ class _RegistrationResponseSerializer(serializers.Serializer):
             request_only=True,
         ),
     ],
+)
+@extend_schema_view(
+    list=extend_schema(summary='Получить список пользователей (только для админа)'),
+    retrieve=extend_schema(summary='Получить пользователя по ID'),
+    update=extend_schema(summary='Обновить пользователя (полностью)'),
+    partial_update=extend_schema(summary='Обновить пользователя (частично)'),
+    destroy=extend_schema(summary='Удалить пользователя'),
+    activation=extend_schema(summary='Активация пользователя'),
+    resend_activation=extend_schema(summary='Повторная отправка активации'),
+    reset_password=extend_schema(summary='Сброс пароля'),
+    reset_password_confirm=extend_schema(summary='Подтверждение сброса пароля'),
+    reset_username=extend_schema(summary='Сброс username'),
+    reset_username_confirm=extend_schema(summary='Подтверждение сброса username'),
+    set_password=extend_schema(summary='Установить новый пароль (для авторизованных)'),
+    set_username=extend_schema(
+        summary='Установить новый username (для авторизованных)'
+    ),
+    me=extend_schema(summary='Получить свой профиль'),
 )
 class CustomUserViewSet(UserViewSet):
     """Кастомный ViewSet для пользователей с улучшенной документацией Swagger."""
@@ -408,6 +434,63 @@ class UserProfileRetrieveUpdateAPIView(generics.RetrieveUpdateAPIView):
         if not self.request.user.uuid_esa:
             return UserSelfProfileSerializer
         return UserESAProfileSerializer
+
+
+@extend_schema(
+    tags=['Пользователи | Профиль'],
+)
+@extend_schema_view(
+    patch=extend_schema(
+        summary='Загрузка аватарки',
+        description='Загружает аватарку текущего пользователя. '
+        'Тело запроса — multipart/form-data с полем avatar. '
+        f'Допустимые форматы: {", ".join(IMAGE_EXTENSIONS)}. '
+        f'Максимальный размер: {MAX_AVATAR_SIZE // (1024 * 1024)} МБ. '
+        f'Минимальное разрешение: {MIN_AVATAR_WIDTH}x{MIN_AVATAR_HEIGHT} px. '
+        'Прежняя аватарка удаляется автоматически.',
+        request={'multipart/form-data': UserAvatarSerializer},
+        responses={
+            200: UserAvatarSerializer,
+            400: OpenApiResponse(
+                description='Ошибка валидации: формат, размер или разрешение'
+            ),
+            401: OpenApiResponse(description='Не авторизован'),
+        },
+    ),
+    delete=extend_schema(
+        summary='Удаление аватарки',
+        description='Удаляет аватарку текущего пользователя вместе с файлом.',
+        responses={
+            200: OpenApiResponse(description='Аватарка удалена'),
+            401: OpenApiResponse(description='Не авторизован'),
+            404: OpenApiResponse(description='Аватарка не установлена'),
+        },
+    ),
+)
+class UserAvatarAPIView(generics.GenericAPIView):
+    """Загрузка и удаление аватарки текущего пользователя."""
+
+    queryset = User.objects.all()
+    permission_classes = [permissions.IsAuthenticated]
+    parser_classes = [MultiPartParser, FormParser]
+    serializer_class = UserAvatarSerializer
+
+    def get_object(self):
+        return self.request.user
+
+    def patch(self, request):
+        serializer = self.get_serializer(self.get_object(), data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def delete(self, request):
+        user = self.get_object()
+        if not user.avatar:
+            raise NotFound('Аватарка не установлена.')
+        user.avatar = None
+        user.save()
+        return Response({'detail': 'Аватарка удалена.'}, status=status.HTTP_200_OK)
 
 
 @extend_schema(

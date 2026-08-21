@@ -58,6 +58,10 @@ IMAGE_EXTENSIONS = ('jpg', 'jpeg', 'png')
 # максимально допустимый размер для аватара (в Б)
 MAX_AVATAR_SIZE = 5 * 1024 * 1024
 
+# минимально допустимое разрешение аватара (в px)
+MIN_AVATAR_WIDTH = 100
+MIN_AVATAR_HEIGHT = 100
+
 # длина строки для вывода в str
 SHORT_STR_LENGTH = 20
 

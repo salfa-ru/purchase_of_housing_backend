@@ -161,6 +161,10 @@ AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'users.validators.ContainsUppercaseValidator',
     },
+    {
+        'NAME': 'users.validators.MaximumLengthPasswordValidator',
+        'OPTIONS': {'max_length': 60},
+    },
 ]
 
 LANGUAGE_CODE = 'ru-ru'
@@ -307,7 +311,7 @@ DJOSER = {
     'SERIALIZERS': {
         'user_create': 'users.serializers.UserCreateSerializer',
         'user': 'users.serializers.UserCreateSerializer',
-        'current_user': 'users.serializers.UserCreateSerializer',
+        'current_user': 'users.serializers.CurrentUserSerializer',
     },
 }
 

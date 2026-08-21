@@ -10,7 +10,7 @@ from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
 
 from config.constants import IMAGE_EXTENSIONS
-from users.models import User, validate_avatar_size
+from users.models import User, validate_avatar_min_resolution, validate_avatar_size
 from users.validators import (
     normalize_phone_number,
     validate_email_length,
@@ -70,6 +70,7 @@ class UserBaseSerializer(serializers.ModelSerializer):
         validators=[
             FileExtensionValidator(allowed_extensions=IMAGE_EXTENSIONS),
             validate_avatar_size,
+            validate_avatar_min_resolution,
         ],
     )
 
@@ -140,11 +141,20 @@ class UserProfileUpdateSerializer(serializers.ModelSerializer):
     НЕДОСТУПНЫ для изменения через этот сериализатор.
     """
 
-    # Явно переопределяем поля без валидаторов модели,
-    # чтобы обычный пользователь мог обновлять профиль без ограничений
+    # Имя и фамилию явно переопределяем без валидаторов модели,
+    # чтобы обычный пользователь мог обновлять профиль без ограничений.
+    # На аватарку ограничения по формату, размеру и разрешению остаются.
     first_name = serializers.CharField(required=False, allow_blank=True, max_length=40)
     last_name = serializers.CharField(required=False, allow_blank=True, max_length=40)
-    avatar = serializers.ImageField(required=False, allow_null=True)
+    avatar = serializers.ImageField(
+        required=False,
+        allow_null=True,
+        validators=[
+            FileExtensionValidator(allowed_extensions=IMAGE_EXTENSIONS),
+            validate_avatar_size,
+            validate_avatar_min_resolution,
+        ],
+    )
 
     class Meta:
         model = User
@@ -168,6 +178,35 @@ class UserProfileUpdateSerializer(serializers.ModelSerializer):
         # if attrs.get('first_name') and attrs.get('last_name'):
         #     # какая-то проверка
         return attrs
+
+
+class CurrentUserSerializer(UserBaseSerializer):
+    """Профиль текущего пользователя для /api/auth/users/me/."""
+
+    class Meta(UserBaseSerializer.Meta):
+        extra_kwargs = {
+            **UserBaseSerializer.Meta.extra_kwargs,
+            'email': {'read_only': True},
+            'phone_number': {'read_only': True},
+        }
+
+
+class UserAvatarSerializer(serializers.ModelSerializer):
+    """Загрузка аватарки через отдельный эндпоинт /users/me/avatar/."""
+
+    avatar = serializers.ImageField(
+        required=True,
+        allow_null=False,
+        validators=[
+            FileExtensionValidator(allowed_extensions=IMAGE_EXTENSIONS),
+            validate_avatar_size,
+            validate_avatar_min_resolution,
+        ],
+    )
+
+    class Meta:
+        model = User
+        fields = ['avatar']
 
 
 class AdminUserUpdateSerializer(UserBaseSerializer):
@@ -509,5 +548,3 @@ class SetPasswordSerializer(serializers.Serializer):
             raise serializers.ValidationError(
                 {'new_password': error.messages}
             ) from error
-
-        return data

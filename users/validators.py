@@ -146,3 +146,20 @@ class ContainsUppercaseValidator:
 
     def get_help_text(self):
         return 'Пароль должен содержать хотя бы одну заглавную букву.'
+
+
+class MaximumLengthPasswordValidator:
+    """Проверяет, что пароль не длиннее заданного предела."""
+
+    def __init__(self, max_length=60):
+        self.max_length = max_length
+
+    def validate(self, password, user=None):
+        if len(password) > self.max_length:
+            raise ValidationError(
+                f'Пароль не должен превышать {self.max_length} символов.',
+                code='password_too_long',
+            )
+
+    def get_help_text(self):
+        return f'Пароль не должен превышать {self.max_length} символов.'
