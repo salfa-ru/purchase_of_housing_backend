@@ -441,7 +441,7 @@ class UserCreateSerializer(BaseUserCreateSerializer):
             UniqueValidator(
                 queryset=User.objects.all(),
                 message='Пользователь с таким email уже существует.',
-            )
+            ),
         ],
     )
 
