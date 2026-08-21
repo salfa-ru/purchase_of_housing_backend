@@ -7,6 +7,7 @@ from django.core.validators import FileExtensionValidator
 from djoser.serializers import UserCreateSerializer as BaseUserCreateSerializer
 from drf_spectacular.utils import OpenApiExample, extend_schema_serializer
 from rest_framework import serializers
+from rest_framework.validators import UniqueValidator
 
 from config.constants import IMAGE_EXTENSIONS
 from users.models import User, validate_avatar_size
@@ -383,22 +384,57 @@ class ChangePhoneSerializer(serializers.Serializer):
 class UserCreateSerializer(BaseUserCreateSerializer):
     """Сериализатор для регистрации нового пользователя."""
 
+    # Поля объявлены явно, поэтому DRF не добавляет к ним проверку
+    # уникальности из модели сам — без нее занятый email или телефон
+    # доходит до базы, и djoser подменяет ошибку на общую заглушку.
     phone_number = serializers.CharField(
-        required=True, validators=[validate_phone_number]
+        required=True,
+        validators=[
+            validate_phone_number,
+            UniqueValidator(
+                queryset=User.objects.all(),
+                message='Пользователь с таким номером телефона уже существует.',
+            ),
+        ],
     )
     first_name = serializers.CharField(
         required=True, allow_blank=False, validators=[validate_person_name]
     )
+    # Фамилия по ТЗ не обязательна
     last_name = serializers.CharField(
-        required=True, allow_blank=False, validators=[validate_person_name]
+        required=False, allow_blank=True, validators=[validate_person_name]
     )
-    email = serializers.EmailField(required=True)
+    email = serializers.EmailField(
+        required=True,
+        validators=[
+            UniqueValidator(
+                queryset=User.objects.all(),
+                message='Пользователь с таким email уже существует.',
+            )
+        ],
+    )
 
     def validate_first_name(self, value):
         return capitalize_name(value)
 
     def validate_last_name(self, value):
         return capitalize_name(value)
+
+    def validate_password(self, value):
+        """Проверка пароля на уровне поля."""
+        user = User(
+            email=self.initial_data.get('email', ''),
+            first_name=self.initial_data.get('first_name', ''),
+            last_name=self.initial_data.get('last_name', ''),
+        )
+        try:
+            password_validation.validate_password(value, user)
+        except ValidationError as error:
+            raise serializers.ValidationError(list(error.messages)) from error
+        return value
+
+    def validate(self, attrs):
+        return attrs
 
     class Meta(BaseUserCreateSerializer.Meta):
         model = User
@@ -439,5 +475,4 @@ class SetPasswordSerializer(serializers.Serializer):
             raise serializers.ValidationError(
                 {'new_password': error.messages}
             ) from error
-
         return data

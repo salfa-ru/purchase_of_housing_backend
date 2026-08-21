@@ -56,7 +56,7 @@ class _RegistrationRequestSerializer(serializers.Serializer):
     re_password = serializers.CharField(write_only=True)
     email = serializers.EmailField()
     phone_number = serializers.CharField()
-    first_name = serializers.CharField(required=False)
+    first_name = serializers.CharField()
     last_name = serializers.CharField(required=False)
 
 
