@@ -13,7 +13,7 @@ from django.utils import timezone  # <---xxx--- для удаления поль
 from config import constants
 from config.constants import IMAGE_EXTENSIONS, MAX_AVATAR_SIZE
 from realty_values import models as values_models
-from users.validators import validate_person_name
+from users.validators import validate_email_length, validate_person_name
 
 
 def validate_avatar_size(value):
@@ -53,7 +53,11 @@ class User(AbstractUser):
         validators=[validate_person_name],
         **constants.NULLABLE_FIELD,
     )
-    email = models.EmailField(verbose_name='email', unique=True)
+    email = models.EmailField(
+        verbose_name='email',
+        unique=True,
+        validators=[validate_email_length],
+    )
 
     uuid_esa = models.UUIDField(
         editable=False, verbose_name='UUID из ЕСА', **constants.NULLABLE_FIELD
