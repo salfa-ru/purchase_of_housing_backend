@@ -70,6 +70,35 @@ class _RegistrationResponseSerializer(serializers.Serializer):
     last_name = serializers.CharField()
 
 
+@extend_schema_view(
+    list=extend_schema(summary='Получить список пользователей (только для админа)'),
+    retrieve=extend_schema(summary='Получить пользователя по ID'),
+    update=extend_schema(summary='Обновить пользователя (полностью)'),
+    partial_update=extend_schema(summary='Обновить пользователя (частично)'),
+    destroy=extend_schema(summary='Удалить пользователя'),
+    activation=extend_schema(summary='Активация пользователя'),
+    resend_activation=extend_schema(summary='Повторная отправка активации'),
+    reset_password=extend_schema(
+        summary='Сброс пароля по email',
+        description='Отправляет на указанный email письмо со ссылкой для '
+        'установки нового пароля. Доступно без авторизации.',
+    ),
+    reset_password_confirm=extend_schema(
+        summary='Подтверждение сброса пароля',
+        description='Принимает uid и token из письма вместе с новым паролем.',
+    ),
+    reset_username=extend_schema(summary='Сброс username'),
+    reset_username_confirm=extend_schema(summary='Подтверждение сброса username'),
+    set_password=extend_schema(
+        summary='Смена пароля (для авторизованных)',
+        description='Принимает текущий пароль и новый. Доступно только '
+        'авторизованному пользователю и меняет пароль ему самому.',
+    ),
+    set_username=extend_schema(
+        summary='Установить новый username (для авторизованных)'
+    ),
+    me=extend_schema(summary='Свой профиль'),
+)
 @extend_schema(
     tags=['Аутентификация'],
     summary='Регистрация пользователя',
@@ -123,62 +152,6 @@ class CustomUserViewSet(UserViewSet):
 
             return UserCreateSerializer
         return super().get_serializer_class()
-
-    @extend_schema(summary='Получить список пользователей (только для админа)')
-    def list(self, request, *args, **kwargs):
-        return super().list(request, *args, **kwargs)
-
-    @extend_schema(summary='Получить пользователя по ID')
-    def retrieve(self, request, *args, **kwargs):
-        return super().retrieve(request, *args, **kwargs)
-
-    @extend_schema(summary='Обновить пользователя (полностью)')
-    def update(self, request, *args, **kwargs):
-        return super().update(request, *args, **kwargs)
-
-    @extend_schema(summary='Обновить пользователя (частично)')
-    def partial_update(self, request, *args, **kwargs):
-        return super().partial_update(request, *args, **kwargs)
-
-    @extend_schema(summary='Удалить пользователя')
-    def destroy(self, request, *args, **kwargs):
-        return super().destroy(request, *args, **kwargs)
-
-    @extend_schema(summary='Активация пользователя')
-    def activation(self, request, *args, **kwargs):
-        return super().activation(request, *args, **kwargs)
-
-    @extend_schema(summary='Повторная отправка активации')
-    def resend_activation(self, request, *args, **kwargs):
-        return super().resend_activation(request, *args, **kwargs)
-
-    @extend_schema(summary='Сброс пароля')
-    def reset_password(self, request, *args, **kwargs):
-        return super().reset_password(request, *args, **kwargs)
-
-    @extend_schema(summary='Подтверждение сброса пароля')
-    def reset_password_confirm(self, request, *args, **kwargs):
-        return super().reset_password_confirm(request, *args, **kwargs)
-
-    @extend_schema(summary='Сброс username')
-    def reset_username(self, request, *args, **kwargs):
-        return super().reset_username(request, *args, **kwargs)
-
-    @extend_schema(summary='Подтверждение сброса username')
-    def reset_username_confirm(self, request, *args, **kwargs):
-        return super().reset_username_confirm(request, *args, **kwargs)
-
-    @extend_schema(summary='Установить новый пароль (для авторизованных)')
-    def set_password(self, request, *args, **kwargs):
-        return super().set_password(request, *args, **kwargs)
-
-    @extend_schema(summary='Установить новый username (для авторизованных)')
-    def set_username(self, request, *args, **kwargs):
-        return super().set_username(request, *args, **kwargs)
-
-    @extend_schema(summary='Получить свой профиль')
-    def me(self, request, *args, **kwargs):
-        return super().me(request, *args, **kwargs)
 
 
 @extend_schema(
