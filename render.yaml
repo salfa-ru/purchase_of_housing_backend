@@ -1,0 +1,116 @@
+# Описание сервисов для Render (Blueprint). Создаётся так:
+# New → Blueprint → выбрать этот репозиторий. Render поднимет оба сервиса и
+# спросит значения переменных, помеченных sync: false.
+#
+# Подробности и таблица переменных — docs/deploy-render.md
+
+services:
+  # --------------------------------------------------------------------
+  # Тестовый стенд: катится с dev автоматически, документация открыта
+  # --------------------------------------------------------------------
+  - name: realty-backend-test
+    type: web
+    runtime: docker
+    plan: free
+    region: frankfurt
+    branch: dev
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /hidden-health/
+    autoDeployTrigger: commit
+    envVars:
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DEBUG
+        value: 'False'
+      # Swagger и Redoc открыты всем — это тестовый стенд
+      - key: DOCS_PUBLIC
+        value: 'True'
+      - key: USE_SQLITE
+        value: 'False'
+      # Логи Django появляются в консоли Render сразу, а не порциями
+      - key: PYTHONUNBUFFERED
+        value: '1'
+      - key: DB_PORT
+        value: '5432'
+      - key: DB_SSLMODE
+        value: require
+      - key: SUPABASE_BUCKET
+        value: media
+      # Срок жизни объявления: на тесте короче, чтобы проверять деактивацию
+      - key: MAX_LISTING_DURATION_DD_HH_MM_SS
+        value: '00:01:00:00'
+      # Ниже — то, что спросит Render при создании
+      - key: POSTGRES_DB
+        sync: false
+      - key: POSTGRES_USER
+        sync: false
+      - key: POSTGRES_PASSWORD
+        sync: false
+      - key: DB_HOST
+        sync: false
+      - key: SUPABASE_S3_ENDPOINT
+        sync: false
+      - key: SUPABASE_S3_REGION
+        sync: false
+      - key: SUPABASE_S3_ACCESS_KEY
+        sync: false
+      - key: SUPABASE_S3_SECRET_KEY
+        sync: false
+      - key: SUPABASE_PUBLIC_DOMAIN
+        sync: false
+      - key: DADATA_API_KEY
+        sync: false
+
+  # --------------------------------------------------------------------
+  # Прод: деплой только вручную кнопкой, документация закрыта
+  # --------------------------------------------------------------------
+  - name: realty-backend-prod
+    type: web
+    runtime: docker
+    plan: free
+    region: frankfurt
+    branch: dev
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /hidden-health/
+    # Никакого автодеплоя: иначе любой пуш в dev уедет на боевой сервис
+    autoDeployTrigger: 'off'
+    envVars:
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DEBUG
+        value: 'False'
+      # Документация видна только админам
+      - key: DOCS_PUBLIC
+        value: 'False'
+      - key: USE_SQLITE
+        value: 'False'
+      - key: PYTHONUNBUFFERED
+        value: '1'
+      - key: DB_PORT
+        value: '5432'
+      - key: DB_SSLMODE
+        value: require
+      - key: SUPABASE_BUCKET
+        value: media
+      - key: MAX_LISTING_DURATION_DD_HH_MM_SS
+        value: '30:00:00:00'
+      - key: POSTGRES_DB
+        sync: false
+      - key: POSTGRES_USER
+        sync: false
+      - key: POSTGRES_PASSWORD
+        sync: false
+      - key: DB_HOST
+        sync: false
+      - key: SUPABASE_S3_ENDPOINT
+        sync: false
+      - key: SUPABASE_S3_REGION
+        sync: false
+      - key: SUPABASE_S3_ACCESS_KEY
+        sync: false
+      - key: SUPABASE_S3_SECRET_KEY
+        sync: false
+      - key: SUPABASE_PUBLIC_DOMAIN
+        sync: false
+      - key: DADATA_API_KEY
+        sync: false

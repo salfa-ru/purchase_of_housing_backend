@@ -165,6 +165,9 @@ cython_debug/
 # media folders
 media/
 
+# собранная статика: собирается в образ при сборке, в репозитории не нужна
+static/
+
 #**/migrations/
 
 .idea/

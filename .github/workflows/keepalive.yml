@@ -1,0 +1,33 @@
+# Бесплатный тариф Render усыпляет сервис после 15 минут без трафика, а после
+# пробуждения первый запрос идёт около минуты. Этот workflow дёргает лёгкий
+# health-эндпоинт и держит прод бодрым.
+#
+# Окно 03:00-20:00 UTC — это 06:00-23:00 по Москве. Круглосуточный пинг съел бы
+# 744 часа из 750 бесплатных на месяц, и в последних числах Render отключил бы
+# все сервисы разом, включая тестовый.
+name: Пробуждение прода
+
+on:
+  schedule:
+    - cron: '*/10 3-20 * * *'
+  workflow_dispatch:
+
+jobs:
+  ping:
+    name: Пинг health-эндпоинта
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Ping
+        env:
+          # Переменная репозитория: Settings - Secrets and variables - Actions - Variables.
+          # Полный адрес вместе с /hidden-health/
+          URL: ${{ vars.PROD_HEALTHCHECK_URL }}
+        run: |
+          if [ -z "$URL" ]; then
+            echo "Переменная PROD_HEALTHCHECK_URL не задана — пропускаем."
+            exit 0
+          fi
+          code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 120 --retry 3 --retry-delay 30 "$URL")
+          echo "Ответ: $code"
+          test "$code" = "200"
