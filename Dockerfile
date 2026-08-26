@@ -18,6 +18,10 @@ RUN pip install -r requirements.txt --no-cache-dir
 # Копируем все файлы из текущей директории на локальной машине в рабочую директорию контейнера
 COPY . .
 
+# Собираем статику в образ: WhiteNoise раздаёт её сам, nginx на Render нет.
+# К базе эта команда не обращается, поэтому на этапе сборки выполняется спокойно.
+RUN python manage.py collectstatic --noinput
+
 
 # ======================================================================
 # ВНИМАНИЕ! Часть с удалением объявлений и запуском задач по удалению
@@ -48,4 +52,4 @@ ENTRYPOINT ["/app/entrypoint.sh"]
 # --threads: количество потоков на один процесс. 2-4 потока на воркер — норм
 #  Теперь один воркер сможет одновременно обрабатывать до 4 запросов.
 #CMD ["gunicorn config.wsgi:application --workers 3 --threads 4 --bind 0.0.0.0:8080"]
-CMD ["gunicorn", "config.wsgi:application", "--workers", "3", "--threads", "4", "--bind", "0.0.0.0:8080"]
+CMD ["sh", "-c", "gunicorn config.wsgi:application --workers ${WEB_CONCURRENCY:-2} --threads 4 --bind 0.0.0.0:${PORT:-8080}"]

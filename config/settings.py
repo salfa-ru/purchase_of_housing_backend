@@ -36,6 +36,11 @@ extra_hosts = os.getenv('EXTRA_ALLOWED_HOSTS')
 if extra_hosts:
     ALLOWED_HOSTS += [host.strip() for host in extra_hosts.split(',')]
 
+RENDER_HOSTNAME = os.getenv('RENDER_EXTERNAL_HOSTNAME')
+
+if RENDER_HOSTNAME:
+    ALLOWED_HOSTS.append(RENDER_HOSTNAME)
+
 CSRF_TRUSTED_ORIGINS = [
     # f'http://{DOMAIN}',
     # f'https://{DOMAIN}',
@@ -58,6 +63,9 @@ extra_trusted_origins = os.getenv('EXTRA_CSRF_TRUSTED_ORIGINS')
 
 if extra_trusted_origins:
     CSRF_TRUSTED_ORIGINS += [host.strip() for host in extra_trusted_origins.split(',')]
+
+if RENDER_HOSTNAME:
+    CSRF_TRUSTED_ORIGINS.append(f'https://{RENDER_HOSTNAME}')
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -91,6 +99,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -137,6 +146,9 @@ else:
             'PASSWORD': os.getenv('POSTGRES_PASSWORD', ''),
             'HOST': os.getenv('DB_HOST', ''),
             'PORT': os.getenv('DB_PORT', 5432),
+            'CONN_MAX_AGE': int(os.getenv('DB_CONN_MAX_AGE', '60')),
+            'CONN_HEALTH_CHECKS': True,
+            'OPTIONS': {'sslmode': os.getenv('DB_SSLMODE', 'prefer')},
         }
     }
 
@@ -178,6 +190,29 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+STORAGES = {
+    'default': {'BACKEND': 'django.core.files.storage.FileSystemStorage'},
+    'staticfiles': {'BACKEND': 'whitenoise.storage.CompressedStaticFilesStorage'},
+}
+
+SUPABASE_BUCKET = os.getenv('SUPABASE_BUCKET')
+
+if SUPABASE_BUCKET:
+    STORAGES['default'] = {
+        'BACKEND': 'storages.backends.s3.S3Storage',
+        'OPTIONS': {
+            'bucket_name': SUPABASE_BUCKET,
+            'endpoint_url': os.getenv('SUPABASE_S3_ENDPOINT'),
+            'access_key': os.getenv('SUPABASE_S3_ACCESS_KEY'),
+            'secret_key': os.getenv('SUPABASE_S3_SECRET_KEY'),
+            'region_name': os.getenv('SUPABASE_S3_REGION'),
+            'addressing_style': 'path',
+            'querystring_auth': False,
+            'file_overwrite': False,
+            'custom_domain': os.getenv('SUPABASE_PUBLIC_DOMAIN'),
+        },
+    }
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
@@ -252,7 +287,7 @@ SPECTACULAR_SETTINGS = {
 Q_CLUSTER = {
     'name': 'DjangoORM',
     'orm': 'default',  # Use the default Django database for task management
-    'workers': 4,  # Number of workers to handle tasks
+    'workers': int(os.getenv('Q_CLUSTER_WORKERS', '2')),
     'retry': 360,  # Time to keep retrying tasks before marking as failed
     'timeout': 60,  # Task execution timeout in seconds
     'queue_limit': 50,  # Max number of tasks in the queue
@@ -270,6 +305,11 @@ CORS_ALLOWED_ORIGINS = [
     'https://front.test.estate.ktsf.ru',
     'https://house-react-ten.vercel.app',
 ]
+
+extra_cors_origins = os.getenv('EXTRA_CORS_ALLOWED_ORIGINS')
+
+if extra_cors_origins:
+    CORS_ALLOWED_ORIGINS += [origin.strip() for origin in extra_cors_origins.split(',')]
 
 # REMOVE IN PRODUCTION
 # CORS_ALLOW_ALL_ORIGINS = True
