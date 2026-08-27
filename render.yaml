@@ -69,11 +69,10 @@ services:
     runtime: docker
     plan: free
     region: frankfurt
-    branch: dev
+    branch: main
     dockerfilePath: ./Dockerfile
     healthCheckPath: /hidden-health/
-    # Никакого автодеплоя: иначе любой пуш в dev уедет на боевой сервис
-    autoDeployTrigger: 'off'
+    autoDeployTrigger: commit
     envVars:
       - key: SECRET_KEY
         generateValue: true
