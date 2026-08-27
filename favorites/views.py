@@ -18,8 +18,9 @@ REALTY_TYPE_MAP = {
     'apartments': 'Квартира',
     'flat': 'Квартира',
     'house': 'Дом',
-    'commercial': 'Коммерческая',
 }
+
+COMMERCIAL_ALIAS = 'commercial'
 
 
 def resolve_realty_types(raw):
@@ -29,14 +30,22 @@ def resolve_realty_types(raw):
     регистр не важен. Возвращает список канонических названий типов
     для фильтрации.
     """
-    known = {
-        value.lower(): value
-        for value in RealtyType.objects.values_list('type', flat=True)
-    }
+    catalog = list(RealtyType.objects.values_list('type', 'is_commercial'))
+    known = {value.lower(): value for value, _ in catalog}
+    commercial = [value for value, is_commercial in catalog if is_commercial]
+
     resolved = []
     unknown = []
     for part in (item.strip() for item in raw.split(',')):
         if not part:
+            continue
+        if part.lower() == COMMERCIAL_ALIAS:
+            if not commercial:
+                unknown.append(part)
+                continue
+            for value in commercial:
+                if value not in resolved:
+                    resolved.append(value)
             continue
         canonical = known.get(REALTY_TYPE_MAP.get(part.lower(), part).lower())
         if canonical is None:

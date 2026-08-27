@@ -1,0 +1,61 @@
+name: Автотесты
+
+on:
+  push:
+    branches: [ dev ]
+  pull_request:
+    branches: [ dev ]
+
+jobs:
+  tests:
+    name: Django-тесты
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_DB: realty_ci
+          POSTGRES_USER: realty_ci
+          POSTGRES_PASSWORD: realty_ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      # DEBUG обязательно False: часть тестов проверяет, что документация
+      # закрыта от посторонних, а при DEBUG=True она открыта всем
+      DEBUG: 'False'
+      USE_SQLITE: 'False'
+      SECRET_KEY: ci-secret-key-only-for-tests
+      POSTGRES_DB: realty_ci
+      POSTGRES_USER: realty_ci
+      POSTGRES_PASSWORD: realty_ci
+      DB_HOST: 127.0.0.1
+      DB_PORT: '5432'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      # Страховка от расхождения моделей и миграций
+      - name: Check migrations
+        run: python manage.py makemigrations --check --dry-run
+
+      - name: Run tests
+        run: python manage.py test --verbosity 2
