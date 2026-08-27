@@ -13,9 +13,10 @@ SECRET_KEY = os.getenv('SECRET_KEY', 'default_key')
 
 DEBUG = os.getenv('DEBUG', 'False').lower() == 'true'
 
-# Документация API (Swagger/Redoc/schema): открыта всем на не-проде (DEBUG=True —
-# тест/локаль), на проде (DEBUG=False) — только админам.
-DOCS_PUBLIC = DEBUG
+# Документация API (Swagger/Redoc/schema): открыта всем на не-проде, на проде —
+# только админам. Прод и тест крутятся на одном коде с DEBUG=False, поэтому
+# значение берётся из окружения, а DEBUG остаётся лишь запасным вариантом.
+DOCS_PUBLIC = os.getenv('DOCS_PUBLIC', str(DEBUG)).lower() == 'true'
 
 # DOMAIN = os.getenv('DOMAIN')
 # ALLOWED_HOSTS = [DOMAIN, os.getenv('HOST_IP'), 'localhost', 'api.prod.estate.ktsf.ru']
