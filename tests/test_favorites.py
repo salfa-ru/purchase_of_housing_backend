@@ -6,46 +6,10 @@ from rest_framework.test import APIClient
 from config import constants
 from favorites.models import Favorite
 from realty.models import Realty
-from realty_addresses.models import Address
-from realty_specificities.models import AboutApartment
-from realty_values.models import (
-    CommunicationMethod,
-    RealtyAdvStatus,
-    RealtyType,
-    RoomsNumber,
-    TradeParticipant,
-)
+from realty_values.models import RealtyType
+from tests.factories import create_realty, create_user
 
 User = get_user_model()
-
-
-def create_realty(owner, realty_type_name='Квартира', **kwargs):
-    """Создаёт объявление со всеми обязательными связями."""
-    realty_type, _ = RealtyType.objects.get_or_create(
-        type=realty_type_name, defaults={'is_commercial': False}
-    )
-    owner_type, _ = TradeParticipant.objects.get_or_create(participant='Собственник')
-    communication_method, _ = CommunicationMethod.objects.get_or_create(method='Звонок')
-    realty_status, _ = RealtyAdvStatus.objects.get_or_create(status='Опубликовано')
-    rooms_number, _ = RoomsNumber.objects.get_or_create(number_of_rooms='2')
-
-    address = Address.objects.create(house_number='1', latitude=55.7, longitude=37.6)
-    about_apartment = AboutApartment.objects.create(
-        number_of_rooms=rooms_number, area=50.0, floor=2, floors_number=9
-    )
-
-    return Realty.objects.create(
-        owner=owner,
-        realty_type=realty_type,
-        address=address,
-        about_apartment=about_apartment,
-        description='Тестовое объявление',
-        price=1000000,
-        owner_type=owner_type,
-        communication_method=communication_method,
-        realty_status=realty_status,
-        **kwargs,
-    )
 
 
 class FavoriteCreateViewTest(TestCase):
@@ -250,3 +214,44 @@ class FavoriteRealtyTypeFilterTest(TestCase):
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data['count'], 3)
+
+
+class FavoriteCommercialAliasTest(TestCase):
+    """Алиас commercial разворачивается во все коммерческие типы справочника."""
+
+    def setUp(self):
+        self.client = APIClient()
+        self.user = create_user('aliasowner')
+        self.client.force_authenticate(user=self.user)
+
+        self.office = RealtyType.objects.get(type='Офис')
+        self.warehouse = RealtyType.objects.get(type='Склад')
+
+        self.commercial = create_realty(self.user, realty_type=self.office)
+        self.warehouse_realty = create_realty(self.user, realty_type=self.warehouse)
+        self.residential = create_realty(self.user, realty_type_name='Квартира')
+
+        for realty in (self.commercial, self.warehouse_realty, self.residential):
+            Favorite.objects.create(user=self.user, realty=realty)
+
+    def test_alias_returns_all_commercial(self):
+        """Тест: ?realty_type=commercial отдаёт объекты всех коммерческих типов"""
+        response = self.client.get('/api/favorites/?realty_type=commercial')
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        ids = {item['realty']['id'] for item in response.data['results']}
+        self.assertEqual(ids, {self.commercial.id, self.warehouse_realty.id})
+
+    def test_alias_is_case_insensitive(self):
+        """Тест: регистр в алиасе не важен"""
+        response = self.client.get('/api/favorites/?realty_type=COMMERCIAL')
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data['results']), 2)
+
+    def test_alias_combines_with_plain_type(self):
+        """Тест: алиас перечисляется вместе с обычным типом через запятую"""
+        response = self.client.get('/api/favorites/?realty_type=commercial,Квартира')
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data['results']), 3)

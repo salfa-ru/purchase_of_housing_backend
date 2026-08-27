@@ -290,7 +290,46 @@ class RealtyCreateSerializer(serializers.ModelSerializer):
 
         return value
 
+    def _resolve(self, data, field):
+        """Значение поля с учётом частичного обновления: из запроса или из объекта."""
+        if field in data:
+            return data[field]
+        return getattr(self.instance, field, None)
+
+    def _validate_commercial_type(self, data):
+        """Тип коммерции обязателен для коммерческой недвижимости и запрещён для жилой."""
+        realty_type = self._resolve(data, 'realty_type')
+        commercial_type = self._resolve(data, 'commercial_type')
+
+        if realty_type is None:
+            return
+
+        if realty_type.is_commercial and not commercial_type:
+            allowed = ', '.join(
+                code for code, _ in realty_models.Realty.COMMERCIAL_TYPE_CHOICES
+            )
+            raise serializers.ValidationError(
+                {
+                    'commercial_type': (
+                        f'Обязательно для коммерческой недвижимости. '
+                        f'Допустимые значения: {allowed}.'
+                    )
+                }
+            )
+
+        if not realty_type.is_commercial and commercial_type:
+            raise serializers.ValidationError(
+                {
+                    'commercial_type': (
+                        'Указывается только для коммерческой недвижимости, '
+                        f'а «{realty_type.type}» — жилая.'
+                    )
+                }
+            )
+
     def validate(self, data):
+        self._validate_commercial_type(data)
+
         warnings = []
 
         # Check for simultaneous use of new and old fields
