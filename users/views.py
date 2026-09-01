@@ -61,7 +61,6 @@ from users.utils import delete_expired_tokens, update_token_field
 class _RegistrationRequestSerializer(serializers.Serializer):
     username = serializers.CharField()
     password = serializers.CharField(write_only=True)
-    re_password = serializers.CharField(write_only=True)
     email = serializers.EmailField()
     phone_number = serializers.CharField()
     first_name = serializers.CharField()
@@ -78,7 +77,49 @@ class _RegistrationResponseSerializer(serializers.Serializer):
     last_name = serializers.CharField()
 
 
+@extend_schema(tags=['Аутентификация'])
 @extend_schema_view(
+    create=extend_schema(
+        summary='Регистрация пользователя',
+        description="""
+    Создание нового пользователя.
+
+    **Обязательные поля:**
+    - username (логин)
+    - password (пароль)
+    - email
+    - phone_number (уникальный номер телефона)
+    - first_name (имя)
+
+    **Опциональные поля:**
+    - last_name (фамилия)
+
+    **Примечание:** После регистрации username автоматически становится равен email.
+    Для входа используйте email в качестве username.
+    """,
+        request=_RegistrationRequestSerializer,
+        responses={
+            201: OpenApiResponse(
+                description='Пользователь успешно создан',
+                response=_RegistrationResponseSerializer,
+            ),
+            400: OpenApiResponse(description='Ошибка валидации'),
+        },
+        examples=[
+            OpenApiExample(
+                'Пример запроса',
+                value={
+                    'username': 'ivan@example.com',
+                    'password': 'securepass123',
+                    'email': 'ivan@example.com',
+                    'phone_number': '+79991234567',
+                    'first_name': 'Иван',
+                    'last_name': 'Петров',
+                },
+                request_only=True,
+            ),
+        ],
+    ),
     list=extend_schema(summary='Получить список пользователей (только для админа)'),
     retrieve=extend_schema(summary='Получить пользователя по ID'),
     update=extend_schema(summary='Обновить пользователя (полностью)'),
@@ -106,68 +147,6 @@ class _RegistrationResponseSerializer(serializers.Serializer):
         summary='Установить новый username (для авторизованных)'
     ),
     me=extend_schema(summary='Свой профиль'),
-)
-@extend_schema(
-    tags=['Аутентификация'],
-    summary='Регистрация пользователя',
-    description="""
-    Создание нового пользователя.
-
-    **Обязательные поля:**
-    - username (логин)
-    - password (пароль)
-    - re_password (подтверждение пароля)
-    - email
-    - phone_number (уникальный номер телефона)
-
-    **Опциональные поля:**
-    - first_name (имя)
-    - last_name (фамилия)
-
-    **Примечание:** После регистрации username автоматически становится равен email.
-    Для входа используйте email в качестве username.
-    """,
-    request=_RegistrationRequestSerializer,
-    responses={
-        201: OpenApiResponse(
-            description='Пользователь успешно создан',
-            response=_RegistrationResponseSerializer,
-        ),
-        400: OpenApiResponse(description='Ошибка валидации'),
-    },
-    examples=[
-        OpenApiExample(
-            'Пример запроса',
-            value={
-                'username': 'ivan123',
-                'password': 'securepass123',
-                're_password': 'securepass123',
-                'email': 'ivan@example.com',
-                'phone_number': '+79991234567',
-                'first_name': 'Иван',
-                'last_name': 'Петров',
-            },
-            request_only=True,
-        ),
-    ],
-)
-@extend_schema_view(
-    list=extend_schema(summary='Получить список пользователей (только для админа)'),
-    retrieve=extend_schema(summary='Получить пользователя по ID'),
-    update=extend_schema(summary='Обновить пользователя (полностью)'),
-    partial_update=extend_schema(summary='Обновить пользователя (частично)'),
-    destroy=extend_schema(summary='Удалить пользователя'),
-    activation=extend_schema(summary='Активация пользователя'),
-    resend_activation=extend_schema(summary='Повторная отправка активации'),
-    reset_password=extend_schema(summary='Сброс пароля'),
-    reset_password_confirm=extend_schema(summary='Подтверждение сброса пароля'),
-    reset_username=extend_schema(summary='Сброс username'),
-    reset_username_confirm=extend_schema(summary='Подтверждение сброса username'),
-    set_password=extend_schema(summary='Установить новый пароль (для авторизованных)'),
-    set_username=extend_schema(
-        summary='Установить новый username (для авторизованных)'
-    ),
-    me=extend_schema(summary='Получить свой профиль'),
 )
 class CustomUserViewSet(UserViewSet):
     """Кастомный ViewSet для пользователей с улучшенной документацией Swagger."""

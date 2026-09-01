@@ -7,4 +7,4 @@ class UsersConfig(AppConfig):
     verbose_name = 'Пользователи и группы'  # Задаём название вкладки
 
     def ready(self):
-        pass
+        from config import swagger  # noqa: F401

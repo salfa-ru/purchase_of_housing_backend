@@ -197,21 +197,32 @@ STORAGES = {
     'staticfiles': {'BACKEND': 'whitenoise.storage.CompressedStaticFilesStorage'},
 }
 
-SUPABASE_BUCKET = os.getenv('SUPABASE_BUCKET')
+
+def getenv_stripped(name, default=None):
+    """Значение переменной окружения без крайних пробелов.
+    Доступы к хранилищу вставляются в дашборд Render руками, и случайный
+    пробел в конце адреса уходит прямо в URL запроса (`.../s3%20/media/...`),
+    из-за чего загрузка файла падает с невнятным 404.
+    """
+    value = os.getenv(name, default)
+    return value.strip() if isinstance(value, str) else value
+
+
+SUPABASE_BUCKET = getenv_stripped('SUPABASE_BUCKET')
 
 if SUPABASE_BUCKET:
     STORAGES['default'] = {
         'BACKEND': 'storages.backends.s3.S3Storage',
         'OPTIONS': {
             'bucket_name': SUPABASE_BUCKET,
-            'endpoint_url': os.getenv('SUPABASE_S3_ENDPOINT'),
-            'access_key': os.getenv('SUPABASE_S3_ACCESS_KEY'),
-            'secret_key': os.getenv('SUPABASE_S3_SECRET_KEY'),
-            'region_name': os.getenv('SUPABASE_S3_REGION'),
+            'endpoint_url': getenv_stripped('SUPABASE_S3_ENDPOINT'),
+            'access_key': getenv_stripped('SUPABASE_S3_ACCESS_KEY'),
+            'secret_key': getenv_stripped('SUPABASE_S3_SECRET_KEY'),
+            'region_name': getenv_stripped('SUPABASE_S3_REGION'),
             'addressing_style': 'path',
             'querystring_auth': False,
             'file_overwrite': False,
-            'custom_domain': os.getenv('SUPABASE_PUBLIC_DOMAIN'),
+            'custom_domain': getenv_stripped('SUPABASE_PUBLIC_DOMAIN'),
         },
     }
 
@@ -246,7 +257,20 @@ REST_FRAMEWORK = {
 
 SPECTACULAR_SETTINGS = {
     'TITLE': 'Недвижимость',
-    'DESCRIPTION': 'Документация для приложения purchase_of_housing_backend',
+    'DESCRIPTION': (
+        'Документация для приложения purchase_of_housing_backend.\n\n'
+        '### Как войти прямо здесь\n\n'
+        '1. **Регистрация** — `POST /api/auth/users/`, кнопка «Try it out». '
+        'Обязательны `username` (обычно совпадает с email), `email`, '
+        '`password`, `phone_number` и `first_name`.\n'
+        '2. **Вход** — `POST /api/auth/token-auth/` с тем же логином и '
+        'паролем. В ответе придёт поле `access`.\n'
+        '3. Нажмите **Authorize** вверху страницы и вставьте значение '
+        '`access` (только сам токен, без слова Bearer).\n\n'
+        'После этого запросы уходят с заголовком авторизации, а токен '
+        'сохраняется при перезагрузке страницы. Живёт он 5 минут — когда '
+        'ответы станут приходить с 401, повторите шаги 2–3.'
+    ),
     'VERSION': '1.0.1',
     'SERVE_INCLUDE_SCHEMA': False,
     'COMPONENT_SPLIT_REQUEST': True,
@@ -274,13 +298,6 @@ SPECTACULAR_SETTINGS = {
         'scopeSeparator': ' ',
         'additionalQueryStringParams': {},
     },
-    # 🔧 ДОБАВЛЯЕМ ЭТО:
-    'AUTHENTICATION_EXTENSIONS': [
-        'config.swagger.BearerTokenScheme',
-    ],
-    'SECURITY': [
-        {'BearerAuth': []},
-    ],
 }
 
 
@@ -388,3 +405,39 @@ SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 # Используем заголовки от nginx для формирования URL
 USE_X_FORWARDED_HOST = True
 USE_X_FORWARDED_PORT = True
+
+
+# ========== ЛОГИРОВАНИЕ ==========
+# На Render логи — это stdout контейнера. В конфигурации Django по умолчанию
+# консольный обработчик включается только при DEBUG=True, а необработанные
+# ошибки при DEBUG=False уходят в mail_admins — то есть при пустом ADMINS
+# никуда. Из-за этого 500-е приходили без единой строки в логах.
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '{asctime} {levelname} {name} {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose',
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+            'level': os.getenv('DJANGO_LOG_LEVEL', 'INFO'),
+        },
+        # Трассировки необработанных исключений: без этого логгера 500-е
+        # остаются невидимыми
+        'django.request': {
+            'handlers': ['console'],
+            'level': 'ERROR',
+            'propagate': False,
+        },
+    },
+}
