@@ -257,20 +257,7 @@ REST_FRAMEWORK = {
 
 SPECTACULAR_SETTINGS = {
     'TITLE': 'Недвижимость',
-    'DESCRIPTION': (
-        'Документация для приложения purchase_of_housing_backend.\n\n'
-        '### Как войти прямо здесь\n\n'
-        '1. **Регистрация** — `POST /api/auth/users/`, кнопка «Try it out». '
-        'Обязательны `username` (обычно совпадает с email), `email`, '
-        '`password`, `phone_number` и `first_name`.\n'
-        '2. **Вход** — `POST /api/auth/token-auth/` с тем же логином и '
-        'паролем. В ответе придёт поле `access`.\n'
-        '3. Нажмите **Authorize** вверху страницы и вставьте значение '
-        '`access` (только сам токен, без слова Bearer).\n\n'
-        'После этого запросы уходят с заголовком авторизации, а токен '
-        'сохраняется при перезагрузке страницы. Живёт он 5 минут — когда '
-        'ответы станут приходить с 401, повторите шаги 2–3.'
-    ),
+    'DESCRIPTION': 'Документация для приложения purchase_of_housing_backend',
     'VERSION': '1.0.1',
     'SERVE_INCLUDE_SCHEMA': False,
     'COMPONENT_SPLIT_REQUEST': True,
