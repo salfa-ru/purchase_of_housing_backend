@@ -29,17 +29,42 @@ STREET_TYPE_SYNONYMS = (
     ('станция', 'ст.', 'ст'),
 )
 
-STREET_TYPE_SEARCHABLE = {
-    form
-    for group in STREET_TYPE_SYNONYMS
-    for form in group
-    if len(form) > 4 or not form.isalpha()
-}
+# Символы, из которых состоят слова в названиях. Всё остальное (пробел, точка,
+# запятая, дефис, начало и конец строки) считается границей слова.
+WORD_CHARS = '0-9A-Za-zА-Яа-яЁё'
+REGEX_SPECIAL_CHARS = frozenset('\\^$.|?*+()[]{}')
 
-STREET_TYPE_LOOKUP = {
-    form.rstrip('.'): tuple(f for f in group if f in STREET_TYPE_SEARCHABLE)
+
+def _regex_atom(char):
+    """Один символ шаблона: буква — в виде обоих регистров, спецсимвол — экранированным."""
+    lower, upper = char.lower(), char.upper()
+    if lower != upper:
+        return f'[{lower}{upper}]'
+    if char in REGEX_SPECIAL_CHARS:
+        return f'\\{char}'
+    return char
+
+
+def _street_type_pattern(forms):
+    """Шаблон «одно из написаний типа улицы, стоящее отдельным словом»."""
+    alternatives = '|'.join(''.join(_regex_atom(c) for c in form) for form in forms)
+    return f'(^|[^{WORD_CHARS}])({alternatives})([^{WORD_CHARS}]|$)'
+
+
+def _normalize_street_type_forms(group):
+    """Написания без завершающей точки и без повторов: «ул.» и «ул» — одно и то же."""
+    forms = []
+    for form in group:
+        form = form.rstrip('.')
+        if form not in forms:
+            forms.append(form)
+    return tuple(forms)
+
+
+STREET_TYPE_PATTERNS = {
+    form: _street_type_pattern(_normalize_street_type_forms(group))
     for group in STREET_TYPE_SYNONYMS
-    for form in group
+    for form in _normalize_street_type_forms(group)
 }
 
 
@@ -86,7 +111,8 @@ class RealtyFilter(PriceRangeFilterSet):
         method='filter_address',
         label='Улица или метро',
         help_text='Поиск по названию улицы или станции метро (частичное совпадение, '
-        'без учета регистра). Понимает сокращения: пр-кт, ул., ш. и т.п.',
+        'без учета регистра). Понимает сокращения: пр-кт, ул., ш. и т.п. '
+        'Несколько адресов перечисляются через запятую.',
     )
     # address_street = django_filters.BaseInFilter(
     #    method='filter_address',
@@ -249,29 +275,46 @@ class RealtyFilter(PriceRangeFilterSet):
     @staticmethod
     def _address_word_q(field, word):
         """Условие для одного слова запроса.
-        Тип улицы («пр-кт») ищется по всем своим написаниям сразу."""
-        variants = STREET_TYPE_LOOKUP.get(word.lower().rstrip('.'))
-        if not variants:
-            return Q(**{f'{field}__icontains': word})
+        Тип улицы («ул», «ул.», «улица») ищется по всем своим написаниям сразу и
+        только как отдельное слово, иначе «ул» нашлось бы внутри «Тульская».
+        Остальные слова ищутся как часть названия.
+        """
+        pattern = STREET_TYPE_PATTERNS.get(word.lower().rstrip('.'))
+        if pattern:
+            return Q(**{f'{field}__regex': pattern})
+        return Q(**{f'{field}__icontains': word})
 
-        query = Q()
-        for variant in variants:
-            query |= Q(**{f'{field}__icontains': variant})
-        return query
-
-    def filter_address(self, queryset, name, value):
-        """Поиск по названию улицы или станции метро."""
-        words = value.split() if value else []
+    @classmethod
+    def _address_phrase_q(cls, phrase):
+        """Условие для одной фразы: все её слова должны найтись в улице либо в метро."""
+        words = phrase.split()
         if not words:
-            return queryset
+            return None
 
         street_q = Q()
         metro_q = Q()
         for word in words:
-            street_q &= self._address_word_q('address__street__name', word)
-            metro_q &= self._address_word_q('address__metro__name', word)
+            street_q &= cls._address_word_q('address__street__name', word)
+            metro_q &= cls._address_word_q('address__metro__name', word)
 
-        return queryset.filter(street_q | metro_q)
+        return street_q | metro_q
+
+    def filter_address(self, queryset, name, value):
+        """Поиск по названию улицы или станции метро.
+        Запятая разделяет независимые адреса: подходит объект, попавший
+        хотя бы под один из них.
+        """
+        query = Q()
+        found = False
+        for phrase in (value or '').split(','):
+            phrase_q = self._address_phrase_q(phrase)
+            if phrase_q is not None:
+                query |= phrase_q
+                found = True
+
+        if not found:
+            return queryset
+        return queryset.filter(query)
 
 
 class CatalogPriceFilter(PriceRangeFilterSet):
