@@ -575,7 +575,8 @@ class RealtyDeleteView(generics.DestroyAPIView):
     parameters=[
         OpenApiParameter(
             name='ids',
-            description='Список ID через запятую (например, ids=1,2,3)',
+            description='Список ID через запятую (например, ids=1,2,3). '
+            f'Не больше {constants.BATCH_IDS_MAX} штук за запрос.',
             required=True,
             type=str,
         ),
@@ -603,25 +604,35 @@ class RealtyBatchView(GenericAPIView):
             )
             # Разбираем строку "1,2,3" в список чисел
         try:
-            id_list = [int(id.strip()) for id in ids_param.split(',')]
+            parsed_ids = [int(item.strip()) for item in ids_param.split(',')]
         except ValueError:
             return Response(
                 {'error': 'Invalid ID format. Use comma-separated numbers'},
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        # Получаем обьекты
-        realties = Realty.objects.filter(id__in=id_list)
+        id_list = list(dict.fromkeys(parsed_ids))
+
+        if len(id_list) > constants.BATCH_IDS_MAX:
+            return Response(
+                {'error': f'Too many ids, {constants.BATCH_IDS_MAX} max'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        realties = Realty.objects.filter(
+            id__in=id_list,
+            is_deleted=False,
+            owner__is_deleted=False,
+        )
 
         # Сохраняем порядок как в запросе
         # Создаём словарь {id: объект} для быстрого доступа
         realty_dict = {realty.id: realty for realty in realties}
 
         # Формируем результат в том же порядке, что и запрошенные ID
-        result = []
-        for id in id_list:
-            if id in realty_dict:
-                result.append(realty_dict[id])
+        result = [
+            realty_dict[realty_id] for realty_id in id_list if realty_id in realty_dict
+        ]
 
         # Сериалезуем
         serializer = self.get_serializer(result, many=True)
