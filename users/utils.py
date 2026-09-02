@@ -31,6 +31,21 @@ def set_jwt_cookies(request, response, refresh_token):
     return response
 
 
+def clear_jwt_cookies(response):
+    """Удаляет refresh-куки."""
+    response.set_cookie(
+        key=settings.SIMPLE_JWT['REFRESH_COOKIE'],
+        value='',
+        max_age=0,
+        expires='Thu, 01 Jan 1970 00:00:00 GMT',
+        httponly=True,
+        secure=settings.SIMPLE_JWT['AUTH_COOKIE_SECURE'],
+        samesite=settings.SIMPLE_JWT['AUTH_COOKIE_SAMESITE'],
+        path=settings.SIMPLE_JWT['AUTH_COOKIE_PATH'],
+    )
+    return response
+
+
 def update_token_field(request, response):
     """
     Обновляет токены: хэширует refresh, устанавливает cookie.

@@ -52,7 +52,11 @@ from users.serializers import (
     UserProfileUpdateSerializer,
     UserSelfProfileSerializer,
 )
-from users.utils import delete_expired_tokens, update_token_field
+from users.utils import (
+    clear_jwt_cookies,
+    delete_expired_tokens,
+    update_token_field,
+)
 
 # from django.contrib.auth import authenticate
 
@@ -236,7 +240,9 @@ class LogoutView(APIView):
 
     def post(self, request):
         # 1. Отзываем refresh-токен
-        refresh_token = request.COOKIES.get('refresh_token')
+        refresh_token = request.COOKIES.get(
+            settings.SIMPLE_JWT.get('REFRESH_COOKIE', 'refresh_token')
+        )
         if refresh_token:
             try:
                 token = RefreshToken(refresh_token)
@@ -273,11 +279,7 @@ class LogoutView(APIView):
         response = Response(
             {'detail': 'Successfully logged out.'}, status=status.HTTP_205_RESET_CONTENT
         )
-        response.delete_cookie(
-            'refresh_token',
-            path=settings.SIMPLE_JWT.get('AUTH_COOKIE_PATH', '/'),
-            domain=None,
-        )
+        clear_jwt_cookies(response)
 
         return response
 
