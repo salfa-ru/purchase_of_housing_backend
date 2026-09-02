@@ -1,4 +1,4 @@
-from drf_spectacular.utils import OpenApiParameter, extend_schema
+from drf_spectacular.utils import OpenApiParameter, extend_schema, extend_schema_view
 from rest_framework import generics, status
 from rest_framework.exceptions import NotFound, ValidationError
 from rest_framework.permissions import IsAuthenticated
@@ -11,7 +11,7 @@ from realty_values.models import RealtyType
 
 from .models import Favorite
 from .paginations import FavoritePagination
-from .serializers import FavoriteSerializer
+from .serializers import FavoriteSerializer, FavoriteViewedSerializer
 
 REALTY_TYPE_MAP = {
     'apartment': 'Квартира',
@@ -21,6 +21,20 @@ REALTY_TYPE_MAP = {
 }
 
 COMMERCIAL_ALIAS = 'commercial'
+
+TRADE_TYPES = ('sale', 'rent')
+BOOLEAN_VALUES = {'true': True, 'false': False}
+ORDERING_VALUES = ('added_at', '-added_at')
+
+
+def invalid_value_error(param, raw, allowed):
+    """Единый текст ошибки для параметров с закрытым списком значений."""
+    return ValidationError(
+        {
+            param: f"Недопустимое значение '{raw}'. "
+            f'Допустимые значения: {", ".join(allowed)}.'
+        }
+    )
 
 
 def resolve_realty_types(raw):
@@ -66,56 +80,101 @@ def resolve_realty_types(raw):
     return resolved
 
 
-@extend_schema(
+def resolve_trade_type(raw):
+    """sale или rent, регистр не важен. Иначе — 400."""
+    value = raw.strip().lower()
+    if value not in TRADE_TYPES:
+        raise invalid_value_error('trade_type', raw, TRADE_TYPES)
+    return value
+
+
+def resolve_is_commercial(raw):
+    """true или false, регистр не важен. Иначе — 400."""
+    value = raw.strip().lower()
+    if value not in BOOLEAN_VALUES:
+        raise invalid_value_error('is_commercial', raw, BOOLEAN_VALUES)
+    return BOOLEAN_VALUES[value]
+
+
+def resolve_ordering(raw):
+    """Сортировка только по дате добавления: поле уходит прямо в order_by,
+    поэтому произвольное значение уронило бы запрос в 500."""
+    value = raw.strip()
+    if value not in ORDERING_VALUES:
+        raise invalid_value_error('ordering', raw, ORDERING_VALUES)
+    return value
+
+
+FAVORITE_LIST_PARAMETERS = [
+    OpenApiParameter(
+        name='page',
+        description=f'Номер страницы (по {constants.FAVORITES_PAGESIZE_DEFAULT} объявления на странице)',
+        required=False,
+        type=int,
+    ),
+    OpenApiParameter(
+        name='trade_type',
+        description='sale или rent. Другое значение — 400.',
+        required=False,
+        type=str,
+        enum=TRADE_TYPES,
+    ),
+    OpenApiParameter(
+        name='is_commercial',
+        description='true — коммерческая, false — жилая. Другое значение — 400.',
+        required=False,
+        type=bool,
+    ),
+    OpenApiParameter(
+        name='realty_type',
+        description='Тип недвижимости: русское название из справочника '
+        '(Квартира, Апартаменты) или английский алиас (apartment, flat). '
+        'Регистр не важен. Несколько типов перечисляются через запятую: '
+        'Квартира,Апартаменты. Неизвестный тип — 400.',
+        required=False,
+        type=str,
+    ),
+    OpenApiParameter(
+        name='ordering',
+        description='-added_at (сначала новые, по умолчанию) или added_at '
+        '(сначала старые). Другое значение — 400.',
+        required=False,
+        type=str,
+        enum=ORDERING_VALUES,
+    ),
+]
+
+FAVORITE_LIST_SCHEMA = extend_schema(
     tags=['Избранные'],
     summary='Получение списка избранного пользователя',
-    description='Возвращает страницу объявлений в избранном с количеством непросмотренных. Поддерживает фильтрацию по trade_type, is_commercial и ordering.',
-    parameters=[
-        OpenApiParameter(
-            name='page',
-            description=f'Номер страницы (по {constants.FAVORITES_PAGESIZE_DEFAULT} объявления на странице)',
-            required=False,
-            type=int,
-        ),
-        OpenApiParameter(
-            name='trade_type', description='sale или rent', required=False, type=str
-        ),
-        OpenApiParameter(
-            name='is_commercial',
-            description='true — коммерческая, false — жилая',
-            required=False,
-            type=bool,
-        ),
-        OpenApiParameter(
-            name='realty_type',
-            description='Тип недвижимости: русское название из справочника '
-            '(Квартира, Апартаменты) или английский алиас (apartment, flat). '
-            'Регистр не важен. Несколько типов перечисляются через запятую: '
-            'Квартира,Апартаменты. Неизвестный тип — 400.',
-            required=False,
-            type=str,
-        ),
-        OpenApiParameter(
-            name='ordering',
-            description='-added_at (сначала новые)',
-            required=False,
-            type=str,
-        ),
-    ],
+    description='Возвращает страницу объявлений в избранном с количеством непросмотренных. Поддерживает фильтрацию по trade_type, is_commercial, realty_type и ordering.',
+    parameters=FAVORITE_LIST_PARAMETERS,
 )
-class FavoriteListView(generics.ListAPIView):
-    """
-    Возвращает список избранных объявлений текущего пользователя.
 
-    Поддерживает фильтрацию:
+FAVORITE_CREATE_SCHEMA = extend_schema(
+    tags=['Избранные'],
+    summary='Добавление объявления в избранное',
+    description='Принимает realty_id и добавляет объявление в избранное текущего пользователя',
+    request=FavoriteSerializer,
+    responses={201: FavoriteSerializer},
+)
+
+
+@extend_schema_view(get=FAVORITE_LIST_SCHEMA, post=FAVORITE_CREATE_SCHEMA)
+class FavoriteListCreateView(generics.ListCreateAPIView):
+    """
+    Список избранного текущего пользователя и добавление в него объявления.
+
+    GET поддерживает фильтрацию:
     - `trade_type` — тип сделки (sale/rent)
     - `is_commercial` — тип недвижимости (true — коммерческая, false — жилая)
     - `realty_type` — тип недвижимости. Принимает как русские названия
       (Квартира, Апартаменты, Дом и т.д.), так и английские алиасы
       (apartment, apartments, flat, house, commercial). Регистр не важен.
       Несколько типов перечисляются через запятую: `Квартира,Апартаменты`.
-      Неизвестный тип — 400 со списком допустимых значений.
-    - `ordering` — сортировка по дате добавления (added_at / -added_at)
+    - `ordering` — сортировка по дате добавления (`-added_at` по умолчанию)
+
+    Недопустимое значение любого из фильтров — 400 со списком допустимых.
 
     Выдача постраничная, страница выбирается параметром `page`.
 
@@ -124,6 +183,14 @@ class FavoriteListView(generics.ListAPIView):
       (считается по всему избранному, а не по текущей странице)
     - `count`, `page_size`, `pages_total`, `current_page`, `next`, `previous` — навигация по страницам
     - `results` — объекты избранного текущей страницы с полными данными объявлений
+
+    POST ожидает JSON:
+    {
+        "realty_id": 123
+    }
+
+    и возвращает созданный объект избранного с вложенными данными объявления.
+    Если объявление уже в избранном — 400.
 
     Доступно только авторизованным пользователям.
     """
@@ -135,33 +202,32 @@ class FavoriteListView(generics.ListAPIView):
     def get_queryset(self):
         user = self.request.user
         queryset = Favorite.objects.filter(user=user)
+        params = self.request.query_params
 
         # Фильтрация по типу сделки (sale/rent)
-        trade_type = self.request.query_params.get('trade_type')
-        if trade_type:
-            if trade_type.lower() == 'sale':
+        trade_type = params.get('trade_type')
+        if trade_type is not None:
+            if resolve_trade_type(trade_type) == 'sale':
                 queryset = queryset.filter(realty__sale_profile__isnull=False)
-            elif trade_type.lower() == 'rent':
+            else:
                 queryset = queryset.filter(realty__rent_profile__isnull=False)
 
         # Фильтрация по типу недвижимости (жилая/коммерческая)
-        is_commercial = self.request.query_params.get('is_commercial')
+        is_commercial = params.get('is_commercial')
         if is_commercial is not None:
-            if is_commercial.lower() == 'true':
-                queryset = queryset.filter(realty__realty_type__is_commercial=True)
-            elif is_commercial.lower() == 'false':
-                queryset = queryset.filter(realty__realty_type__is_commercial=False)
+            queryset = queryset.filter(
+                realty__realty_type__is_commercial=resolve_is_commercial(is_commercial)
+            )
 
         # Фильтрация по типу недвижимости (Квартира, Апартаменты, Дом и т.д.)
-        realty_type = self.request.query_params.get('realty_type')
+        realty_type = params.get('realty_type')
         if realty_type is not None:
             queryset = queryset.filter(
                 realty__realty_type__type__in=resolve_realty_types(realty_type)
             )
 
         # Сортировка
-        ordering = self.request.query_params.get('ordering', 'added_at')
-        return queryset.order_by(ordering)
+        return queryset.order_by(resolve_ordering(params.get('ordering', '-added_at')))
 
     def list(self, request, *args, **kwargs):
         """
@@ -185,36 +251,6 @@ class FavoriteListView(generics.ListAPIView):
 
         serializer = self.get_serializer(queryset, many=True)
         return Response({'unviewed_count': unviewed_count, 'results': serializer.data})
-
-
-@extend_schema(
-    tags=['Избранные'],
-    summary='Добавление объявления в избранное',
-    description='Принимает realty_id и добавляет объявление в избранное текущего пользователя',
-    request=FavoriteSerializer,
-    responses={201: FavoriteSerializer},
-)
-class FavoriteCreateView(generics.CreateAPIView):
-    """
-    Добавляет объявление в избранное текущего пользователя.
-
-    Ожидает JSON:
-    {
-        "realty_id": 123
-    }
-
-    Возвращает созданный объект избранного с вложенными данными объявления.
-
-    Если объявление уже в избранном — возвращает ошибку 400.
-    Доступно только авторизованным пользователям.
-    """
-
-    http_method_names = ['post']
-    permission_classes = [IsAuthenticated]
-    serializer_class = FavoriteSerializer
-
-    def post(self, request, *args, **kwargs):
-        return super().post(request, *args, **kwargs)
 
     def create(self, request, *args, **kwargs):
         """Переопределяем create для добавления проверок"""
@@ -241,8 +277,22 @@ class FavoriteCreateView(generics.CreateAPIView):
         serializer = self.get_serializer(favorite)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-    def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
+
+@extend_schema_view(
+    post=extend_schema(
+        tags=['Избранные'],
+        summary='Добавление объявления в избранное (устаревший адрес)',
+        description='Оставлен ради обратной совместимости. '
+        'Новый адрес — POST /api/favorites/.',
+        request=FavoriteSerializer,
+        responses={201: FavoriteSerializer},
+        deprecated=True,
+    )
+)
+class FavoriteCreateView(FavoriteListCreateView):
+    """Устаревший алиас POST /api/favorites/create/."""
+
+    http_method_names = ['post']
 
 
 @extend_schema(
@@ -280,7 +330,8 @@ class FavoriteDeleteView(generics.DestroyAPIView):
     tags=['Избранные'],
     summary='Сброс счётчика непросмотренных',
     description='Помечает все объявления в избранном как просмотренные (is_viewed = True)',
-    responses={200: None},
+    request=None,
+    responses={200: FavoriteViewedSerializer},
 )
 class FavoriteMarkViewedView(APIView):
     """
@@ -299,6 +350,7 @@ class FavoriteMarkViewedView(APIView):
     """
 
     permission_classes = [IsAuthenticated]
+    serializer_class = FavoriteViewedSerializer
 
     def post(self, request):
         # Обновляем все непросмотренные записи текущего пользователя
@@ -308,5 +360,5 @@ class FavoriteMarkViewedView(APIView):
 
         return Response(
             {'status': 'viewed', 'update_count': updated},
-            status=status.HTTP_204_NO_CONTENT,
+            status=status.HTTP_200_OK,
         )

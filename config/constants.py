@@ -101,6 +101,9 @@ MY_REALTY_PAGESIZE_MAX = 50
 LATEST_REALTY_LIMIT_DEFAULT = 3
 LATEST_REALTY_LIMIT_MAX = 100
 
+# Эндпоинт /api/realty/batch/, максимум ID за один запрос
+BATCH_IDS_MAX = 100
+
 # Настройка Пагинации Избранного
 FAVORITES_PAGESIZE_DEFAULT = 4
 

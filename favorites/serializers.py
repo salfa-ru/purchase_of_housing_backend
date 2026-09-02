@@ -24,7 +24,14 @@ class FavoriteSerializer(serializers.ModelSerializer):
             'added_at',
             'is_viewed',
         ]
-        realty_only_fields = [
+        read_only_fields = [
             'id',
             'added_at',
         ]  # Поля, которые нельзя изменить через API
+
+
+class FavoriteViewedSerializer(serializers.Serializer):
+    """Ответ сброса счётчика непросмотренных."""
+
+    status = serializers.CharField(read_only=True)
+    update_count = serializers.IntegerField(read_only=True)
