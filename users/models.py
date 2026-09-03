@@ -19,7 +19,11 @@ from config.constants import (
     MIN_AVATAR_WIDTH,
 )
 from realty_values import models as values_models
-from users.validators import validate_email_length, validate_person_name
+from users.validators import (
+    EMAIL_MAX_LENGTH,
+    validate_email_length,
+    validate_person_name,
+)
 
 
 def validate_avatar_size(value):
@@ -72,6 +76,14 @@ class User(AbstractUser):
         validators=[validate_person_name],
         **constants.NULLABLE_FIELD,
     )
+    username = models.CharField(
+        verbose_name='username',
+        max_length=EMAIL_MAX_LENGTH,
+        unique=True,
+        validators=[AbstractUser.username_validator],
+        error_messages={'unique': 'Пользователь с таким username уже существует.'},
+    )
+
     email = models.EmailField(
         verbose_name='email',
         unique=True,

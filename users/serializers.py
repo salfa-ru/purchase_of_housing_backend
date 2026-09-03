@@ -33,11 +33,7 @@ def capitalize_name(value):
 
     value = re.sub(r'-{2,}', '-', value)
 
-    # Разбиваем по дефису
-    parts = value.split('-')
-    # Каждую часть капитализируем
-    capitalized_parts = [part.capitalize() for part in parts]
-    return '-'.join(capitalized_parts)
+    return re.sub(r'[^\s-]+', lambda part: part.group().capitalize(), value)
 
 
 def normalize_user_input(data):
@@ -548,3 +544,5 @@ class SetPasswordSerializer(serializers.Serializer):
             raise serializers.ValidationError(
                 {'new_password': error.messages}
             ) from error
+
+        return data

@@ -5,10 +5,18 @@ from django.core.validators import RegexValidator
 
 # ========== ВАЛИДАТОР ИМЕНИ ==========
 
+NAME_MIN_LENGTH = 2
+NAME_MAX_LENGTH = 50
+
+# Кириллица: \u0400-\u04FF (А-Яа-я), \u0500-\u052F (Ёё и др.)
+NAME_PATTERN = r'^[A-Za-z\u0400-\u04FF\u0500-\u052F \-—]+$'
+NAME_LETTER_PATTERN = r'[A-Za-z\u0400-\u04FF\u0500-\u052F]'
+
 
 def validate_person_name(value):
     """
-    Проверяет, что имя/фамилия содержит только кириллицу, пробел, тире, дефис (2-40 символов).
+    Проверяет имя/фамилию: буквы кириллицы и латиницы, пробел, тире, дефис,
+    от 2 до 50 символов.
     """
     if not value:
         raise ValidationError(
@@ -20,19 +28,24 @@ def validate_person_name(value):
     value = value.strip()
 
     # Проверяем длину
-    if len(value) < 2 or len(value) > 40:
+    if len(value) < NAME_MIN_LENGTH or len(value) > NAME_MAX_LENGTH:
         raise ValidationError(
-            'Длина должна быть от 2 до 40 символов.',
+            f'Длина должна быть от {NAME_MIN_LENGTH} до {NAME_MAX_LENGTH} символов.',
             code='invalid_length',
         )
 
     # Проверяем допустимые символы
-    # Кириллица: \u0400-\u04FF (А-Яа-я), \u0500-\u052F (Ёё и др.)
-    pattern = r'^[\u0400-\u04FF\u0500-\u052F \-—]{2,40}$'
-    if not re.match(pattern, value):
+    if not re.match(NAME_PATTERN, value):
         raise ValidationError(
-            'Введены недопустимые символы. Только кириллица, пробел, тире, дефис, от 2 до 40 символов.',
+            'Введены недопустимые символы. Только буквы, пробел, тире, дефис, '
+            f'от {NAME_MIN_LENGTH} до {NAME_MAX_LENGTH} символов.',
             code='invalid_characters',
+        )
+
+    if not re.search(NAME_LETTER_PATTERN, value):
+        raise ValidationError(
+            'Имя должно содержать хотя бы одну букву.',
+            code='no_letters',
         )
 
     return value
@@ -111,55 +124,34 @@ def validate_email_length(value):
 
 # ========== ВАЛИДАТОР ПАРОЛЯ ==========
 
+PASSWORD_MIN_LENGTH = 6
+PASSWORD_MAX_LENGTH = 60
 
-class LetterAndDigitPasswordValidator:
-    """Пароль должен содержать минимум одну латинскую букву и одну цифру."""
-
-    def validate(self, password, user=None):
-        if not re.search(r'[A-Za-z]', password):
-            raise ValidationError(
-                'Пароль должен содержать хотя бы одну латинскую букву.',
-                code='password_no_letter',
-            )
-        if not re.search(r'[0-9]', password):
-            raise ValidationError(
-                'Пароль должен содержать хотя бы одну цифру.',
-                code='password_no_digit',
-            )
-
-    def get_help_text(self):
-        return 'Пароль должен содержать минимум одну латинскую букву и одну цифру.'
+PASSWORD_REQUIREMENTS = (
+    f'Пароль должен содержать не менее {PASSWORD_MIN_LENGTH} и не более '
+    f'{PASSWORD_MAX_LENGTH} символов, заглавные и строчные латинские буквы, цифры.'
+)
 
 
-# ========== ВАЛИДАТОР ЗАГЛАВНЫХ БУКВ (ДЛЯ #28348) ==========
+class PasswordComplexityValidator:
+    """Все требования к паролю разом: длина, заглавные и строчные латинские
+    буквы, цифры. Спецсимволы допустимы."""
 
-
-class ContainsUppercaseValidator:
-    """Проверяет, что пароль содержит хотя бы одну заглавную букву."""
-
-    def validate(self, password, user=None):
-        if not re.search(r'[A-Z]', password):
-            raise ValidationError(
-                'Пароль должен содержать хотя бы одну заглавную букву.',
-                code='password_no_uppercase',
-            )
-
-    def get_help_text(self):
-        return 'Пароль должен содержать хотя бы одну заглавную букву.'
-
-
-class MaximumLengthPasswordValidator:
-    """Проверяет, что пароль не длиннее заданного предела."""
-
-    def __init__(self, max_length=60):
+    def __init__(self, min_length=PASSWORD_MIN_LENGTH, max_length=PASSWORD_MAX_LENGTH):
+        self.min_length = min_length
         self.max_length = max_length
 
     def validate(self, password, user=None):
-        if len(password) > self.max_length:
+        if (
+            not self.min_length <= len(password) <= self.max_length
+            or not re.search(r'[A-Z]', password)
+            or not re.search(r'[a-z]', password)
+            or not re.search(r'[0-9]', password)
+        ):
             raise ValidationError(
-                f'Пароль не должен превышать {self.max_length} символов.',
-                code='password_too_long',
+                PASSWORD_REQUIREMENTS,
+                code='password_requirements',
             )
 
     def get_help_text(self):
-        return f'Пароль не должен превышать {self.max_length} символов.'
+        return PASSWORD_REQUIREMENTS
