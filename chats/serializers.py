@@ -1,5 +1,6 @@
 # chats/serializers.py
 
+from django.core.validators import MaxLengthValidator
 from django.db.models import Q
 from django.utils import timezone
 from drf_spectacular.utils import extend_schema_field
@@ -25,7 +26,17 @@ class CreateMessageRequestSerializer(serializers.Serializer):
 
     chat_id = serializers.IntegerField(min_value=1, required=False)
     realty_id = serializers.IntegerField(min_value=1, required=False)
-    message = serializers.CharField(max_length=MESSAGE_LENGTH)
+    message = serializers.CharField(
+        # Через validators, а не max_length: так в ответе видно, сколько
+        # символов насчитал сервер. Спор «у меня было 2200» иначе не разрешить
+        validators=[
+            MaxLengthValidator(
+                MESSAGE_LENGTH,
+                message='Сообщение не должно превышать %(limit_value)d '
+                'символов, сейчас %(show_value)d.',
+            )
+        ],
+    )
 
     def validate(self, data):
         """Проверяем, что передан либо chat_id, либо realty_id, но не оба"""

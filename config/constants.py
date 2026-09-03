@@ -11,7 +11,7 @@ NUMBER_OF_PHOTOS_MIN = 1
 NUMBER_OF_PHOTOS_MAX = 5
 
 CHAR_LENGTH = 50
-NAME_LENGTH = 40
+NAME_LENGTH = 50
 
 DESCRIPTION_LENGTH = 2000
 COMPLAINT_LENGTH = 200
@@ -67,7 +67,6 @@ SHORT_STR_LENGTH = 20
 
 MAX_MINUTES_TO_METRO = 180
 
-# TODO - После тестирования выставить оптимальное время между показами
 # ограничения по частоте обновления счетчиков показов
 # для показа полного объявления
 COUNTER_FULL_VIEW_MIN_TIME_INTERVAL = timedelta(hours=0, minutes=0, seconds=5)
