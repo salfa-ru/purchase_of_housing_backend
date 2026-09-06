@@ -132,6 +132,20 @@ PASSWORD_REQUIREMENTS = (
     f'{PASSWORD_MAX_LENGTH} символов, заглавные и строчные латинские буквы, цифры.'
 )
 
+PASSWORD_NO_UPPERCASE = (
+    'Пароль должен содержать хотя бы одну заглавную латинскую букву.'
+)
+PASSWORD_NO_LOWERCASE = 'Пароль должен содержать хотя бы одну строчную латинскую букву.'
+PASSWORD_NO_DIGIT = 'Пароль должен содержать хотя бы одну цифру.'
+
+
+def password_too_short(min_length=PASSWORD_MIN_LENGTH):
+    return f'Пароль должен содержать не менее {min_length} символов.'
+
+
+def password_too_long(max_length=PASSWORD_MAX_LENGTH):
+    return f'Пароль не должен превышать {max_length} символов.'
+
 
 class PasswordComplexityValidator:
     """Все требования к паролю разом: длина, заглавные и строчные латинские
@@ -142,16 +156,49 @@ class PasswordComplexityValidator:
         self.max_length = max_length
 
     def validate(self, password, user=None):
-        if (
-            not self.min_length <= len(password) <= self.max_length
-            or not re.search(r'[A-Z]', password)
-            or not re.search(r'[a-z]', password)
-            or not re.search(r'[0-9]', password)
-        ):
-            raise ValidationError(
-                PASSWORD_REQUIREMENTS,
-                code='password_requirements',
+        errors = []
+
+        if len(password) < self.min_length:
+            errors.append(
+                ValidationError(
+                    password_too_short(self.min_length),
+                    code='password_too_short',
+                )
             )
+        elif len(password) > self.max_length:
+            errors.append(
+                ValidationError(
+                    password_too_long(self.max_length),
+                    code='password_too_long',
+                )
+            )
+
+        if not re.search(r'[A-Z]', password):
+            errors.append(
+                ValidationError(
+                    PASSWORD_NO_UPPERCASE,
+                    code='password_no_uppercase',
+                )
+            )
+
+        if not re.search(r'[a-z]', password):
+            errors.append(
+                ValidationError(
+                    PASSWORD_NO_LOWERCASE,
+                    code='password_no_lowercase',
+                )
+            )
+
+        if not re.search(r'[0-9]', password):
+            errors.append(
+                ValidationError(
+                    PASSWORD_NO_DIGIT,
+                    code='password_no_digit',
+                )
+            )
+
+        if errors:
+            raise ValidationError(errors)
 
     def get_help_text(self):
         return PASSWORD_REQUIREMENTS
