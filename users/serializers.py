@@ -137,11 +137,12 @@ class UserProfileUpdateSerializer(serializers.ModelSerializer):
     НЕДОСТУПНЫ для изменения через этот сериализатор.
     """
 
-    # Имя и фамилию явно переопределяем без валидаторов модели,
-    # чтобы обычный пользователь мог обновлять профиль без ограничений.
-    # На аватарку ограничения по формату, размеру и разрешению остаются.
-    first_name = serializers.CharField(required=False, allow_blank=True, max_length=40)
-    last_name = serializers.CharField(required=False, allow_blank=True, max_length=40)
+    first_name = serializers.CharField(
+        required=False, allow_blank=True, validators=[validate_person_name]
+    )
+    last_name = serializers.CharField(
+        required=False, allow_blank=True, validators=[validate_person_name]
+    )
     avatar = serializers.ImageField(
         required=False,
         allow_null=True,
@@ -157,23 +158,10 @@ class UserProfileUpdateSerializer(serializers.ModelSerializer):
         fields = ['first_name', 'last_name', 'avatar']
 
     def validate_first_name(self, value):
-        """Дополнительная валидация для имени (если нужна)."""
-        # Здесь можно добавить бизнес-логику, если потребуется
-        return value
+        return capitalize_name(value)
 
     def validate_last_name(self, value):
-        """Дополнительная валидация для фамилии (если нужна)."""
-        return value
-
-    def validate(self, attrs):
-        """
-        Общая валидация для всех полей.
-        Можно добавить проверки, требующие нескольких полей.
-        """
-        # Если нужно добавить логику, например:
-        # if attrs.get('first_name') and attrs.get('last_name'):
-        #     # какая-то проверка
-        return attrs
+        return capitalize_name(value)
 
 
 class CurrentUserSerializer(UserBaseSerializer):
