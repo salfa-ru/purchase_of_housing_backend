@@ -241,6 +241,16 @@ class UserFullSerializer(UserSelfProfileSerializer):
     last_name = serializers.CharField(
         required=True, allow_blank=False, validators=[validate_person_name]
     )
+    email = serializers.EmailField(
+        required=True,
+        validators=[
+            validate_email_length,
+            UniqueValidator(
+                queryset=User.objects.all(),
+                message='Пользователь с таким email уже существует.',
+            ),
+        ],
+    )
 
     class Meta(UserSelfProfileSerializer.Meta):
         fields = UserSelfProfileSerializer.Meta.fields + [

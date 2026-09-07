@@ -87,36 +87,26 @@ def normalize_phone_number(value):
 
 # ========== ВАЛИДАТОР EMAIL ==========
 
-EMAIL_MAX_LENGTH = 254  # RFC 5321: вся строка адреса
-EMAIL_LOCAL_MAX_LENGTH = 64  # RFC 5321: часть до @
-EMAIL_DOMAIN_MAX_LENGTH = 255  # RFC 5321: часть после @
+EMAIL_MIN_LENGTH = 6
+EMAIL_MAX_LENGTH = 254
 
 
 def validate_email_length(value):
     """
-    Проверяет длину частей адреса электронной почты по RFC 5321/5322.
-    """
+    Проверяет общую длину адреса электронной почты"""
     if not value:
         return value
+
+    if len(value) < EMAIL_MIN_LENGTH:
+        raise ValidationError(
+            f'Адрес электронной почты должен содержать не менее {EMAIL_MIN_LENGTH} символов.',
+            code='email_too_short',
+        )
 
     if len(value) > EMAIL_MAX_LENGTH:
         raise ValidationError(
             f'Адрес электронной почты не должен превышать {EMAIL_MAX_LENGTH} символов.',
             code='email_too_long',
-        )
-
-    local_part, _, domain_part = value.rpartition('@')
-
-    if len(local_part) > EMAIL_LOCAL_MAX_LENGTH:
-        raise ValidationError(
-            f'Часть адреса до символа @ не должна превышать {EMAIL_LOCAL_MAX_LENGTH} символов.',
-            code='email_local_too_long',
-        )
-
-    if len(domain_part) > EMAIL_DOMAIN_MAX_LENGTH:
-        raise ValidationError(
-            f'Доменная часть адреса не должна превышать {EMAIL_DOMAIN_MAX_LENGTH} символов.',
-            code='email_domain_too_long',
         )
 
     return value

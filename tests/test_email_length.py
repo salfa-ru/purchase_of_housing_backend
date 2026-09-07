@@ -1,6 +1,4 @@
-"""Длина адреса электронной почты по RFC 5321: весь адрес до 254 символов,
-часть до @ — до 64. Адрес попадает и в username, поэтому проверяется запись
-в базу целиком, а не только валидация."""
+"""Длина адреса электронной почты по ТЗ."""
 
 from django.contrib.auth import get_user_model
 from django.test import TestCase
@@ -68,15 +66,24 @@ class EmailLengthTest(TestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn('email', response.data)
 
-    def test_local_part_longer_than_64_is_rejected(self):
-        """Тест: часть до @ длиннее 64 символов отклоняется"""
+    def test_long_local_part_is_accepted(self):
+        """Тест: длинная часть до @ не мешает регистрации (кейс из баги)"""
         email = 'a123456789' * 24 + '435daad@ya.ru'
         self.assertEqual(len(email), 253)
 
         response = self.register(email)
 
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+    def test_email_shorter_than_6_is_rejected(self):
+        """Тест: адрес короче 6 символов отклоняется"""
+        email = 'a@b.c'
+        self.assertEqual(len(email), 5)
+
+        response = self.register(email)
+
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
-        self.assertIn('до символа @', ' '.join(response.data['email']))
+        self.assertIn('email', response.data)
 
     def test_ordinary_email_still_works(self):
         """Тест: обычный короткий адрес не задет правками"""
