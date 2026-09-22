@@ -21,6 +21,7 @@ from config.constants import (
 from realty_values import models as values_models
 from users.validators import (
     EMAIL_MAX_LENGTH,
+    validate_email_domain_ascii,
     validate_email_length,
     validate_person_name,
 )
@@ -87,7 +88,7 @@ class User(AbstractUser):
     email = models.EmailField(
         verbose_name='email',
         unique=True,
-        validators=[validate_email_length],
+        validators=[validate_email_length, validate_email_domain_ascii],
     )
 
     uuid_esa = models.UUIDField(

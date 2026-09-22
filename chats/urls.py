@@ -10,6 +10,7 @@ from chats.views import (
     ChatsBlockingCreateAPIView,
     ChatsDeleteAPIView,
     MessageCreateAPIView,
+    MessagesDeleteAPIView,
 )
 
 app_name = ChatsConfig.name
@@ -31,6 +32,7 @@ urlpatterns = [
     path(
         'delete-chats/', ChatsDeleteAPIView.as_view(), name='delete-chats'
     ),  # ex-multiple-del
+    path('delete-messages/', MessagesDeleteAPIView.as_view(), name='delete-messages'),
     path('block/', ChatsBlockingCreateAPIView.as_view(), name='blocking'),
     path('unblock/', ChatRemoveBlocking.as_view(), name='unblocking'),
 ]
