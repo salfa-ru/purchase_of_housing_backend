@@ -23,6 +23,7 @@ from chats.serializers import (
     CreateMessageResponseSerializer,
     IdsListSerializer,
     MessageSerializer,
+    MsgIdsListSerializer,
     UnblockingRequestSerializer,
     UserInfoIdNameSerializer,
 )
@@ -32,6 +33,7 @@ from chats.services import (
     get_chats_by_ids,
     get_chats_from_users,
     get_chats_sorted,
+    get_messages_by_ids,
     get_realties_from_users,
     get_realty_by_realty_id,
     get_users_to_block_unblock,
@@ -182,7 +184,7 @@ class ChatListAPIView(generics.ListAPIView):
 
         if page is not None:
             serializer = self.get_serializer(
-                page, many=True, context={'request': request}
+                page, many=True, context={'request': request, 'short': True}
             )
             paginated_response = self.get_paginated_response(serializer.data)
             new_data = {'unread_total': unread_total}
@@ -191,7 +193,7 @@ class ChatListAPIView(generics.ListAPIView):
             return paginated_response
 
         serializer = self.get_serializer(
-            queryset, many=True, context={'request': request}
+            queryset, many=True, context={'request': request, 'short': True}
         )
         response_data = serializer.data
         # Вставляем unread_total в начало
@@ -270,8 +272,6 @@ class ChatMessagesAPIView(generics.CreateAPIView):
 
         page = self.paginate_queryset(messages.order_by('-created_at'))
 
-        # TODO - ПРОВЕРИТЬ - Установка даты чтения сообщения получателем (место 1 из 2)
-        print('ПРОВЕРИТЬ - Установка даты чтения сообщения получателем (место 1 из 2)!')
         if page is not None:
             serializer = ChatMessagesSerializer(
                 instance=chat, context={'request': request}
@@ -345,6 +345,62 @@ class MessageCreateAPIView(generics.CreateAPIView):
 
         response_serializer = self.get_serializer(message)
         return Response(response_serializer.data, status=status.HTTP_201_CREATED)
+
+
+@extend_schema(
+    tags=['Чаты'],
+    request=MsgIdsListSerializer,
+    summary='Удаление сообщений по их ID',
+    responses={
+        200: inline_serializer(
+            name='MessagesDeleteResponse',
+            fields={
+                'deleted_msg_ids': serializers.ListField(
+                    child=serializers.IntegerField()
+                ),
+                'detail': serializers.CharField(),
+            },
+        ),
+        400: inline_serializer(
+            name='MessagesDeleteError',
+            fields={'detail': serializers.CharField()},
+        ),
+    },
+)
+class MessagesDeleteAPIView(generics.CreateAPIView):
+    """Удаление сообщений (одного или нескольких) по списку msg_ids.
+
+    Сообщение удаляется только у текущего пользователя: у собеседника
+    переписка остается нетронутой. Чужие и уже удаленные сообщения
+    считаются не найденными."""
+
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = MsgIdsListSerializer
+
+    def post(self, request, *args, **kwargs):
+        serializer = MsgIdsListSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        msg_ids = serializer.validated_data['msg_ids']
+
+        try:
+            messages = get_messages_by_ids(current_user=request.user, msg_ids=msg_ids)
+        except exceptions.NotFound as e:
+            return Response({'detail': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+        deleted_msg_ids = [message.msg_id for message in messages]
+
+        Message.objects.filter(
+            msg_id__in=deleted_msg_ids, user_from=request.user
+        ).update(is_deleted_from=True)
+        Message.objects.filter(msg_id__in=deleted_msg_ids, user_to=request.user).update(
+            is_deleted_to=True
+        )
+
+        response_data = {
+            'deleted_msg_ids': deleted_msg_ids,
+            'detail': 'Сообщения успешно удалены.',
+        }
+        return Response(response_data, status=status.HTTP_200_OK)
 
 
 @extend_schema(

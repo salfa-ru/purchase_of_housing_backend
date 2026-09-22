@@ -17,7 +17,7 @@ class Chat(models.Model):
     chat_id = models.AutoField(primary_key=True)
     realty = models.ForeignKey(
         realty_models.Realty,
-        on_delete=models.CASCADE,
+        on_delete=models.PROTECT,
         verbose_name='Объект недвижимости',
         related_name='chats',
     )

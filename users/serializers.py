@@ -1,4 +1,3 @@
-import re
 from datetime import datetime
 
 from django.contrib.auth import password_validation
@@ -12,28 +11,36 @@ from rest_framework.validators import UniqueValidator
 from config.constants import IMAGE_EXTENSIONS
 from users.models import User, validate_avatar_min_resolution, validate_avatar_size
 from users.validators import (
+    NAME_INVALID_CHARACTERS,
+    PASSWORD_CONFIRMATION_REQUIRED,
+    PASSWORD_MISMATCH,
+    normalize_person_name,
     normalize_phone_number,
+    validate_email_domain_ascii,
     validate_email_length,
     validate_person_name,
     validate_phone_number,
 )
 
 
-def capitalize_name(value):
+class PersonNameField(serializers.CharField):
     """
-    Приводит имя/фамилию к формату:
-    - первая буква заглавная, остальные строчные
-    - заменяет двойные тире на одно
-    - поддерживает двойные имена через дефис (Анна-Мария)
+    Имя/фамилия: значение нормализуется до запуска валидаторов, поэтому
+    краевые дефисы и лишние пробелы отсекаются, а не приводят к ошибке.
     """
-    if not value:
-        return value
 
-    # 🔧 Убираем двойные тире
+    def __init__(self, **kwargs):
+        kwargs.setdefault('validators', [validate_person_name])
+        super().__init__(**kwargs)
 
-    value = re.sub(r'-{2,}', '-', value)
+    def to_internal_value(self, data):
+        value = super().to_internal_value(data)
+        normalized = normalize_person_name(value)
 
-    return re.sub(r'[^\s-]+', lambda part: part.group().capitalize(), value)
+        if value and not normalized:
+            raise serializers.ValidationError(NAME_INVALID_CHARACTERS)
+
+        return normalized
 
 
 def normalize_user_input(data):
@@ -45,6 +52,7 @@ def normalize_user_input(data):
 
     if data.get('email'):
         data['email'] = data['email'].lower()
+        data['username'] = data['email']
 
     if data.get('phone_number'):
         try:
@@ -137,12 +145,8 @@ class UserProfileUpdateSerializer(serializers.ModelSerializer):
     НЕДОСТУПНЫ для изменения через этот сериализатор.
     """
 
-    first_name = serializers.CharField(
-        required=False, allow_blank=True, validators=[validate_person_name]
-    )
-    last_name = serializers.CharField(
-        required=False, allow_blank=True, validators=[validate_person_name]
-    )
+    first_name = PersonNameField(required=False, allow_blank=True)
+    last_name = PersonNameField(required=False, allow_blank=True)
     avatar = serializers.ImageField(
         required=False,
         allow_null=True,
@@ -156,12 +160,6 @@ class UserProfileUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['first_name', 'last_name', 'avatar']
-
-    def validate_first_name(self, value):
-        return capitalize_name(value)
-
-    def validate_last_name(self, value):
-        return capitalize_name(value)
 
 
 class CurrentUserSerializer(UserBaseSerializer):
@@ -226,7 +224,7 @@ class UserSelfProfileSerializer(UserBaseSerializer):
             'password',
         ]
         extra_kwargs_add = {
-            'password': {'write_only': True},
+            'password': {'write_only': True, 'trim_whitespace': False},
         }
         extra_kwargs = {**UserBaseSerializer.Meta.extra_kwargs, **extra_kwargs_add}
 
@@ -235,16 +233,13 @@ class UserFullSerializer(UserSelfProfileSerializer):
     """Сериализатор для list, create, delete.
     Полные данные по пользователю."""
 
-    first_name = serializers.CharField(
-        required=True, allow_blank=False, validators=[validate_person_name]
-    )
-    last_name = serializers.CharField(
-        required=True, allow_blank=False, validators=[validate_person_name]
-    )
+    first_name = PersonNameField(required=True, allow_blank=False)
+    last_name = PersonNameField(required=True, allow_blank=False)
     email = serializers.EmailField(
         required=True,
         validators=[
             validate_email_length,
+            validate_email_domain_ascii,
             UniqueValidator(
                 queryset=User.objects.all(),
                 message='Пользователь с таким email уже существует.',
@@ -297,7 +292,9 @@ class UserPersonalAccountSerializer(serializers.ModelSerializer):
     new_notifications_count = serializers.SerializerMethodField()
 
     def get_new_messages_count(self, instance) -> int:
-        return instance.messages_received.filter(is_new=True).count()
+        return instance.messages_received.filter(
+            is_new=True, is_deleted_to=False
+        ).count()
 
     def get_new_notifications_count(self, instance) -> int:
         return instance.notifications.filter(is_new=True).count()
@@ -321,7 +318,7 @@ class UserNewMsgsSerializer(serializers.ModelSerializer):
 
     def get_have_new_msgs(self, instance) -> bool:
         return bool(
-            instance.messages_received.filter(is_new=True).count()
+            instance.messages_received.filter(is_new=True, is_deleted_to=False).count()
             + instance.notifications.filter(is_new=True).count()
         )
 
@@ -432,7 +429,6 @@ class ChangePhoneSerializer(serializers.Serializer):
         OpenApiExample(
             'Пример регистрации',
             value={
-                'username': 'user123',
                 'password': 'securepass123',
                 're_password': 'securepass123',
                 'email': 'user@example.com',
@@ -460,17 +456,28 @@ class UserCreateSerializer(BaseUserCreateSerializer):
             ),
         ],
     )
-    first_name = serializers.CharField(
-        required=True, allow_blank=False, validators=[validate_person_name]
+    first_name = PersonNameField(required=True, allow_blank=False)
+    last_name = PersonNameField(required=False, allow_blank=True)
+    password = serializers.CharField(
+        write_only=True,
+        trim_whitespace=False,
+        style={'input_type': 'password'},
     )
-    # Фамилия по ТЗ не обязательна
-    last_name = serializers.CharField(
-        required=False, allow_blank=True, validators=[validate_person_name]
+    re_password = serializers.CharField(
+        write_only=True,
+        trim_whitespace=False,
+        style={'input_type': 'password'},
+        error_messages={
+            'required': PASSWORD_CONFIRMATION_REQUIRED,
+            'blank': PASSWORD_CONFIRMATION_REQUIRED,
+            'null': PASSWORD_CONFIRMATION_REQUIRED,
+        },
     )
     email = serializers.EmailField(
         required=True,
         validators=[
             validate_email_length,
+            validate_email_domain_ascii,
             UniqueValidator(
                 queryset=User.objects.all(),
                 message='Пользователь с таким email уже существует.',
@@ -480,12 +487,6 @@ class UserCreateSerializer(BaseUserCreateSerializer):
 
     def to_internal_value(self, data):
         return super().to_internal_value(normalize_user_input(data))
-
-    def validate_first_name(self, value):
-        return capitalize_name(value)
-
-    def validate_last_name(self, value):
-        return capitalize_name(value)
 
     def validate_password(self, value):
         """Проверка пароля на уровне поля."""
@@ -501,6 +502,11 @@ class UserCreateSerializer(BaseUserCreateSerializer):
         return value
 
     def validate(self, attrs):
+        re_password = attrs.pop('re_password', None)
+
+        if attrs.get('password') != re_password:
+            raise serializers.ValidationError({'re_password': PASSWORD_MISMATCH})
+
         return attrs
 
     class Meta(BaseUserCreateSerializer.Meta):
@@ -509,29 +515,29 @@ class UserCreateSerializer(BaseUserCreateSerializer):
             'id',
             'username',
             'password',
+            're_password',
             'email',
             'phone_number',
             'first_name',
             'last_name',
         )
         extra_kwargs = {
-            'password': {'write_only': True},
+            'password': {'write_only': True, 'trim_whitespace': False},
             'email': {'required': True},
             'phone_number': {'required': True},
+            'username': {'required': False},
         }
 
 
 class SetPasswordSerializer(serializers.Serializer):
-    current_password = serializers.CharField()
-    new_password = serializers.CharField()
-    re_new_password = serializers.CharField()
+    current_password = serializers.CharField(trim_whitespace=False)
+    new_password = serializers.CharField(trim_whitespace=False)
+    re_new_password = serializers.CharField(trim_whitespace=False)
 
     def validate(self, data):
         # Проверяем, что пароли совпадают
         if data['new_password'] != data['re_new_password']:
-            raise serializers.ValidationError(
-                {'re_new_password': 'Пароли не совпадают.'}
-            )
+            raise serializers.ValidationError({'re_new_password': PASSWORD_MISMATCH})
 
         request = self.context.get('request')
         try:

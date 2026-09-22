@@ -34,6 +34,7 @@ class EmailLengthTest(TestCase):
                 'username': email,
                 'email': email,
                 'password': 'Ab1cd2',
+                're_password': 'Ab1cd2',
                 'first_name': 'Тест',
                 'last_name': 'Тест',
                 'phone_number': '+79000000013',

@@ -8,6 +8,12 @@ from rest_framework import fields, serializers, status
 from rest_framework.exceptions import APIException
 
 from chats.models import Blocking, Chat, Message
+from chats.restrictions import (
+    SEND_DENIED_REALTY_ARCHIVED,
+    SEND_DENIED_REALTY_DELETED,
+    get_send_restriction,
+    is_archived,
+)
 from config.constants import MESSAGE_LENGTH
 from realty.models import Realty
 from users.models import User
@@ -70,11 +76,11 @@ class CreateMessageRequestSerializer(serializers.Serializer):
                     detail='Объявление не найдено'
                 ) from err
 
-        # Статус 4 = В архиве
-        if realty and realty.realty_status_id == 4:
-            raise ValidationCustomDetailError(
-                detail='Невозможно отправить сообщение в архивное объявление'
-            )
+        if realty and realty.is_deleted:
+            raise ValidationCustomDetailError(detail=SEND_DENIED_REALTY_DELETED)
+
+        if realty and is_archived(realty):
+            raise ValidationCustomDetailError(detail=SEND_DENIED_REALTY_ARCHIVED)
 
         return data
 
@@ -199,6 +205,9 @@ class ChatMessagesSerializer(serializers.ModelSerializer):
 
     unread = serializers.SerializerMethodField()  # Добавляем новое поле
 
+    can_send = serializers.SerializerMethodField()
+    disabled_reason = serializers.SerializerMethodField()
+
     # Fields for flattened last message info
     message = serializers.CharField(read_only=True, required=False)
     msg_id = serializers.IntegerField(read_only=True, required=False)
@@ -217,6 +226,8 @@ class ChatMessagesSerializer(serializers.ModelSerializer):
             'realty',
             'i_block',
             'i_am_blocked',
+            'can_send',
+            'disabled_reason',
             'messages',  # останется либо список, либо одно сообщение <-----
             'msg_id',
             'message',
@@ -232,10 +243,7 @@ class ChatMessagesSerializer(serializers.ModelSerializer):
         data = super().to_representation(instance)
         request = self.context.get('request')
 
-        # Check if we're in /chats/ or /chats/blacklist/
-        if request and (
-            request.path == '/chats/' or request.path == '/chats/blacklist/'
-        ):
+        if self.context.get('short'):
             # Remove the messages list
             data.pop('messages', None)
 
@@ -289,9 +297,7 @@ class ChatMessagesSerializer(serializers.ModelSerializer):
     def get_unread(self, obj) -> int | None:  # <------- Corrected type hint
         """Считаем количество непрочитанных сообщений в чате."""
         request = self.context.get('request')
-        if request and (
-            request.path == '/chats/' or request.path == '/chats/blacklist/'
-        ):
+        if self.context.get('short'):
             current_user = request.user
             return obj.messages.filter(
                 user_to=current_user, is_new=True, is_deleted_to=False
@@ -315,12 +321,7 @@ class ChatMessagesSerializer(serializers.ModelSerializer):
 
     def get_messages(self, obj) -> list:
         """Get messages only for non-list endpoints"""
-        request = self.context.get('request')
-
-        # If we're in /chats/ or /chats/blacklist/, return empty list
-        if request and (
-            request.path == '/chats/' or request.path == '/chats/blacklist/'
-        ):
+        if self.context.get('short'):
             return []
 
         current_user = self.context['request'].user
@@ -331,9 +332,6 @@ class ChatMessagesSerializer(serializers.ModelSerializer):
 
         """ Важное исправление - сначала показываем, что сообщения новые
         и только делаем прочитанными (все равно будучи не уверенными, что пользователь их прочитает) """
-
-        # TODO - ПРОВЕРИТЬ - Установка даты чтения сообщения получателем (место 2 из 2)
-        print('ПРОВЕРИТЬ - Установка даты чтения сообщения получателем (место 2 из 2)!')
 
         # Serialize the messages *before* marking them as read.
         serialized_messages = MessageSerializer(
@@ -352,6 +350,16 @@ class ChatMessagesSerializer(serializers.ModelSerializer):
         return serialized_messages
 
     ...
+
+    def get_can_send(self, obj) -> bool:
+        """Можно ли писать в этот чат."""
+        current_user = self.context['request'].user
+        return get_send_restriction(current_user, chat=obj) is None
+
+    def get_disabled_reason(self, obj) -> str | None:
+        """Причина, по которой писать нельзя (удалённое объявление и т.д.)."""
+        current_user = self.context['request'].user
+        return get_send_restriction(current_user, chat=obj)
 
     def get_i_block(self, obj) -> bool:
         current_user = self.context['request'].user
@@ -420,6 +428,17 @@ class IdsListSerializer(serializers.Serializer):
         child=serializers.IntegerField(min_value=1),
         allow_empty=True,
         help_text='Список ID чатов (chat_ids)',
+    )
+
+
+class MsgIdsListSerializer(serializers.Serializer):
+    """Сериализатор списка id-шников сообщений.
+    Используется в удалении сообщений"""
+
+    msg_ids = serializers.ListField(
+        child=serializers.IntegerField(min_value=1),
+        allow_empty=True,
+        help_text='Список ID сообщений (msg_ids)',
     )
 
 

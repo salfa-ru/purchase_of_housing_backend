@@ -4,6 +4,13 @@ from django.db.models import OuterRef, Q, Subquery
 from rest_framework import exceptions
 
 from chats.models import Blocking, Chat, Message
+from chats.restrictions import (
+    SEND_DENIED_BLOCKED_BY_OTHER,
+    SEND_DENIED_BLOCKED_BY_YOU,
+    SEND_DENIED_REALTY_DELETED,
+    SEND_DENIED_USER_DELETED,
+    get_send_restriction,
+)
 from chats.serializers import IdsListSerializer, ValidationCustomDetailError
 from realty.models import Realty
 from users.models import User
@@ -83,12 +90,28 @@ def get_chats_by_ids(current_user, data):
     return chats
 
 
+def get_messages_by_ids(current_user, msg_ids):
+    """Получение сообщений по msg_id и проверка прав доступа."""
+    messages = Message.objects.filter(
+        Q(msg_id__in=msg_ids)
+        & (
+            Q(user_from=current_user, is_deleted_from=False)
+            | Q(user_to=current_user, is_deleted_to=False)
+        )
+    )
+
+    found_ids = {message.msg_id for message in messages}
+    diff = set(msg_ids) - found_ids
+    if diff:
+        msg = f'Сообщения {diff} не найдены или уже удалены'
+        raise exceptions.NotFound(detail=msg)
+    return messages
+
+
 def check_user_is_deleted(user):
     """Проверяет, активен ли пользователь."""
     if user.is_deleted:
-        raise exceptions.PermissionDenied(
-            detail='Пользователь удален. Отправка сообщений невозможна.'
-        )
+        raise exceptions.PermissionDenied(detail=SEND_DENIED_USER_DELETED)
 
 
 def check_blocking(user_from, user_to):
@@ -98,16 +121,12 @@ def check_blocking(user_from, user_to):
         user_who=user_to, user_whom=user_from
     ).exists()
     if is_blocked_by_other:
-        raise exceptions.PermissionDenied(
-            detail='Пользователь вас заблокировал, вы не можете ему писать'
-        )
+        raise exceptions.PermissionDenied(detail=SEND_DENIED_BLOCKED_BY_OTHER)
     is_blocked_by_yourself = Blocking.objects.filter(
         user_who=user_from, user_whom=user_to
     ).exists()
     if is_blocked_by_yourself:
-        raise exceptions.PermissionDenied(
-            detail='Вы заблокировали этого пользователя и не можете ему писать'
-        )
+        raise exceptions.PermissionDenied(detail=SEND_DENIED_BLOCKED_BY_YOU)
 
 
 def create_message(user_from, message_text, realty_id=None, chat_id=None):
@@ -135,6 +154,9 @@ def create_message(user_from, message_text, realty_id=None, chat_id=None):
 
     else:
         raise ValueError('Должен быть указан либо chat_id, либо realty_id')
+
+    if get_send_restriction(user_from, chat=chat) == SEND_DENIED_REALTY_DELETED:
+        raise exceptions.ValidationError(detail=SEND_DENIED_REALTY_DELETED)
 
     message = Message.objects.create(
         chat=chat,

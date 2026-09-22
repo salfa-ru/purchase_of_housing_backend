@@ -1,8 +1,9 @@
 """Требования к паролю: 6-60 символов, обязательны заглавные и
-строчные латинские буквы и цифры. Спецсимволы допустимы. Каждое нарушение
-описывается своим сообщением, все найденные приходят списком."""
+строчные латинские буквы и цифры. Спецсимволы допустимы, пробелы и любые
+символы вне латиницы — нет. Каждое нарушение описывается своим сообщением,
+все найденные приходят списком."""
 
-from django.contrib.auth import password_validation
+from django.contrib.auth import get_user_model, password_validation
 from django.core.exceptions import ValidationError
 from django.test import TestCase
 from rest_framework import status
@@ -10,6 +11,9 @@ from rest_framework.test import APIClient
 
 from users.serializers import UserFullSerializer
 from users.validators import (
+    PASSWORD_CONFIRMATION_REQUIRED,
+    PASSWORD_INVALID_CHARACTERS,
+    PASSWORD_MISMATCH,
     PASSWORD_NO_DIGIT,
     PASSWORD_NO_LOWERCASE,
     PASSWORD_NO_UPPERCASE,
@@ -19,6 +23,7 @@ from users.validators import (
 )
 
 REGISTER_URL = '/api/auth/users/'
+User = get_user_model()
 
 
 class PasswordRulesTest(TestCase):
@@ -51,7 +56,12 @@ class PasswordRulesTest(TestCase):
 
     def test_cyrillic_does_not_count_as_letters(self):
         """Тест: кириллица не заменяет латинские буквы"""
-        self.assertRejected('Пароль123', PASSWORD_NO_UPPERCASE, PASSWORD_NO_LOWERCASE)
+        self.assertRejected(
+            'Пароль123',
+            PASSWORD_NO_UPPERCASE,
+            PASSWORD_NO_LOWERCASE,
+            PASSWORD_INVALID_CHARACTERS,
+        )
 
     def test_digits_only_is_rejected(self):
         """Тест: пароль из одних цифр → нужны буквы обоих регистров"""
@@ -107,6 +117,7 @@ class PasswordRulesApiTest(TestCase):
             'last_name': 'Тест',
             'phone_number': '+79000000012',
             'password': 'onlylowercase123',
+            're_password': 'onlylowercase123',
         }
 
     def test_registration_rejects_password_without_uppercase(self):
@@ -126,7 +137,178 @@ class PasswordRulesApiTest(TestCase):
     def test_valid_password_is_accepted(self):
         """Тест: пароль по правилам → пользователь создается"""
         self.payload['password'] = '123456789qQ'
+        self.payload['re_password'] = '123456789qQ'
 
         response = self.client.post(REGISTER_URL, self.payload, format='json')
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+
+class PasswordCharactersTest(TestCase):
+    """Состав символов: только латиница, цифры и спецсимволы."""
+
+    def assertRejected(self, password):
+        with self.assertRaises(ValidationError) as context:
+            password_validation.validate_password(password)
+
+        self.assertIn(
+            PASSWORD_INVALID_CHARACTERS,
+            context.exception.messages,
+            f'пароль {password!r} отклонен, но без претензии к символам',
+        )
+
+    def test_leading_space_is_rejected(self):
+        """Пробел в начале пароля недопустим"""
+        self.assertRejected(' Ab1cd2')
+
+    def test_trailing_space_is_rejected(self):
+        """Пробел в конце пароля недопустим"""
+        self.assertRejected('Ab1cd2 ')
+
+    def test_inner_space_is_rejected(self):
+        """Пробел внутри пароля недопустим"""
+        self.assertRejected('Ab1 cd2')
+
+    def test_tab_is_rejected(self):
+        """Табуляция недопустима"""
+        self.assertRejected('Ab1\tcd2')
+
+    def test_emoji_is_rejected(self):
+        """Эмодзи недопустимы"""
+        self.assertRejected('Ab1cd2😀')
+
+    def test_hieroglyph_is_rejected(self):
+        """Иероглифы недопустимы"""
+        self.assertRejected('Ab1cd2漢字')
+
+    def test_cyrillic_letter_is_rejected(self):
+        """Кириллическая буква среди латинских недопустима"""
+        self.assertRejected('AbВ1cd2')
+
+    def test_all_special_characters_are_allowed(self):
+        """Спецсимволы латинской раскладки разрешены"""
+        password_validation.validate_password('Ab1!"#$%&\'()*+,-./:;<=>?@[]^_`{|}~')
+
+    def test_ordinary_password_is_not_affected(self):
+        """Обычный пароль правилами не задет"""
+        password_validation.validate_password('Passw0rd!')
+
+
+class PasswordCharactersApiTest(TestCase):
+    """Проверка состава символов работает на регистрации."""
+
+    def setUp(self):
+        self.client = APIClient()
+        self.payload = {
+            'email': 'err8@mail.ru',
+            'first_name': 'Игорь',
+            'last_name': 'Тест',
+            'phone_number': '+79000000015',
+            'password': '123456789qQ',
+            're_password': '123456789qQ',
+        }
+
+    def register(self, password):
+        self.payload['password'] = password
+        self.payload['re_password'] = password
+        return self.client.post(REGISTER_URL, self.payload, format='json')
+
+    def test_password_with_space_is_rejected(self):
+        """Тест: POST /api/auth/users/ с пробелом в пароле → 400"""
+        response = self.register('12345 6789qQ')
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn(PASSWORD_INVALID_CHARACTERS, response.data['password'])
+
+    def test_password_with_leading_space_is_rejected(self):
+        """Пробел в начале не срезается, а дает 400"""
+        response = self.register(' 123456789qQ')
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn(PASSWORD_INVALID_CHARACTERS, response.data['password'])
+
+    def test_password_with_trailing_space_is_rejected(self):
+        """Пробел в конце не срезается, а дает 400"""
+        response = self.register('123456789qQ ')
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn(PASSWORD_INVALID_CHARACTERS, response.data['password'])
+
+    def test_password_with_emoji_is_rejected(self):
+        """Тест: POST /api/auth/users/ с эмодзи в пароле → 400"""
+        response = self.register('123456789qQ😀')
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn(PASSWORD_INVALID_CHARACTERS, response.data['password'])
+
+    def test_password_with_hieroglyph_is_rejected(self):
+        """Тест: POST /api/auth/users/ с иероглифом в пароле → 400"""
+        response = self.register('123456789qQ漢')
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn(PASSWORD_INVALID_CHARACTERS, response.data['password'])
+
+    def test_valid_password_still_works(self):
+        """Тест: корректный пароль по-прежнему проходит"""
+        response = self.register('123456789qQ')
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
+
+
+class PasswordConfirmationTest(TestCase):
+    """re_password обязателен и должен совпадать с password."""
+
+    def setUp(self):
+        self.client = APIClient()
+        self.payload = {
+            'email': 'err9@mail.ru',
+            'first_name': 'Игорь',
+            'last_name': 'Тест',
+            'phone_number': '+79000000016',
+            'password': '123456789qQ',
+            're_password': '123456789qQ',
+        }
+
+    def register(self, **overrides):
+        payload = dict(self.payload)
+        for field, value in overrides.items():
+            if value is None:
+                payload.pop(field, None)
+            else:
+                payload[field] = value
+        return self.client.post(REGISTER_URL, payload, format='json')
+
+    def test_matching_confirmation_is_accepted(self):
+        """Тест: совпадающее подтверждение → пользователь создается"""
+        response = self.register()
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
+
+    def test_mismatching_confirmation_is_rejected(self):
+        """Тест: пароли не совпадают → 400 с понятным текстом"""
+        response = self.register(re_password='123456789qW')
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn(PASSWORD_MISMATCH, response.data['re_password'])
+
+    def test_missing_confirmation_is_rejected(self):
+        """Тест: без подтверждения регистрация не проходит"""
+        response = self.register(re_password=None)
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn(PASSWORD_CONFIRMATION_REQUIRED, response.data['re_password'])
+
+    def test_blank_confirmation_is_rejected(self):
+        """Тест: пустое подтверждение не проходит"""
+        response = self.register(re_password='')
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn(PASSWORD_CONFIRMATION_REQUIRED, response.data['re_password'])
+
+    def test_confirmation_is_not_stored(self):
+        """Тест: re_password не попадает ни в ответ, ни в базу"""
+        response = self.register()
+
+        self.assertNotIn('re_password', response.data)
+        user = User.objects.get(email=self.payload['email'])
+        self.assertTrue(user.check_password(self.payload['password']))
