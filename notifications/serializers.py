@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from notifications.models import Notification, NotificationTemplate
+from notifications.models import DeviceToken, Notification, NotificationTemplate
 from realty.models import Realty
 from realty.utils import get_apartment_short_info
 
@@ -97,3 +97,12 @@ class IdsNotifListSerializer(serializers.Serializer):
     Используется в множественном удалении и смене статуса"""
 
     ids = serializers.ListField(child=serializers.IntegerField(), allow_empty=False)
+
+
+class DeviceTokenSerializer(serializers.ModelSerializer):
+    """Токен устройства для пуш-уведомлений."""
+
+    class Meta:
+        model = DeviceToken
+        fields = ('token', 'platform')
+        extra_kwargs = {'token': {'validators': []}}

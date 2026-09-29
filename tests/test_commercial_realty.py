@@ -17,7 +17,7 @@ class CommercialRealtyTypesSeedTest(TestCase):
     """Справочник коммерческих типов заводится миграцией."""
 
     def test_commercial_types_exist(self):
-        """Тест: все коммерческие типы есть в справочнике"""
+        """Все коммерческие типы есть в справочнике"""
         for name in COMMERCIAL_TYPE_NAMES:
             with self.subTest(name=name):
                 self.assertTrue(
@@ -25,7 +25,7 @@ class CommercialRealtyTypesSeedTest(TestCase):
                 )
 
     def test_residential_types_untouched(self):
-        """Тест: миграция не сделала коммерческими жилые типы"""
+        """Миграция не сделала коммерческими жилые типы"""
         residential, _ = RealtyType.objects.get_or_create(
             type='Квартира', defaults={'is_commercial': False}
         )
@@ -44,7 +44,7 @@ class CommercialTypeValidationTest(TestCase):
         self.realty = create_realty(self.user, realty_type=self.residential)
 
     def test_commercial_type_on_residential_is_rejected(self):
-        """Тест: тип коммерции у жилого объекта → ошибка"""
+        """Тип коммерции у жилого объекта → ошибка"""
         serializer = RealtyCreateSerializer(
             instance=self.realty, data={'commercial_type': 'office'}, partial=True
         )
@@ -53,7 +53,7 @@ class CommercialTypeValidationTest(TestCase):
         self.assertIn('commercial_type', serializer.errors)
 
     def test_commercial_realty_without_type_is_rejected(self):
-        """Тест: коммерческий объект без типа коммерции → ошибка"""
+        """Коммерческий объект без типа коммерции → ошибка"""
         serializer = RealtyCreateSerializer(
             instance=self.realty,
             data={'realty_type': self.office.id},
@@ -64,7 +64,7 @@ class CommercialTypeValidationTest(TestCase):
         self.assertIn('commercial_type', serializer.errors)
 
     def test_commercial_realty_with_type_is_accepted(self):
-        """Тест: коммерческий объект с типом коммерции → проходит"""
+        """Коммерческий объект с типом коммерции → проходит"""
         serializer = RealtyCreateSerializer(
             instance=self.realty,
             data={'realty_type': self.office.id, 'commercial_type': 'office'},
@@ -74,7 +74,7 @@ class CommercialTypeValidationTest(TestCase):
         self.assertTrue(serializer.is_valid(), serializer.errors)
 
     def test_residential_without_commercial_type_is_accepted(self):
-        """Тест: жилой объект без типа коммерции → проходит"""
+        """Жилой объект без типа коммерции → проходит"""
         serializer = RealtyCreateSerializer(
             instance=self.realty, data={'price': 2000000}, partial=True
         )
@@ -82,7 +82,7 @@ class CommercialTypeValidationTest(TestCase):
         self.assertTrue(serializer.is_valid(), serializer.errors)
 
     def test_clearing_commercial_type_on_commercial_realty_is_rejected(self):
-        """Тест: у коммерческого объекта нельзя стереть тип коммерции"""
+        """У коммерческого объекта нельзя стереть тип коммерции"""
         self.realty.realty_type = self.office
         self.realty.commercial_type = 'office'
         self.realty.save(update_fields=['realty_type', 'commercial_type'])

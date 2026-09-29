@@ -187,20 +187,19 @@ class CookieTokenObtainPairView(TokenObtainPairView):
 @extend_schema(
     tags=['Аутентификация'],
     summary='Обновление access токена',
-    description='Обновляет access токен с помощью refresh токена из HttpOnly cookie.',
+    description='Обновляет access токен по refresh токену. Токен берется '
+    'из поля refresh в теле запроса, а если его там нет — из HttpOnly cookie.',
 )
 class CookieTokenRefreshView(TokenRefreshView):
-    """Обновление токенов через refresh cookie."""
+    """Обновление токенов по refresh из тела запроса или из cookie."""
 
     def post(self, request, *args, **kwargs):
-        # 1. Сначала пробуем взять токен из куки
-        refresh_token = request.COOKIES.get(
-            settings.SIMPLE_JWT.get('REFRESH_COOKIE', 'refresh_token')
-        )
+        refresh_token = request.data.get('refresh')
 
-        # 2. Если в куки нет — пробуем из тела (для обратной совместимости)
         if not refresh_token:
-            refresh_token = request.data.get('refresh')
+            refresh_token = request.COOKIES.get(
+                settings.SIMPLE_JWT.get('REFRESH_COOKIE', 'refresh_token')
+            )
 
         # 3. Если нигде нет — ошибка
         if not refresh_token:

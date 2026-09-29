@@ -12,6 +12,8 @@ from chats.restrictions import (
     get_send_restriction,
 )
 from chats.serializers import IdsListSerializer, ValidationCustomDetailError
+from notifications.constants import NEW_MESSAGE_CODE
+from notifications.utils import create_notification
 from realty.models import Realty
 from users.models import User
 
@@ -164,6 +166,9 @@ def create_message(user_from, message_text, realty_id=None, chat_id=None):
         user_to=user_to,
         message=message_text,
     )
+
+    create_notification(chat.realty, NEW_MESSAGE_CODE, user_to=user_to)
+
     return message
 
 

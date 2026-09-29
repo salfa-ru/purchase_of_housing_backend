@@ -129,6 +129,9 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'config.wsgi.application'
 
+# ========== ПУШ-УВЕДОМЛЕНИЯ (FCM) ==========
+FIREBASE_ENABLED = os.getenv('FIREBASE_ENABLED', 'False').lower() == 'true'
+
 USE_SQLITE = os.getenv('USE_SQLITE', 'False').lower() in ('true', '1', 'yes')
 
 if USE_SQLITE:
@@ -194,6 +197,8 @@ def getenv_stripped(name, default=None):
     value = os.getenv(name, default)
     return value.strip() if isinstance(value, str) else value
 
+
+FIREBASE_CREDENTIALS_PATH = getenv_stripped('FIREBASE_CREDENTIALS_PATH')
 
 SUPABASE_BUCKET = getenv_stripped('SUPABASE_BUCKET')
 
@@ -412,6 +417,10 @@ LOGGING = {
             'handlers': ['console'],
             'level': 'ERROR',
             'propagate': False,
+        },
+        'notifications': {
+            'handlers': ['console'],
+            'level': os.getenv('DJANGO_LOG_LEVEL', 'INFO'),
         },
     },
 }

@@ -9,6 +9,7 @@ from rest_framework import status
 from rest_framework.test import APIClient
 
 from chats.restrictions import SEND_DENIED_REALTY_DELETED
+from notifications.models import Notification
 from tests.factories import create_realty, create_user
 
 CHATS_URL = '/api/chats/'
@@ -183,6 +184,10 @@ class UnreadCountersTest(ChatDeletionTestBase):
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         return response.data['new_messages_count']
 
+    def drop_notifications(self, user):
+        """Гасит уведомления о новых сообщениях."""
+        Notification.objects.filter(user_to=user).delete()
+
     def test_unread_is_counted_before_deletion(self):
         """Непрочитанное входящее считается"""
         self.assertEqual(self.new_messages_count(self.client_user), 1)
@@ -194,6 +199,7 @@ class UnreadCountersTest(ChatDeletionTestBase):
         self.api.post(
             DELETE_MESSAGES_URL, {'msg_ids': [self.answer_msg_id]}, format='json'
         )
+        self.drop_notifications(self.client_user)
 
         self.assertEqual(self.new_messages_count(self.client_user), 0)
         self.assertFalse(self.have_new_msgs(self.client_user))
@@ -206,7 +212,7 @@ class UnreadCountersTest(ChatDeletionTestBase):
         self.assertEqual(self.new_messages_count(self.client_user), 0)
 
     def test_chat_list_does_not_mark_messages_read(self):
-        """заход в список чатов не гасит непрочитанные сообщения"""
+        """Заход в список чатов не гасит непрочитанные сообщения"""
         self.chat_ids(self.client_user)
 
         self.assertEqual(self.new_messages_count(self.client_user), 1)

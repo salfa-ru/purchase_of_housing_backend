@@ -25,3 +25,15 @@ class NotificationAdmin(admin.ModelAdmin):
         'template',
         'is_new',
     )
+
+
+@admin.register(models.DeviceToken)
+class DeviceTokenAdmin(admin.ModelAdmin):
+    list_display = (
+        'user',
+        'platform',
+        'created_at',
+        'updated_at',
+    )
+    list_filter = ('platform',)
+    search_fields = ('token', 'user__username')

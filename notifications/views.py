@@ -3,9 +3,13 @@ from rest_framework import generics, serializers, status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from notifications.models import Notification
+from notifications.models import DeviceToken, Notification
 from notifications.paginations import NotificationPagination
-from notifications.serializers import IdsNotifListSerializer, NotificationSerializer
+from notifications.serializers import (
+    DeviceTokenSerializer,
+    IdsNotifListSerializer,
+    NotificationSerializer,
+)
 from notifications.utils import get_queryset_by_ids
 
 
@@ -109,3 +113,48 @@ class NotificationDeleteAPIView(generics.CreateAPIView):
 
         msg = f'{ids} notifications deleted'
         return Response({'detail': msg}, status=status.HTTP_200_OK)
+
+
+@extend_schema(
+    tags=['Уведомления'],
+    summary='Регистрация токена устройства для пуш-уведомлений',
+    description='Повторная регистрация того же токена обновляет владельца '
+    'и платформу, дубликаты не создаются.',
+)
+class DeviceTokenCreateAPIView(generics.CreateAPIView):
+    """Регистрация токена устройства."""
+
+    serializer_class = DeviceTokenSerializer
+    permission_classes = [IsAuthenticated]
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        DeviceToken.objects.update_or_create(
+            token=serializer.validated_data['token'],
+            defaults={
+                'user': request.user,
+                'platform': serializer.validated_data['platform'],
+            },
+        )
+
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+@extend_schema(
+    tags=['Уведомления'],
+    summary='Удаление токена устройства',
+    description='Удалить можно только свой токен. Вызывается при выходе '
+    'из аккаунта и при отключении пушей.',
+    responses={204: None},
+)
+class DeviceTokenDeleteAPIView(generics.DestroyAPIView):
+    """Удаление токена устройства."""
+
+    serializer_class = DeviceTokenSerializer
+    permission_classes = [IsAuthenticated]
+    lookup_field = 'token'
+
+    def get_queryset(self):
+        return DeviceToken.objects.filter(user=self.request.user)
