@@ -29,47 +29,47 @@ class PersonNameValidationTest(TestCase):
             validate_person_name(value)
 
     def test_cyrillic_is_accepted(self):
-        """Тест: кириллица принимается"""
+        """Кириллица принимается"""
         self.assertAccepted('Игорь')
 
     def test_latin_is_accepted(self):
-        """Тест: латиница принимается"""
+        """Латиница принимается"""
         self.assertAccepted('John')
 
     def test_hyphenated_name_is_accepted(self):
-        """Тест: двойное имя через дефис принимается"""
+        """Двойное имя через дефис принимается"""
         self.assertAccepted('Анна-Мария')
 
     def test_name_with_space_is_accepted(self):
-        """Тест: составное имя с пробелами принимается"""
+        """Составное имя с пробелами принимается"""
         self.assertAccepted('Ван Дер Берг')
 
     def test_forty_characters_are_allowed(self):
-        """Тест: сорок символов еще допустимы"""
+        """Сорок символов еще допустимы"""
         self.assertAccepted('и' * 40)
 
     def test_longer_than_forty_is_rejected(self):
-        """Тест: сорок один символ отклоняется"""
+        """Сорок один символ отклоняется"""
         self.assertRejected('и' * 41)
 
     def test_single_character_is_rejected(self):
-        """Тест: один символ отклоняется"""
+        """Один символ отклоняется"""
         self.assertRejected('И')
 
     def test_digits_are_rejected(self):
-        """Тест: цифры в имени отклоняются"""
+        """Цифры в имени отклоняются"""
         self.assertRejected('Иван1')
 
     def test_special_characters_are_rejected(self):
-        """Тест: спецсимволы отклоняются"""
+        """Спецсимволы отклоняются"""
         self.assertRejected('Иван@')
 
     def test_separators_only_are_rejected(self):
-        """Тест: имя из одних разделителей отклоняется"""
+        """Имя из одних разделителей отклоняется"""
         self.assertRejected('--')
 
     def test_normalized_separators_only_are_rejected(self):
-        """Тест: строка из дефисов после нормализации пуста и отклоняется"""
+        """Строка из дефисов после нормализации пуста и отклоняется"""
         for value in ('-', '-—-'):
             with self.subTest(value=value):
                 self.assertRejected(normalize_person_name(value))
@@ -79,39 +79,39 @@ class NameCapitalizationTest(TestCase):
     """Автоматическая капитализация."""
 
     def test_lowercase_is_capitalized(self):
-        """Тест: первая буква поднимается до заглавной"""
+        """Первая буква поднимается до заглавной"""
         self.assertEqual(normalize_person_name('игорь'), 'Игорь')
 
     def test_uppercase_is_normalized(self):
-        """Тест: имя капсом приводится к обычному виду"""
+        """Имя капсом приводится к обычному виду"""
         self.assertEqual(normalize_person_name('ИГОРЬ'), 'Игорь')
 
     def test_each_part_of_hyphenated_name(self):
-        """Тест: капитализируется каждая часть имени через дефис"""
+        """Капитализируется каждая часть имени через дефис"""
         self.assertEqual(normalize_person_name('анна-мария'), 'Анна-Мария')
 
     def test_each_word_of_compound_name(self):
-        """Тест: капитализируется каждое слово составного имени"""
+        """Капитализируется каждое слово составного имени"""
         self.assertEqual(normalize_person_name('ван дер берг'), 'Ван Дер Берг')
 
     def test_double_hyphen_is_collapsed(self):
-        """Тест: двойной дефис схлопывается в один"""
+        """Двойной дефис схлопывается в один"""
         self.assertEqual(normalize_person_name('анна--мария'), 'Анна-Мария')
 
     def test_leading_hyphen_is_stripped(self):
-        """Тест: дефис в начале имени срезается"""
+        """Дефис в начале имени срезается"""
         self.assertEqual(normalize_person_name('-иван'), 'Иван')
 
     def test_trailing_hyphen_is_stripped(self):
-        """Тест: дефис в конце имени срезается"""
+        """Дефис в конце имени срезается"""
         self.assertEqual(normalize_person_name('иван-'), 'Иван')
 
     def test_surrounding_dashes_are_stripped(self):
-        """Тест: тире по краям имени срезается"""
+        """Тире по краям имени срезается"""
         self.assertEqual(normalize_person_name('—иван—'), 'Иван')
 
     def test_surrounding_spaces_are_stripped(self):
-        """Тест: пробелы по краям имени срезаются"""
+        """Пробелы по краям имени срезаются"""
         self.assertEqual(normalize_person_name(' игорь '), 'Игорь')
 
 
@@ -137,7 +137,7 @@ class NameOnRegistrationTest(TestCase):
         )
 
     def test_name_is_capitalized_on_registration(self):
-        """Тест: при регистрации имя и фамилия капитализируются"""
+        """При регистрации имя и фамилия капитализируются"""
         response = self.register('игорь', 'петров-водкин')
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
@@ -145,14 +145,14 @@ class NameOnRegistrationTest(TestCase):
         self.assertEqual(response.data['last_name'], 'Петров-Водкин')
 
     def test_latin_name_is_accepted_on_registration(self):
-        """Тест: латинское имя проходит регистрацию"""
+        """Латинское имя проходит регистрацию"""
         response = self.register('john', 'smith')
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(response.data['first_name'], 'John')
 
     def test_edge_hyphens_are_stripped_on_registration(self):
-        """Тест: дефисы по краям имени и фамилии срезаются при регистрации"""
+        """Дефисы по краям имени и фамилии срезаются при регистрации"""
         response = self.register('-Иван', 'Тест-')
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
@@ -160,7 +160,7 @@ class NameOnRegistrationTest(TestCase):
         self.assertEqual(response.data['last_name'], 'Тест')
 
     def test_name_with_digits_is_rejected_on_registration(self):
-        """Тест: имя с цифрами не проходит регистрацию"""
+        """Имя с цифрами не проходит регистрацию"""
         response = self.register('Иван1', 'Тест')
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
@@ -178,7 +178,7 @@ class NameOnProfileUpdateTest(TestCase):
         return self.client.patch(PROFILE_URL, payload, format='json')
 
     def test_name_is_capitalized_on_update(self):
-        """Тест: при обновлении профиля имя и фамилия капитализируются"""
+        """При обновлении профиля имя и фамилия капитализируются"""
         response = self.patch_name(first_name='анна--мария', last_name='ван дер берг')
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -186,27 +186,27 @@ class NameOnProfileUpdateTest(TestCase):
         self.assertEqual(response.data['last_name'], 'Ван Дер Берг')
 
     def test_name_with_digits_is_rejected_on_update(self):
-        """Тест: имя с цифрами не проходит обновление профиля"""
+        """Имя с цифрами не проходит обновление профиля"""
         response = self.patch_name(first_name='Иван1')
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn('first_name', response.data)
 
     def test_longer_than_forty_is_rejected_on_update(self):
-        """Тест: сорок один символ не проходит обновление профиля"""
+        """Сорок один символ не проходит обновление профиля"""
         response = self.patch_name(first_name='и' * 41)
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn('first_name', response.data)
 
     def test_forty_characters_are_allowed_on_update(self):
-        """Тест: сорок символов проходят обновление профиля"""
+        """Сорок символов проходят обновление профиля"""
         response = self.patch_name(first_name='и' * 40)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_blank_last_name_is_allowed(self):
-        """Тест: фамилию можно очистить"""
+        """Фамилию можно очистить"""
         response = self.patch_name(last_name='')
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -241,21 +241,21 @@ class NameOnDevRegistrationTest(TestCase):
         self.assertEqual(serializer.validated_data['last_name'], expected_last)
 
     def test_leading_hyphen_is_stripped(self):
-        """Тест: '-Иван' проходит и сохраняется как 'Иван'"""
+        """'-Иван' проходит и сохраняется как 'Иван'"""
         self.assertNormalized('-Иван', 'Тест', 'Иван', 'Тест')
 
     def test_trailing_hyphen_is_stripped(self):
-        """Тест: 'Иван-' проходит и сохраняется как 'Иван'"""
+        """'Иван-' проходит и сохраняется как 'Иван'"""
         self.assertNormalized('Иван-', 'Тест-', 'Иван', 'Тест')
 
     def test_name_is_capitalized(self):
-        """Тест: на dev-эндпоинте имя тоже капитализируется"""
+        """На dev-эндпоинте имя тоже капитализируется"""
         self.assertNormalized(
             'иван--иван', 'петров-водкин', 'Иван-Иван', 'Петров-Водкин'
         )
 
     def test_hyphen_only_name_is_rejected(self):
-        """Тест: имя из одного дефиса отклоняется как недопустимые символы"""
+        """Имя из одного дефиса отклоняется как недопустимые символы"""
         serializer = self.serialize('-', 'Тест')
 
         self.assertFalse(serializer.is_valid())

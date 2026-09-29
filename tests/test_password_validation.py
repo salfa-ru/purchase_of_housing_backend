@@ -43,19 +43,19 @@ class PasswordRulesTest(TestCase):
             self.fail(f'пароль {password!r} принят, хотя должен быть отклонен')
 
     def test_uppercase_only_is_rejected(self):
-        """Тест: пароль из одних заглавных → нужна строчная буква"""
+        """Пароль из одних заглавных → нужна строчная буква"""
         self.assertRejected('ONLYUPPERCASE123', PASSWORD_NO_LOWERCASE)
 
     def test_lowercase_only_is_rejected(self):
-        """Тест: пароль из одних строчных → нужна заглавная буква"""
+        """Пароль из одних строчных → нужна заглавная буква"""
         self.assertRejected('onlylowercase123', PASSWORD_NO_UPPERCASE)
 
     def test_letters_without_digits_are_rejected(self):
-        """Тест: пароль без цифр → нужна цифра"""
+        """Пароль без цифр → нужна цифра"""
         self.assertRejected('OnlyLetters', PASSWORD_NO_DIGIT)
 
     def test_cyrillic_does_not_count_as_letters(self):
-        """Тест: кириллица не заменяет латинские буквы"""
+        """Кириллица не заменяет латинские буквы"""
         self.assertRejected(
             'Пароль123',
             PASSWORD_NO_UPPERCASE,
@@ -64,42 +64,42 @@ class PasswordRulesTest(TestCase):
         )
 
     def test_digits_only_is_rejected(self):
-        """Тест: пароль из одних цифр → нужны буквы обоих регистров"""
+        """Пароль из одних цифр → нужны буквы обоих регистров"""
         self.assertRejected('1234567', PASSWORD_NO_UPPERCASE, PASSWORD_NO_LOWERCASE)
 
     def test_too_short_is_rejected(self):
-        """Тест: пароль короче 6 символов → сообщение про длину"""
+        """Пароль короче 6 символов → сообщение про длину"""
         self.assertRejected('Ab1cd', password_too_short())
 
     def test_too_long_is_rejected(self):
-        """Тест: пароль длиннее 60 символов → сообщение про длину"""
+        """Пароль длиннее 60 символов → сообщение про длину"""
         self.assertRejected('Ab1' + 'c' * 58, password_too_long())
 
     def test_short_password_does_not_complain_about_characters(self):
-        """Тест: у короткого, но полного по составу пароля одна претензия"""
+        """У короткого, но полного по составу пароля одна претензия"""
         with self.assertRaises(ValidationError) as context:
             password_validation.validate_password('Ab1cd')
 
         self.assertEqual(context.exception.messages, [password_too_short()])
 
     def test_six_characters_is_enough(self):
-        """Тест: шести символов достаточно"""
+        """Шести символов достаточно"""
         password_validation.validate_password('Ab1cd2')
 
     def test_sixty_characters_are_allowed(self):
-        """Тест: шестьдесят символов еще допустимы"""
+        """Шестьдесят символов еще допустимы"""
         password_validation.validate_password('Ab1' + 'c' * 57)
 
     def test_special_characters_are_allowed(self):
-        """Тест: спецсимволы не мешают"""
+        """Спецсимволы не мешают"""
         password_validation.validate_password('Passw0rd!')
 
     def test_example_from_specification_is_accepted(self):
-        """Тест: пример корректного пароля из ТЗ принимается"""
+        """Пример корректного пароля из ТЗ принимается"""
         password_validation.validate_password('123456789qQ')
 
     def test_help_text_lists_all_requirements(self):
-        """Тест: подсказка в документации перечисляет требования целиком"""
+        """Подсказка в документации перечисляет требования целиком"""
         self.assertIn(
             PASSWORD_REQUIREMENTS, password_validation.password_validators_help_texts()
         )
@@ -121,21 +121,21 @@ class PasswordRulesApiTest(TestCase):
         }
 
     def test_registration_rejects_password_without_uppercase(self):
-        """Тест: POST /api/auth/users/ → 400 с указанием, чего не хватает"""
+        """POST /api/auth/users/ → 400 с указанием, чего не хватает"""
         response = self.client.post(REGISTER_URL, self.payload, format='json')
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn(PASSWORD_NO_UPPERCASE, response.data['password'])
 
     def test_dev_serializer_rejects_password_without_uppercase(self):
-        """Тест: сериализатор dev-эндпоинта не пропускает такой пароль"""
+        """Сериализатор dev-эндпоинта не пропускает такой пароль"""
         serializer = UserFullSerializer(data=self.payload)
 
         self.assertFalse(serializer.is_valid())
         self.assertIn('password', serializer.errors)
 
     def test_valid_password_is_accepted(self):
-        """Тест: пароль по правилам → пользователь создается"""
+        """Пароль по правилам → пользователь создается"""
         self.payload['password'] = '123456789qQ'
         self.payload['re_password'] = '123456789qQ'
 
@@ -214,7 +214,7 @@ class PasswordCharactersApiTest(TestCase):
         return self.client.post(REGISTER_URL, self.payload, format='json')
 
     def test_password_with_space_is_rejected(self):
-        """Тест: POST /api/auth/users/ с пробелом в пароле → 400"""
+        """POST /api/auth/users/ с пробелом в пароле → 400"""
         response = self.register('12345 6789qQ')
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
@@ -235,21 +235,21 @@ class PasswordCharactersApiTest(TestCase):
         self.assertIn(PASSWORD_INVALID_CHARACTERS, response.data['password'])
 
     def test_password_with_emoji_is_rejected(self):
-        """Тест: POST /api/auth/users/ с эмодзи в пароле → 400"""
+        """POST /api/auth/users/ с эмодзи в пароле → 400"""
         response = self.register('123456789qQ😀')
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn(PASSWORD_INVALID_CHARACTERS, response.data['password'])
 
     def test_password_with_hieroglyph_is_rejected(self):
-        """Тест: POST /api/auth/users/ с иероглифом в пароле → 400"""
+        """POST /api/auth/users/ с иероглифом в пароле → 400"""
         response = self.register('123456789qQ漢')
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn(PASSWORD_INVALID_CHARACTERS, response.data['password'])
 
     def test_valid_password_still_works(self):
-        """Тест: корректный пароль по-прежнему проходит"""
+        """Корректный пароль по-прежнему проходит"""
         response = self.register('123456789qQ')
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
@@ -279,34 +279,34 @@ class PasswordConfirmationTest(TestCase):
         return self.client.post(REGISTER_URL, payload, format='json')
 
     def test_matching_confirmation_is_accepted(self):
-        """Тест: совпадающее подтверждение → пользователь создается"""
+        """Совпадающее подтверждение → пользователь создается"""
         response = self.register()
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
 
     def test_mismatching_confirmation_is_rejected(self):
-        """Тест: пароли не совпадают → 400 с понятным текстом"""
+        """Пароли не совпадают → 400 с понятным текстом"""
         response = self.register(re_password='123456789qW')
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn(PASSWORD_MISMATCH, response.data['re_password'])
 
     def test_missing_confirmation_is_rejected(self):
-        """Тест: без подтверждения регистрация не проходит"""
+        """Без подтверждения регистрация не проходит"""
         response = self.register(re_password=None)
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn(PASSWORD_CONFIRMATION_REQUIRED, response.data['re_password'])
 
     def test_blank_confirmation_is_rejected(self):
-        """Тест: пустое подтверждение не проходит"""
+        """Пустое подтверждение не проходит"""
         response = self.register(re_password='')
 
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn(PASSWORD_CONFIRMATION_REQUIRED, response.data['re_password'])
 
     def test_confirmation_is_not_stored(self):
-        """Тест: re_password не попадает ни в ответ, ни в базу"""
+        """re_password не попадает ни в ответ, ни в базу"""
         response = self.register()
 
         self.assertNotIn('re_password', response.data)

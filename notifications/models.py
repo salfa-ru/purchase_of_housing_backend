@@ -1,6 +1,6 @@
 from django.db import models
 
-from config.constants import NOTIFICATION_LENGTH, NULLABLE_FIELD
+from config.constants import DEVICE_TOKEN_LENGTH, NOTIFICATION_LENGTH, NULLABLE_FIELD
 from realty import models as realty_models
 from users import models as users_models
 
@@ -63,3 +63,43 @@ class Notification(models.Model):
 
     def __str__(self):
         return f'{self.template} --- {self.realty}'
+
+
+class DeviceToken(models.Model):
+    """Токен устройства пользователя для пуш-уведомлений (FCM)."""
+
+    ANDROID = 'android'
+    IOS = 'ios'
+    WEB = 'web'
+    PLATFORM_CHOICES = [
+        (ANDROID, 'Android'),
+        (IOS, 'iOS'),
+        (WEB, 'Web'),
+    ]
+
+    user = models.ForeignKey(
+        users_models.User,
+        on_delete=models.CASCADE,
+        verbose_name='Пользователь',
+        related_name='device_tokens',
+    )
+    token = models.CharField(
+        max_length=DEVICE_TOKEN_LENGTH,
+        unique=True,
+        verbose_name='Токен устройства',
+    )
+    platform = models.CharField(
+        max_length=10,
+        choices=PLATFORM_CHOICES,
+        verbose_name='Платформа',
+    )
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name='Добавлен')
+    updated_at = models.DateTimeField(auto_now=True, verbose_name='Обновлен')
+
+    class Meta:
+        verbose_name = 'Токен устройства'
+        verbose_name_plural = 'Токены устройств'
+        ordering = ['-updated_at']
+
+    def __str__(self):
+        return f'{self.user} --- {self.platform}'

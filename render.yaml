@@ -27,6 +27,9 @@ services:
         value: 'True'
       - key: USE_SQLITE
         value: 'False'
+      # Пуш-уведомления: пока выключены, отправка только пишется в лог
+      - key: FIREBASE_ENABLED
+        value: 'False'
       # Логи Django появляются в консоли Render сразу, а не порциями
       - key: PYTHONUNBUFFERED
         value: '1'
@@ -82,6 +85,9 @@ services:
       - key: DOCS_PUBLIC
         value: 'False'
       - key: USE_SQLITE
+        value: 'False'
+      # Пуш-уведомления: пока выключены, отправка только пишется в лог
+      - key: FIREBASE_ENABLED
         value: 'False'
       - key: PYTHONUNBUFFERED
         value: '1'

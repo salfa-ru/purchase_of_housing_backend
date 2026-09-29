@@ -1,7 +1,12 @@
+import logging
+
 from rest_framework import exceptions
 
 from notifications.models import Notification, NotificationTemplate
+from notifications.push import send_push
 from notifications.serializers import IdsNotifListSerializer
+
+logger = logging.getLogger(__name__)
 
 
 def get_queryset_by_ids(user, data):
@@ -20,20 +25,36 @@ def get_queryset_by_ids(user, data):
     return queryset, ids
 
 
-def create_notification(realty, notification_type: str):
-    """Отправка Уведомления владельцу объявления"""
+def create_notification(realty, notification_type: str, user_to=None):
+    """Создает уведомление и отправляет пуш."""
+    user_to = user_to or realty.owner
 
-    # находим тип уведомления
-    template = NotificationTemplate.objects.get(code=notification_type)
+    try:
+        template = NotificationTemplate.objects.get(code=notification_type)
+    except NotificationTemplate.DoesNotExist:
+        logger.error(
+            'уведомление %r не создано: нет шаблона с таким кодом', notification_type
+        )
+        return None
 
-    # создаем Уведомление
-    Notification.objects.create(
+    notification = Notification.objects.create(
         template=template,
-        user_to=realty.owner,
+        user_to=user_to,
         realty=realty,
     )
 
-    print('DEBUG - notifications/utils.py - create_notification():')
-    print(
-        f"        Пользователю {realty.owner} отправлено оповещение '{notification_type}' об объявлении #{realty.id}"
+    logger.info(
+        'уведомление %r создано: пользователь=%s объявление=%s',
+        notification_type,
+        user_to.id,
+        realty.id,
     )
+
+    send_push(
+        user_to,
+        title=template.part1,
+        body=template.part2 or '',
+        data={'notification_id': notification.id, 'realty_id': realty.id},
+    )
+
+    return notification

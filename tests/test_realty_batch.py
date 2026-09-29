@@ -26,7 +26,7 @@ class RealtyBatchViewTest(TestCase):
         return [item['id'] for item in response.json()]
 
     def test_order_follows_request(self):
-        """Тест: объявления возвращаются в порядке запрошенных ID"""
+        """Объявления возвращаются в порядке запрошенных ID"""
         ids = f'{self.third.id},{self.first.id},{self.second.id}'
         response = self.client.get(BATCH_URL, {'ids': ids})
         self.assertEqual(response.status_code, 200)
@@ -35,19 +35,19 @@ class RealtyBatchViewTest(TestCase):
         )
 
     def test_duplicates_collapse(self):
-        """Тест: повторяющийся ID не дублируется в ответе"""
+        """Повторяющийся ID не дублируется в ответе"""
         ids = f'{self.first.id},{self.first.id},{self.second.id}'
         response = self.client.get(BATCH_URL, {'ids': ids})
         self.assertEqual(self.ids_from(response), [self.first.id, self.second.id])
 
     def test_missing_id_is_skipped(self):
-        """Тест: несуществующий ID просто выпадает из выдачи"""
+        """Несуществующий ID просто выпадает из выдачи"""
         ids = f'{self.first.id},{10**6}'
         response = self.client.get(BATCH_URL, {'ids': ids})
         self.assertEqual(self.ids_from(response), [self.first.id])
 
     def test_deleted_realty_is_hidden(self):
-        """Тест: удалённое объявление не отдаётся"""
+        """Удалённое объявление не отдаётся"""
         self.second.is_deleted = True
         self.second.save()
 
@@ -56,7 +56,7 @@ class RealtyBatchViewTest(TestCase):
         self.assertEqual(self.ids_from(response), [self.first.id])
 
     def test_realty_of_deleted_owner_is_hidden(self):
-        """Тест: объявление удалённого владельца не отдаётся"""
+        """Объявление удалённого владельца не отдаётся"""
         owner = create_user('deletedowner')
         realty = create_realty(owner)
         owner.is_deleted = True
@@ -66,22 +66,22 @@ class RealtyBatchViewTest(TestCase):
         self.assertEqual(self.ids_from(response), [self.first.id])
 
     def test_too_many_ids_returns_400(self):
-        """Тест: слишком длинный список ID → 400"""
+        """Слишком длинный список ID → 400"""
         ids = ','.join(str(number) for number in range(constants.BATCH_IDS_MAX + 1))
         response = self.client.get(BATCH_URL, {'ids': ids})
         self.assertEqual(response.status_code, 400)
 
     def test_max_ids_is_accepted(self):
-        """Тест: список ровно на предел принимается"""
+        """Список ровно на предел принимается"""
         ids = ','.join(str(number) for number in range(constants.BATCH_IDS_MAX))
         response = self.client.get(BATCH_URL, {'ids': ids})
         self.assertEqual(response.status_code, 200)
 
     def test_missing_ids_returns_400(self):
-        """Тест: без параметра ids → 400"""
+        """Без параметра ids → 400"""
         self.assertEqual(self.client.get(BATCH_URL).status_code, 400)
 
     def test_non_numeric_ids_returns_400(self):
-        """Тест: нечисловой ID → 400"""
+        """Нечисловой ID → 400"""
         response = self.client.get(BATCH_URL, {'ids': '1,abc'})
         self.assertEqual(response.status_code, 400)

@@ -58,66 +58,66 @@ class AddressStreetFilterTest(TestCase):
         return {item['street'] for item in response.json()['results']}
 
     def test_full_phrase(self):
-        """Тест: поиск по полной фразе «ул Габричевского»"""
+        """Поиск по полной фразе «ул Габричевского»"""
         self.assertEqual(self.found_streets('ул Габричевского'), {'ул Габричевского'})
 
     def test_compound_street_name(self):
-        """Тест: составное название с сокращением через тире"""
+        """Составное название с сокращением через тире"""
         self.assertEqual(
             self.found_streets('пр-кт Защитников Москвы'),
             {'пр-кт Защитников Москвы'},
         )
 
     def test_single_word(self):
-        """Тест: однословный запрос по части названия"""
+        """Однословный запрос по части названия"""
         self.assertEqual(self.found_streets('Алтуфьевское'), {'Алтуфьевское шоссе'})
 
     def test_street_type_abbreviation(self):
-        """Тест: «ул» находит и «ул », и «ул.», и не цепляет «Тульская»"""
+        """«ул» находит и «ул », и «ул.», и не цепляет «Тульская»"""
         self.assertEqual(self.found_streets('ул'), {'ул Габричевского', 'ул. Ленина'})
 
     def test_abbreviation_with_dot(self):
-        """Тест: «ул.» равнозначно «ул»"""
+        """«ул.» равнозначно «ул»"""
         self.assertEqual(self.found_streets('ул.'), {'ул Габричевского', 'ул. Ленина'})
 
     def test_abbreviation_matches_full_form(self):
-        """Тест: «шоссе» и «ш.» — одно и то же"""
+        """«шоссе» и «ш.» — одно и то же"""
         self.assertEqual(self.found_streets('ш.'), {'Алтуфьевское шоссе'})
 
     def test_case_insensitive(self):
-        """Тест: регистр не важен"""
+        """Регистр не важен"""
         self.assertEqual(self.found_streets('УЛ ГАБРИЧЕВСКОГО'), {'ул Габричевского'})
 
     def test_word_order_does_not_matter(self):
-        """Тест: порядок слов не важен"""
+        """Порядок слов не важен"""
         self.assertEqual(
             self.found_streets('Москвы Защитников'), {'пр-кт Защитников Москвы'}
         )
 
     def test_several_streets_by_comma(self):
-        """Тест: несколько улиц через запятую"""
+        """Несколько улиц через запятую"""
         self.assertEqual(
             self.found_streets('ул Габричевского, Алтуфьевское'),
             {'ул Габричевского', 'Алтуфьевское шоссе'},
         )
 
     def test_comma_without_space(self):
-        """Тест: запятая без пробела"""
+        """Запятая без пробела"""
         self.assertEqual(
             self.found_streets('Тульская,Алтуфьевское'),
             {'Тульская', 'Алтуфьевское шоссе'},
         )
 
     def test_unknown_street_returns_nothing(self):
-        """Тест: несуществующая улица — пустой результат"""
+        """Несуществующая улица — пустой результат"""
         self.assertEqual(self.found_streets('Несуществующая'), set())
 
     def test_blank_value_does_not_filter(self):
-        """Тест: пустое значение не фильтрует"""
+        """Пустое значение не фильтрует"""
         self.assertEqual(len(self.found_streets('   ')), len(self.realty_by_street))
 
     def test_search_by_metro(self):
-        """Тест: тот же параметр ищет и по станции метро"""
+        """Тот же параметр ищет и по станции метро"""
         realty = self.realty_by_street['Тульская']
         realty.address.metro = self.metro
         realty.address.save()

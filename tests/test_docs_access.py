@@ -30,14 +30,14 @@ class DocsAccessTest(TestCase):
         )
 
     def test_anonymous_gets_403(self):
-        """Тест: без авторизации → 403"""
+        """Без авторизации → 403"""
         for url in DOCS_URLS:
             with self.subTest(url=url):
                 response = self.client.get(url)
                 self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_regular_user_gets_403(self):
-        """Тест: обычный пользователь → 403"""
+        """Обычный пользователь → 403"""
         self.client.login(username=self.user.username, password=self.user_password)
 
         for url in DOCS_URLS:
@@ -46,7 +46,7 @@ class DocsAccessTest(TestCase):
                 self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def test_admin_gets_200(self):
-        """Тест: админ (is_staff=True) → 200"""
+        """Админ (is_staff=True) → 200"""
         self.client.login(username=self.admin.username, password=self.user_password)
 
         for url in DOCS_URLS:
