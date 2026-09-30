@@ -20,6 +20,7 @@ from config.constants import (
 )
 from realty_values import models as values_models
 from users.validators import (
+    AVATAR_TOO_LARGE,
     EMAIL_MAX_LENGTH,
     validate_email_domain_ascii,
     validate_email_length,
@@ -30,7 +31,7 @@ from users.validators import (
 def validate_avatar_size(value):
     filesize = value.size
     if filesize > MAX_AVATAR_SIZE:
-        raise ValidationError('The allowed file size has been exceeded')
+        raise ValidationError(AVATAR_TOO_LARGE)
 
 
 def validate_avatar_min_resolution(value):

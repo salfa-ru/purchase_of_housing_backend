@@ -34,6 +34,27 @@ class Chat(models.Model):
         related_name='client_chats',
     )
 
+    is_deleted_owner = models.BooleanField(
+        default=False, verbose_name='Удален владельцем'
+    )
+    is_deleted_client = models.BooleanField(
+        default=False, verbose_name='Удален клиентом'
+    )
+
+    def hide_for(self, user):
+        """Прячет чат у одной стороны."""
+        field = 'is_deleted_owner' if self.owner_id == user.id else 'is_deleted_client'
+        setattr(self, field, True)
+        self.save(update_fields=[field])
+
+    def is_hidden_for(self, user):
+        """Скрыт ли чат у этого пользователя."""
+        return (
+            self.is_deleted_owner
+            if self.owner_id == user.id
+            else self.is_deleted_client
+        )
+
     class Meta:
         verbose_name = 'Чат'
         verbose_name_plural = 'Чаты'

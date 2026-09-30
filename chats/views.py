@@ -40,12 +40,6 @@ from chats.services import (
 )
 from config import constants
 
-# TODO - Внимание! При пагинации сообщений в чате - может быть непрочитанные будут на предыдущей странице!
-# I came up with this approach: well, I have paginator there, and so while I am asking for "the last page"
-# of messages, I can forcely show not the last one but the page where the "oldest" unread message is!
-# (thus I am on let's say page 2 of messages, but when I will scroll down, i will have to download page 1 of messages
-# (as the last ones are one the first pages). what do you think?
-
 
 class ChatsPagination(ConfigurablePagination):
     """Pagination for Chat lists (/chats/ and /chats/blacklist/)."""
@@ -137,12 +131,10 @@ class ChatListAPIView(generics.ListAPIView):
 
         filtered_chats = []
         for chat in chats:
-            # Фильтрация по наличию сообщений (как было)
-            has_messages = chat.messages.filter(
-                Q(user_from=user, is_deleted_from=False)
-                | Q(user_to=user, is_deleted_to=False)
-            ).exists()
-            if not has_messages:
+            if chat.is_hidden_for(user):
+                continue
+
+            if not chat.messages.exists():
                 continue
 
             # Фильтрация по блокировкам
@@ -267,9 +259,6 @@ class ChatMessagesAPIView(generics.CreateAPIView):
             Q(user_from=request.user, is_deleted_from=False)
             | Q(user_to=request.user, is_deleted_to=False)
         )
-        if not messages.exists():
-            return Response({'detail': 'Чат пуст'}, status=status.HTTP_404_NOT_FOUND)
-
         page = self.paginate_queryset(messages.order_by('-created_at'))
 
         if page is not None:
@@ -455,40 +444,32 @@ class ChatsDeleteAPIView(generics.CreateAPIView):
         found_chat_ids = [chat.chat_id for chat in chats]
         not_found_chat_ids = list(set(chat_ids) - set(found_chat_ids))
 
-        # 2. Проверяем, есть ли в каждом найденном чате сообщения для удаления.
-        chats_without_messages = []
-        for chat in chats:
-            has_messages = Message.objects.filter(
-                Q(chat=chat)
-                & (
-                    Q(user_from=request.user, is_deleted_from=False)
-                    | Q(user_to=request.user, is_deleted_to=False)
-                )
-            ).exists()
-            if not has_messages:
-                chats_without_messages.append(chat.chat_id)
+        already_deleted_chat_ids = [
+            chat.chat_id for chat in chats if chat.is_hidden_for(request.user)
+        ]
 
-        # 3. Если есть чаты без сообщений ИЛИ не все чаты найдены, возвращаем ошибку.
-        if chats_without_messages or not_found_chat_ids:
+        if already_deleted_chat_ids or not_found_chat_ids:
             response_data = {
-                'not_found_or_empty_chats': not_found_chat_ids + chats_without_messages,
+                'not_found_or_empty_chats': not_found_chat_ids
+                + already_deleted_chat_ids,
                 'found_chats': [
                     chat_id
                     for chat_id in found_chat_ids
-                    if chat_id not in chats_without_messages
+                    if chat_id not in already_deleted_chat_ids
                 ],
                 'detail': 'Удаление не произошло.  '
-                'Некоторые чаты не найдены или не содержат сообщений для удаления.',
+                'Некоторые чаты не найдены или уже удалены.',
             }
             return Response(response_data, status=status.HTTP_400_BAD_REQUEST)
 
-        # 4. Если все чаты найдены и содержат сообщения, удаляем.
         Message.objects.filter(chat__in=chats, user_from=request.user).update(
             is_deleted_from=True
         )
         Message.objects.filter(chat__in=chats, user_to=request.user).update(
             is_deleted_to=True
         )
+        for chat in chats:
+            chat.hide_for(request.user)
 
         response_data = {
             'deleted_chat_ids': found_chat_ids,

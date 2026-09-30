@@ -8,9 +8,10 @@ from drf_spectacular.utils import OpenApiExample, extend_schema_serializer
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
 
-from config.constants import IMAGE_EXTENSIONS
+from config.constants import AVATAR_EXTENSIONS, IMAGE_EXTENSIONS
 from users.models import User, validate_avatar_min_resolution, validate_avatar_size
 from users.validators import (
+    AVATAR_WRONG_FORMAT,
     NAME_INVALID_CHARACTERS,
     PASSWORD_CONFIRMATION_REQUIRED,
     PASSWORD_MISMATCH,
@@ -179,8 +180,13 @@ class UserAvatarSerializer(serializers.ModelSerializer):
     avatar = serializers.ImageField(
         required=True,
         allow_null=False,
+        # invalid_image: без этого на текстовый файл приходит стандартное
+        # «Загрузите правильное изображение», где нет списка форматов
+        error_messages={'invalid_image': AVATAR_WRONG_FORMAT},
         validators=[
-            FileExtensionValidator(allowed_extensions=IMAGE_EXTENSIONS),
+            FileExtensionValidator(
+                allowed_extensions=AVATAR_EXTENSIONS, message=AVATAR_WRONG_FORMAT
+            ),
             validate_avatar_size,
             validate_avatar_min_resolution,
         ],

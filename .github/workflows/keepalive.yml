@@ -5,17 +5,20 @@
 # Окно 03:00-20:00 UTC — это 06:00-23:00 по Москве. Круглосуточный пинг съел бы
 # 744 часа из 750 бесплатных на месяц, и в последних числах Render отключил бы
 # все сервисы разом, включая тестовый.
-name: Пробуждение прода
+name: Пробуждение прода и базы
 
 on:
   schedule:
+    # Каждые 10 минут — прод на Render, раз в сутки — база в Supabase
     - cron: '*/10 3-20 * * *'
+    - cron: '17 4 * * *'
   workflow_dispatch:
 
 jobs:
   ping:
     name: Пинг health-эндпоинта
     runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' || github.event.schedule == '*/10 3-20 * * *'
 
     steps:
       - name: Ping
@@ -26,6 +29,29 @@ jobs:
         run: |
           if [ -z "$URL" ]; then
             echo "Переменная PROD_HEALTHCHECK_URL не задана — пропускаем."
+            exit 0
+          fi
+          code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 120 --retry 3 --retry-delay 30 "$URL")
+          echo "Ответ: $code"
+          test "$code" = "200"
+
+  # Supabase усыпляет бесплатный проект после недели без обращений к базе,
+  # а health-эндпоинт отвечает 200, не трогая базу вообще. Поэтому раз в
+  # сутки дёргаем лёгкий публичный запрос, который реально читает данные.
+  db-ping:
+    name: Пинг базы
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' || github.event.schedule == '17 4 * * *'
+
+    steps:
+      - name: Ping
+        env:
+          # Переменная репозитория: Settings - Secrets and variables - Actions - Variables.
+          # Любая лёгкая ручка, читающая базу, например /api/realty/?page_size=1
+          URL: ${{ vars.PROD_DB_PING_URL }}
+        run: |
+          if [ -z "$URL" ]; then
+            echo "Переменная PROD_DB_PING_URL не задана — пропускаем."
             exit 0
           fi
           code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 120 --retry 3 --retry-delay 30 "$URL")
