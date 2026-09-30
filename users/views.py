@@ -34,7 +34,7 @@ from rest_framework_simplejwt.tokens import AccessToken, RefreshToken
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
 from config.constants import (
-    IMAGE_EXTENSIONS,
+    AVATAR_EXTENSIONS,
     MAX_AVATAR_SIZE,
     MIN_AVATAR_HEIGHT,
     MIN_AVATAR_WIDTH,
@@ -57,6 +57,7 @@ from users.utils import (
     delete_expired_tokens,
     update_token_field,
 )
+from users.validators import AVATAR_SINGLE_FILE
 
 # from django.contrib.auth import authenticate
 
@@ -424,7 +425,7 @@ class UserProfileRetrieveUpdateAPIView(generics.RetrieveUpdateAPIView):
         summary='Загрузка аватарки',
         description='Загружает аватарку текущего пользователя. '
         'Тело запроса — multipart/form-data с полем avatar. '
-        f'Допустимые форматы: {", ".join(IMAGE_EXTENSIONS)}. '
+        f'Допустимые форматы: {", ".join(AVATAR_EXTENSIONS)}. '
         f'Максимальный размер: {MAX_AVATAR_SIZE // (1024 * 1024)} МБ. '
         f'Минимальное разрешение: {MIN_AVATAR_WIDTH}x{MIN_AVATAR_HEIGHT} px. '
         'Прежняя аватарка удаляется автоматически.',
@@ -459,6 +460,13 @@ class UserAvatarAPIView(generics.GenericAPIView):
         return self.request.user
 
     def patch(self, request):
+        # Несколько файлов в одном поле: DRF молча берет последний,
+        # поэтому отвечаем понятной ошибкой
+        if len(request.FILES.getlist('avatar')) > 1:
+            return Response(
+                {'avatar': [AVATAR_SINGLE_FILE]}, status=status.HTTP_400_BAD_REQUEST
+            )
+
         serializer = self.get_serializer(self.get_object(), data=request.data)
         serializer.is_valid(raise_exception=True)
         serializer.save()

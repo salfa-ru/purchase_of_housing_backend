@@ -1,5 +1,5 @@
-"""Валидация имени и фамилии: буквы кириллицы и латиницы, пробелы
-и дефисы, 2-40 символов, автоматическая нормализация."""
+"""Валидация имени и фамилии: только кириллица, пробелы и дефисы,
+2-40 символов, автоматическая нормализация."""
 
 from django.core.exceptions import ValidationError
 from django.test import TestCase
@@ -32,9 +32,21 @@ class PersonNameValidationTest(TestCase):
         """Кириллица принимается"""
         self.assertAccepted('Игорь')
 
-    def test_latin_is_accepted(self):
-        """Латиница принимается"""
-        self.assertAccepted('John')
+    def test_latin_is_rejected(self):
+        """Латиница не принимается"""
+        self.assertRejected('John')
+
+    def test_mixed_alphabets_are_rejected(self):
+        """Смесь кириллицы и латиницы не принимается"""
+        self.assertRejected('Иванoff')
+
+    def test_tab_is_rejected(self):
+        """Табуляция не принимается"""
+        self.assertRejected(normalize_person_name('Иван\tИван'))
+
+    def test_line_break_is_rejected(self):
+        """Перенос строки не принимается"""
+        self.assertRejected(normalize_person_name('Иван\nИван'))
 
     def test_hyphenated_name_is_accepted(self):
         """Двойное имя через дефис принимается"""
@@ -144,12 +156,26 @@ class NameOnRegistrationTest(TestCase):
         self.assertEqual(response.data['first_name'], 'Игорь')
         self.assertEqual(response.data['last_name'], 'Петров-Водкин')
 
-    def test_latin_name_is_accepted_on_registration(self):
-        """Латинское имя проходит регистрацию"""
+    def test_latin_name_is_rejected_on_registration(self):
+        """Латинское имя не проходит регистрацию"""
         response = self.register('john', 'smith')
 
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(response.data['first_name'], 'John')
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn(NAME_INVALID_CHARACTERS, response.data['first_name'])
+
+    def test_tab_in_name_is_rejected_on_registration(self):
+        """Табуляция в имени не проходит регистрацию"""
+        response = self.register('Иван\tИван', 'Тест')
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn(NAME_INVALID_CHARACTERS, response.data['first_name'])
+
+    def test_line_break_in_name_is_rejected_on_registration(self):
+        """Перенос строки в имени не проходит регистрацию"""
+        response = self.register('Иван\nИван', 'Тест')
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn(NAME_INVALID_CHARACTERS, response.data['first_name'])
 
     def test_edge_hyphens_are_stripped_on_registration(self):
         """Дефисы по краям имени и фамилии срезаются при регистрации"""

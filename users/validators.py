@@ -4,6 +4,7 @@ from django.core.exceptions import ValidationError
 from django.core.validators import RegexValidator
 
 from config import constants
+from config.constants import AVATAR_EXTENSIONS, MAX_AVATAR_SIZE
 
 # ========== ВАЛИДАТОР ИМЕНИ ==========
 
@@ -11,11 +12,11 @@ NAME_MIN_LENGTH = 2
 NAME_MAX_LENGTH = constants.NAME_LENGTH
 
 # Кириллица: \u0400-\u04FF (А-Яа-я), \u0500-\u052F (Ёё и др.)
-NAME_PATTERN = r'^[A-Za-z\u0400-\u04FF\u0500-\u052F \-—]+$'
-NAME_LETTER_PATTERN = r'[A-Za-z\u0400-\u04FF\u0500-\u052F]'
+NAME_PATTERN = r'^[\u0400-\u04FF\u0500-\u052F \-—]+$'
+NAME_LETTER_PATTERN = r'[\u0400-\u04FF\u0500-\u052F]'
 
 NAME_INVALID_CHARACTERS = (
-    'Введены недопустимые символы. Только буквы, пробел, тире, дефис, '
+    'Введены недопустимые символы. Только кириллица, пробел, тире, дефис, '
     f'от {NAME_MIN_LENGTH} до {NAME_MAX_LENGTH} символов.'
 )
 
@@ -32,16 +33,18 @@ def normalize_person_name(value):
     if not value:
         return value
 
-    value = re.sub(r'\s+', ' ', value.strip())
+    # Схлопываем только пробелы: табуляция и перенос строки должны дойти
+    # до валидатора и получить отказ, а не превратиться в пробел
+    value = re.sub(r' +', ' ', value.strip(' '))
     value = re.sub(r'[-—]{2,}', '-', value)
-    value = re.sub(r'^[-—\s]+|[-—\s]+$', '', value)
+    value = re.sub(r'^[-— ]+|[-— ]+$', '', value)
 
     return re.sub(r'[^\s\-—]+', lambda part: part.group().capitalize(), value)
 
 
 def validate_person_name(value):
     """
-    Проверяет имя/фамилию: буквы кириллицы и латиницы, пробел, тире, дефис,
+    Проверяет имя/фамилию: кириллица, пробел, тире, дефис,
     от 2 до 40 символов.
     """
     if not value:
@@ -50,8 +53,9 @@ def validate_person_name(value):
             code='required',
         )
 
-    # Удаляем лишние пробелы
-    value = value.strip()
+    # Срезаем только пробелы: табуляция и перенос строки — недопустимые
+    # символы, их нельзя молча убирать
+    value = value.strip(' ')
 
     # Проверяем длину
     if len(value) < NAME_MIN_LENGTH or len(value) > NAME_MAX_LENGTH:
@@ -74,6 +78,18 @@ def validate_person_name(value):
         )
 
     return value
+
+
+# ========== ВАЛИДАТОР АВАТАРКИ ==========
+
+AVATAR_TOO_LARGE = (
+    f'Максимальный размер файла превышает {MAX_AVATAR_SIZE // (1024 * 1024)} МБ.'
+)
+AVATAR_WRONG_FORMAT = (
+    'Недопустимый формат файла. Разрешены: '
+    f'{", ".join(extension.upper() for extension in AVATAR_EXTENSIONS)}.'
+)
+AVATAR_SINGLE_FILE = 'Можно загрузить только один файл.'
 
 
 # ========== ВАЛИДАТОР ТЕЛЕФОНА ==========

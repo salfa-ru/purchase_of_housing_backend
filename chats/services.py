@@ -167,6 +167,11 @@ def create_message(user_from, message_text, realty_id=None, chat_id=None):
         message=message_text,
     )
 
+    if chat.is_deleted_owner or chat.is_deleted_client:
+        chat.is_deleted_owner = False
+        chat.is_deleted_client = False
+        chat.save(update_fields=['is_deleted_owner', 'is_deleted_client'])
+
     create_notification(chat.realty, NEW_MESSAGE_CODE, user_to=user_to)
 
     return message

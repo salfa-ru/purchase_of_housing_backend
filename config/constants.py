@@ -55,6 +55,7 @@ ADVERTISMENT_STATUS = 'Активно'
 
 # допустимые типы для изображений
 IMAGE_EXTENSIONS = ('jpg', 'jpeg', 'png')
+AVATAR_EXTENSIONS = ('jpg', 'jpeg', 'png', 'webp')
 
 # максимально допустимый размер для аватара (в Б)
 MAX_AVATAR_SIZE = 5 * 1024 * 1024

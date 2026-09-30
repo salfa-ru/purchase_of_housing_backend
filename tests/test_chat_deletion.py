@@ -58,8 +58,6 @@ class ChatDeletionTestBase(TestCase):
 
     def visible_msg_ids(self, user):
         response = self.show_chat(user)
-        if response.status_code == status.HTTP_404_NOT_FOUND:
-            return []
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         return [msg['msg_id'] for msg in response.data['results']['messages']]
 
@@ -126,6 +124,28 @@ class MessageDeletionTest(ChatDeletionTestBase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertIn(self.first_msg_id, self.visible_msg_ids(self.client_user))
 
+    def test_chat_stays_after_deleting_all_messages(self):
+        """Удаление всех своих сообщений не убирает чат из списка"""
+        self.delete_messages(
+            self.client_user,
+            [self.first_msg_id, self.second_msg_id, self.answer_msg_id],
+        )
+
+        self.assertEqual(self.chat_ids(self.client_user), [self.chat_id])
+        self.assertEqual(self.chat_ids(self.owner), [self.chat_id])
+
+    def test_empty_chat_returns_empty_list(self):
+        """Чат без видимых сообщений отдает 200 и пустой список"""
+        self.delete_messages(
+            self.client_user,
+            [self.first_msg_id, self.second_msg_id, self.answer_msg_id],
+        )
+
+        response = self.show_chat(self.client_user)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+        self.assertEqual(response.data['results']['messages'], [])
+
     def test_already_deleted_message_is_rejected(self):
         """Повторное удаление того же сообщения дает 400"""
         self.delete_messages(self.client_user, [self.first_msg_id])
@@ -158,6 +178,34 @@ class ChatDeletionTest(ChatDeletionTestBase):
 
         self.assertEqual(self.visible_msg_ids(self.client_user), [])
         self.assertEqual(len(self.visible_msg_ids(self.owner)), 3)
+
+    def test_chat_with_deleted_messages_can_be_deleted(self):
+        """Чат удаляется и после того, как все сообщения удалены по одному"""
+        self.api.force_authenticate(self.client_user)
+        self.api.post(
+            DELETE_MESSAGES_URL,
+            {
+                'msg_ids': [
+                    self.first_msg_id,
+                    self.second_msg_id,
+                    self.answer_msg_id,
+                ]
+            },
+            format='json',
+        )
+
+        response = self.delete_chat(self.client_user)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+        self.assertEqual(self.chat_ids(self.client_user), [])
+
+    def test_repeated_chat_deletion_is_rejected(self):
+        """Повторное удаление того же чата дает 400"""
+        self.delete_chat(self.client_user)
+
+        response = self.delete_chat(self.client_user)
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_new_message_brings_chat_back(self):
         """Новое сообщение возвращает удаленный чат в список"""
