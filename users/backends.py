@@ -10,13 +10,14 @@ from users.services import create_user_from_esa, update_user_from_esa
 
 
 class CustomAuthentication(authentication.BaseAuthentication):
-    """Custom authenticate with ESA"""
+    """Аутентификация через ЕСА."""
 
     def authenticate(self, request):
         """
         Основной метод кастомной аутентификации.
         Получает заголовок Authorization, проверяет его состав и наличие префикса.
-        Декодирует токен, получает из него uuid пользователя и дату последнего изменения профиля.
+        Декодирует токен, получает из него uuid пользователя и дату последнего изменения
+        профиля.
         Получает пользователя по uuid (либо создает нового и сохраняет в базу).
         Обновляет пользователя в базе, если даты последнего изменения не совпадают.
         """
@@ -92,7 +93,7 @@ class CustomAuthentication(authentication.BaseAuthentication):
 
     @staticmethod
     def _get_user_by_id(user_id, token):
-        """Получает пользователя из базы или создает нового, если в базе такого не было."""
+        """Получает пользователя из базы или создает, если его там не было."""
         if not User.objects.filter(uuid_esa=user_id).exists():
             create_user_from_esa(user_id, token)
         return User.objects.get(uuid_esa=user_id)

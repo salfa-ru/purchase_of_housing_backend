@@ -1,5 +1,3 @@
-# notifications/constants.py
-
 """Коды шаблонов уведомлений."""
 
 ON_MODERATION_CODE = 'on_moderation'

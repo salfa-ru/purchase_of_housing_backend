@@ -1,5 +1,3 @@
-# realty/urls.py
-
 from django.urls import include, path
 from rest_framework.routers import DefaultRouter
 
@@ -45,7 +43,6 @@ urlpatterns = [
     path('', include(router.urls)),
     path('filter-options/', RealtyFilterOptionsView.as_view(), name='filter-options'),
     path('batch/', RealtyBatchView.as_view(), name='realty-batch'),
-    # Каталоги недвижимости (4 типа)
     path(
         'catalog/sale/residential/',
         CatalogSaleResidentialView.as_view(),

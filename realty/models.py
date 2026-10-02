@@ -1,6 +1,6 @@
 from django.core.validators import MinValueValidator
 from django.db import models
-from django.utils import timezone  # <---YYY--- realty_удаление v1
+from django.utils import timezone
 
 from config.constants import DESCRIPTION_LENGTH, MIN_PRICE, NULLABLE_FIELD
 from realty_addresses import models as addresses_models
@@ -10,7 +10,7 @@ from users import models as user_models
 
 
 class Realty(models.Model):
-    """Base Realty model."""
+    """Базовое объявление."""
 
     COMMERCIAL_TYPE_CHOICES = [
         ('office', 'Офис'),
@@ -106,12 +106,10 @@ class Realty(models.Model):
         null=True,
     )
 
-    is_deleted = models.BooleanField(
-        default=False, verbose_name='Удалено'
-    )  # <-- YYY --- realty_удаление v1
+    is_deleted = models.BooleanField(default=False, verbose_name='Удалено')
     deleted_at = models.DateTimeField(
         blank=True, null=True, verbose_name='Дата удаления'
-    )  # <-- YYY --- realty_удаление v1
+    )
 
     @property
     def trade_type(self):
@@ -125,27 +123,26 @@ class Realty(models.Model):
         verbose_name = 'Недвижимость'
         verbose_name_plural = 'Недвижимость'
 
-    def save(self, *args, **kwargs):  # <-- YYY --- realty_удаление v1
+    def save(self, *args, **kwargs):
         """При сохранении - устанавливаем дату удаления если объявление удалилось!"""
 
-        if (
-            self.is_deleted and self.deleted_at is None
-        ):  # <-- YYY --- Если только что удалили
+        if self.is_deleted and self.deleted_at is None:
             self.deleted_at = timezone.now()
-        elif (
-            not self.is_deleted
-        ):  # <-- YYY --- Если запись снова сделали "не удаленной"
-            self.deleted_at = None  # <-- YYY --- Убираем дату удаления, если она была
+        elif not self.is_deleted:
+            self.deleted_at = None
 
-        super().save(*args, **kwargs)  # <-- YYY --- Сохраняем после манипуляций
+        super().save(*args, **kwargs)
 
     def __str__(self):
+        rooms = self.about_apartment.number_of_rooms.number_of_rooms
+        rooms_suffix = '-комн.' if len(rooms) <= 2 else ''
+
         return (
-            f'{self.about_apartment.number_of_rooms.number_of_rooms}'
-            f'{"-комн." if len(self.about_apartment.number_of_rooms.number_of_rooms) <= 2 else ""} '
+            f'{rooms}{rooms_suffix} '
             f'{self.realty_type.type}, '
             f'{self.about_apartment.area} м.кв., '
-            f'{self.about_apartment.floor}/{self.about_apartment.floors_number} этаж --- '
+            f'{self.about_apartment.floor}/{self.about_apartment.floors_number} этаж '
+            f'--- '
             f'{self.address.street.name}, '
             f'{self.address.house_number}'
             f'{"копр." + self.address.corpus if self.address.corpus else ""}'
@@ -153,11 +150,10 @@ class Realty(models.Model):
             f'{"вл." + self.address.ownership if self.address.ownership else ""} --- '
             f'{self.owner.username}'
         )
-        # TODO переделать пользователя, когда будет кастомный пользователь
 
 
 class Sale(models.Model):
-    """Sale Realty model."""
+    """Объявление о продаже."""
 
     realty = models.OneToOneField(
         Realty,
@@ -177,7 +173,7 @@ class Sale(models.Model):
 
 
 class Rent(models.Model):
-    """Rent Realty model."""
+    """Объявление об аренде."""
 
     realty = models.OneToOneField(
         Realty,

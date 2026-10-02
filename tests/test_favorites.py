@@ -16,7 +16,6 @@ class FavoriteCreateViewTest(TestCase):
     def setUp(self):
         self.client = APIClient()
 
-        # Создаём тестового пользователя
         self.user = User.objects.create_user(
             username='testuser',
             password='testpass123',
@@ -25,8 +24,6 @@ class FavoriteCreateViewTest(TestCase):
         )
         self.client.force_authenticate(user=self.user)
 
-        # Берём существующее объявление из БД (id=1)
-        # Если его нет — тесты пропустим
         self.realty_id = 1
         self.realty_exists = Realty.objects.filter(id=self.realty_id).exists()
 
@@ -35,13 +32,11 @@ class FavoriteCreateViewTest(TestCase):
         if not self.realty_exists:
             self.skipTest("Realty with id=1 doesn't exist")
 
-        # Первое добавление
         response1 = self.client.post(
             '/api/favorites/create/', {'realty_id': self.realty_id}
         )
         self.assertEqual(response1.status_code, status.HTTP_201_CREATED)
 
-        # Второе добавление (дубликат) — должно вернуть 400
         response2 = self.client.post(
             '/api/favorites/create/', {'realty_id': self.realty_id}
         )

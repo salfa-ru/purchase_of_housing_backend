@@ -1,5 +1,3 @@
-# chats/admin.py
-
 from django.contrib import admin
 from django.forms import ModelForm
 from django.urls import reverse
@@ -20,12 +18,8 @@ class MessageAdminForm(ModelForm):
     def __init__(self, *args, **kwargs):
         self.request = kwargs.pop('request', None)
         super().__init__(*args, **kwargs)
-
-        ...
         if self.request and not self.request.user.is_superuser:
-            if (
-                self.instance.pk
-            ):  # Существующая запись - запрет на изменение отправителя!
+            if self.instance.pk:
                 self.fields['user_from'].queryset = self.fields[
                     'user_from'
                 ].queryset.filter(id=self.instance.user_from.id)
@@ -35,7 +29,7 @@ class MessageAdminForm(ModelForm):
                     'Хмм, а остальное, получается, можно? </span>'
                 )
 
-            else:  # Новая запись - автоматически выбирается текущий пользователь (модератор)
+            else:
                 self.fields['user_from'].queryset = self.fields[
                     'user_from'
                 ].queryset.filter(id=self.request.user.id)
@@ -44,16 +38,13 @@ class MessageAdminForm(ModelForm):
                     'user_from'
                 ].help_text = 'Новое сообщение можно создать только от своего имени.'
 
-            self.fields[
-                'user_from'
-            ].empty_label = None  # запрет на выбор ПУСТОГО отправителя
+            self.fields['user_from'].empty_label = None
 
 
 @admin.register(Message)
 class MessageAdmin(admin.ModelAdmin):
     list_display = (
         'msg_id',
-        # '__str__',
         'str_link',
         'user_from',
         'user_to',
@@ -69,19 +60,14 @@ class MessageAdmin(admin.ModelAdmin):
     form = MessageAdminForm
 
     def str_link(self, obj):
-        """
-        Creates a clickable link to the object's change form.
-        Uses the object's __str__ representation as the link text.
-        """
+        """Кликабельная ссылка на страницу редактирования объекта."""
         url = reverse(
             f'admin:{obj._meta.app_label}_{obj._meta.model_name}_change', args=[obj.pk]
         )
-        return format_html('<a href="{}">{}</a>', url, str(obj))  # Safely inject HTML
+        return format_html('<a href="{}">{}</a>', url, str(obj))
 
-    str_link.short_description = 'Сообщение'  # Optional: Nice column header
-    str_link.admin_order_field = (
-        '__str__'  # Optional: Enable sorting (if __str__ is sortable)
-    )
+    str_link.short_description = 'Сообщение'
+    str_link.admin_order_field = '__str__'
 
     def get_form(self, request, obj=None, **kwargs):
         admin_form = super().get_form(request, obj, **kwargs)
@@ -108,7 +94,6 @@ class BlockingAdmin(admin.ModelAdmin):
     )
     list_filter = ('user_who', 'user_whom')
     search_fields = ('user_who__username', 'user_whom__username')
-    # raw_id_fields = ('user_who', 'user_whom')
 
 
 @admin.register(Chat)

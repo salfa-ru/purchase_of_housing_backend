@@ -11,7 +11,7 @@ from complaints.serializers import ComplaintsSerializer
     'и в поле description вводится текст жалобы)',
 )
 class ComplaintsCreateAPIView(generics.CreateAPIView):
-    """Endpoint to Create complaints"""
+    """Создание жалобы."""
 
     serializer_class = ComplaintsSerializer
     permission_classes = [IsAuthenticated]

@@ -36,7 +36,7 @@ REGEX_SPECIAL_CHARS = frozenset('\\^$.|?*+()[]{}')
 
 
 def _regex_atom(char):
-    """Один символ шаблона: буква — в виде обоих регистров, спецсимвол — экранированным."""
+    """Один символ шаблона: буква — в обоих регистрах, спецсимвол — экранированным."""
     lower, upper = char.lower(), char.upper()
     if lower != upper:
         return f'[{lower}{upper}]'
@@ -80,12 +80,14 @@ class PriceRangeFilterSet(django_filters.FilterSet):
 
 
 class RealtyFilter(PriceRangeFilterSet):
-    """Custom filterset for Realty model."""
+    """Фильтры для объявлений."""
 
     bathroom_type = django_filters.BaseInFilter(
         field_name='common_characteristics__bathroom__type',
         lookup_expr='in',
-        help_text='Тип санузла (Раздельный или Совмещенный). (Значения вводить с учетом регистра! '
+        help_text='Тип санузла (Раздельный или Совмещенный). (Значения вводить с учетом'
+        ' '
+        'регистра! '
         'Можно ввести несколько значений, через запятую без пробелов '
         'или добавить значение в новый строковый элемент.)',
     )
@@ -114,12 +116,6 @@ class RealtyFilter(PriceRangeFilterSet):
         'без учета регистра). Понимает сокращения: пр-кт, ул., ш. и т.п. '
         'Несколько адресов перечисляются через запятую.',
     )
-    # address_street = django_filters.BaseInFilter(
-    #    method='filter_address',
-    #    label='Улица или метро',
-    #    help_text='Можно ввести несколько значений, через запятую без пробелов '
-    #              'или добавить значение в новый строковый элемент.'
-    # )
     address_house_number = django_filters.CharFilter(
         field_name='address__house_number', lookup_expr='icontains', label='Номер дома'
     )
@@ -233,11 +229,8 @@ class RealtyFilter(PriceRangeFilterSet):
         model = Realty
         fields = []
 
-    def __init__(
-        self, *args, **kwargs
-    ):  # <-- YYY --- Добавлено для фильтрации по is_deleted и владельцу
+    def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # По умолчанию показывать только не удаленные объявления
         self.queryset = self.queryset.filter(is_deleted=False, owner__is_deleted=False)
 
     def filter_trade_type(self, queryset, name, value):
@@ -324,7 +317,7 @@ class CatalogPriceFilter(PriceRangeFilterSet):
 
 
 class LatestRealtyFilter(RealtyFilter):
-    """RealtyFilter со строгой валидацией trade_type для эндпоинта /api/realty/latest/."""
+    """RealtyFilter со строгой проверкой trade_type для /api/realty/latest/."""
 
     def filter_trade_type(self, queryset, name, value):
         normalized = value.strip().lower()

@@ -68,13 +68,12 @@ class RealtyAdmin(admin.ModelAdmin):
 
     def get_readonly_fields(self, request, obj=None):
         """Регулируем редактируемость полей для админа/модератора.
-        Хотя в permissions модератор может менять realty, нужно, чтобы можно было менять только Статус"""
+        Хотя в permissions модератор может менять realty, менять он
+        должен только статус"""
 
         if request.user.is_superuser:
-            # единственные read-only поля для админа:
             return ['id', 'changed_at', 'deleted_at']
         else:
-            # для модератора - все поля read-only, кроме Статуса
             if obj:
                 return [
                     f.name for f in obj._meta.fields if f.name != 'realty_status'
@@ -84,20 +83,17 @@ class RealtyAdmin(admin.ModelAdmin):
     def get_fields(self, request, obj=None):
         """Ставим ID и Статус сверху, дату редактирования в конце"""
 
-        # Получаем все поля
         fields = [f.name for f in Realty._meta.fields]
 
-        # Убираем те, которые хотим разместить в определенном порядке, из текущего списка
         fields.remove('id')
         fields.remove('realty_status')
         fields.remove('changed_at')
 
-        # Возвращаем поля в желаемом, удобном порядке
         return ['id', 'realty_status'] + fields + ['changed_at']
 
     def get_form(self, request, obj=None, **kwargs):
-        """Переписываю форму, чтобы в forms.py можно было узнать, какой пользователь сохранял объявление.
-        Так Админ (но не Модератор) может менять в Realty все что угодно, включая статус БЕЗ ограничений!"""
+        """Форма знает, какой пользователь сохраняет объявление.
+        Админ (но не модератор) может менять что угодно, включая статус"""
 
         form_class = super().get_form(request, obj, **kwargs)
 
@@ -108,15 +104,11 @@ class RealtyAdmin(admin.ModelAdmin):
 
         return FormWithRequest
 
-    def owner_is_deleted(
-        self, obj
-    ):  # <-- YYY --- Создаем метод для отображения owner.is_deleted
+    def owner_is_deleted(self, obj):
         return obj.owner.is_deleted
 
-    owner_is_deleted.boolean = True  # <-- YYY --- Отображать как флажок
-    owner_is_deleted.short_description = (
-        'Владелец удален'  # <-- YYY --- Задаем описание
-    )
+    owner_is_deleted.boolean = True
+    owner_is_deleted.short_description = 'Владелец удален'
 
     def apartment(self, obj):
         """Выдача инфо о квартире короткой строкой"""
@@ -140,7 +132,7 @@ class RealtyAdmin(admin.ModelAdmin):
 
     def get_inlines(self, request, obj=None):
         """Использование inline формы только для уже созданной модели"""
-        inlines = [RealtyPhotoInline]  # Always include photo inline
+        inlines = [RealtyPhotoInline]
         if obj and obj.trade_type == 'sale':
             inlines.append(SaleInline)
         elif obj and obj.trade_type == 'rent':

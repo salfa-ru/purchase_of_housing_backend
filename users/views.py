@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import UTC, datetime
 
 from django.conf import settings
 from djoser.views import UserViewSet
@@ -13,17 +13,17 @@ from rest_framework import (
     mixins,
     permissions,
     serializers,
-    status,  # <---xxx--- удаление пользователя
+    status,
     viewsets,
 )
-from rest_framework.exceptions import (  # <---xxx---
+from rest_framework.exceptions import (
     NotFound,
     PermissionDenied,
     ValidationError,
 )
 from rest_framework.parsers import FormParser, MultiPartParser
 from rest_framework.permissions import AllowAny, IsAuthenticated
-from rest_framework.response import Response  # <---xxx--- удаление пользователя
+from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
 from rest_framework_simplejwt.token_blacklist.models import (
@@ -58,8 +58,6 @@ from users.utils import (
     update_token_field,
 )
 from users.validators import AVATAR_SINGLE_FILE
-
-# from django.contrib.auth import authenticate
 
 
 # Схема для запроса регистрации (только для Swagger, не влияет на логику)
@@ -178,7 +176,6 @@ class CookieTokenObtainPairView(TokenObtainPairView):
         response = super().post(request, *args, **kwargs)
         response = update_token_field(request, response)
 
-        # 🔧 ИСПРАВЛЕНО: Убираем refresh из тела ВСЕГДА
         if 'refresh' in response.data:
             del response.data['refresh']
 
@@ -202,7 +199,6 @@ class CookieTokenRefreshView(TokenRefreshView):
                 settings.SIMPLE_JWT.get('REFRESH_COOKIE', 'refresh_token')
             )
 
-        # 3. Если нигде нет — ошибка
         if not refresh_token:
             return Response(
                 {'detail': 'Refresh token not found'},
@@ -221,7 +217,6 @@ class CookieTokenRefreshView(TokenRefreshView):
         response = Response(serializer.validated_data, status=status.HTTP_200_OK)
         response = update_token_field(request, response)
 
-        # 🔧 ИСПРАВЛЕНО: Убираем refresh из тела ВСЕГДА
         if 'refresh' in response.data:
             del response.data['refresh']
 
@@ -239,7 +234,6 @@ class LogoutView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
-        # 1. Отзываем refresh-токен
         refresh_token = request.COOKIES.get(
             settings.SIMPLE_JWT.get('REFRESH_COOKIE', 'refresh_token')
         )
@@ -250,7 +244,6 @@ class LogoutView(APIView):
             except Exception:
                 pass
 
-        # 2. Отзываем access-токен
         auth_header = request.headers.get('Authorization', '')
         if auth_header.startswith('Bearer '):
             access_token = auth_header.split(' ')[1]
@@ -259,9 +252,8 @@ class LogoutView(APIView):
                     token = AccessToken(access_token)
                     jti = token['jti']
                     user_id = token['user_id']
-                    exp = datetime.fromtimestamp(token['exp'])
+                    exp = datetime.fromtimestamp(token['exp'], tz=UTC)
 
-                    # Создаем OutstandingToken (если его еще нет)
                     outstanding, created = OutstandingToken.objects.get_or_create(
                         jti=jti,
                         defaults={
@@ -270,12 +262,10 @@ class LogoutView(APIView):
                             'expires_at': exp,
                         },
                     )
-                    # Добавляем в черный список
                     BlacklistedToken.objects.get_or_create(token=outstanding)
                 except Exception:
                     pass
 
-        # 3. Удаляем cookie
         response = Response(
             {'detail': 'Successfully logged out.'}, status=status.HTTP_205_RESET_CONTENT
         )
@@ -309,7 +299,6 @@ class UserDevViewSet(
             return [IsAdminOrOwner()]
         return [permissions.IsAdminUser()]
 
-    # добавлено, чтобы нельзя было создавать удаленного пользователя
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -368,13 +357,13 @@ class UserSoftDeleteAPIView(generics.DestroyAPIView):
         return obj
 
     def destroy(self, request, *args, **kwargs):
-        instance = self.get_object()  # Get the object for deletion
-        username = instance.username  # Get the username *before* deleting
-        instance.soft_delete()  # "Delete" the user
+        instance = self.get_object()
+        username = instance.username
+        instance.soft_delete()
         return Response(
             {'detail': f'Пользователь {instance.id} - {username} удален'},
             status=status.HTTP_200_OK,
-        )  # Return the success message
+        )
 
 
 @extend_schema(
@@ -408,10 +397,8 @@ class UserProfileRetrieveUpdateAPIView(generics.RetrieveUpdateAPIView):
         return self.request.user
 
     def get_serializer_class(self):
-        # Для обновления профиля — ограниченный сериализатор
         if self.request.method in ['PUT', 'PATCH']:
             return UserProfileUpdateSerializer
-        # Для просмотра профиля — полный сериализатор
         if not self.request.user.uuid_esa:
             return UserSelfProfileSerializer
         return UserESAProfileSerializer
@@ -460,8 +447,6 @@ class UserAvatarAPIView(generics.GenericAPIView):
         return self.request.user
 
     def patch(self, request):
-        # Несколько файлов в одном поле: DRF молча берет последний,
-        # поэтому отвечаем понятной ошибкой
         if len(request.FILES.getlist('avatar')) > 1:
             return Response(
                 {'avatar': [AVATAR_SINGLE_FILE]}, status=status.HTTP_400_BAD_REQUEST
@@ -502,7 +487,7 @@ class UserPersonalAccountRetrieveAPIView(generics.RetrieveAPIView):
 @extend_schema(
     tags=['Пользователи | Профиль'],
     summary='Наличие новых сообщений или уведомлений',
-    description='Возвращает флаг наличия новых непрочитанных сообщений или уведомлений.',
+    description='Возвращает флаг наличия новых сообщений или уведомлений.',
 )
 class UserNewMsgsRetrieveAPIView(generics.RetrieveAPIView):
     """Получение информации о наличии новых сообщений или уведомлений.
@@ -580,7 +565,6 @@ class SetPasswordView(APIView):
         current_password = serializer.validated_data['current_password']
         new_password = serializer.validated_data['new_password']
 
-        # Проверяем текущий пароль
         if not user.check_password(current_password):
             raise ValidationError({'current_password': 'Неверный текущий пароль.'})
 
@@ -590,7 +574,6 @@ class SetPasswordView(APIView):
                 {'new_password': 'Новый пароль не должен совпадать с текущим.'}
             )
 
-        # Меняем пароль
         user.set_password(new_password)
         user.save()
 

@@ -33,7 +33,7 @@ from .models import Metro
     responses=MapPointsSerializer(many=True),
 )
 class GetlistMapPointsAPIView(APIView):
-    """Get list realty's point in map"""
+    """Точки объявлений на карте."""
 
     queryset = (
         Realty.objects.all()
@@ -52,7 +52,6 @@ class GetlistMapPointsAPIView(APIView):
         bottom_right_latitude = request.data.get('bottom_right_latitude')
         bottom_right_longitude = request.data.get('bottom_right_longitude')
 
-        # получаем ID статуса объявления со значением Активно
         realty_status = models_values.RealtyAdvStatus.objects.get(status='Активно').pk
 
         queryset = Realty.objects.filter(
@@ -86,7 +85,7 @@ class GetlistMapPointsAPIView(APIView):
     responses=ShortRealtySerializer(many=True),
 )
 class GetListAnnouncementsInMapPoint(APIView):
-    """Get List realty in point"""
+    """Объявления в точке на карте."""
 
     queryset = (
         Realty.objects.all()
@@ -109,7 +108,6 @@ class GetListAnnouncementsInMapPoint(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-        # получаем ID статуса объявления со значением Активно
         realty_status = models_values.RealtyAdvStatus.objects.get(status='Активно').pk
 
         queryset = Realty.objects.filter(
@@ -142,9 +140,7 @@ class GetListAnnouncementsInMapPoint(APIView):
     responses={200: MetroSerializer(many=True), 404: None},
 )
 class MetroStationsAPIView(generics.ListAPIView):
-    """
-    API endpoint for retrieving metro stations with optional filtering.
-    """
+    """Станции метро с необязательной фильтрацией."""
 
     serializer_class = MetroSerializer
     queryset = Metro.objects.select_related('line').all()

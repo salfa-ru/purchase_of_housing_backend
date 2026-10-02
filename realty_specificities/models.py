@@ -6,7 +6,7 @@ from realty_values import models as values_models
 
 
 class AboutBuilding(models.Model):
-    """About Building model."""
+    """О доме."""
 
     year_built = models.PositiveSmallIntegerField(
         verbose_name='Год постройки',
@@ -34,7 +34,7 @@ class AboutBuilding(models.Model):
 
 
 class AboutApartment(models.Model):
-    """About Apartment model."""
+    """О квартире."""
 
     number_of_rooms = models.ForeignKey(
         values_models.RoomsNumber,
@@ -77,7 +77,7 @@ class AboutApartment(models.Model):
 
 
 class CommonCharacteristics(models.Model):
-    """Common Charcteristics model."""
+    """Общие характеристики."""
 
     repair_type = models.ForeignKey(
         values_models.RepairType,
@@ -122,7 +122,7 @@ class CommonCharacteristics(models.Model):
 
 
 class RentalFeatures(models.Model):
-    """Rental Features model."""
+    """Условия аренды."""
 
     fridge = models.BooleanField(verbose_name='Холодильник', default=False)
     internet = models.BooleanField(verbose_name='Интернет', default=False)
@@ -168,7 +168,7 @@ class RentalFeatures(models.Model):
 
 
 class LeasePayments(models.Model):
-    """Lease Payment model."""
+    """Платежи по аренде."""
 
     counters_payment = models.ForeignKey(
         values_models.TradeParticipant,
@@ -198,7 +198,7 @@ class LeasePayments(models.Model):
 
 
 class SalesParameters(models.Model):
-    """Sales Parameters model."""
+    """Параметры продажи."""
 
     housing_type = models.ForeignKey(
         values_models.HousingType,

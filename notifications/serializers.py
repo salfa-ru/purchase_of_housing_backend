@@ -54,14 +54,10 @@ class RealtyForNotificationSerializer(serializers.ModelSerializer):
 
 
 class NotificationSerializer(serializers.ModelSerializer):
-    """Notification base serializer"""
+    """Базовый сериализатор уведомления."""
 
     realty = RealtyForNotificationSerializer()
 
-    # оригинальный сериалайзер, выдающий текст Уведомлений без изменений типа "Ваше объявление №___ опубликовано"
-    # template = NotificationTemplateSerializer()
-
-    # метод, подставляющий номер объявления
     template = serializers.SerializerMethodField()
 
     class Meta:
@@ -74,16 +70,11 @@ class NotificationSerializer(serializers.ModelSerializer):
             'is_new',
         ]
 
-    def get_template(
-        self, obj
-    ) -> dict[str, str | None]:  # внутри output-а могут быть строки или ничего
-        # Получаем оригинальные темплейты из стандартного сериализатора
+    def get_template(self, obj) -> dict[str, str | None]:
         template_data = NotificationTemplateSerializer(obj.template).data
 
-        # Get brief realty info
         realty_brief_info = get_apartment_short_info(obj.realty)
 
-        # Вставляем номер объявление вместо подчеркивания - ищем его только в первой части
         if '№___' in template_data['part1']:
             template_data['part1'] = template_data['part1'].replace(
                 '№___', f'№{str(obj.realty.id)} ({realty_brief_info})'

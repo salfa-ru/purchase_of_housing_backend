@@ -4,7 +4,7 @@ from config import constants
 
 
 class BuildingType(models.Model):
-    """Type of Building model."""
+    """Тип дома."""
 
     type = models.CharField(max_length=constants.CHAR_LENGTH, verbose_name='Тип дома')
 
@@ -17,7 +17,7 @@ class BuildingType(models.Model):
 
 
 class RoomsNumber(models.Model):
-    """Rooms Number model."""
+    """Количество комнат."""
 
     number_of_rooms = models.CharField(max_length=20, verbose_name='Количество комнат')
 
@@ -30,7 +30,7 @@ class RoomsNumber(models.Model):
 
 
 class RepairType(models.Model):
-    """Repair Type model."""
+    """Тип ремонта."""
 
     type = models.CharField(
         max_length=constants.CHAR_LENGTH, verbose_name='Тип ремонта'
@@ -45,7 +45,7 @@ class RepairType(models.Model):
 
 
 class CommunicationMethod(models.Model):
-    """Communication Method model."""
+    """Способ связи."""
 
     method = models.CharField(
         max_length=constants.CHAR_LENGTH, verbose_name='Способ связи'
@@ -60,7 +60,7 @@ class CommunicationMethod(models.Model):
 
 
 class RealtyAdvStatus(models.Model):
-    """Realty Advertisment Status model."""
+    """Статус объявления."""
 
     status = models.CharField(
         max_length=constants.CHAR_LENGTH,
@@ -76,7 +76,7 @@ class RealtyAdvStatus(models.Model):
 
 
 class HousingType(models.Model):
-    """Housing Type model."""
+    """Тип жилья."""
 
     type = models.CharField(
         max_length=constants.CHAR_LENGTH,
@@ -93,7 +93,7 @@ class HousingType(models.Model):
 
 
 class SaleType(models.Model):
-    """Sale Type model."""
+    """Тип продажи."""
 
     type = models.CharField(
         max_length=constants.CHAR_LENGTH,
@@ -110,7 +110,7 @@ class SaleType(models.Model):
 
 
 class TradeParticipant(models.Model):
-    """Tade Participant model."""
+    """Участник сделки."""
 
     participant = models.CharField(
         max_length=constants.CHAR_LENGTH,
@@ -126,16 +126,12 @@ class TradeParticipant(models.Model):
 
 
 class RealtyType(models.Model):
-    """Realty Type model."""
+    """Тип недвижимости."""
 
     type = models.CharField(
         max_length=constants.CHAR_LENGTH,
         verbose_name='Тип недвижимости',
     )
-    is_commercial = models.BooleanField(
-        default=False, verbose_name='Коммерческая недвижимость'
-    )
-
     is_commercial = models.BooleanField(
         default=False, verbose_name='Коммерческая недвижимость'
     )
@@ -149,7 +145,7 @@ class RealtyType(models.Model):
 
 
 class BathroomType(models.Model):
-    """Bathroom Type model."""
+    """Тип санузла."""
 
     type = models.CharField(
         max_length=constants.CHAR_LENGTH,

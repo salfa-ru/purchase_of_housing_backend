@@ -7,7 +7,7 @@ from realty_addresses import models as address_models
 
 
 class ZoneSerializer(serializers.ModelSerializer):
-    """Zone Serializer."""
+    """Район."""
 
     name = serializers.CharField(
         max_length=constants.CHAR_LENGTH,
@@ -20,7 +20,7 @@ class ZoneSerializer(serializers.ModelSerializer):
 
 
 class DistrictSerializer(serializers.ModelSerializer):
-    """District Serilalizer."""
+    """Округ."""
 
     name = serializers.CharField(
         max_length=constants.CHAR_LENGTH,
@@ -33,7 +33,7 @@ class DistrictSerializer(serializers.ModelSerializer):
 
 
 class CitySerializer(serializers.ModelSerializer):
-    """City Serilalizer."""
+    """Город."""
 
     name = serializers.CharField(
         max_length=constants.CHAR_LENGTH,
@@ -46,7 +46,7 @@ class CitySerializer(serializers.ModelSerializer):
 
 
 class StreetReadSerializer(serializers.ModelSerializer):
-    """Street Serializer."""
+    """Чтение улицы."""
 
     zone = ZoneSerializer()
     district = DistrictSerializer()
@@ -58,7 +58,7 @@ class StreetReadSerializer(serializers.ModelSerializer):
 
 
 class StreetCreateSerializer(serializers.ModelSerializer):
-    """Street Create Serializer."""
+    """Создание улицы."""
 
     name = serializers.CharField(
         max_length=constants.CHAR_LENGTH,
@@ -78,64 +78,13 @@ class StreetCreateSerializer(serializers.ModelSerializer):
         queryset=address_models.City.objects.all(), required=True
     )
 
-    # def create(self, validated_data):  # DONE
-    #     city_data = validated_data.pop("city", None)
-    #     zone_data = validated_data.pop("zone", None)
-    #     district_data = validated_data.pop("district", None)
-
-    #     if city_data:
-    #         city = address_models.Street.objects.get(id=city['id'])
-    #     else:
-    #         city = None
-
-    #     if zone_data:
-    #         zone = address_models.Zone.objects.get(id=zone_data['id'])
-    #     else:
-    #         zone = None
-
-    #     if district_data:
-    #         district = address_models.District.objects.get(id=district_data['id'])
-    #     else:
-    #         district = None
-
-    #     street = address_models.Street.objects.create(
-    #         zone=zone,
-    #         district=district,
-    #         city=city)
-    #     return street
-
-    # def create(self, validated_data):
-    #     zone_data = validated_data.pop("zone", None)
-    #     district_data = validated_data.pop("district", None)
-    #     city_data = validated_data.pop("city", None)
-
-    #     zone, _ = (address_models.Zone.objects.get_or_create(
-    #         **zone_data) if zone_data else None)
-    #     validated_data["zone"] = zone
-
-    #     district = (address_models.District.objects.create(
-    #         **district_data) if district_data else None)
-    #     validated_data["district"] = district
-
-    #     if city_data:
-    #     #     city, _ = address_models.City.objects.get_or_create(**city_data)
-    #     #     validated_data["city"] = city
-    #     # street, _ = address_models.Street.objects.get_or_create(
-    #     #     **validated_data
-    #     # )
-    #         validated_data["city"] = city_data
-    #     street, _ = address_models.Street.objects.get_or_create(
-    #         **validated_data
-    #     )
-    #     return street
-
     class Meta:
         model = address_models.Street
         fields = '__all__'
 
 
 class MetroSerializer(serializers.ModelSerializer):
-    """Metro Serilalizer."""
+    """Станция метро."""
 
     name = serializers.CharField(
         max_length=constants.CHAR_LENGTH,
@@ -152,7 +101,7 @@ class MetroSerializer(serializers.ModelSerializer):
 
 
 class AddressReadSerializer(serializers.ModelSerializer):
-    """Address Serializer."""
+    """Чтение адреса."""
 
     street = StreetReadSerializer()
     metro = MetroSerializer()
@@ -183,31 +132,8 @@ class GetAnnouncementsInMapPointRequestSerializer(serializers.Serializer):
     longitude = serializers.FloatField(required=True)
 
 
-class GetAnnouncementsInMapPoint(serializers.ModelSerializer):
-    street = serializers.CharField(source='address.street.name')
-    house_number = serializers.CharField(source='address.house_number')
-    corpus = serializers.CharField(source='address.corpus')
-    building = serializers.CharField(source='address.building')
-    number_of_rooms = serializers.CharField(
-        source='about_apartment.number_of_rooms.number_of_rooms'
-    )
-    realty_type = serializers.CharField(source='realty_type.type')
-
-    class Meta:
-        model = realty_models.Realty
-        fields = [
-            'realty_type',
-            'price',
-            'street',
-            'number_of_rooms',
-            'house_number',
-            'corpus',
-            'building',
-        ]
-
-
 class AddressCreateSerializer(serializers.ModelSerializer):
-    """Address Serializer."""
+    """Создание адреса."""
 
     house_number = serializers.CharField(
         max_length=constants.CHAR_LENGTH,
@@ -237,7 +163,7 @@ class AddressCreateSerializer(serializers.ModelSerializer):
     street = StreetCreateSerializer(required=True)
     metro = serializers.PrimaryKeyRelatedField(
         queryset=address_models.Metro.objects.all(),
-        required=False,  # Необязательно для создания/обновления
+        required=False,
         allow_null=True,
     )
 
@@ -247,7 +173,8 @@ class AddressCreateSerializer(serializers.ModelSerializer):
         """Валидация для minutes_to_metro, чтобы значение было <= 59."""
         if value is not None and value > MAX_MINUTES_TO_METRO:
             raise serializers.ValidationError(
-                f"Значение 'minutes_to_metro' не может быть больше {MAX_MINUTES_TO_METRO}."
+                f"Значение 'minutes_to_metro' не может быть больше "
+                f'{MAX_MINUTES_TO_METRO}.'
             )
         return value
 
@@ -276,7 +203,7 @@ class AddressCreateSerializer(serializers.ModelSerializer):
             street = street_serializer.save()
             validated_data['street'] = street
 
-        validated_data['metro'] = metro  # Связываем метро по id
+        validated_data['metro'] = metro
 
         address, _ = address_models.Address.objects.get_or_create(**validated_data)
         return address
@@ -285,7 +212,6 @@ class AddressCreateSerializer(serializers.ModelSerializer):
         street_data = validated_data.pop('street', None)
         metro = validated_data.pop('metro', None)
 
-        # Обновление улицы через StreetCreateSerializer
         if street_data:
             street_serializer = StreetCreateSerializer(
                 instance=instance.street, data=street_data, partial=True
@@ -293,13 +219,11 @@ class AddressCreateSerializer(serializers.ModelSerializer):
             street_serializer.is_valid(raise_exception=True)
             street_serializer.save()
 
-        # Обновление метро
         if metro is not None:
             instance.metro = metro
         else:
             instance.metro = None
 
-        # Обновление остальных полей Address
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
 

@@ -4,7 +4,7 @@ from config.constants import CHAR_LENGTH, QUESTION_LENGTH
 
 
 class QuestionType(models.Model):
-    """Question Type model."""
+    """Тип вопроса."""
 
     type = models.CharField(max_length=CHAR_LENGTH, verbose_name='Тип вопроса')
 
@@ -17,7 +17,7 @@ class QuestionType(models.Model):
 
 
 class QuestionSection(models.Model):
-    """Question Type model."""
+    """Раздел вопросов."""
 
     section = models.CharField(max_length=CHAR_LENGTH, verbose_name='Раздел')
     type = models.ForeignKey(
@@ -36,7 +36,7 @@ class QuestionSection(models.Model):
 
 
 class Question(models.Model):
-    """Question model."""
+    """Вопрос."""
 
     question = models.CharField(max_length=QUESTION_LENGTH, verbose_name='Вопрос')
     answer = models.TextField(verbose_name='Ответ')
@@ -56,7 +56,7 @@ class Question(models.Model):
 
 
 class DocumentTemplate(models.Model):
-    """Document Template model."""
+    """Шаблон документа."""
 
     title = models.CharField(max_length=CHAR_LENGTH, verbose_name='Название')
     document = models.FileField(

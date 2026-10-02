@@ -12,7 +12,6 @@ def create_user_from_esa(user_id, token):
 
     User.objects.create(
         uuid_esa=user_id,
-        # TODO заменить на login, когда появится в ЕСА
         username=user_data.get('email'),
         first_name=user_data.get('first_name'),
         last_name=user_data.get('last_name'),
@@ -27,7 +26,6 @@ def update_user_from_esa(user, token):
 
     user_data = get_profile_from_esa(token)
 
-    # TODO заменить на login, когда появится в ЕСА
     user.username = user_data.get('email')
     user.first_name = user_data.get('first_name')
     user.last_name = user_data.get('last_name')
@@ -39,7 +37,7 @@ def update_user_from_esa(user, token):
 
 
 def get_profile_from_esa(token):
-    """Get user profile from ESA"""
+    """Профиль пользователя из ЕСА."""
 
     headers = {'Authorization': 'Bearer ' + token.decode('ascii')}
     try:
@@ -58,7 +56,6 @@ def get_profile_from_esa(token):
 def check_esa_fields(user_data):
     """Проверяем, что при получении профиля все поля пришли из ЕСА"""
 
-    # TODO добавить login, когда появится в ЕСА
     return (
         user_data.get('email')
         and user_data.get('first_name')

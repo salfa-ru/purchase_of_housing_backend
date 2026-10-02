@@ -1,5 +1,3 @@
-# realty/serializers/serializers_sale.py
-
 from rest_framework import serializers
 
 from config import constants
@@ -10,7 +8,7 @@ from realty_values import models as values_models
 
 
 class SaleReadSerializer(serializers.ModelSerializer):
-    """Sale Read Serializer."""
+    """Чтение продажи."""
 
     realty = realty_serializers.RealtyBaseSerializer()
 
@@ -20,10 +18,9 @@ class SaleReadSerializer(serializers.ModelSerializer):
 
 
 class SaleCreateSerializer(realty_serializers.RealtyCreateSerializer):
-    """Sale Create Serializer."""
+    """Создание продажи."""
 
     def create(self, validated_data):
-        # Создаем данные Realty через родительский метод
         realty = super().create(validated_data)
         validated_data['realty'] = realty
 
@@ -47,7 +44,6 @@ class SaleCreateSerializer(realty_serializers.RealtyCreateSerializer):
         return realty
 
     def update(self, instance, validated_data):
-        # Обновляем данные Realty через родительский метод
         instance = super().update(instance, validated_data)
 
         return instance
@@ -57,13 +53,3 @@ class SaleCreateSerializer(realty_serializers.RealtyCreateSerializer):
             return SaleReadSerializer(instance).data
         elif isinstance(instance, realty_models.Realty):
             return realty_serializers.RealtyBaseSerializer(instance).data
-
-
-class ShortSaleSerializer(serializers.ModelSerializer):
-    """Sale Short Detail Read Serializer."""
-
-    realty = realty_serializers.ShortRealtySerializer()
-
-    class Meta:
-        model = realty_models.Sale
-        fields = ('realty',)

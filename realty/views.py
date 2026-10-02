@@ -2,7 +2,7 @@ from django.utils import timezone
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.helpers import forced_singular_serializer
 from drf_spectacular.utils import OpenApiParameter, extend_schema, extend_schema_view
-from rest_framework import (  # <-- YYY --- realty_удаление v1
+from rest_framework import (
     generics,
     permissions,
     status,
@@ -38,7 +38,7 @@ from .serializers.serializers_realty import RealtyBaseSerializer
 
 
 class BaseViewSet(viewsets.ModelViewSet):
-    """Base viewset."""
+    """Базовый вьюсет."""
 
     http_method_names = ['post']
 
@@ -53,18 +53,6 @@ class BaseViewSet(viewsets.ModelViewSet):
         return [permission() for permission in permission_classes]
 
 
-class RealtyBaseViewSet(BaseViewSet):
-    """Realty Base viewset.
-    Viewing, creating, editing, removal."""
-
-    queryset = realty_models.Realty.objects.all()
-
-    def get_serializer_class(self):
-        if self.action == 'create':
-            return realty_serializers.RealtyCreateSerializer
-        return realty_serializers.RealtyBaseSerializer
-
-
 @extend_schema(tags=['Недвижимость | Продажа'])
 @extend_schema_view(
     create=extend_schema(
@@ -77,25 +65,14 @@ class RealtyBaseViewSet(BaseViewSet):
         description='Обновляет отдельные поля объявления о продаже. '
         'Доступно только владельцу объявления.',
     ),
-    # Если нужно добавить другие методы:
-    # list=extend_schema(
-    #     summary='Просмотр списка объявлений о продаже',
-    #     description='Возвращает список всех объявлений о продаже. Доступна фильтрация.',
-    # ),
-    # retrieve=extend_schema(
-    #     summary='Просмотр объявления о продаже',
-    #     description='Возвращает детальную информацию о продаже по id.',
-    # ),
 )
 class SaleViewSet(BaseViewSet):
-    """Sale Viewset."""
+    """Продажа."""
 
     queryset = realty_models.Sale.objects.all()
     http_method_names = ['post', 'patch']
 
     def get_serializer_class(self):
-        # if self.action in ('list', 'retrieve'):
-        #     return sale_serializers.SaleReadSerializer
         return sale_serializers.SaleCreateSerializer
 
 
@@ -113,51 +90,37 @@ class SaleViewSet(BaseViewSet):
     ),
 )
 class RentViewSet(BaseViewSet):
-    """Rent Viewset."""
+    """Аренда."""
 
     queryset = realty_models.Rent.objects.all()
     http_method_names = ['post', 'patch']
 
     def get_serializer_class(self):
-        # if self.action in ('list', 'retrieve'):
-        #     return rent_serializers.RentReadSerializer
         return rent_serializers.RentCreateSerializer
-
-    # на будущее для доб в избранное
-    # @staticmethod
-    # def create_obj(request, pk, serializers):
-    #     user = request.user
-    #     realty_data = {
-    #         "owner": user.id,
-    #         "realty_id": pk,
-    #     }
-    #     serializer = serializers(data=realty_data,
-    # context={'request': request})
-    #     serializer.is_valid(raise_exception=True)
-    #     serializer.save()
-    #     return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
 @extend_schema(
     tags=['Недвижимость | Основные'],
     summary='Получение списка последних 3 объявлений',
-    description='Возвращает последние 3 активных объявления. Доступна фильтрация по trade_type.',
+    description='Возвращает последние 3 активных объявления. Доступна фильтрация по '
+    'trade_type.',
 )
 class LastRealtyListView(generics.ListAPIView):
-    """Viewing last 3 Realty objects."""
+    """Последние 3 объявления."""
 
     serializer_class = realty_serializers.ShortRealtySerializer
     filter_backends = (DjangoFilterBackend,)
     filterset_class = LatestRealtyFilter
     pagination_class = LatestRealtyPagination
 
-    # TODO найти решение без пагинации. Требуется вывод последних 3х объектов.
+    # Пагинация отдаёт 3 объявления по умолчанию, но фронт может запросить другое
+    # количество через limit — поэтому список здесь не режется жёстко до трёх
     queryset = (
         realty_models.Realty.objects.all()
         .filter(
             realty_status__status=constants.ADVERTISMENT_STATUS,
             is_deleted=False,
-            owner__is_deleted=False,  # <-- YYY --- realty_удаление v1
+            owner__is_deleted=False,
         )
         .order_by('-published_at')
     )
@@ -185,12 +148,7 @@ class LastRealtyListView(generics.ListAPIView):
     'Есть пагинация по 10 объектов.',
 )
 class RealtyListView(generics.ListAPIView):
-    """Viewing Realty objects queryset."""
-
-    # УБРАНО В ПОЛЬЗУ QUERY SET при удалении объявлений
-    # queryset = realty_models.Realty.objects.all().filter(
-    #     realty_status__status=constants.ADVERTISMENT_STATUS
-    # )  # .order_by('-published_at')
+    """Список объявлений."""
 
     filter_backends = (DjangoFilterBackend,)
     pagination_class = LimitRealtyPagination
@@ -203,11 +161,11 @@ class RealtyListView(generics.ListAPIView):
             return realty_serializers.ShortRealtySerializer
         return realty_serializers.RealtyPublicSerializer
 
-    def get_queryset(self):  # <-- YYY --- Переопределяем get_queryset для фильтрации
+    def get_queryset(self):
         return realty_models.Realty.objects.filter(
             realty_status__status=constants.ADVERTISMENT_STATUS,
             is_deleted=False,
-            owner__is_deleted=False,  # Показывать только объявления активных владельцев
+            owner__is_deleted=False,
         ).order_by('-published_at')
 
     def list(self, request, *args, **kwargs):
@@ -220,7 +178,6 @@ class RealtyListView(generics.ListAPIView):
         for realty_data in response.data['results']:
             realty = realties.get(id=realty_data['id'])
 
-            # Увеличиваем счетчик для поиска
             increment_counter(
                 request,
                 realty,
@@ -236,21 +193,14 @@ class RealtyListView(generics.ListAPIView):
     tags=['Недвижимость | Основные'], summary='Получение объявления по его id'
 )
 class RealtyDetailView(generics.RetrieveAPIView):
-    """Viewing Realty object by <id>."""
+    """Объявление по id."""
 
-    # Переопределено для realty_удаление v1
-    # queryset = realty_models.Realty.objects.all().filter(
-    #     realty_status__status=constants.ADVERTISMENT_STATUS
-    # )
     serializer_class = realty_serializers.RealtyBaseSerializer
 
-    def get_queryset(self):  # <-- YYY --- Переопределяем get_queryset для фильтрации
+    def get_queryset(self):
         return realty_models.Realty.objects.filter(
-            #  Отдаю ВСЕ объявления, важно чтобы Фронт фильтровал
-            #  и не показывал те, что смотреть нельзя!
-            #  realty_status__status=constants.ADVERTISMENT_STATUS,
             is_deleted=False,
-            owner__is_deleted=False,  # Показывать только объявления активных владельцев
+            owner__is_deleted=False,
         )
 
     def retrieve(self, request, *args, **kwargs):
@@ -258,11 +208,9 @@ class RealtyDetailView(generics.RetrieveAPIView):
 
         realty = self.get_object()
 
-        # Добавлено, что счетчик работает только на активных объявлениях!
         if realty.realty_status.status != constants.ADVERTISMENT_STATUS:
             return super().retrieve(request, *args, **kwargs)
 
-        # Увеличиваем счетчик, передавая нужные параметры
         increment_counter(
             request,
             realty,
@@ -278,16 +226,16 @@ class RealtyDetailView(generics.RetrieveAPIView):
 @extend_schema(
     tags=['Недвижимость | Основные'],
     summary='Количество найденных объявлений по фильтрам',
-    description='Возвращает количество объявлений, соответствующих переданным фильтрам.',
+    description='Возвращает количество объявлений по переданным фильтрам.',
     responses=forced_singular_serializer(common_serializers.CountRealtySerializer),
 )
 class RealtyCountView(generics.ListAPIView):
-    """Endpoint to get the count of filtered realty objects."""
+    """Количество объявлений после фильтров."""
 
     queryset = realty_models.Realty.objects.all().filter(
         realty_status__status=constants.ADVERTISMENT_STATUS,
         is_deleted=False,
-        owner__is_deleted=False,  # Показывать только объявления активных владельцев
+        owner__is_deleted=False,
     )
     serializer_class = common_serializers.CountRealtySerializer
     filter_backends = (DjangoFilterBackend,)
@@ -306,7 +254,7 @@ class RealtyCountView(generics.ListAPIView):
     'Доступно только авторизованным пользователям.',
 )
 class RealtyOwnerDataView(generics.RetrieveAPIView):
-    """Endpoint to get realty's owner data."""
+    """Данные владельца объявления."""
 
     queryset = realty_models.Realty.objects.all()
     serializer_class = common_serializers.RealtyOwnerDataSerializer
@@ -319,7 +267,7 @@ class RealtyOwnerDataView(generics.RetrieveAPIView):
     'Доступно только авторизованным пользователям.',
 )
 class RealtyOwnerContactsView(generics.RetrieveAPIView):
-    """Endpoint to get realty's owner contacts."""
+    """Контакты владельца объявления."""
 
     queryset = realty_models.Realty.objects.all()
     serializer_class = common_serializers.RealtyOwnerContactsSerializer
@@ -335,7 +283,9 @@ class RealtyOwnerContactsView(generics.RetrieveAPIView):
         OpenApiParameter(
             name='page_size',
             type=int,
-            description=f'Количество объявлений на странице (по умолчанию {constants.MY_REALTY_PAGESIZE_DEFAULT}, максимум {constants.MY_REALTY_PAGESIZE_MAX})',
+            description=f'Количество объявлений на странице '
+            f'(по умолчанию {constants.MY_REALTY_PAGESIZE_DEFAULT}, '
+            f'максимум {constants.MY_REALTY_PAGESIZE_MAX})',
             required=False,
         ),
         OpenApiParameter(
@@ -349,7 +299,8 @@ class RealtyOwnerContactsView(generics.RetrieveAPIView):
 )
 class RealtyLKListView(generics.ListAPIView):
     """
-    <p> Возвращает список объявлений с пагинацией, по умолчанию - 10 объявлений на странице.<br>
+    <p> Возвращает список объявлений с пагинацией, по умолчанию - 10 объявлений на
+    странице.<br>
     <h3> Структура ответа: </h3>
     <ul>
     <li> <b>count:</b> общее количество объявлений
@@ -368,7 +319,7 @@ class RealtyLKListView(generics.ListAPIView):
         return realty_models.Realty.objects.filter(
             owner_id=self.request.user,
             is_deleted=False,
-            owner__is_deleted=False,  # <-- YYY --- realty_удаление v1
+            owner__is_deleted=False,
         ).order_by('-published_at')
 
     def list(self, request, *args, **kwargs):
@@ -396,7 +347,7 @@ class RealtyLKListView(generics.ListAPIView):
     'В архиве → На модерации.',
 )
 class ChangeStatusUpdateAPIView(generics.UpdateAPIView):
-    """Endpoint for change status in realty"""
+    """Смена статуса объявления."""
 
     queryset = realty_models.Realty.objects.all()
     serializer_class = common_serializers.RealtyStatusUpdateSerializer
@@ -418,7 +369,8 @@ class RealtyFilterOptionsView(views.APIView):
     """
 
     def get(self, request, *args, **kwargs):
-        # Получаем данные
+        participants = realty_values_models.TradeParticipant.objects.all()
+
         data = {
             'realty_type': [
                 {'id': rt.id, 'type': rt.type}
@@ -480,7 +432,7 @@ class RealtyFilterOptionsView(views.APIView):
                         'id': apt.id,
                         'participant': apt.participant,
                     }
-                    for apt in realty_values_models.TradeParticipant.objects.all()
+                    for apt in participants
                 ]
             },
             'communication_method': [
@@ -517,7 +469,7 @@ class RealtyFilterOptionsView(views.APIView):
                                 'id': apt.id,
                                 'participant': apt.participant,
                             }
-                            for apt in realty_values_models.TradeParticipant.objects.all()
+                            for apt in participants
                         ]
                     },
                     'communal_payment': {
@@ -526,7 +478,7 @@ class RealtyFilterOptionsView(views.APIView):
                                 'id': apt.id,
                                 'participant': apt.participant,
                             }
-                            for apt in realty_values_models.TradeParticipant.objects.all()
+                            for apt in participants
                         ]
                     },
                 }
@@ -538,7 +490,8 @@ class RealtyFilterOptionsView(views.APIView):
 @extend_schema(
     tags=['Недвижимость | Управление'],
     summary='Удаление объявления (soft delete)',
-    description='Мягкое удаление объявления. Объявление становится недоступным для просмотра, '
+    description='Мягкое удаление объявления. Объявление становится недоступным для '
+    'просмотра, '
     'но остаётся в базе данных. Доступно только владельцу объявления.',
 )
 class RealtyDeleteView(generics.DestroyAPIView):
@@ -553,12 +506,10 @@ class RealtyDeleteView(generics.DestroyAPIView):
                 status=status.HTTP_403_FORBIDDEN,
             )
 
-        if (
-            instance.is_deleted
-        ):  # <-- YYY --- Проверка на то, что объявление уже удалено
+        if instance.is_deleted:
             return Response(
                 {'detail': 'Объявление уже удалено.'},
-                status=status.HTTP_400_BAD_REQUEST,  # <-- YYY --- realty_удаление v1
+                status=status.HTTP_400_BAD_REQUEST,
             )
 
         instance.is_deleted = True
@@ -594,7 +545,6 @@ class RealtyBatchView(GenericAPIView):
     queryset = Realty.objects.all()
 
     def get(self, request):
-        # Получаем параметр ids из запроса
         ids_param = request.query_params.get('ids')
 
         if not ids_param:
@@ -602,7 +552,6 @@ class RealtyBatchView(GenericAPIView):
                 {'error': 'Parameter "ids" is required'},
                 status=status.HTTP_400_BAD_REQUEST,
             )
-            # Разбираем строку "1,2,3" в список чисел
         try:
             parsed_ids = [int(item.strip()) for item in ids_param.split(',')]
         except ValueError:
@@ -625,16 +574,12 @@ class RealtyBatchView(GenericAPIView):
             owner__is_deleted=False,
         )
 
-        # Сохраняем порядок как в запросе
-        # Создаём словарь {id: объект} для быстрого доступа
         realty_dict = {realty.id: realty for realty in realties}
 
-        # Формируем результат в том же порядке, что и запрошенные ID
         result = [
             realty_dict[realty_id] for realty_id in id_list if realty_id in realty_dict
         ]
 
-        # Сериалезуем
         serializer = self.get_serializer(result, many=True)
         return Response(serializer.data)
 
@@ -648,12 +593,12 @@ class BaseCatalogView(generics.ListAPIView):
     filter_backends = [DjangoFilterBackend, OrderingFilter]
     filterset_class = CatalogPriceFilter
     ordering_fields = ['price', 'published_at']
-    ordering = ['-published_at']  # сначала новые
+    ordering = ['-published_at']
 
     def get_queryset(self):
         return Realty.objects.filter(
             is_deleted=False,
-            realty_status=1,  # Активно
+            realty_status=1,
             **self.get_extra_filters(),
         )
 
@@ -665,7 +610,8 @@ class BaseCatalogView(generics.ListAPIView):
 @extend_schema(
     tags=['Недвижимость | Каталоги'],
     summary='Каталог: продажа жилой недвижимости',
-    description='Возвращает список квартир, домов и другой жилой недвижимости на продажу',
+    description='Возвращает список квартир, домов и другой жилой недвижимости на '
+    'продажу',
     parameters=[
         OpenApiParameter(
             name='price_min', description='Мин. цена', required=False, type=int
@@ -686,15 +632,17 @@ class CatalogSaleResidentialView(BaseCatalogView):
 
     def get_extra_filters(self):
         return {
-            'sale_profile__isnull': False,  # есть продажа
-            'realty_type__is_commercial': False,  # жилая
+            'sale_profile__isnull': False,
+            'realty_type__is_commercial': False,
         }
 
 
 @extend_schema(
     tags=['Недвижимость | Каталоги'],
     summary='Каталог: продажа коммерческой недвижимости',
-    description='Возвращает список коммерческой недвижимости на продажу (офисы, склады, помещения)',
+    description='Возвращает список коммерческой недвижимости на продажу (офисы, склады,'
+    ' '
+    'помещения)',
     parameters=[
         OpenApiParameter(
             name='price_min', description='Мин. цена', required=False, type=int
@@ -715,8 +663,8 @@ class CatalogSaleCommercialView(BaseCatalogView):
 
     def get_extra_filters(self):
         return {
-            'sale_profile__isnull': False,  # есть продажа
-            'realty_type__is_commercial': True,  # коммерческая
+            'sale_profile__isnull': False,
+            'realty_type__is_commercial': True,
         }
 
 
@@ -744,15 +692,16 @@ class CatalogRentResidentialView(BaseCatalogView):
 
     def get_extra_filters(self):
         return {
-            'rent_profile__isnull': False,  # есть аренда
-            'realty_type__is_commercial': False,  # жилая
+            'rent_profile__isnull': False,
+            'realty_type__is_commercial': False,
         }
 
 
 @extend_schema(
     tags=['Недвижимость | Каталоги'],
     summary='Каталог: аренда коммерческой недвижимости',
-    description='Возвращает список коммерческой недвижимости в аренду (офисы, склады, помещения)',
+    description='Возвращает список коммерческой недвижимости в аренду (офисы, склады, '
+    'помещения)',
     parameters=[
         OpenApiParameter(
             name='price_min', description='Мин. цена', required=False, type=int
@@ -773,6 +722,6 @@ class CatalogRentCommercialView(BaseCatalogView):
 
     def get_extra_filters(self):
         return {
-            'rent_profile__isnull': False,  # есть аренда
-            'realty_type__is_commercial': True,  # коммерческая
+            'rent_profile__isnull': False,
+            'realty_type__is_commercial': True,
         }

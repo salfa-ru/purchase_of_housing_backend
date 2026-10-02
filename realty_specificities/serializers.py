@@ -9,7 +9,7 @@ from realty_values import serializers as values_serializers
 
 
 class AboutBuildingSerializer(serializers.ModelSerializer):
-    """About Building Serializer."""
+    """О доме."""
 
     type = values_serializers.BuildingTypeSerializer()
 
@@ -30,7 +30,7 @@ class AboutBuildingCreateSerializer(serializers.ModelSerializer):
 
 
 class AboutApartmentSerializer(serializers.ModelSerializer):
-    """About Apartment Serializer."""
+    """О квартире."""
 
     number_of_rooms = values_serializers.RoomsNumberSerializer()
 
@@ -40,7 +40,7 @@ class AboutApartmentSerializer(serializers.ModelSerializer):
 
 
 class AboutApartmentCreateSerializer(serializers.ModelSerializer):
-    """About Apartment Create Serializer."""
+    """Создание данных о квартире."""
 
     number_of_rooms = serializers.PrimaryKeyRelatedField(
         queryset=values_models.RoomsNumber.objects.all(),
@@ -89,7 +89,7 @@ class AboutApartmentCreateSerializer(serializers.ModelSerializer):
 
 
 class CommonCharacteristicsCreateSerializer(serializers.ModelSerializer):
-    """Common Characteristics Create Serilalizer."""
+    """Создание общих характеристик."""
 
     repair_type = serializers.PrimaryKeyRelatedField(
         queryset=values_models.RepairType.objects.all(),
@@ -106,7 +106,7 @@ class CommonCharacteristicsCreateSerializer(serializers.ModelSerializer):
 
 
 class CommonCharacteristicsSerializer(serializers.ModelSerializer):
-    """Common Characteristics Serilalizer."""
+    """Общие характеристики."""
 
     repair_type = values_serializers.RepairTypeSerilalizer()
     bathroom = values_serializers.BathroomTypeSerializer()
@@ -116,8 +116,8 @@ class CommonCharacteristicsSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class RentalFeaturesSerilalizer(serializers.ModelSerializer):
-    """Rental Feature serializer."""
+class RentalFeaturesCreateSerializer(serializers.ModelSerializer):
+    """Создание условий аренды."""
 
     class Meta:
         model = spec_models.RentalFeatures
@@ -125,7 +125,7 @@ class RentalFeaturesSerilalizer(serializers.ModelSerializer):
 
 
 class LeasePaymentsCreateSerializer(serializers.ModelSerializer):
-    """Lease Payments Serializer."""
+    """Создание платежей по аренде."""
 
     counters_payment = serializers.PrimaryKeyRelatedField(
         queryset=values_models.TradeParticipant.objects.all(),
@@ -144,14 +144,14 @@ class LeasePaymentsCreateSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
     def validate_deposit(self, value):
-        """Deposit value check."""
+        """Проверка размера залога."""
         if value < 0:
             raise serializers.ValidationError('Залог не может быть отрицательным.')
         return value
 
 
 class LeasePaymentsSerializer(serializers.ModelSerializer):
-    """Lease Payments Serializer."""
+    """Платежи по аренде."""
 
     counters_payment = values_serializers.TradeParticipantSerializer()
     communal_payment = values_serializers.TradeParticipantSerializer()
@@ -162,7 +162,7 @@ class LeasePaymentsSerializer(serializers.ModelSerializer):
 
 
 class SalesParametersSerializer(serializers.ModelSerializer):
-    """Sales Parameters Serializer."""
+    """Параметры продажи."""
 
     housing_type = values_serializers.HousingTypeSerializer()
     sale_type = values_serializers.SaleTypeSerializer()
@@ -173,7 +173,7 @@ class SalesParametersSerializer(serializers.ModelSerializer):
 
 
 class RentalFeaturesSerializer(serializers.ModelSerializer):
-    """Serializer for RentalFeatures."""
+    """Условия аренды."""
 
     class Meta:
         model = spec_models.RentalFeatures

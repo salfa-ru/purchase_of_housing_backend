@@ -5,7 +5,9 @@ class Command(BaseCommand):
     help = 'Clean up outdated realties and schedule the next run.'
 
     def handle(self, *args, **options):
-        print('Деактивация устаревших объявлений и регистрация такой-же HOURLY задачи')
+        self.stdout.write(
+            'Деактивация устаревших объявлений и регистрация такой-же HOURLY задачи'
+        )
         from realty.tasks import expire_all_outdated_realties, plan_mass_deactivation
 
         expire_all_outdated_realties()

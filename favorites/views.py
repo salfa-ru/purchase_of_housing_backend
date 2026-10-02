@@ -108,7 +108,8 @@ def resolve_ordering(raw):
 FAVORITE_LIST_PARAMETERS = [
     OpenApiParameter(
         name='page',
-        description=f'Номер страницы (по {constants.FAVORITES_PAGESIZE_DEFAULT} объявления на странице)',
+        description=f'Номер страницы (по {constants.FAVORITES_PAGESIZE_DEFAULT} '
+        'объявления на странице)',
         required=False,
         type=int,
     ),
@@ -147,14 +148,17 @@ FAVORITE_LIST_PARAMETERS = [
 FAVORITE_LIST_SCHEMA = extend_schema(
     tags=['Избранные'],
     summary='Получение списка избранного пользователя',
-    description='Возвращает страницу объявлений в избранном с количеством непросмотренных. Поддерживает фильтрацию по trade_type, is_commercial, realty_type и ordering.',
+    description='Возвращает страницу объявлений в избранном с количеством '
+    'непросмотренных. '
+    'Поддерживает фильтрацию по trade_type, is_commercial, realty_type и ordering.',
     parameters=FAVORITE_LIST_PARAMETERS,
 )
 
 FAVORITE_CREATE_SCHEMA = extend_schema(
     tags=['Избранные'],
     summary='Добавление объявления в избранное',
-    description='Принимает realty_id и добавляет объявление в избранное текущего пользователя',
+    description='Принимает realty_id и добавляет объявление в избранное текущего '
+    'пользователя',
     request=FavoriteSerializer,
     responses={201: FavoriteSerializer},
 )
@@ -179,9 +183,11 @@ class FavoriteListCreateView(generics.ListCreateAPIView):
     Выдача постраничная, страница выбирается параметром `page`.
 
     Ответ содержит:
-    - `unviewed_count` — количество новых объявлений, добавленных после последнего посещения
+    - `unviewed_count` — количество новых объявлений, добавленных после последнего
+    посещения
       (считается по всему избранному, а не по текущей странице)
-    - `count`, `page_size`, `pages_total`, `current_page`, `next`, `previous` — навигация по страницам
+    - `count`, `page_size`, `pages_total`, `current_page`, `next`, `previous` —
+    навигация по страницам
     - `results` — объекты избранного текущей страницы с полными данными объявлений
 
     POST ожидает JSON:
@@ -204,7 +210,6 @@ class FavoriteListCreateView(generics.ListCreateAPIView):
         queryset = Favorite.objects.filter(user=user)
         params = self.request.query_params
 
-        # Фильтрация по типу сделки (sale/rent)
         trade_type = params.get('trade_type')
         if trade_type is not None:
             if resolve_trade_type(trade_type) == 'sale':
@@ -212,21 +217,18 @@ class FavoriteListCreateView(generics.ListCreateAPIView):
             else:
                 queryset = queryset.filter(realty__rent_profile__isnull=False)
 
-        # Фильтрация по типу недвижимости (жилая/коммерческая)
         is_commercial = params.get('is_commercial')
         if is_commercial is not None:
             queryset = queryset.filter(
                 realty__realty_type__is_commercial=resolve_is_commercial(is_commercial)
             )
 
-        # Фильтрация по типу недвижимости (Квартира, Апартаменты, Дом и т.д.)
         realty_type = params.get('realty_type')
         if realty_type is not None:
             queryset = queryset.filter(
                 realty__realty_type__type__in=resolve_realty_types(realty_type)
             )
 
-        # Сортировка
         return queryset.order_by(resolve_ordering(params.get('ordering', '-added_at')))
 
     def list(self, request, *args, **kwargs):
@@ -255,25 +257,20 @@ class FavoriteListCreateView(generics.ListCreateAPIView):
     def create(self, request, *args, **kwargs):
         """Переопределяем create для добавления проверок"""
 
-        # 1. Проверяем, что realty_id передан
         realty_id = request.data.get('realty_id')
         if not realty_id:
             raise ValidationError({'realty_id': 'Это поле обязательно'})
 
-        # 2. Проверяем, существует ли объявление
         try:
             realty = Realty.objects.get(id=realty_id)
         except Realty.DoesNotExist as err:
             raise NotFound({'detail': 'Объявление не найдено'}) from err
 
-        # 3. Проверяем, не добавлено ли уже в избранное
         if Favorite.objects.filter(user=request.user, realty=realty).exists():
             raise ValidationError({'detail': 'Объявление уже добавлено в избранное'})
 
-        # 4. Создаём объект избранного
         favorite = Favorite.objects.create(user=request.user, realty=realty)
 
-        # 5. Сериализуем и возвращаем ответ
         serializer = self.get_serializer(favorite)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
@@ -317,7 +314,6 @@ class FavoriteDeleteView(generics.DestroyAPIView):
     lookup_field = 'pk'
 
     def get_queryset(self):
-        # Пользователь может удалять только свое избранное
         return self.queryset.filter(user=self.request.user)
 
     def destroy(self, request, *args, **kwargs):
@@ -329,7 +325,8 @@ class FavoriteDeleteView(generics.DestroyAPIView):
 @extend_schema(
     tags=['Избранные'],
     summary='Сброс счётчика непросмотренных',
-    description='Помечает все объявления в избранном как просмотренные (is_viewed = True)',
+    description='Помечает все объявления в избранном как просмотренные (is_viewed = '
+    'True)',
     request=None,
     responses={200: FavoriteViewedSerializer},
 )
@@ -338,7 +335,8 @@ class FavoriteMarkViewedView(APIView):
     Сбрасывает счётчик новых объявлений в избранном.
 
     Вызывается при заходе пользователя на страницу /favorites.
-    Устанавливает флаг `is_viewed = True` для всех непросмотренных записей текущего пользователя.
+    Устанавливает флаг `is_viewed = True` для всех непросмотренных записей текущего
+    пользователя.
 
     Возвращает:
     {
@@ -353,7 +351,6 @@ class FavoriteMarkViewedView(APIView):
     serializer_class = FavoriteViewedSerializer
 
     def post(self, request):
-        # Обновляем все непросмотренные записи текущего пользователя
         updated = Favorite.objects.filter(user=request.user, is_viewed=False).update(
             is_viewed=True
         )

@@ -1,8 +1,9 @@
 import hashlib
-from datetime import datetime
+from datetime import UTC, datetime
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
+from django.utils import timezone as django_timezone
 from rest_framework_simplejwt.settings import api_settings
 from rest_framework_simplejwt.token_blacklist.models import OutstandingToken
 from rest_framework_simplejwt.tokens import AccessToken, RefreshToken
@@ -53,13 +54,12 @@ def update_token_field(request, response):
     access_token = response.data.get('access')
     refresh_token = response.data.get('refresh')
 
-    # 🔧 ДОБАВЛЯЕМ: сохраняем access токен
     if access_token:
         try:
             access_token_obj = AccessToken(access_token)
             jti = access_token_obj['jti']
             user_id = access_token_obj['user_id']
-            expires_at = datetime.fromtimestamp(access_token_obj['exp'])
+            expires_at = datetime.fromtimestamp(access_token_obj['exp'], tz=UTC)
 
             OutstandingToken.objects.get_or_create(
                 jti=jti,
@@ -72,7 +72,6 @@ def update_token_field(request, response):
         except Exception:
             pass
 
-    # Обрабатываем refresh токен
     if refresh_token:
         refresh_token_hash = hash_token(refresh_token)
         refresh_token_obj = RefreshToken(refresh_token)
@@ -85,7 +84,9 @@ def update_token_field(request, response):
 
         if user_id:
             jti = refresh_token_obj.payload.get('jti')
-            expires_at = datetime.fromtimestamp(refresh_token_obj.payload.get('exp'))
+            expires_at = datetime.fromtimestamp(
+                refresh_token_obj.payload.get('exp'), tz=UTC
+            )
 
             OutstandingToken.objects.get_or_create(
                 jti=jti,
@@ -102,7 +103,6 @@ def update_token_field(request, response):
         if access_token and refresh_token:
             response = set_jwt_cookies(request, response, refresh_token)
 
-    # Убираем refresh из тела ответа
     if 'refresh' in response.data:
         del response.data['refresh']
 
@@ -111,6 +111,8 @@ def update_token_field(request, response):
 
 def delete_expired_tokens():
     """Удаляет записи устаревших хэшов токенов из базы данных."""
-    expired_hash_tokens = OutstandingToken.objects.filter(expires_at__lt=datetime.now())
+    expired_hash_tokens = OutstandingToken.objects.filter(
+        expires_at__lt=django_timezone.now()
+    )
     if expired_hash_tokens.exists():
         expired_hash_tokens.delete()

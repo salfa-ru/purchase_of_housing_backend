@@ -6,7 +6,7 @@ from users import models as users_models
 
 
 class Complaint(models.Model):
-    """Complaint model."""
+    """Жалоба."""
 
     owner = models.ForeignKey(
         users_models.User,
