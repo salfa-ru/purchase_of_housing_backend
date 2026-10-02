@@ -1,5 +1,3 @@
-# notifications/push.py
-
 """Отправка пуш-уведомлений через Firebase Cloud Messaging."""
 
 import logging

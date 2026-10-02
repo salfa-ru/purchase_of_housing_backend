@@ -3,17 +3,21 @@ from drf_spectacular.utils import OpenApiExample, OpenApiParameter, extend_schem
 from rest_framework import generics
 
 from questions.models import QuestionSection, QuestionType
+from questions.paginations import QuestionsPagination
 from questions.serializers import QuestionSectionFullSerializer, QuestionTypeSerializer
 
 
 @extend_schema(
     tags=['Вопросы'],
     summary='Получение списка "тип -> раздел -> вопросы"',
-    description='Возвращает все разделы с вопросами. Можно отфильтровать по типу вопроса.',
+    description='Возвращает все разделы с вопросами. Можно отфильтровать по типу '
+    'вопроса. Есть пагинация по 10 объектов.',
     parameters=[
         OpenApiParameter(
             name='type',
-            description='Тип вопроса. Доступные значения: FAQ, Правовая информация и другие, созданные в админке.',
+            description='Тип вопроса. Доступные значения: FAQ, Правовая информация и '
+            'другие, '
+            'созданные в админке.',
             required=False,
             type=str,
             examples=[
@@ -27,8 +31,11 @@ class QuestionSectionListAPIView(generics.ListAPIView):
     """Получение списка возможных разделов с входящими в них вопросами.
     Возможна фильтрация по типу вопросов: Правовая информация или FAQ."""
 
-    queryset = QuestionType.objects.all()
+    queryset = QuestionType.objects.prefetch_related('sections__questions').order_by(
+        'id'
+    )
     serializer_class = QuestionTypeSerializer
+    pagination_class = QuestionsPagination
     filter_backends = [DjangoFilterBackend]
     filterset_fields = ['type']
 
@@ -49,17 +56,20 @@ class QuestionSectionListAPIView(generics.ListAPIView):
 class QuestionSectionRetrieveAPIView(generics.RetrieveAPIView):
     """Получение списка вопросов с ответами и файлами для заданного раздела"""
 
-    queryset = QuestionSection.objects.all()
+    queryset = QuestionSection.objects.prefetch_related('questions__document_templates')
     serializer_class = QuestionSectionFullSerializer
 
 
-# TODO - Если будет слишком много данных, нужен будет пагинатор!
 @extend_schema(
     tags=['Вопросы'],
     summary='Получение списка ВСЕХ разделов с вопросами, ответами и документами',
+    description='Есть пагинация по 10 объектов.',
 )
 class AllQuestionsListAPIView(generics.ListAPIView):
     """Получение списка всех разделов с вопросами, ответами и документами"""
 
-    queryset = QuestionSection.objects.all()
+    queryset = QuestionSection.objects.prefetch_related(
+        'questions__document_templates'
+    ).order_by('id')
     serializer_class = QuestionSectionFullSerializer
+    pagination_class = QuestionsPagination

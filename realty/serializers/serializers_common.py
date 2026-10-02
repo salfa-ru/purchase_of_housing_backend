@@ -1,8 +1,7 @@
-# realty/serializers/serializers_common.py
-
 from django.core.exceptions import ValidationError
 from rest_framework import serializers
 
+from config import constants
 from realty import models as realty_models
 from realty.models import Realty
 from realty.serializers import serializers_realty as realty_serializers
@@ -11,7 +10,7 @@ from users.serializers import UserContactsSerializer, UserDataSerializer
 
 
 class CountRealtySerializer(realty_serializers.RealtyBaseSerializer):
-    """Filtered Realty Count Serializer."""
+    """Количество объявлений после фильтров."""
 
     count = serializers.IntegerField()
 
@@ -21,7 +20,7 @@ class CountRealtySerializer(realty_serializers.RealtyBaseSerializer):
 
 
 class RealtyOwnerDataSerializer(serializers.ModelSerializer):
-    """Realty's Owner Contacts Serializer."""
+    """Данные владельца объявления."""
 
     owner = UserDataSerializer(read_only=True)
     owner_type = serializers.ReadOnlyField(source='owner_type.participant')
@@ -39,7 +38,7 @@ class RealtyOwnerDataSerializer(serializers.ModelSerializer):
 
 
 class RealtyOwnerContactsSerializer(serializers.ModelSerializer):
-    """Realty's Owner Contacts Serializer."""
+    """Контакты владельца объявления."""
 
     owner = UserContactsSerializer(read_only=True)
     owner_type = serializers.ReadOnlyField(source='owner_type.participant')
@@ -53,13 +52,14 @@ class RealtyOwnerContactsSerializer(serializers.ModelSerializer):
 
 
 class RealtyLKSerializer(serializers.ModelSerializer):
-    """Сериализатор для объектов недвижимости с добавлением счетчиков просмотров и статуса."""
+    """Сериализатор для объектов недвижимости с добавлением счетчиков просмотров и
+    статуса.
+    """
 
     short_realty_data = realty_serializers.ShortRealtySerializer(read_only=True)
     counter_views = displays_serializers.CounterViewsSerializer(read_only=True)
     realty_status = serializers.IntegerField(source='realty_status_id', read_only=True)
 
-    # Добавляем поля типа недвижимости
     realty_type = serializers.CharField(source='realty_type.type', read_only=True)
     is_commercial = serializers.BooleanField(
         source='realty_type.is_commercial', read_only=True
@@ -76,7 +76,6 @@ class RealtyLKSerializer(serializers.ModelSerializer):
         ]
 
     def to_representation(self, instance):
-        # Базовое представление
         representation = {
             'short_realty_data': realty_serializers.ShortRealtySerializer(
                 instance, context=self.context
@@ -88,13 +87,7 @@ class RealtyLKSerializer(serializers.ModelSerializer):
             else False,
         }
 
-        # статусы из realty_values_realtyadvstatus
-        # 1 - Активно
-        # 2 - На модерации
-        # 3 - Отклонено
-        # 4 - В архиве
-
-        if instance.realty_status_id == 1:
+        if instance.realty_status_id == constants.STATUS_ACTIVE_ID:
             representation['counter_views'] = (
                 displays_serializers.CounterViewsSerializer(instance).data
             )
@@ -105,7 +98,7 @@ class RealtyLKSerializer(serializers.ModelSerializer):
 
 
 class RealtyStatusUpdateSerializer(serializers.ModelSerializer):
-    """Serializer for update realty_status"""
+    """Смена статуса объявления."""
 
     class Meta:
         model = realty_models.Realty
@@ -130,7 +123,8 @@ class RealtyStatusUpdateSerializer(serializers.ModelSerializer):
                     )
             else:
                 raise ValidationError(
-                    f"Недопустимая операция: статус '{obj.realty_status.status}' нельзя изменить."
+                    f"Недопустимая операция: статус '{obj.realty_status.status}' "
+                    f'нельзя изменить.'
                 )
 
             return value

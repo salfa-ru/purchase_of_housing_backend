@@ -1,5 +1,3 @@
-# realty/serializers/serializers_rent.py
-
 from rest_framework import serializers
 
 from realty import models as realty_models
@@ -9,7 +7,7 @@ from realty_specificities import serializers as specif_serializers
 
 
 class RentReadSerializer(serializers.ModelSerializer):
-    """Rent Read Serializer."""
+    """Чтение аренды."""
 
     realty = realty_serializers.RealtyBaseSerializer()
 
@@ -22,15 +20,11 @@ class RentReadSerializer(serializers.ModelSerializer):
 
 
 class RentCreateSerializer(serializers.ModelSerializer):
-    """Rent Create Serializer."""
+    """Создание аренды."""
 
     realty = realty_serializers.RealtyCreateSerializer(required=True)
-    rental_features = specif_serializers.RentalFeaturesSerilalizer(required=False)
+    rental_features = specif_serializers.RentalFeaturesCreateSerializer(required=False)
     lease_payments = specif_serializers.LeasePaymentsCreateSerializer(required=False)
-
-    # class Meta:
-    #     model = realty_models.Rent
-    #     fields = '__all__'
 
     def create(self, validated_data):
         realty_data = validated_data.pop('realty', None)
@@ -63,7 +57,6 @@ class RentCreateSerializer(serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
         realty_data = validated_data.pop('realty', None)
-        print(realty_data)
         realty_instance = instance.realty
 
         if realty_data:
@@ -78,12 +71,10 @@ class RentCreateSerializer(serializers.ModelSerializer):
                     setattr(instance_field, attr, value)
                 instance_field.save()
 
-        # Обновление rental_features
         update_related(
             instance.rental_features, validated_data.pop('rental_features', None)
         )
 
-        # Обновление lease_payments
         update_related(
             instance.lease_payments, validated_data.pop('lease_payments', None)
         )
@@ -99,13 +90,3 @@ class RentCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = realty_models.Rent
         fields = '__all__'
-
-
-class ShortRentSerializer(serializers.ModelSerializer):
-    """Rent Short Detail Read Serializer."""
-
-    realty = realty_serializers.ShortRealtySerializer()
-
-    class Meta:
-        model = realty_models.Rent
-        fields = ('realty',)

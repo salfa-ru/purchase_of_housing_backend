@@ -49,24 +49,19 @@ class UserAdmin(admin.ModelAdmin):
     list_filter = (
         'is_active',
         'is_deleted',
-    )  # <---xxx--- добавляем фильтрацию по статусу активности и удаленности
-    actions = [
-        'hard_delete_users'
-    ]  # <---xxx--- добавляем action для реального удаления
+    )
+    actions = ['hard_delete_users']
 
     def get_queryset(self, request):
         """Отображаем всех пользователей, включая удаленных"""
-        return self.model.objects.all()  # <---xxx---
+        return self.model.objects.all()
 
-    def hard_delete_users(
-        self, request, queryset
-    ):  # <---xxx--- action для реального удаления пользователей
+    def hard_delete_users(self, request, queryset):
         for obj in queryset:
             obj.hard_delete()
 
     hard_delete_users.short_description = 'Удалить выбранных пользователей навсегда'
 
-    # По-человечески можно выбирать группы и права для пользователей.
     filter_horizontal = (
         'groups',
         'user_permissions',
@@ -76,9 +71,7 @@ class UserAdmin(admin.ModelAdmin):
         return mark_safe(f'<img src="{obj.avatar.url}" style="width: 100px">')
 
     def preview_phone_qr_code(self, obj):
-        if (
-            obj.is_deleted
-        ):  # <---xxx--- Не показываем QR-код для удаленных пользователей
+        if obj.is_deleted:
             return 'Пользователь удален'
         return mark_safe(f'<img src="{obj.phone_qr_code.url}" style="width: 100px">')
 
@@ -86,15 +79,13 @@ class UserAdmin(admin.ModelAdmin):
     preview_phone_qr_code.short_description = 'Превью'
 
 
-# Удаляем Group из стандартной админки
 admin.site.unregister(Group)
 
 
-# Переопределяем Group, чтобы она была частью "users"
 class CustomGroup(Group):
     class Meta:
-        proxy = True  # Делаем прокси-модель
-        app_label = 'users'  # Переносим в приложение users
+        proxy = True
+        app_label = 'users'
         verbose_name = 'Группа'
         verbose_name_plural = 'Группы'
 

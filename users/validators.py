@@ -11,7 +11,6 @@ from config.constants import AVATAR_EXTENSIONS, MAX_AVATAR_SIZE
 NAME_MIN_LENGTH = 2
 NAME_MAX_LENGTH = constants.NAME_LENGTH
 
-# Кириллица: \u0400-\u04FF (А-Яа-я), \u0500-\u052F (Ёё и др.)
 NAME_PATTERN = r'^[\u0400-\u04FF\u0500-\u052F \-—]+$'
 NAME_LETTER_PATTERN = r'[\u0400-\u04FF\u0500-\u052F]'
 
@@ -33,8 +32,6 @@ def normalize_person_name(value):
     if not value:
         return value
 
-    # Схлопываем только пробелы: табуляция и перенос строки должны дойти
-    # до валидатора и получить отказ, а не превратиться в пробел
     value = re.sub(r' +', ' ', value.strip(' '))
     value = re.sub(r'[-—]{2,}', '-', value)
     value = re.sub(r'^[-— ]+|[-— ]+$', '', value)
@@ -53,18 +50,14 @@ def validate_person_name(value):
             code='required',
         )
 
-    # Срезаем только пробелы: табуляция и перенос строки — недопустимые
-    # символы, их нельзя молча убирать
     value = value.strip(' ')
 
-    # Проверяем длину
     if len(value) < NAME_MIN_LENGTH or len(value) > NAME_MAX_LENGTH:
         raise ValidationError(
             f'Длина должна быть от {NAME_MIN_LENGTH} до {NAME_MAX_LENGTH} символов.',
             code='invalid_length',
         )
 
-    # Проверяем допустимые символы
     if not re.match(NAME_PATTERN, value):
         raise ValidationError(
             NAME_INVALID_CHARACTERS,
@@ -169,7 +162,8 @@ def validate_email_length(value):
 
     if len(value) < EMAIL_MIN_LENGTH:
         raise ValidationError(
-            f'Адрес электронной почты должен содержать не менее {EMAIL_MIN_LENGTH} символов.',
+            f'Адрес электронной почты должен содержать не менее {EMAIL_MIN_LENGTH} '
+            f'символов.',
             code='email_too_short',
         )
 

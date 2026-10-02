@@ -1,5 +1,3 @@
-# chats/models.py
-
 from django.db import models
 from django.db.models import UniqueConstraint
 
@@ -122,11 +120,8 @@ class Message(models.Model):
             f'{"..." if len(self.message) > SHORT_STR_LENGTH else ""} '
         )
 
-    """ Что то совсем новенькое """
-
     def save(self, *args, **kwargs):
-        # Автоматически устанавливаем sender_is_owner при сохранении
-        if not self.pk:  # Только для новых сообщений
+        if not self.pk:
             self.sender_is_owner = self.user_from == self.chat.owner
         super().save(*args, **kwargs)
 

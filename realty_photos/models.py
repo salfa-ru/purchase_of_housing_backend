@@ -6,7 +6,7 @@ from realty import models as realty_models
 
 
 class RealtyPhoto(models.Model):
-    """Realty Photo model."""
+    """Фотография объявления."""
 
     realty = models.ForeignKey(
         realty_models.Realty,
@@ -30,17 +30,3 @@ class RealtyPhoto(models.Model):
 def delete_realty_photo_file(sender, instance, **kwargs):
     if instance.image:
         instance.image.delete(save=False)
-
-
-#     if not instance.id:
-#         return
-
-#     try:
-#         old_instance = sender.objects.get(
-#             id=instance.id)
-#     except ObjectDoesNotExist:
-#         return
-
-#     if (old_instance and
-#             old_instance.file != instance.file):
-#         old_instance.file.delete(save=False)

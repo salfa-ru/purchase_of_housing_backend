@@ -6,7 +6,7 @@ from users import models as users_models
 
 
 class NotificationTemplate(models.Model):
-    """Notification Template model."""
+    """Шаблон уведомления."""
 
     code = models.CharField(
         max_length=NOTIFICATION_LENGTH['code'],
@@ -31,7 +31,7 @@ class NotificationTemplate(models.Model):
 
 
 class Notification(models.Model):
-    """Notification model."""
+    """Уведомление."""
 
     template = models.ForeignKey(
         NotificationTemplate,

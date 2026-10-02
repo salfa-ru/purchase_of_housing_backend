@@ -9,17 +9,17 @@ User = get_user_model()
 
 
 class CookieJWTAuthentication(JWTAuthentication):
-    """Аутентификация через access token в заголовке или cookie с проверкой черного списка."""
+    """Аутентификация через access token в заголовке или cookie с проверкой черного
+    списка.
+    """
 
     def authenticate(self, request):
-        # 1. Проверяем заголовок Authorization
         header = self.get_header(request)
         if header:
             raw_token = self.get_raw_token(header)
             if raw_token:
                 try:
                     validated_token = AccessToken(raw_token)
-                    # Проверка черного списка
                     if BlacklistedToken.objects.filter(
                         token__jti=validated_token['jti']
                     ).exists():
@@ -29,14 +29,12 @@ class CookieJWTAuthentication(JWTAuthentication):
                 except Exception:
                     return None
 
-        # 2. Проверяем cookie
         raw_token = request.COOKIES.get(
             settings.SIMPLE_JWT.get('AUTH_COOKIE', 'access_token')
         )
         if raw_token:
             try:
                 validated_token = AccessToken(raw_token)
-                # Проверка черного списка
                 if BlacklistedToken.objects.filter(
                     token__jti=validated_token['jti']
                 ).exists():
@@ -46,7 +44,6 @@ class CookieJWTAuthentication(JWTAuthentication):
             except Exception:
                 return None
 
-        # 3. Если нигде нет токена — возвращаем None
         return None
 
     def get_user(self, validated_token):

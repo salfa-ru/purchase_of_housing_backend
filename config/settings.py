@@ -18,13 +18,7 @@ DEBUG = os.getenv('DEBUG', 'False').lower() == 'true'
 # значение берётся из окружения, а DEBUG остаётся лишь запасным вариантом.
 DOCS_PUBLIC = os.getenv('DOCS_PUBLIC', str(DEBUG)).lower() == 'true'
 
-# DOMAIN = os.getenv('DOMAIN')
-# ALLOWED_HOSTS = [DOMAIN, os.getenv('HOST_IP'), 'localhost', 'api.prod.estate.ktsf.ru']
-
-
 ALLOWED_HOSTS = [
-    # os.getenv("DOMAIN"),
-    # os.getenv("HOST_IP"),
     'localhost',
     '127.0.0.1',
     'api.test.estate.ktsf.ru',
@@ -43,13 +37,6 @@ if RENDER_HOSTNAME:
     ALLOWED_HOSTS.append(RENDER_HOSTNAME)
 
 CSRF_TRUSTED_ORIGINS = [
-    # f'http://{DOMAIN}',
-    # f'https://{DOMAIN}',
-    # This is not right
-    # "https://api.prod.estate.ktsf.ru",
-    # "https://api.test.estate.ktsf.ru",
-    # 'http://*',
-    # 'https://*',
     'https://localhost',
     'https://127.0.0.1',
     'http://localhost:5173',
@@ -160,7 +147,7 @@ AUTH_USER_MODEL = 'users.User'
 
 AUTH_PASSWORD_VALIDATORS = [
     {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',  # noqa: E501
     },
     {
         'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
@@ -220,28 +207,10 @@ if SUPABASE_BUCKET:
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# Старые настройки, когда не работала Аутентификация при выключенном DEBUG
-# REST_FRAMEWORK = {
-#     'DEFAULT_AUTHENTICATION_CLASSES': [
-#         'users.backends.CustomAuthentication',
-#     ],
-#     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
-# }
-#
-# if DEBUG:
-#     REST_FRAMEWORK['DEFAULT_AUTHENTICATION_CLASSES'].append(
-#         'rest_framework.authentication.TokenAuthentication'
-#     )
-
-
-# НОВЫЕ Настройки, CORS должен работать в любом случае!
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
-        # 'users.backends.CustomAuthentication',   # отключил, так как не пользуемся ИССОЙ!
-        # 'rest_framework.authentication.TokenAuthentication',
         'users.authentication.CookieJWTAuthentication',
-        # 'rest_framework_simplejwt.authentication.JWTAuthentication',
     ],
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
     'EXCEPTION_HANDLER': 'config.exceptions.db_error_exception_handler',
@@ -279,19 +248,16 @@ SPECTACULAR_SETTINGS = {
     },
 }
 
-
-# Настройки Django Q2 для деактивации устаревших объявлений
 Q_CLUSTER = {
     'name': 'DjangoORM',
-    'orm': 'default',  # Use the default Django database for task management
+    'orm': 'default',
     'workers': int(os.getenv('Q_CLUSTER_WORKERS', '2')),
-    'retry': 360,  # Time to keep retrying tasks before marking as failed
-    'timeout': 60,  # Task execution timeout in seconds
-    'queue_limit': 50,  # Max number of tasks in the queue
-    'bulk': 10,  # Max number of tasks processed at once
-    'catch_up': False,  # Prevent overdue tasks from being executed if the system was offline
-    # 'admin': False,  # Hide Django Q models from the admin ( better try with admin.py, to see only as admin )
-    'poll': 1,  # Poll every 1 second instead of 0.2
+    'retry': 360,
+    'timeout': 60,
+    'queue_limit': 50,
+    'bulk': 10,
+    'catch_up': False,
+    'poll': 1,
 }
 
 CORS_ALLOWED_ORIGINS = [
@@ -308,8 +274,6 @@ extra_cors_origins = os.getenv('EXTRA_CORS_ALLOWED_ORIGINS')
 if extra_cors_origins:
     CORS_ALLOWED_ORIGINS += [origin.strip() for origin in extra_cors_origins.split(',')]
 
-# REMOVE IN PRODUCTION
-# CORS_ALLOW_ALL_ORIGINS = True
 
 CORS_ALLOW_METHODS = [
     'DELETE',
@@ -337,12 +301,12 @@ CORS_ALLOW_ALL_LOCALHOST = True
 
 # ========== DJOSER ==========
 DJOSER = {
-    'USER_CREATE_PASSWORD_RETYPE': True,  # Требует re_password при регистрации
-    'USER_EMAIL_REQUIRED': True,  # Email обязателен
-    'SEND_ACTIVATION_EMAIL': False,  # Не отправляем письмо для активации
-    'SET_PASSWORD_RETYPE': True,  # Подтверждение при смене пароля
-    'PASSWORD_RESET_CONFIRM_RETYPE': True,  # Подтверждение при сбросе пароля
-    'USERNAME_RESET_CONFIRM_RETYPE': True,  # Подтверждение при сбросе username
+    'USER_CREATE_PASSWORD_RETYPE': True,
+    'USER_EMAIL_REQUIRED': True,
+    'SEND_ACTIVATION_EMAIL': False,
+    'SET_PASSWORD_RETYPE': True,
+    'PASSWORD_RESET_CONFIRM_RETYPE': True,
+    'USERNAME_RESET_CONFIRM_RETYPE': True,
     'PASSWORD_RESET_CONFIRM_URL': 'api/password-reset/{uid}/{token}/',
     'PASSWORD_RESET_SHOW_EMAIL_NOT_FOUND': True,
     'SERIALIZERS': {
@@ -352,7 +316,6 @@ DJOSER = {
     },
 }
 
-# URL для редиректа после сброса пароля
 LOGIN_URL = 'api/auth/token-auth/'
 
 SIMPLE_JWT = {
@@ -364,27 +327,20 @@ SIMPLE_JWT = {
     'JTI_CLAIM': 'jti',
     'REFRESH_COOKIE': 'refresh_token',
     'AUTH_COOKIE': 'access_token',
-    # 🔧 ИСПРАВЛЯЕМ:
-    'AUTH_COOKIE_SECURE': not DEBUG,  # True в продакшене (HTTPS), False локально (HTTP)
-    'AUTH_COOKIE_HTTP_ONLY': True,  # Защита от XSS (всегда True)
-    'AUTH_COOKIE_SAMESITE': 'None'
-    if not DEBUG
-    else 'Lax',  # Продакшен: None, локально: Lax
-    'AUTH_COOKIE_PATH': '/',  # ✅ вместо /api/
+    'AUTH_COOKIE_SECURE': not DEBUG,
+    'AUTH_COOKIE_HTTP_ONLY': True,
+    'AUTH_COOKIE_SAMESITE': 'None' if not DEBUG else 'Lax',
+    'AUTH_COOKIE_PATH': '/',
 }
 
 # ========== EMAIL НАСТРОЙКИ (для сброса пароля) ==========
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'  # письма в консоль
-
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 # ========== НАСТРОЙКИ ДЛЯ HTTPS (через nginx) ==========
-# Доверяем заголовки от nginx
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
-# Используем заголовки от nginx для формирования URL
 USE_X_FORWARDED_HOST = True
 USE_X_FORWARDED_PORT = True
-
 
 # ========== ЛОГИРОВАНИЕ ==========
 # На Render логи — это stdout контейнера. В конфигурации Django по умолчанию
@@ -411,8 +367,6 @@ LOGGING = {
             'handlers': ['console'],
             'level': os.getenv('DJANGO_LOG_LEVEL', 'INFO'),
         },
-        # Трассировки необработанных исключений: без этого логгера 500-е
-        # остаются невидимыми
         'django.request': {
             'handlers': ['console'],
             'level': 'ERROR',

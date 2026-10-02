@@ -1,5 +1,3 @@
-# chats/services.py
-
 from django.db.models import OuterRef, Q, Subquery
 from rest_framework import exceptions
 
@@ -19,29 +17,26 @@ from users.models import User
 
 
 def get_chats_sorted(current_user):
-    """
-    Retrieves the user's chats, sorted by the date of the last active
-    message (sent by or received by the user, and not deleted).
+    """Чаты пользователя по дате последнего активного сообщения.
+
+    Активное — отправленное или полученное пользователем и не удалённое им.
     """
 
-    # Subquery to get the 'created_at' of the last active message.
     last_active_message_date = (
         Message.objects.filter(
-            Q(chat=OuterRef('pk')),  # Connects to the outer Chat query.
+            Q(chat=OuterRef('pk')),
             Q(user_from=current_user, is_deleted_from=False)
             | Q(user_to=current_user, is_deleted_to=False),
         )
         .order_by('-created_at')
         .values('created_at')[:1]
-    )  # Only get the 'created_at' value.
+    )
 
-    # Main queryset: filter chats for the current_user, annotate with
-    # the last active message date, and order by that date.
     queryset = (
         Chat.objects.filter(Q(owner=current_user) | Q(client=current_user))
         .annotate(last_message_created_at=Subquery(last_active_message_date))
         .order_by('-last_message_created_at')
-    )  # Descending for most recent first.
+    )
 
     return queryset
 
@@ -76,9 +71,7 @@ def get_chats_by_ids(current_user, data):
     """Получение списка чатов по id из запроса и проверка прав доступа"""
     serializer = IdsListSerializer(data=data)
     serializer.is_valid(raise_exception=True)
-    chat_ids = serializer.validated_data.get(
-        'chat_ids'
-    )  # Изменено с 'ids' на 'chat_ids'
+    chat_ids = serializer.validated_data.get('chat_ids')
 
     chats = Chat.objects.filter(
         Q(chat_id__in=chat_ids) & (Q(owner=current_user) | Q(client=current_user))
@@ -136,7 +129,7 @@ def create_message(user_from, message_text, realty_id=None, chat_id=None):
     if chat_id is not None:
         chat = get_chat_by_chat_id(user_from, chat_id)
         user_to = chat.owner if chat.client == user_from else chat.client
-        check_user_is_deleted(user_to)  # <-- YYY --- Проверяем, активен ли user_to
+        check_user_is_deleted(user_to)
         check_blocking(user_from, user_to)
     elif realty_id is not None:
         realty = get_realty_by_realty_id(realty_id)
@@ -147,7 +140,7 @@ def create_message(user_from, message_text, realty_id=None, chat_id=None):
                 detail='Вы не можете отправить сообщение самому себе.'
             )
 
-        check_user_is_deleted(user_to)  # <-- YYY --- Проверяем, активен ли user_to
+        check_user_is_deleted(user_to)
         check_blocking(user_from, user_to)
 
         chat, created = Chat.objects.get_or_create(
@@ -177,16 +170,9 @@ def create_message(user_from, message_text, realty_id=None, chat_id=None):
     return message
 
 
-""" Новая сложная блокировка / разблокировка по любому параметру """
-
-# region  Блокировка
-
-
 def validate_ids(model, id_list, id_field='id', error_message='Invalid IDs found'):
-    """
-    Validates a list of IDs against a given model.
-    """
-    if not id_list:  # Handle empty lists
+    """Проверяет список id по указанной модели."""
+    if not id_list:
         return
     existing_ids = model.objects.filter(**{f'{id_field}__in': id_list}).values_list(
         id_field, flat=True
@@ -197,14 +183,13 @@ def validate_ids(model, id_list, id_field='id', error_message='Invalid IDs found
 
 
 def get_users_from_chats(current_user, chat_ids):
-    """Gets users to block/unblock from a list of chat IDs."""
+    """Пользователи для блокировки или разблокировки по списку id чатов."""
     validate_ids(Chat, chat_ids, id_field='chat_id', error_message='Invalid chat IDs')
 
     chats = Chat.objects.filter(
         Q(owner=current_user) | Q(client=current_user), chat_id__in=chat_ids
     )
 
-    # check if user is a member of all chats
     user_chats_ids = [chat.chat_id for chat in chats]
     invalid_chat_ids = list(set(chat_ids) - set(user_chats_ids))
     if invalid_chat_ids:
@@ -215,27 +200,26 @@ def get_users_from_chats(current_user, chat_ids):
     users_to_block = set()
     for chat in chats:
         other_user = chat.owner if chat.client == current_user else chat.client
-        if other_user != current_user:  # Crucial: Exclude self
+        if other_user != current_user:
             users_to_block.add(other_user)
     return list(users_to_block)
 
 
 def get_users_from_realties(current_user, realty_ids):
-    """Gets users to block/unblock from a list of realty IDs.
-    Crucially changed to prevent blocking owners of own realties.
+    """Пользователи для блокировки или разблокировки по списку id объявлений.
+
+    Владельцы своих же объявлений в выборку не попадают.
     """
     validate_ids(Realty, realty_ids)
-    # Filter realties where the user is *NOT* the owner.  This is the key change.
     realties = Realty.objects.filter(id__in=realty_ids).exclude(owner=current_user)
     users_to_block = set()
     for realty in realties:
-        # Block the owner of the realty, only if you're not the owner.
-        users_to_block.add(realty.owner)  # Only add owner, no need to check again
+        users_to_block.add(realty.owner)
     return list(users_to_block)
 
 
 def get_chats_from_users(current_user, users_to_operate):
-    """Gets chats to block/unblock from a list of users IDs."""
+    """Чаты для блокировки или разблокировки по списку id пользователей."""
 
     chats = (
         Chat.objects.filter(
@@ -248,7 +232,7 @@ def get_chats_from_users(current_user, users_to_operate):
 
 
 def get_realties_from_users(current_user, users_to_operate):
-    """Gets realties to block/unblock from a list of users IDs."""
+    """Объявления для блокировки или разблокировки по списку id пользователей."""
     realties = Realty.objects.filter(
         Q(owner=current_user) | Q(chats__client=current_user),
         Q(owner__in=users_to_operate) | Q(chats__client__in=users_to_operate),
@@ -259,17 +243,16 @@ def get_realties_from_users(current_user, users_to_operate):
 def get_users_to_block_unblock(
     current_user, chat_ids=None, user_ids=None, realty_ids=None
 ):
-    """Unified function to get users based on different criteria, with self-exclusion."""
+    """Пользователи для блокировки по разным критериям, кроме себя."""
 
     if chat_ids:
         return get_users_from_chats(current_user, chat_ids)
     elif user_ids:
         validate_ids(User, user_ids)
-        # Exclude the current user directly in the query.
         other_users = list(
             User.objects.filter(id__in=user_ids).exclude(id=current_user.id)
         )
-        if not other_users:  # if list of user contains only your id
+        if not other_users:
             raise ValidationCustomDetailError(
                 detail='You cannot block/unblock yourself.'
             )
@@ -278,6 +261,3 @@ def get_users_to_block_unblock(
         return get_users_from_realties(current_user, realty_ids)
     else:
         raise ValueError('Must provide chat_ids, user_ids, or realty_ids.')
-
-
-# endregion

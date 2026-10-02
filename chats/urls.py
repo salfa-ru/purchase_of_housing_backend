@@ -1,5 +1,3 @@
-# chats/urls.py
-
 from django.urls import path
 
 from chats.apps import ChatsConfig
@@ -23,15 +21,9 @@ urlpatterns = [
         {'blacklist': True},
         name='chat-blacklist',
     ),
-    path(
-        'send-message/', MessageCreateAPIView.as_view(), name='create-message'
-    ),  # Новый универсальный эндпоинт
-    path(
-        'show-chat/', ChatMessagesAPIView.as_view(), name='chat-messages'
-    ),  # Новый универсальный эндпоинт
-    path(
-        'delete-chats/', ChatsDeleteAPIView.as_view(), name='delete-chats'
-    ),  # ex-multiple-del
+    path('send-message/', MessageCreateAPIView.as_view(), name='create-message'),
+    path('show-chat/', ChatMessagesAPIView.as_view(), name='chat-messages'),
+    path('delete-chats/', ChatsDeleteAPIView.as_view(), name='delete-chats'),
     path('delete-messages/', MessagesDeleteAPIView.as_view(), name='delete-messages'),
     path('block/', ChatsBlockingCreateAPIView.as_view(), name='blocking'),
     path('unblock/', ChatRemoveBlocking.as_view(), name='unblocking'),

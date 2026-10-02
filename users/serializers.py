@@ -1,8 +1,7 @@
-from datetime import datetime
-
 from django.contrib.auth import password_validation
 from django.core.exceptions import ValidationError
 from django.core.validators import FileExtensionValidator
+from django.utils import timezone
 from djoser.serializers import UserCreateSerializer as BaseUserCreateSerializer
 from drf_spectacular.utils import OpenApiExample, extend_schema_serializer
 from rest_framework import serializers
@@ -71,7 +70,6 @@ class UserBaseSerializer(serializers.ModelSerializer):
 
     avatar = serializers.ImageField(
         required=False,
-        # если нужно иметь возможность удалить аватар, добавить allow_null=True,
         validators=[
             FileExtensionValidator(allowed_extensions=IMAGE_EXTENSIONS),
             validate_avatar_size,
@@ -96,9 +94,7 @@ class UserBaseSerializer(serializers.ModelSerializer):
             'id': {'read_only': True},
         }
 
-    def validate(
-        self, data
-    ):  # <---xxx--- Добавляем валидацию на уникальность email и phone number
+    def validate(self, data):
         """
         Проверяет, что email и phone_number не принадлежат удаленным пользователям.
         """
@@ -115,7 +111,9 @@ class UserBaseSerializer(serializers.ModelSerializer):
                 not self.instance or self.instance != existing_user_email
             ):
                 raise ValidationError(
-                    'Пользователь с таким адресом электронной почты уже существует и удален, обратитесь в поддержку для восстановления аккаунта или введите другой имейл.'
+                    'Пользователь с таким адресом электронной почты уже существует и '
+                    'удален, обратитесь в поддержку для восстановления аккаунта или '
+                    'введите другой имейл.'
                 )
 
         if phone_number:
@@ -126,7 +124,9 @@ class UserBaseSerializer(serializers.ModelSerializer):
                 not self.instance or self.instance != existing_user_phone
             ):
                 raise ValidationError(
-                    'Пользователь с таким номером телефона уже существует и удален, обратитесь в поддержку для восстановления аккаунта или введите другой номер телефона.'
+                    'Пользователь с таким номером телефона уже существует и удален, '
+                    'обратитесь в поддержку для восстановления аккаунта или введите '
+                    'другой номер телефона.'
                 )
 
         return data
@@ -195,16 +195,6 @@ class UserAvatarSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['avatar']
-
-
-class AdminUserUpdateSerializer(UserBaseSerializer):
-    """
-    Сериализатор для администратора.
-    Позволяет изменять служебные поля.
-    """
-
-    class Meta(UserBaseSerializer.Meta):
-        fields = UserBaseSerializer.Meta.fields + ['is_active', 'is_staff']
 
 
 class UserSelfProfileSerializer(UserBaseSerializer):
@@ -353,7 +343,7 @@ class UserDataSerializer(UserBaseSerializer):
         )
 
     def get_registered_for(self, obj) -> str:
-        now = datetime.now()
+        now = timezone.now()
         date_joined = obj.date_joined
         years = now.year - date_joined.year
         months = now.month - date_joined.month
@@ -382,7 +372,9 @@ class UserDataSerializer(UserBaseSerializer):
             return list(endings.values())[-1]
 
         if years > 0 and months > 0:
-            return f'{years} {get_ending(years, years_endings)} и {months} {get_ending(months, months_endings)} на сайте'
+            years_text = f'{years} {get_ending(years, years_endings)}'
+            months_text = f'{months} {get_ending(months, months_endings)}'
+            return f'{years_text} и {months_text} на сайте'
         elif years > 0:
             return f'{years} {get_ending(years, years_endings)} на сайте'
         elif months > 0:
@@ -541,7 +533,6 @@ class SetPasswordSerializer(serializers.Serializer):
     re_new_password = serializers.CharField(trim_whitespace=False)
 
     def validate(self, data):
-        # Проверяем, что пароли совпадают
         if data['new_password'] != data['re_new_password']:
             raise serializers.ValidationError({'re_new_password': PASSWORD_MISMATCH})
 

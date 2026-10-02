@@ -4,7 +4,7 @@ from django.apps import AppConfig
 class UsersConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
     name = 'users'
-    verbose_name = 'Пользователи и группы'  # Задаём название вкладки
+    verbose_name = 'Пользователи и группы'
 
     def ready(self):
         from config import swagger  # noqa: F401

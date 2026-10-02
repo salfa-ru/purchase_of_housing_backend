@@ -9,7 +9,7 @@ from django.core.validators import FileExtensionValidator
 from django.db import models
 from django.db.models.signals import pre_save
 from django.dispatch import receiver
-from django.utils import timezone  # <---xxx--- для удаления пользователей
+from django.utils import timezone
 
 from config import constants
 from config.constants import (
@@ -48,7 +48,7 @@ def validate_avatar_min_resolution(value):
 
 
 class CustomUserManager(UserManager):
-    """Переопределение работы менеджера, для того чтобы работала команда createsuperuser.
+    """Переопределение менеджера, чтобы работала команда createsuperuser.
     Для superuser задаются значения для обязательных полей."""
 
     def create_superuser(self, username, email=None, password=None, **extra_fields):
@@ -62,7 +62,7 @@ class CustomUserManager(UserManager):
 
 
 class User(AbstractUser):
-    """Custom User model."""
+    """Пользователь."""
 
     objects = CustomUserManager()
     REQUIRED_FIELDS = []
@@ -132,13 +132,13 @@ class User(AbstractUser):
 
     is_deleted = models.BooleanField(
         default=False,
-        verbose_name='Удален',  # <---xxx---
-        help_text="<span style='color: DarkRed;'><strong>"  # DarkOrange
+        verbose_name='Удален',
+        help_text="<span style='color: DarkRed;'><strong>"
         'Удаление</strong> (отключение) пользователя и его объявлений</span>',
     )
     deleted_at = models.DateTimeField(
         verbose_name='Дата удаления', null=True, blank=True
-    )  # <---xxx---
+    )
 
     def clean(self):
         super().clean()
@@ -165,20 +165,16 @@ class User(AbstractUser):
             uuid_esa = user_previous.uuid_esa
             avatar_previous = user_previous.avatar
 
-        # Хэшируем пароль (только если он сырой, а не уже хеширован)
         if not self.is_superuser and (
             self._state.adding or self.password != password_previous
         ):
             if self.password and not self.password.startswith('pbkdf2_sha256$'):
                 self.set_password(self.password)
 
-        # Меняем username для 'своих' пользователей (только если email есть)
         if not uuid_esa and (self._state.adding or self.email != email_previous):
             if self.email:
                 self.username = self.email
 
-        # Создаем QR-код при создании пользователя или обновлении номера телефона,
-        # старый при необходимости удаляем
         if (
             self._state.adding or self.phone_number != phone_number_previous
         ) and not self.is_deleted:
@@ -195,16 +191,15 @@ class User(AbstractUser):
             else:
                 self.phone_qr_code = None
 
-        # Удаляем старую аватарку при замене
         if user_previous and self.avatar != avatar_previous:
             user_previous.avatar.delete(save=False)
 
         return super().save(*args, **kwargs)
 
-    def soft_delete(self):  # <---xxx--- Передумал переопределять настоящее удаление!
+    def soft_delete(self):
         self.is_active = False
-        self.is_deleted = True  # <---xxx---
-        self.deleted_at = timezone.now()  # <---xxx---
+        self.is_deleted = True
+        self.deleted_at = timezone.now()
         self.save()
 
 

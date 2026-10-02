@@ -1,17 +1,14 @@
-from collections import OrderedDict
-
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 from rest_framework.pagination import LimitOffsetPagination, PageNumberPagination
-from rest_framework.response import Response
 
 from config import constants
-from config.pagination import StrictPageSizeMixin
+from config.pagination import BasePagination
 from realty.serializers import serializers_common as common_serializers
 
 
 class LimitRealtyPagination(PageNumberPagination):
-    """Custom pagination for Realty queryset."""
+    """Пагинация списка объявлений."""
 
     page_size_query_param = None
     page_size = 10
@@ -68,24 +65,8 @@ class PaginatedResponseSerializer(serializers.Serializer):
     results = common_serializers.RealtyLKSerializer(many=True)
 
 
-class MyRealtyPagination(StrictPageSizeMixin, PageNumberPagination):
-    """Custom pagination for my Realty queryset для ЛИЧНОГО КАБИНЕТА."""
+class MyRealtyPagination(BasePagination):
+    """Мои объявления в личном кабинете."""
 
-    page_size_query_param = 'page_size'
     page_size = constants.MY_REALTY_PAGESIZE_DEFAULT
     max_page_size = constants.MY_REALTY_PAGESIZE_MAX
-
-    def get_paginated_response(self, data):
-        return Response(
-            OrderedDict(
-                [
-                    ('count', self.page.paginator.count),
-                    ('page_size', self.get_page_size(self.request)),
-                    ('pages_total', self.page.paginator.num_pages),
-                    ('current_page', self.page.number),
-                    ('next', self.get_next_link()),
-                    ('previous', self.get_previous_link()),
-                    ('results', data),
-                ]
-            )
-        )

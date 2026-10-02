@@ -5,7 +5,7 @@ from config import constants
 
 
 class City(models.Model):
-    """City model."""
+    """Город."""
 
     name = models.CharField(max_length=constants.CHAR_LENGTH, verbose_name='Город')
 
@@ -19,7 +19,7 @@ class City(models.Model):
 
 
 class District(models.Model):
-    """District model."""
+    """Округ."""
 
     name = models.CharField(max_length=constants.CHAR_LENGTH, verbose_name='Округ')
 
@@ -33,7 +33,7 @@ class District(models.Model):
 
 
 class Zone(models.Model):
-    """Zone model."""
+    """Район."""
 
     name = models.CharField(max_length=constants.CHAR_LENGTH, verbose_name='Район')
 
@@ -47,7 +47,7 @@ class Zone(models.Model):
 
 
 class Street(models.Model):
-    """Street model."""
+    """Улица."""
 
     name = models.CharField(max_length=constants.CHAR_LENGTH, verbose_name='Улица')
     zone = models.ForeignKey(
@@ -128,7 +128,6 @@ class Metro(models.Model):
         max_length=250,
         verbose_name='Полное название станции',
         help_text="Например, 'Авиамоторная (D3)'",
-        # TODO - Нужно позже удалить:
         default='',
     )
     line = models.ForeignKey(
@@ -136,8 +135,7 @@ class Metro(models.Model):
         on_delete=models.CASCADE,
         related_name='stations',
         verbose_name='Линия метро',
-        # TODO - Нужно позже удалить:
-        default=1,  # По умолчанию устанавливаем значение 1 - только для успешной миграции!
+        default=1,
     )
     latitude = models.FloatField(verbose_name='Широта', null=True, blank=True)
     longitude = models.FloatField(verbose_name='Долгота', null=True, blank=True)
@@ -151,12 +149,11 @@ class Metro(models.Model):
         verbose_name_plural = 'Станции метро'
 
     def __str__(self):
-        # Используем name_full, так как оно более информативно
         return f'{self.name_full}'
 
 
 class Address(models.Model):
-    """Address model."""
+    """Адрес."""
 
     house_number = models.CharField(
         max_length=constants.CHAR_LENGTH, verbose_name='Номер дома'
@@ -166,7 +163,7 @@ class Address(models.Model):
         verbose_name='Улица',
         on_delete=models.PROTECT,
         related_name='addresses',
-        **constants.NULLABLE_FIELD,  # не забыть вернуть к обязательному!
+        **constants.NULLABLE_FIELD,
     )
     corpus = models.CharField(
         max_length=constants.CHAR_LENGTH,

@@ -143,7 +143,6 @@ class RefreshTokenSourceTest(TestCase):
     def test_body_token_wins_over_cookie(self):
         """Тело запроса важнее куки"""
         self.login(self.user)
-        # только ASCII: куки кодируются в latin-1
         self.client.cookies['refresh_token'] = 'broken-token-from-cookie'
         token = self.refresh_token_of(self.other_user)
 

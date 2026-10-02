@@ -1,4 +1,3 @@
-# config/swagger.py
 from drf_spectacular.extensions import OpenApiAuthenticationExtension
 
 

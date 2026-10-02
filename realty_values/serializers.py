@@ -4,7 +4,7 @@ from realty_values import models as values_models
 
 
 class BuildingTypeSerializer(serializers.ModelSerializer):
-    """Building Type serilalizer."""
+    """Тип дома."""
 
     class Meta:
         model = values_models.BuildingType
@@ -12,7 +12,7 @@ class BuildingTypeSerializer(serializers.ModelSerializer):
 
 
 class RoomsNumberSerializer(serializers.ModelSerializer):
-    """Number of Romms Serilalizer."""
+    """Количество комнат."""
 
     class Meta:
         model = values_models.RoomsNumber
@@ -20,7 +20,7 @@ class RoomsNumberSerializer(serializers.ModelSerializer):
 
 
 class RepairTypeSerilalizer(serializers.ModelSerializer):
-    """Repair Type Serializer."""
+    """Тип ремонта."""
 
     class Meta:
         model = values_models.RepairType
@@ -28,7 +28,7 @@ class RepairTypeSerilalizer(serializers.ModelSerializer):
 
 
 class BathroomTypeSerializer(serializers.ModelSerializer):
-    """Bathroom Type Serializer."""
+    """Тип санузла."""
 
     class Meta:
         model = values_models.BathroomType
@@ -36,7 +36,7 @@ class BathroomTypeSerializer(serializers.ModelSerializer):
 
 
 class TradeParticipantSerializer(serializers.ModelSerializer):
-    """Trade Participant Serializer."""
+    """Участник сделки."""
 
     class Meta:
         model = values_models.TradeParticipant
@@ -44,7 +44,7 @@ class TradeParticipantSerializer(serializers.ModelSerializer):
 
 
 class HousingTypeSerializer(serializers.ModelSerializer):
-    """Housing Type Serializer."""
+    """Тип жилья."""
 
     class Meta:
         model = values_models.HousingType
@@ -52,7 +52,7 @@ class HousingTypeSerializer(serializers.ModelSerializer):
 
 
 class SaleTypeSerializer(serializers.ModelSerializer):
-    """Sale Type Serializer."""
+    """Тип продажи."""
 
     class Meta:
         model = values_models.SaleType

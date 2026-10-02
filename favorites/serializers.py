@@ -8,12 +8,8 @@ from .models import Favorite
 class FavoriteSerializer(serializers.ModelSerializer):
     """Сериализатор для избранного"""
 
-    realty = RealtyBaseSerializer(
-        read_only=True
-    )  # Вложенный объект недвижимости (как в GET /realty/{id}/)
-    realty_id = serializers.IntegerField(
-        write_only=True
-    )  # Поле только для записи (фронт присылает ID)
+    realty = RealtyBaseSerializer(read_only=True)
+    realty_id = serializers.IntegerField(write_only=True)
 
     class Meta:
         model = Favorite
@@ -27,7 +23,7 @@ class FavoriteSerializer(serializers.ModelSerializer):
         read_only_fields = [
             'id',
             'added_at',
-        ]  # Поля, которые нельзя изменить через API
+        ]
 
 
 class FavoriteViewedSerializer(serializers.Serializer):

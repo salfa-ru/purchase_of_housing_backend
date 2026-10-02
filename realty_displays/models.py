@@ -3,11 +3,12 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.utils import timezone
 
+from config import constants
 from realty import models as realty_models
 
 
 class DisplayInSearch(models.Model):
-    """Display In Search model."""
+    """Показ в поиске."""
 
     realty = models.ForeignKey(
         realty_models.Realty,
@@ -27,7 +28,7 @@ class DisplayInSearch(models.Model):
 
 
 class DisplayFullInfo(models.Model):
-    """Display Full Info model."""
+    """Показ полной информации."""
 
     realty = models.ForeignKey(
         realty_models.Realty,
@@ -35,7 +36,6 @@ class DisplayFullInfo(models.Model):
         verbose_name='Недвижимость',
         related_name='display_full_info',
     )
-    # теперь даты появляются в показах полных объявлений
     date = models.DateField(default=timezone.now, verbose_name='Дата показа')
     count = models.PositiveIntegerField(verbose_name='Кол-во показов', default=0)
 
@@ -52,10 +52,7 @@ class DisplayFullInfo(models.Model):
 def delete_counters_if_status_not_active(sender, instance, **kwargs):
     """Удаляет все счетчики объявления при выключении активного статуса"""
 
-    # Проверяем, что статус недвижимости не равен 1 - объявление не активно
-    if instance.realty_status_id != 1:
-        # Удаляем связанные записи из DisplayInSearch
+    if instance.realty_status_id != constants.STATUS_ACTIVE_ID:
         DisplayInSearch.objects.filter(realty=instance).delete()
 
-        # Удаляем связанные записи из DisplayFullInfo
         DisplayFullInfo.objects.filter(realty=instance).delete()

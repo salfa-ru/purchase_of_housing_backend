@@ -2,10 +2,6 @@ from django.contrib import admin
 
 from questions import models
 
-# @admin.register(models.QuestionType)
-# class QuestionTypeAdmin(admin.ModelAdmin):
-#     list_display = ('type',)
-
 
 @admin.register(models.QuestionSection)
 class QuestionTypeAdmin(admin.ModelAdmin):

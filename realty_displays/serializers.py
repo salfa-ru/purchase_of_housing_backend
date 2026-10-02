@@ -6,9 +6,8 @@ from rest_framework import serializers
 
 
 class CounterViewsSerializer(serializers.Serializer):
-    """Serializer for view counters."""
+    """Счётчики просмотров."""
 
-    # отдаст Nulls если записей вообще нет, но вообще можно было бы показывать нули (default=0)
     shown_in_search = serializers.IntegerField(default=None, allow_null=True)
     full_views_in_30_days = serializers.IntegerField(default=None, allow_null=True)
     full_views_today = serializers.IntegerField(default=None, allow_null=True)
@@ -20,8 +19,6 @@ class CounterViewsSerializer(serializers.Serializer):
         search_count = search_count_obj.count if search_count_obj else None
         representation['shown_in_search'] = search_count
 
-        # из-за фильтра data_gte добавляется +день к поиску!
-        # так что устанавливаю 29 а не 30
         last_30_days = timezone.now() - timedelta(days=29)
 
         views_30_days = instance.display_full_info.filter(

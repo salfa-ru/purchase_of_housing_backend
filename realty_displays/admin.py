@@ -16,7 +16,7 @@ class DisplayInSearchAdmin(admin.ModelAdmin):
     ordering = ('realty__id',)
 
     def realty_id(self, obj):
-        """Returns the realty ID."""
+        """id объявления."""
         return obj.realty.pk if obj.realty else None
 
     realty_id.short_description = 'ID недвижимости'
@@ -46,7 +46,7 @@ class DisplayFullInfoAdmin(admin.ModelAdmin):
     )
 
     def realty_id(self, obj):
-        """Returns the realty ID."""
+        """id объявления."""
         return obj.realty.pk if obj.realty else None
 
     realty_id.short_description = 'ID недвижимости'

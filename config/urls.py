@@ -25,7 +25,6 @@ router_djoser = DefaultRouter()
 router_djoser.include_root_view = False
 router_djoser.register(r'users', CustomUserViewSet, basename='user')
 
-# Оборачиваем в тег для Swagger
 for url in router_djoser.urls:
     if hasattr(url.callback, 'cls'):
         url.callback.cls = extend_schema(tags=['Аутентификация (djoser)'])(
@@ -69,7 +68,7 @@ urlpatterns = [
         auth_views.PasswordResetConfirmView.as_view(),
         name='password_reset_confirm',
     ),
-    path('api/auth/', include(router_djoser.urls)),  # ← добавили 'api/'
+    path('api/auth/', include(router_djoser.urls)),
     path('schema/', SpectacularAPIView.as_view(), name='schema'),
     path(
         'swagger/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'
@@ -77,14 +76,3 @@ urlpatterns = [
     path('redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
     path('hidden-health/', lambda request: HttpResponse(status=200)),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-
-# if DEBUG:
-#    urlpatterns += [
-# path('token-auth/', views.obtain_auth_token)
-# path('token-auth/', CustomAuthToken.as_view(), name='api_token_auth'),  # Use the custom view
-#    ]
-
-# if settings.DEBUG:
-#     urlpatterns += static(
-#         settings.MEDIA_URL, document_root=settings.MEDIA_ROOT
-#     )

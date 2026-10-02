@@ -1,10 +1,25 @@
-﻿target-version = "py311"
+target-version = "py311"
 line-length = 88
-exclude = ["migrations", "venv", ".venv", "env", "__pycache__"]
+# Вспомогательные каталоги: одноразовые скрипты и архив старых конфигов
+exclude = [
+    "migrations",
+    "venv",
+    ".venv",
+    "env",
+    "__pycache__",
+    "utilities",
+    "Z_DATA",
+    "X_CLEANUP",
+]
 
 [lint]
-select = ["E", "W", "F", "I", "UP", "B"]
-ignore = ["E501"]
+# ERA — закомментированный код, T20 — print, DTZ — даты без часового пояса
+select = ["E", "W", "F", "I", "UP", "B", "ERA", "T20", "DTZ"]
+
+[lint.per-file-ignores]
+# В командах и тестах печать в консоль уместна
+"*/management/commands/*" = ["T20"]
+"tests/*" = ["T20"]
 
 [lint.isort]
 known-first-party = ["config", "users", "realty", "favorites"]
