@@ -1,4 +1,5 @@
 from django.db.models import OuterRef, Q, Subquery
+from django.utils import timezone
 from rest_framework import exceptions
 
 from chats.models import Blocking, Chat, Message
@@ -101,6 +102,15 @@ def get_messages_by_ids(current_user, msg_ids):
         msg = f'Сообщения {diff} не найдены или уже удалены'
         raise exceptions.NotFound(detail=msg)
     return messages
+
+
+def mark_messages_as_read(messages, user):
+    """Помечает прочитанными только переданные сообщения, адресованные user."""
+    return Message.objects.filter(
+        msg_id__in=[message.msg_id for message in messages],
+        user_to=user,
+        is_new=True,
+    ).update(is_new=False, read_at=timezone.now())
 
 
 def check_user_is_deleted(user):

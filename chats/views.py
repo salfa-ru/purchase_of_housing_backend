@@ -1,5 +1,4 @@
 from django.db.models import Q
-from django.utils import timezone
 from drf_spectacular.utils import (
     OpenApiParameter,
     OpenApiResponse,
@@ -20,7 +19,6 @@ from chats.serializers import (
     CreateMessageRequestSerializer,
     CreateMessageResponseSerializer,
     IdsListSerializer,
-    MessageSerializer,
     MsgIdsListSerializer,
     UnblockingRequestSerializer,
     UserInfoIdNameSerializer,
@@ -35,6 +33,7 @@ from chats.services import (
     get_realties_from_users,
     get_realty_by_realty_id,
     get_users_to_block_unblock,
+    mark_messages_as_read,
 )
 from config import constants
 
@@ -180,6 +179,10 @@ class ChatListAPIView(generics.ListAPIView):
 @extend_schema(
     tags=['Чаты'],
     summary='Получение списка сообщений в чате по chat_id ИЛИ realty_id',
+    description='Возвращает чат и одну страницу его сообщений, новые сверху. '
+    'Прочитанными становятся только сообщения, попавшие на эту страницу: '
+    'остальные отмечаются, когда пользователь до них долистает. '
+    'В ответе у только что прочитанных сообщений is_new остаётся true.',
     request=inline_serializer(
         name='ChatOrRealtyId',
         fields={
@@ -204,7 +207,24 @@ class ChatListAPIView(generics.ListAPIView):
             f'настраивается константами MESSAGES_PAGESIZE',
         ),
     ],
-    responses={200: ChatMessagesSerializer},
+    responses={
+        200: inline_serializer(
+            name='ChatMessagesPage',
+            fields={
+                'count': serializers.IntegerField(
+                    help_text='Сколько всего сообщений в чате'
+                ),
+                'page_size': serializers.IntegerField(),
+                'pages_total': serializers.IntegerField(),
+                'current_page': serializers.IntegerField(),
+                'next': serializers.URLField(allow_null=True),
+                'previous': serializers.URLField(allow_null=True),
+                'results': ChatMessagesSerializer(
+                    help_text='Чат, в messages — сообщения текущей страницы'
+                ),
+            },
+        )
+    },
 )
 class ChatMessagesAPIView(generics.CreateAPIView):
     """Получение списка сообщений в чате по chat_id ИЛИ realty_id"""
@@ -242,32 +262,21 @@ class ChatMessagesAPIView(generics.CreateAPIView):
         messages = chat.messages.filter(
             Q(user_from=request.user, is_deleted_from=False)
             | Q(user_to=request.user, is_deleted_to=False)
-        )
-        page = self.paginate_queryset(messages.order_by('-created_at'))
+        ).order_by('-created_at')
+        page = self.paginate_queryset(messages)
+        shown = list(page) if page is not None else list(messages)
+
+        # Сначала ответ, потом пометка: у только что прочитанных
+        # сообщений в ответе остаётся is_new=True
+        data = ChatMessagesSerializer(
+            instance=chat, context={'request': request, 'messages': shown}
+        ).data
+        # Прочитанными становятся только сообщения, попавшие в ответ
+        mark_messages_as_read(shown, request.user)
 
         if page is not None:
-            serializer = ChatMessagesSerializer(
-                instance=chat, context={'request': request}
-            )
-            paginated_messages = MessageSerializer(
-                page, many=True, context={'request': request}
-            ).data
-            response_data = serializer.data
-            response_data['messages'] = paginated_messages
-
-            unread_messages = messages.filter(user_to=request.user, is_new=True)
-            unread_messages.update(is_new=False, read_at=timezone.now())
-            return self.get_paginated_response(response_data)
-
-        else:
-            serializer = ChatMessagesSerializer(
-                instance=chat, context={'request': request}
-            )
-
-            unread_messages = messages.filter(user_to=request.user, is_new=True)
-            unread_messages.update(is_new=False, read_at=timezone.now())
-
-            return Response(serializer.data)
+            return self.get_paginated_response(data)
+        return Response(data)
 
 
 @extend_schema(

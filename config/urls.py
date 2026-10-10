@@ -46,6 +46,7 @@ urlpatterns = [
     ),
     path('api/complaints/', include('complaints.urls', namespace='complaints')),
     path('api/favorites/', include('favorites.urls', namespace='favorites')),
+    path('api/comparison/', include('comparison.urls', namespace='comparison')),
     path(
         'api/auth/token-auth/',
         CookieTokenObtainPairView.as_view(),
