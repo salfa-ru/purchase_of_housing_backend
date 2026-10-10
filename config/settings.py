@@ -82,6 +82,7 @@ INSTALLED_APPS = [
     'users.apps.UsersConfig',
     'djoser',
     'favorites',
+    'comparison',
 ]
 
 MIDDLEWARE = [

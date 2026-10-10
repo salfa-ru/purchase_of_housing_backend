@@ -1,6 +1,5 @@
 from django.core.validators import MaxLengthValidator
 from django.db.models import Q
-from django.utils import timezone
 from drf_spectacular.utils import extend_schema_field
 from rest_framework import fields, serializers, status
 from rest_framework.exceptions import APIException
@@ -297,30 +296,21 @@ class ChatMessagesSerializer(serializers.ModelSerializer):
         current_user = self.context['request'].user
         return current_user != obj.owner
 
+    @extend_schema_field(MessageSerializer(many=True))
     def get_messages(self, obj) -> list:
         """Сообщения отдаются только там, где это не список чатов."""
         if self.context.get('short'):
             return []
 
-        current_user = self.context['request'].user
-        messages = obj.messages.filter(
-            Q(user_from=current_user, is_deleted_from=False)
-            | Q(user_to=current_user, is_deleted_to=False)
-        ).order_by('-created_at')
+        messages = self.context.get('messages')
+        if messages is None:
+            current_user = self.context['request'].user
+            messages = obj.messages.filter(
+                Q(user_from=current_user, is_deleted_from=False)
+                | Q(user_to=current_user, is_deleted_to=False)
+            ).order_by('-created_at')
 
-        serialized_messages = MessageSerializer(
-            messages, many=True, context=self.context
-        ).data
-
-        unread_message_ids = messages.filter(
-            user_to=current_user, is_new=True
-        ).values_list('msg_id', flat=True)
-        Message.objects.filter(msg_id__in=unread_message_ids).update(
-            is_new=False,
-            read_at=timezone.now(),
-        )
-
-        return serialized_messages
+        return MessageSerializer(messages, many=True, context=self.context).data
 
     def get_can_send(self, obj) -> bool:
         """Можно ли писать в этот чат."""
