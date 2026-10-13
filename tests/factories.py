@@ -2,14 +2,16 @@
 
 from django.contrib.auth import get_user_model
 
-from realty.models import Realty
+from realty.models import Realty, Rent, Sale
 from realty_addresses.models import Address
-from realty_specificities.models import AboutApartment
+from realty_specificities.models import AboutApartment, SalesParameters
 from realty_values.models import (
     CommunicationMethod,
+    HousingType,
     RealtyAdvStatus,
     RealtyType,
     RoomsNumber,
+    SaleType,
     TradeParticipant,
 )
 
@@ -27,8 +29,11 @@ def create_user(username, **kwargs):
     return User.objects.create_user(username=username, **defaults)
 
 
-def create_realty(owner, realty_type_name='Квартира', realty_type=None, **kwargs):
-    """Объявление со всеми обязательными связями."""
+def create_realty(
+    owner, realty_type_name='Квартира', realty_type=None, trade_type=None, **kwargs
+):
+    """Объявление со всеми обязательными связями.
+    trade_type='sale' или 'rent' дополнительно заводит продажу или аренду."""
     if realty_type is None:
         realty_type, _ = RealtyType.objects.get_or_create(
             type=realty_type_name, defaults={'is_commercial': False}
@@ -44,7 +49,7 @@ def create_realty(owner, realty_type_name='Квартира', realty_type=None, 
         number_of_rooms=rooms_number, area=50.0, floor=2, floors_number=9
     )
 
-    return Realty.objects.create(
+    realty = Realty.objects.create(
         owner=owner,
         realty_type=realty_type,
         address=address,
@@ -56,3 +61,15 @@ def create_realty(owner, realty_type_name='Квартира', realty_type=None, 
         realty_status=realty_status,
         **kwargs,
     )
+
+    if trade_type == 'sale':
+        housing_type, _ = HousingType.objects.get_or_create(type='Вторичное жилье')
+        sale_type, _ = SaleType.objects.get_or_create(type='Свободная продажа')
+        sales_parameters = SalesParameters.objects.create(
+            housing_type=housing_type, sale_type=sale_type
+        )
+        Sale.objects.create(realty=realty, sales_parameters=sales_parameters)
+    elif trade_type == 'rent':
+        Rent.objects.create(realty=realty)
+
+    return realty
