@@ -1,4 +1,3 @@
-from django.db.models import Q
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.utils import extend_schema
 from rest_framework import generics, status
@@ -16,7 +15,6 @@ from realty_addresses.serializers import (
     MapPointsSerializer,
     MetroSerializer,
 )
-from realty_values import models as models_values
 
 from .models import Metro
 
@@ -25,9 +23,14 @@ from .models import Metro
     tags=['Адреса и карты'],
     summary='Получение списка точек на карте с объявлениями',
     description=(
-        'Возвращает список точек с объявлениями в пределах заданного прямоугольника. '
-        'Необходимо указать координаты верхнего левого и нижнего правого углов, '
-        'а также (опционально) параметры для фильтрации.'
+        'Возвращает точки опубликованных объявлений в видимой части карты: '
+        'в теле запроса — координаты верхнего левого и нижнего правого углов. '
+        'Пагинации нет, отдаются все точки.\n\n'
+        'В query-параметрах принимаются те же фильтры, что и у списка '
+        'объявлений (/api/realty/): цена, тип и т.д. Выделенная пользователем '
+        'область передаётся так же, как в списке, — параметрами lat_min, '
+        'lat_max, lon_min, lon_max. Тогда на карте остаются только точки '
+        'внутри области, а видимую часть карты можно двигать как угодно.'
     ),
     request=MapPointsRequestSerializer,
     responses=MapPointsSerializer(many=True),
@@ -46,21 +49,15 @@ class GetlistMapPointsAPIView(APIView):
     def post(self, request, *args, **kwargs):
         serializer = MapPointsRequestSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-
-        top_left_latitude = request.data.get('top_left_latitude')
-        top_left_longitude = request.data.get('top_left_longitude')
-        bottom_right_latitude = request.data.get('bottom_right_latitude')
-        bottom_right_longitude = request.data.get('bottom_right_longitude')
-
-        realty_status = models_values.RealtyAdvStatus.objects.get(status='Активно').pk
+        corners = serializer.validated_data
 
         queryset = Realty.objects.filter(
-            Q(address__latitude__gte=bottom_right_latitude)
-            & Q(address__latitude__lte=top_left_latitude)
-            & Q(address__longitude__gte=top_left_longitude)
-            & Q(address__longitude__lte=bottom_right_longitude)
-            & Q(realty_status=realty_status)
-        )
+            realty_status__status=constants.ADVERTISMENT_STATUS,
+            address__latitude__gte=corners['bottom_right_latitude'],
+            address__latitude__lte=corners['top_left_latitude'],
+            address__longitude__gte=corners['top_left_longitude'],
+            address__longitude__lte=corners['bottom_right_longitude'],
+        ).select_related('address')
 
         filterset = self.filterset_class(request.query_params, queryset=queryset)
 
@@ -99,21 +96,10 @@ class GetListAnnouncementsInMapPoint(APIView):
         serializer = GetAnnouncementsInMapPointRequestSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        latitude = request.data.get('latitude')
-        longitude = request.data.get('longitude')
-
-        if latitude is None or longitude is None:
-            return Response(
-                {'error': 'Пожалуйста, укажите все необходимые данные!'},
-                status=status.HTTP_400_BAD_REQUEST,
-            )
-
-        realty_status = models_values.RealtyAdvStatus.objects.get(status='Активно').pk
-
         queryset = Realty.objects.filter(
-            Q(address__latitude=latitude)
-            & Q(address__longitude=longitude)
-            & Q(realty_status=realty_status)
+            realty_status__status=constants.ADVERTISMENT_STATUS,
+            address__latitude=serializer.validated_data['latitude'],
+            address__longitude=serializer.validated_data['longitude'],
         )
 
         filterset = self.filterset_class(request.query_params, queryset=queryset)

@@ -120,16 +120,46 @@ class MapPointsSerializer(serializers.ModelSerializer):
         fields = ['id', 'latitude', 'longitude']
 
 
+MAP_LATITUDE_ORDER = (
+    'Верхний левый угол должен быть севернее нижнего правого: '
+    'top_left_latitude не может быть меньше bottom_right_latitude.'
+)
+MAP_LONGITUDE_ORDER = (
+    'Верхний левый угол должен быть западнее нижнего правого: '
+    'top_left_longitude не может быть больше bottom_right_longitude.'
+)
+
+
+def latitude_field():
+    return serializers.FloatField(required=True, min_value=-90, max_value=90)
+
+
+def longitude_field():
+    return serializers.FloatField(required=True, min_value=-180, max_value=180)
+
+
 class MapPointsRequestSerializer(serializers.Serializer):
-    top_left_latitude = serializers.FloatField(required=True)
-    top_left_longitude = serializers.FloatField(required=True)
-    bottom_right_latitude = serializers.FloatField(required=True)
-    bottom_right_longitude = serializers.FloatField(required=True)
+    """Видимая часть карты: верхний левый и нижний правый углы."""
+
+    top_left_latitude = latitude_field()
+    top_left_longitude = longitude_field()
+    bottom_right_latitude = latitude_field()
+    bottom_right_longitude = longitude_field()
+
+    def validate(self, data):
+        errors = {}
+        if data['top_left_latitude'] < data['bottom_right_latitude']:
+            errors['top_left_latitude'] = MAP_LATITUDE_ORDER
+        if data['top_left_longitude'] > data['bottom_right_longitude']:
+            errors['top_left_longitude'] = MAP_LONGITUDE_ORDER
+        if errors:
+            raise serializers.ValidationError(errors)
+        return data
 
 
 class GetAnnouncementsInMapPointRequestSerializer(serializers.Serializer):
-    latitude = serializers.FloatField(required=True)
-    longitude = serializers.FloatField(required=True)
+    latitude = latitude_field()
+    longitude = longitude_field()
 
 
 class AddressCreateSerializer(serializers.ModelSerializer):

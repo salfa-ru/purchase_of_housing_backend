@@ -208,6 +208,11 @@ class Address(models.Model):
         ordering = ['street']
         verbose_name = 'Адрес'
         verbose_name_plural = 'Адреса'
+        indexes = [
+            models.Index(
+                fields=['latitude', 'longitude'], name='address_coordinates_idx'
+            ),
+        ]
 
     def __str__(self):
         return (
