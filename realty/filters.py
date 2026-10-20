@@ -68,6 +68,15 @@ STREET_TYPE_PATTERNS = {
 }
 
 
+AREA_PARAMS = ('lat_min', 'lat_max', 'lon_min', 'lon_max')
+AREA_INCOMPLETE = (
+    'Для выделенной области нужны все четыре границы: '
+    'lat_min, lat_max, lon_min, lon_max.'
+)
+AREA_LAT_ORDER = 'lat_min не может быть больше lat_max.'
+AREA_LON_ORDER = 'lon_min не может быть больше lon_max.'
+
+
 class PriceRangeFilterSet(django_filters.FilterSet):
     """Базовый filterset с диапазоном цены. Переиспользуется поиском и каталогом."""
 
@@ -196,6 +205,34 @@ class RealtyFilter(PriceRangeFilterSet):
     no_commission = django_filters.BooleanFilter(
         method='filter_no_commission', label='Без комиссии'
     )
+    lat_min = django_filters.NumberFilter(
+        field_name='address__latitude',
+        lookup_expr='gte',
+        min_value=-90,
+        max_value=90,
+        label='Выделенная область: южная граница (широта)',
+    )
+    lat_max = django_filters.NumberFilter(
+        field_name='address__latitude',
+        lookup_expr='lte',
+        min_value=-90,
+        max_value=90,
+        label='Выделенная область: северная граница (широта)',
+    )
+    lon_min = django_filters.NumberFilter(
+        field_name='address__longitude',
+        lookup_expr='gte',
+        min_value=-180,
+        max_value=180,
+        label='Выделенная область: западная граница (долгота)',
+    )
+    lon_max = django_filters.NumberFilter(
+        field_name='address__longitude',
+        lookup_expr='lte',
+        min_value=-180,
+        max_value=180,
+        label='Выделенная область: восточная граница (долгота)',
+    )
     ordering = django_filters.OrderingFilter(
         fields={
             'published_at': 'published_at',
@@ -232,6 +269,28 @@ class RealtyFilter(PriceRangeFilterSet):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.queryset = self.queryset.filter(is_deleted=False, owner__is_deleted=False)
+
+    def filter_queryset(self, queryset):
+        self._validate_area(self.form.cleaned_data)
+        return super().filter_queryset(queryset)
+
+    @staticmethod
+    def _validate_area(data):
+        """Область на карте задаётся только целиком: все четыре границы сразу,
+        минимум не больше максимума. Граница включается в область."""
+        given = [param for param in AREA_PARAMS if data.get(param) is not None]
+        if not given:
+            return
+        if len(given) < len(AREA_PARAMS):
+            raise ValidationError({'detail': AREA_INCOMPLETE})
+
+        errors = {}
+        if data['lat_min'] > data['lat_max']:
+            errors['lat_min'] = AREA_LAT_ORDER
+        if data['lon_min'] > data['lon_max']:
+            errors['lon_min'] = AREA_LON_ORDER
+        if errors:
+            raise ValidationError(errors)
 
     def filter_trade_type(self, queryset, name, value):
         if value.lower() == constants.SALE_TRADE_TYPE.lower():
