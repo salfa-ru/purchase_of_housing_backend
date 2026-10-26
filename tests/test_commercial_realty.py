@@ -9,7 +9,6 @@ COMMERCIAL_TYPE_NAMES = [
     'Торговое помещение',
     'Склад',
     'Помещение свободного назначения',
-    'Производственное помещение',
 ]
 
 
@@ -23,6 +22,12 @@ class CommercialRealtyTypesSeedTest(TestCase):
                 self.assertTrue(
                     RealtyType.objects.filter(type=name, is_commercial=True).exists()
                 )
+
+    def test_type_outside_specification_is_absent(self):
+        """Производственного помещения в справочнике нет: его нет в ТЗ"""
+        self.assertFalse(
+            RealtyType.objects.filter(type='Производственное помещение').exists()
+        )
 
     def test_residential_types_untouched(self):
         """Миграция не сделала коммерческими жилые типы"""
@@ -64,10 +69,14 @@ class CommercialTypeValidationTest(TestCase):
         self.assertIn('commercial_type', serializer.errors)
 
     def test_commercial_realty_with_type_is_accepted(self):
-        """Коммерческий объект с типом коммерции → проходит"""
+        """Коммерческий объект с типом коммерции и типом здания → проходит"""
         serializer = RealtyCreateSerializer(
             instance=self.realty,
-            data={'realty_type': self.office.id, 'commercial_type': 'office'},
+            data={
+                'realty_type': self.office.id,
+                'commercial_type': 'office',
+                'commercial_characteristics': {'building_type': 'business_center'},
+            },
             partial=True,
         )
 

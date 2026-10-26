@@ -82,6 +82,9 @@ class RealtyBaseSerializer(serializers.ModelSerializer):
     about_building = specif_serializers.AboutBuildingSerializer()
     about_apartment = specif_serializers.AboutApartmentSerializer()
     common_characteristics = specif_serializers.CommonCharacteristicsSerializer()
+    commercial_characteristics = specif_serializers.CommercialCharacteristicsSerializer(
+        read_only=True
+    )
     owner_type = SlugRelatedField(
         slug_field='participant',
         queryset=values_models.TradeParticipant.objects.all(),
@@ -138,8 +141,26 @@ class RealtyBaseSerializer(serializers.ModelSerializer):
                 'lease_payments': specif_serializers.LeasePaymentsSerializer(
                     obj.rent_profile.lease_payments
                 ).data,
+                'lease_type': rent_profile.lease_type,
+                'utilities_included': rent_profile.utilities_included,
             }
         return None
+
+
+COMMERCIAL_REQUIRED = (
+    'Для коммерческой недвижимости нужно заполнить характеристики помещения: '
+    'как минимум тип здания (building_type).'
+)
+COMMERCIAL_ONLY = (
+    'Характеристики коммерческого помещения указываются только для коммерческой '
+    'недвижимости, а «{realty_type}» — жилая.'
+)
+ROOMS_REQUIRED = 'Количество комнат обязательно для жилой недвижимости.'
+FLOOR_MARK_FIELDS = ('is_basement', 'is_socle', 'is_attic')
+FLOOR_REQUIRED = (
+    'Этаж обязателен. Не указывать его можно только у коммерческого помещения '
+    'в подвале, цоколе или мансарде.'
+)
 
 
 class RealtyCreateSerializer(serializers.ModelSerializer):
@@ -163,6 +184,13 @@ class RealtyCreateSerializer(serializers.ModelSerializer):
     about_apartment = specif_serializers.AboutApartmentCreateSerializer(required=True)
     common_characteristics = specif_serializers.CommonCharacteristicsCreateSerializer(
         required=False
+    )
+    commercial_characteristics = (
+        specif_serializers.CommercialCharacteristicsCreateSerializer(
+            required=False,
+            help_text='Обязательно для коммерческой недвижимости, '
+            'для жилой не передаётся',
+        )
     )
     price = serializers.IntegerField(
         required=True,
@@ -217,6 +245,7 @@ class RealtyCreateSerializer(serializers.ModelSerializer):
             'about_building',
             'about_apartment',
             'common_characteristics',
+            'commercial_characteristics',
             'description',
             'price',
             'commission',
@@ -281,7 +310,16 @@ class RealtyCreateSerializer(serializers.ModelSerializer):
         """Значение поля с учётом частичного обновления: из запроса или из объекта."""
         if field in data:
             return data[field]
-        return getattr(self.instance, field, None)
+        return getattr(self._realty_instance(), field, None)
+
+    def _realty_instance(self):
+        """Изменяемое объявление или None при создании.
+        Сериализатор вызывается и сам (продажа: instance — Sale), и вложенным
+        в аренду: тогда изменяемый объект лежит у корневого сериализатора."""
+        instance = self.instance
+        if instance is None and self.root is not self:
+            instance = self.root.instance
+        return getattr(instance, 'realty', instance)
 
     def _validate_commercial_type(self, data):
         """Тип коммерции обязателен для коммерческой и запрещён для жилой."""
@@ -314,8 +352,87 @@ class RealtyCreateSerializer(serializers.ModelSerializer):
                 }
             )
 
+    def _validate_by_realty_kind(self, data):
+        """Поля, которые зависят от того, жилая недвижимость или коммерческая.
+
+        Обязательность проверяется при создании и при смене типа: старые
+        объявления без новых полей можно редактировать, не заполняя их."""
+        realty_type = self._resolve(data, 'realty_type')
+        if realty_type is None:
+            return
+
+        realty = self._realty_instance()
+        kind_is_set_now = realty is None or (
+            'realty_type' in data and data['realty_type'] != realty.realty_type
+        )
+
+        errors = {}
+        apartment_errors = {}
+        floor_is_free = False
+
+        if realty_type.is_commercial:
+            provided = data.get('commercial_characteristics')
+            existing = realty is not None and realty.commercial_characteristics_id
+            if not existing and (
+                (provided and not provided.get('building_type'))
+                or (kind_is_set_now and not provided)
+            ):
+                errors['commercial_characteristics'] = COMMERCIAL_REQUIRED
+            floor_is_free = self._floor_mark_is_set(data, realty)
+        else:
+            if data.get('commercial_characteristics'):
+                errors['commercial_characteristics'] = COMMERCIAL_ONLY.format(
+                    realty_type=realty_type.type
+                )
+            if self._rooms_missing(data, realty, kind_is_set_now):
+                apartment_errors['number_of_rooms'] = ROOMS_REQUIRED
+
+        if not floor_is_free and self._floor_missing(data, realty):
+            apartment_errors['floor'] = FLOOR_REQUIRED
+
+        if apartment_errors:
+            errors['about_apartment'] = apartment_errors
+
+        if errors:
+            raise serializers.ValidationError(errors)
+
+    def _floor_mark_is_set(self, data, realty):
+        """Помещение в подвале, цоколе или мансарде — номер этажа для него не нужен."""
+        provided = data.get('commercial_characteristics') or {}
+        existing = realty.commercial_characteristics if realty is not None else None
+
+        for field in FLOOR_MARK_FIELDS:
+            if field in provided:
+                if provided[field]:
+                    return True
+            elif existing is not None and getattr(existing, field):
+                return True
+        return False
+
+    @staticmethod
+    def _floor_missing(data, realty):
+        """Этаж должен быть заполнен, кроме помещений с отметкой этажа.
+        У объявлений, созданных раньше, этаж есть всегда: поле было обязательным."""
+        about_apartment = data.get('about_apartment') or {}
+        if 'floor' in about_apartment:
+            return about_apartment['floor'] is None
+        if realty is None:
+            return True
+        return realty.about_apartment.floor is None
+
+    @staticmethod
+    def _rooms_missing(data, realty, kind_is_set_now):
+        """У жилой недвижимости количество комнат должно быть заполнено."""
+        about_apartment = data.get('about_apartment') or {}
+        if 'number_of_rooms' in about_apartment:
+            return about_apartment['number_of_rooms'] is None
+        if realty is None:
+            return True
+        return kind_is_set_now and realty.about_apartment.number_of_rooms_id is None
+
     def validate(self, data):
         self._validate_commercial_type(data)
+        self._validate_by_realty_kind(data)
 
         warnings = []
 
@@ -349,6 +466,9 @@ class RealtyCreateSerializer(serializers.ModelSerializer):
         about_building_data = validated_data.pop('about_building', None)
         about_apartment_data = validated_data.pop('about_apartment', None)
         common_characteristics_data = validated_data.pop('common_characteristics', None)
+        commercial_characteristics_data = validated_data.pop(
+            'commercial_characteristics', None
+        )
         uploaded_photos = validated_data.pop('uploaded_photos', None)
         _uploaded_photos_to_remove = validated_data.pop('uploaded_photos_to_remove', [])
         photos_upload = validated_data.pop('photos_upload', None)
@@ -400,6 +520,14 @@ class RealtyCreateSerializer(serializers.ModelSerializer):
         )
         validated_data['common_characteristics'] = common_characteristics
 
+        validated_data['commercial_characteristics'] = (
+            specificities_models.CommercialCharacteristics.objects.create(
+                **commercial_characteristics_data
+            )
+            if commercial_characteristics_data
+            else None
+        )
+
         if 'realty_status' not in validated_data:
             default_status, _ = values_models.RealtyAdvStatus.objects.get_or_create(
                 status=constants.REALTY_STATUS
@@ -433,6 +561,9 @@ class RealtyCreateSerializer(serializers.ModelSerializer):
         about_building_data = validated_data.pop('about_building', None)
         about_apartment_data = validated_data.pop('about_apartment', None)
         common_characteristics_data = validated_data.pop('common_characteristics', None)
+        commercial_characteristics_data = validated_data.pop(
+            'commercial_characteristics', None
+        )
 
         photos_upload = validated_data.pop('photos_upload', None)
         uploaded_photos = validated_data.pop('uploaded_photos', None)
@@ -494,8 +625,8 @@ class RealtyCreateSerializer(serializers.ModelSerializer):
             about_building_serializer.save()
 
         if about_apartment_data:
-            if 'number_of_rooms' in about_apartment_data:
-                number_of_rooms = about_apartment_data['number_of_rooms']
+            number_of_rooms = about_apartment_data.get('number_of_rooms')
+            if number_of_rooms is not None:
                 about_apartment_data['number_of_rooms'] = number_of_rooms.id
 
             about_apartment_serializer = (
@@ -526,6 +657,19 @@ class RealtyCreateSerializer(serializers.ModelSerializer):
             )
             common_characteristics_serializer.is_valid(raise_exception=True)
             common_characteristics_serializer.save()
+
+        if commercial_characteristics_data:
+            commercial = realty_instance.commercial_characteristics
+            if commercial is None:
+                realty_instance.commercial_characteristics = (
+                    specificities_models.CommercialCharacteristics.objects.create(
+                        **commercial_characteristics_data
+                    )
+                )
+            else:
+                for field, value in commercial_characteristics_data.items():
+                    setattr(commercial, field, value)
+                commercial.save()
 
         if photos_upload is not None:
             current_photos = {

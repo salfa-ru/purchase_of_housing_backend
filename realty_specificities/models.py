@@ -41,6 +41,8 @@ class AboutApartment(models.Model):
         on_delete=models.PROTECT,
         verbose_name='Кол-во комнат',
         related_name='about_apartments',
+        help_text='Обязательно для жилой недвижимости, у коммерческой — нет',
+        **constants.NULLABLE_FIELD,
     )
     area = models.FloatField(
         verbose_name='Площадь квартиры кв.м.',
@@ -52,7 +54,12 @@ class AboutApartment(models.Model):
     loggia = models.BooleanField(verbose_name='Лоджия', default=False)
     balcony = models.BooleanField(verbose_name='Балкон', default=False)
     elevator = models.BooleanField(verbose_name='Лифт', default=False)
-    floor = models.PositiveSmallIntegerField(verbose_name='Этаж', default=False)
+    floor = models.PositiveSmallIntegerField(
+        verbose_name='Этаж',
+        help_text='Можно не указывать у коммерческого помещения '
+        'в подвале, цоколе или мансарде',
+        **constants.NULLABLE_FIELD,
+    )
     floors_number = models.PositiveSmallIntegerField(
         verbose_name='Этажность', default=False
     )
@@ -63,7 +70,9 @@ class AboutApartment(models.Model):
         verbose_name_plural = 'О квартирах'
 
     def __str__(self):
-        characteristics = [f'{self.number_of_rooms} комн., {self.area} кв.м']
+        characteristics = [f'{self.area} кв.м']
+        if self.number_of_rooms:
+            characteristics.insert(0, f'{self.number_of_rooms} комн.')
 
         if self.loggia:
             characteristics.append('Лоджия')
@@ -72,7 +81,8 @@ class AboutApartment(models.Model):
         if self.elevator:
             characteristics.append('Лифт')
 
-        characteristics.append(f'Этаж: {self.floor}/{self.floors_number}')
+        floor = self.floor if self.floor is not None else '—'
+        characteristics.append(f'Этаж: {floor}/{self.floors_number}')
         return ', '.join(characteristics)
 
 
@@ -119,6 +129,74 @@ class CommonCharacteristics(models.Model):
         return (
             ', '.join(characteristics) if characteristics else 'Нет общих характеристик'
         )
+
+
+class CommercialCharacteristics(models.Model):
+    """Характеристики коммерческого помещения: о здании и о помещении."""
+
+    BUILDING_TYPE_CHOICES = [
+        ('administrative', 'Административное'),
+        ('business_center', 'Бизнес-центр'),
+        ('residential', 'Жилой дом'),
+        ('shopping_center', 'Торговый центр'),
+    ]
+    ENTRANCE_CHOICES = [
+        ('separate', 'Отдельный'),
+        ('shared', 'Общий'),
+    ]
+    HEATING_CHOICES = [
+        ('none', 'Нет'),
+        ('central', 'Центральное'),
+        ('autonomous', 'Автономное'),
+    ]
+    FINISHING_CHOICES = [
+        ('none', 'Без отделки'),
+        ('clean', 'Чистовая'),
+        ('office', 'Офисная'),
+    ]
+
+    building_type = models.CharField(
+        max_length=20, choices=BUILDING_TYPE_CHOICES, verbose_name='Тип здания'
+    )
+    entrance = models.CharField(
+        max_length=20,
+        choices=ENTRANCE_CHOICES,
+        verbose_name='Вход',
+        **constants.NULLABLE_FIELD,
+    )
+    ceiling_height = models.FloatField(
+        verbose_name='Высота потолков, м',
+        validators=[
+            validators.MinValueValidator(constants.MIN_CEILING_HEIGHT),
+            validators.MaxValueValidator(constants.MAX_CEILING_HEIGHT),
+        ],
+        **constants.NULLABLE_FIELD,
+    )
+    heating = models.CharField(
+        max_length=20,
+        choices=HEATING_CHOICES,
+        verbose_name='Отопление',
+        **constants.NULLABLE_FIELD,
+    )
+    finishing = models.CharField(
+        max_length=20,
+        choices=FINISHING_CHOICES,
+        verbose_name='Отделка',
+        **constants.NULLABLE_FIELD,
+    )
+    has_furniture = models.BooleanField(
+        verbose_name='Мебель', **constants.NULLABLE_FIELD
+    )
+    is_basement = models.BooleanField(verbose_name='Подвал', default=False)
+    is_socle = models.BooleanField(verbose_name='Цокольный этаж', default=False)
+    is_attic = models.BooleanField(verbose_name='Мансарда', default=False)
+
+    class Meta:
+        verbose_name = 'Характеристики коммерческого помещения'
+        verbose_name_plural = 'Характеристики коммерческих помещений'
+
+    def __str__(self):
+        return self.get_building_type_display()
 
 
 class RentalFeatures(models.Model):

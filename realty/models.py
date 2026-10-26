@@ -17,7 +17,6 @@ class Realty(models.Model):
         ('retail', 'Торговое помещение'),
         ('warehouse', 'Склад'),
         ('free_use', 'Помещение свободного назначения'),
-        ('industrial', 'Производственное помещение'),
     ]
 
     owner = models.ForeignKey(
@@ -55,6 +54,13 @@ class Realty(models.Model):
         specificities_models.CommonCharacteristics,
         on_delete=models.PROTECT,
         verbose_name='Общие характеристики',
+        related_name='realty',
+        **NULLABLE_FIELD,
+    )
+    commercial_characteristics = models.ForeignKey(
+        specificities_models.CommercialCharacteristics,
+        on_delete=models.PROTECT,
+        verbose_name='Характеристики коммерческого помещения',
         related_name='realty',
         **NULLABLE_FIELD,
     )
@@ -134,14 +140,18 @@ class Realty(models.Model):
         super().save(*args, **kwargs)
 
     def __str__(self):
-        rooms = self.about_apartment.number_of_rooms.number_of_rooms
-        rooms_suffix = '-комн.' if len(rooms) <= 2 else ''
+        rooms = self.about_apartment.number_of_rooms
+        rooms_prefix = ''
+        if rooms:
+            rooms = rooms.number_of_rooms
+            rooms_prefix = f'{rooms}-комн. ' if len(rooms) <= 2 else f'{rooms} '
+        floor = self.about_apartment.floor or '—'
 
         return (
-            f'{rooms}{rooms_suffix} '
+            f'{rooms_prefix}'
             f'{self.realty_type.type}, '
             f'{self.about_apartment.area} м.кв., '
-            f'{self.about_apartment.floor}/{self.about_apartment.floors_number} этаж '
+            f'{floor}/{self.about_apartment.floors_number} этаж '
             f'--- '
             f'{self.address.street.name}, '
             f'{self.address.house_number}'
@@ -175,6 +185,11 @@ class Sale(models.Model):
 class Rent(models.Model):
     """Объявление об аренде."""
 
+    LEASE_TYPE_CHOICES = [
+        ('direct', 'Прямая аренда'),
+        ('sublease', 'Субаренда'),
+    ]
+
     realty = models.OneToOneField(
         Realty,
         on_delete=models.CASCADE,
@@ -192,6 +207,18 @@ class Rent(models.Model):
         on_delete=models.PROTECT,
         verbose_name='Платежи аренды',
         related_name='rents',
+        **NULLABLE_FIELD,
+    )
+    lease_type = models.CharField(
+        max_length=20,
+        choices=LEASE_TYPE_CHOICES,
+        verbose_name='Тип аренды',
+        help_text='Только для коммерческой недвижимости, там обязателен',
+        **NULLABLE_FIELD,
+    )
+    utilities_included = models.BooleanField(
+        verbose_name='Коммунальные платежи включены',
+        help_text='Только для коммерческой недвижимости',
         **NULLABLE_FIELD,
     )
 

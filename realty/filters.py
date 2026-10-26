@@ -259,7 +259,7 @@ class RealtyFilter(PriceRangeFilterSet):
         field_name='commercial_type',
         lookup_expr='exact',
         label='Тип коммерческой недвижимости',
-        help_text='office, retail, warehouse, free_use, industrial',
+        help_text='office, retail, warehouse, free_use',
     )
 
     class Meta:

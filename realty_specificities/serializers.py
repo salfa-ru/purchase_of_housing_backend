@@ -44,7 +44,9 @@ class AboutApartmentCreateSerializer(serializers.ModelSerializer):
 
     number_of_rooms = serializers.PrimaryKeyRelatedField(
         queryset=values_models.RoomsNumber.objects.all(),
-        required=True,
+        required=False,
+        allow_null=True,
+        help_text='Обязательно для жилой недвижимости, у коммерческой не нужно',
     )
     area = serializers.FloatField(
         required=True,
@@ -54,10 +56,14 @@ class AboutApartmentCreateSerializer(serializers.ModelSerializer):
         ],
     )
     floor = serializers.IntegerField(
+        required=False,
+        allow_null=True,
+        help_text='Можно не указывать у коммерческого помещения '
+        'в подвале, цоколе или мансарде',
         validators=(
             validators.MinValueValidator(constants.MIN_FLOOR),
             validators.MaxValueValidator(constants.MAX_FLOOR),
-        )
+        ),
     )
     floors_number = serializers.IntegerField(
         validators=(
@@ -122,6 +128,23 @@ class RentalFeaturesCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = spec_models.RentalFeatures
         fields = '__all__'
+
+
+class CommercialCharacteristicsSerializer(serializers.ModelSerializer):
+    """Характеристики коммерческого помещения."""
+
+    class Meta:
+        model = spec_models.CommercialCharacteristics
+        exclude = ['id']
+
+
+class CommercialCharacteristicsCreateSerializer(serializers.ModelSerializer):
+    """Характеристики коммерческого помещения при создании и изменении.
+    Обязателен только тип здания, остальное — по желанию."""
+
+    class Meta:
+        model = spec_models.CommercialCharacteristics
+        exclude = ['id']
 
 
 class LeasePaymentsCreateSerializer(serializers.ModelSerializer):
