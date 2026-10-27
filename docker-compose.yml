@@ -46,6 +46,8 @@ services:
     build: .
     container_name: realty_django_test
     env_file: ../.env.test
+    environment:
+      JWT_ACCESS_TOKEN_LIFETIME_MINUTES: '120'
     volumes:
       - .:/app
       - ../static:/app/static/
