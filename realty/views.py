@@ -17,7 +17,14 @@ from rest_framework.response import Response
 
 from config import constants
 from realty import models as realty_models
-from realty.filters import CatalogPriceFilter, LatestRealtyFilter, RealtyFilter
+from realty import titles
+from realty.filters import (
+    TRADE_TYPE_RENT_VALUES,
+    TRADE_TYPE_SALE_VALUES,
+    CatalogPriceFilter,
+    LatestRealtyFilter,
+    RealtyFilter,
+)
 from realty.pagination import (
     LatestRealtyPagination,
     LimitRealtyPagination,
@@ -31,6 +38,7 @@ from realty.serializers import serializers_sale as sale_serializers
 from realty_addresses import models as realty_addresses_models
 from realty_displays.models import DisplayFullInfo, DisplayInSearch
 from realty_displays.utils import increment_counter
+from realty_specificities.models import CommercialCharacteristics
 from realty_values import models as realty_values_models
 
 from .models import Realty
@@ -142,6 +150,26 @@ class LastRealtyListView(generics.ListAPIView):
 ...
 
 
+def search_page_title(query_params):
+    """Заголовок страницы поиска коммерческой недвижимости по фильтрам запроса.
+    Типы помещения можно передать через запятую: office,warehouse."""
+    if query_params.get('is_commercial', '').lower() not in ('true', '1'):
+        return None
+
+    trade_type = query_params.get('trade_type', '').strip().lower()
+    if trade_type in TRADE_TYPE_SALE_VALUES:
+        trade_type = 'sale'
+    elif trade_type in TRADE_TYPE_RENT_VALUES:
+        trade_type = 'rent'
+
+    commercial_types = [
+        value.strip()
+        for value in query_params.get('commercial_type', '').split(',')
+        if value.strip()
+    ]
+    return titles.page_title(trade_type, commercial_types)
+
+
 @extend_schema(
     tags=['Недвижимость | Основные'],
     summary='Получение списка всех объявлений. Доступна фильтрация. '
@@ -169,11 +197,15 @@ class RealtyListView(generics.ListAPIView):
         return realty_serializers.RealtyPublicSerializer
 
     def get_queryset(self):
-        return realty_models.Realty.objects.filter(
-            realty_status__status=constants.ADVERTISMENT_STATUS,
-            is_deleted=False,
-            owner__is_deleted=False,
-        ).order_by('-published_at')
+        return (
+            realty_models.Realty.objects.filter(
+                realty_status__status=constants.ADVERTISMENT_STATUS,
+                is_deleted=False,
+                owner__is_deleted=False,
+            )
+            .select_related('commercial_characteristics')
+            .order_by('-published_at')
+        )
 
     def list(self, request, *args, **kwargs):
         """Запуск увеличения счетчика показа в поиске с защитой от накрутки."""
@@ -193,6 +225,7 @@ class RealtyListView(generics.ListAPIView):
                 'DisplayInSearch_time',
             )
 
+        response.data['page_title'] = search_page_title(request.query_params)
         return response
 
 
@@ -364,11 +397,18 @@ class ChangeStatusUpdateAPIView(generics.UpdateAPIView):
         serializer.save()
 
 
+def choice_options(choices):
+    """Значения из списка для фильтров: код уходит в запрос, подпись — на экран."""
+    return [{'value': code, 'label': label} for code, label in choices]
+
+
 @extend_schema(
     tags=['Недвижимость | Основные'],
     summary='Получение данных для фильтров',
     description='Возвращает все возможные значения для фильтров: типы недвижимости, '
-    'статусы, метро, районы и т.д.',
+    'статусы, метро, районы и т.д. В разделе commercial — значения для поиска '
+    'коммерческой недвижимости: value передаётся в фильтр (можно несколько через '
+    'запятую), label показывается пользователю.',
 )
 class RealtyFilterOptionsView(views.APIView):
     """
@@ -377,12 +417,21 @@ class RealtyFilterOptionsView(views.APIView):
 
     def get(self, request, *args, **kwargs):
         participants = realty_values_models.TradeParticipant.objects.all()
+        commercial = CommercialCharacteristics
 
         data = {
             'realty_type': [
-                {'id': rt.id, 'type': rt.type}
+                {'id': rt.id, 'type': rt.type, 'is_commercial': rt.is_commercial}
                 for rt in realty_values_models.RealtyType.objects.all()
             ],
+            'commercial': {
+                'commercial_type': choice_options(Realty.COMMERCIAL_TYPE_CHOICES),
+                'building_type': choice_options(commercial.BUILDING_TYPE_CHOICES),
+                'entrance': choice_options(commercial.ENTRANCE_CHOICES),
+                'heating': choice_options(commercial.HEATING_CHOICES),
+                'finishing': choice_options(commercial.FINISHING_CHOICES),
+                'lease_type': choice_options(realty_models.Rent.LEASE_TYPE_CHOICES),
+            },
             'address': {
                 'street': {
                     'zone': [

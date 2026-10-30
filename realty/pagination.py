@@ -13,6 +13,19 @@ class LimitRealtyPagination(PageNumberPagination):
     page_size_query_param = None
     page_size = 10
 
+    def get_paginated_response_schema(self, schema):
+        response_schema = super().get_paginated_response_schema(schema)
+        response_schema['properties']['page_title'] = {
+            'type': 'string',
+            'nullable': True,
+            'description': 'Заголовок страницы поиска коммерческой недвижимости: '
+            '«Снять офис в Москве», при нескольких типах — «Снять коммерческое '
+            'помещение в Москве». Есть, только когда переданы is_commercial=true '
+            'и trade_type; иначе null.',
+            'example': 'Снять офис в Москве',
+        }
+        return response_schema
+
 
 class LatestRealtyPagination(LimitOffsetPagination):
     """LimitOffset-пагинация для /api/realty/latest/ со строгой валидацией."""
