@@ -3,8 +3,9 @@ from django.db.models import F, Q
 from rest_framework.exceptions import ValidationError
 
 from config import constants
+from realty_specificities.models import CommercialCharacteristics
 
-from .models import Realty
+from .models import Realty, Rent
 
 TRADE_TYPE_SALE_VALUES = frozenset({'sale', constants.SALE_TRADE_TYPE.lower()})
 TRADE_TYPE_RENT_VALUES = frozenset({'rent', constants.RENT_TRADE_TYPE.lower()})
@@ -77,6 +78,26 @@ AREA_LAT_ORDER = 'lat_min не может быть больше lat_max.'
 AREA_LON_ORDER = 'lon_min не может быть больше lon_max.'
 
 
+UNKNOWN_CHOICE = 'Недопустимое значение «{value}». Допустимые значения: {allowed}.'
+
+
+class CharInFilter(django_filters.BaseInFilter, django_filters.CharFilter):
+    """Несколько значений через запятую: office,warehouse."""
+
+
+def choices_filter(field_name, choices, label):
+    """Множественный выбор из списка кодов; неизвестный код — 400."""
+    codes = [code for code, _ in choices]
+    choice_filter = CharInFilter(
+        field_name=field_name,
+        method='filter_choices',
+        label=label,
+        help_text=f'Можно несколько через запятую: {", ".join(codes)}',
+    )
+    choice_filter.codes = codes
+    return choice_filter
+
+
 class PriceRangeFilterSet(django_filters.FilterSet):
     """Базовый filterset с диапазоном цены. Переиспользуется поиском и каталогом."""
 
@@ -101,7 +122,8 @@ class RealtyFilter(PriceRangeFilterSet):
         'или добавить значение в новый строковый элемент.)',
     )
     trade_type = django_filters.CharFilter(
-        method='filter_trade_type', label='Тип сделки. (Аренда или Продажа)'
+        method='filter_trade_type',
+        label='Тип сделки: sale или rent (можно Продажа или Аренда)',
     )
     realty_type = django_filters.CharFilter(
         field_name='realty_type__type',
@@ -167,7 +189,10 @@ class RealtyFilter(PriceRangeFilterSet):
         'или добавить значение в новый строковый элемент.)',
     )
     has_furniture = django_filters.BooleanFilter(
-        field_name='common_characteristics__furniture', label='Мебель'
+        method='filter_has_furniture',
+        label='Мебель',
+        help_text='У жилой — из общих характеристик, у коммерческой — '
+        'из характеристик помещения',
     )
     has_refrigerator = django_filters.BooleanFilter(
         field_name='rent_profile__rental_features__fridge', label='Холодильник'
@@ -252,14 +277,56 @@ class RealtyFilter(PriceRangeFilterSet):
     is_commercial = django_filters.BooleanFilter(
         field_name='realty_type__is_commercial',
         label='Тип недвижимости (жилая/коммерческая)',
-        help_text='true - коммерческая, false - жилая',
+        help_text='true - коммерческая, false - жилая. Не передан — только жилая '
+        '(ФТ-1.3.1), если не выбраны тип недвижимости или коммерческие фильтры',
     )
 
-    commercial_type = django_filters.CharFilter(
-        field_name='commercial_type',
-        lookup_expr='exact',
-        label='Тип коммерческой недвижимости',
-        help_text='office, retail, warehouse, free_use',
+    commercial_type = choices_filter(
+        'commercial_type',
+        Realty.COMMERCIAL_TYPE_CHOICES,
+        'Назначение коммерческой недвижимости. Не выбрано — все назначения',
+    )
+    building_type = choices_filter(
+        'commercial_characteristics__building_type',
+        CommercialCharacteristics.BUILDING_TYPE_CHOICES,
+        'Тип здания (коммерческая)',
+    )
+    entrance = choices_filter(
+        'commercial_characteristics__entrance',
+        CommercialCharacteristics.ENTRANCE_CHOICES,
+        'Вход (коммерческая)',
+    )
+    heating = choices_filter(
+        'commercial_characteristics__heating',
+        CommercialCharacteristics.HEATING_CHOICES,
+        'Отопление (коммерческая)',
+    )
+    finishing = choices_filter(
+        'commercial_characteristics__finishing',
+        CommercialCharacteristics.FINISHING_CHOICES,
+        'Отделка (коммерческая)',
+    )
+    lease_type = choices_filter(
+        'rent_profile__lease_type',
+        Rent.LEASE_TYPE_CHOICES,
+        'Тип аренды (коммерческая)',
+    )
+    utilities_included = django_filters.BooleanFilter(
+        field_name='rent_profile__utilities_included',
+        label='Коммунальные платежи включены (коммерческая аренда)',
+    )
+
+    residential_by_default = True
+    KIND_PARAMS = (
+        'is_commercial',
+        'realty_type',
+        'commercial_type',
+        'building_type',
+        'entrance',
+        'heating',
+        'finishing',
+        'lease_type',
+        'utilities_included',
     )
 
     class Meta:
@@ -272,7 +339,52 @@ class RealtyFilter(PriceRangeFilterSet):
 
     def filter_queryset(self, queryset):
         self._validate_area(self.form.cleaned_data)
+        if self.residential_by_default and self._kind_not_chosen():
+            queryset = queryset.filter(realty_type__is_commercial=False)
         return super().filter_queryset(queryset)
+
+    def _kind_not_chosen(self):
+        """Пользователь не выбрал ни вид недвижимости, ни коммерческий фильтр."""
+        return all(
+            self.form.cleaned_data.get(param) in (None, '', [])
+            for param in self.KIND_PARAMS
+        )
+
+    def filter_choices(self, queryset, name, value):
+        """Значения из списка кодов; подходит объявление с любым из них.
+        django-filter передаёт в name поле модели, а не имя фильтра."""
+        param, choice_filter = next(
+            (param, choice_filter)
+            for param, choice_filter in self.filters.items()
+            if choice_filter.field_name == name
+        )
+        codes = choice_filter.codes
+        value = [code.strip() for code in value if code.strip()]
+        unknown = [code for code in value if code not in codes]
+        if unknown:
+            raise ValidationError(
+                {
+                    param: UNKNOWN_CHOICE.format(
+                        value=unknown[0], allowed=', '.join(codes)
+                    )
+                }
+            )
+        if not value:
+            return queryset
+        return queryset.filter(**{f'{name}__in': value})
+
+    def filter_has_furniture(self, queryset, name, value):
+        """Мебель у жилой и у коммерческой хранится в разных местах."""
+        return queryset.filter(
+            Q(
+                realty_type__is_commercial=False,
+                common_characteristics__furniture=value,
+            )
+            | Q(
+                realty_type__is_commercial=True,
+                commercial_characteristics__has_furniture=value,
+            )
+        )
 
     @staticmethod
     def _validate_area(data):
@@ -293,9 +405,10 @@ class RealtyFilter(PriceRangeFilterSet):
             raise ValidationError(errors)
 
     def filter_trade_type(self, queryset, name, value):
-        if value.lower() == constants.SALE_TRADE_TYPE.lower():
+        normalized = value.strip().lower()
+        if normalized in TRADE_TYPE_SALE_VALUES:
             return queryset.filter(sale_profile__isnull=False)
-        elif value.lower() == constants.RENT_TRADE_TYPE.lower():
+        elif normalized in TRADE_TYPE_RENT_VALUES:
             return queryset.filter(rent_profile__isnull=False)
         return queryset
 
@@ -377,6 +490,8 @@ class CatalogPriceFilter(PriceRangeFilterSet):
 
 class LatestRealtyFilter(RealtyFilter):
     """RealtyFilter со строгой проверкой trade_type для /api/realty/latest/."""
+
+    residential_by_default = False
 
     def filter_trade_type(self, queryset, name, value):
         normalized = value.strip().lower()

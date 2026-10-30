@@ -8,6 +8,7 @@ from rest_framework.relations import SlugRelatedField
 from config import constants
 from notifications.utils import create_notification
 from realty import models as realty_models
+from realty import titles
 from realty_addresses import serializers as address_serializers
 from realty_photos.models import RealtyPhoto
 from realty_photos.serializers import RealtyPhotoSerializer
@@ -66,6 +67,12 @@ class RealtyBaseSerializer(serializers.ModelSerializer):
     is_deleted = serializers.BooleanField(read_only=True)
     is_commercial = serializers.SerializerMethodField()
     commercial_type = serializers.CharField(read_only=True)
+    title = serializers.SerializerMethodField(
+        help_text='Название коммерческого объекта: «Офис, 60 м²». У жилой — null'
+    )
+    page_title = serializers.SerializerMethodField(
+        help_text='Заголовок страницы: «Снять офис в Москве». У жилой — null'
+    )
 
     realty_status = serializers.IntegerField(source='realty_status_id', read_only=True)
     realty_status_full = serializers.CharField(
@@ -104,6 +111,12 @@ class RealtyBaseSerializer(serializers.ModelSerializer):
 
     def get_is_commercial(self, obj):
         return obj.realty_type.is_commercial
+
+    def get_title(self, obj) -> str | None:
+        return titles.realty_title(obj)
+
+    def get_page_title(self, obj) -> str | None:
+        return titles.realty_page_title(obj)
 
     def get_warnings(self, obj):
         if hasattr(obj, '_warnings'):
@@ -729,8 +742,11 @@ class ShortRealtySerializer(serializers.ModelSerializer):
     """Короткая карточка объявления."""
 
     photos = RealtyPhotoSerializer(many=True, source='realty_photos')
-    number_of_rooms = serializers.CharField(
-        source='about_apartment.number_of_rooms.number_of_rooms'
+    title = serializers.SerializerMethodField(
+        help_text='Название коммерческого объекта: «Офис, 60 м²». У жилой — null'
+    )
+    number_of_rooms = serializers.SerializerMethodField(
+        help_text='У коммерческой недвижимости — null'
     )
     realty_type = serializers.ReadOnlyField(source='realty_type.type')
     area = serializers.DecimalField(
@@ -761,9 +777,19 @@ class ShortRealtySerializer(serializers.ModelSerializer):
     # ========== ДЛЯ КОММЕРЧЕСКОЙ НЕДВИЖИМОСТИ ==========
     is_commercial = serializers.SerializerMethodField()
     commercial_type = serializers.CharField(read_only=True)
+    commercial_characteristics = specif_serializers.CommercialCharacteristicsSerializer(
+        read_only=True
+    )
 
     def get_is_commercial(self, obj):
         return obj.realty_type.is_commercial
+
+    def get_title(self, obj) -> str | None:
+        return titles.realty_title(obj)
+
+    def get_number_of_rooms(self, obj) -> str | None:
+        rooms = obj.about_apartment.number_of_rooms
+        return rooms.number_of_rooms if rooms else None
 
     class Meta:
         model = realty_models.Realty
@@ -774,8 +800,10 @@ class ShortRealtySerializer(serializers.ModelSerializer):
             'is_deleted',
             'photos',
             'price',
+            'title',
             'is_commercial',
             'commercial_type',
+            'commercial_characteristics',
             'number_of_rooms',
             'realty_type',
             'area',
@@ -794,20 +822,22 @@ class ShortRealtySerializer(serializers.ModelSerializer):
             'published_at',
             'commission',
             'rent',
-            'is_commercial',
-            'commercial_type',
         )
 
     def get_floors_number(self, obj) -> str:
-        return f'{obj.about_apartment.floor}/{obj.about_apartment.floors_number} этаж'
+        apartment = obj.about_apartment
+        return f'{apartment.floor or "—"}/{apartment.floors_number} этаж'
 
     def get_rent(self, obj):
         """Условия аренды."""
         if hasattr(obj, 'rent_profile'):
+            rent_profile = obj.rent_profile
             return {
                 'lease_payments': specif_serializers.LeasePaymentsSerializer(
-                    obj.rent_profile.lease_payments
-                ).data
+                    rent_profile.lease_payments
+                ).data,
+                'lease_type': rent_profile.lease_type,
+                'utilities_included': rent_profile.utilities_included,
             }
         return None
 
@@ -822,8 +852,10 @@ class RealtyPublicSerializer(ShortRealtySerializer):
             'realty_status_full',
             'photos',
             'price',
+            'title',
             'is_commercial',
             'commercial_type',
+            'commercial_characteristics',
             'number_of_rooms',
             'realty_type',
             'area',
