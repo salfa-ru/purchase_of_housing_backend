@@ -97,6 +97,14 @@ class RealtyLKSerializer(serializers.ModelSerializer):
         return representation
 
 
+ALLOWED_TRANSITIONS = {
+    'Активно': ['В архиве'],
+    'Отклонено': ['В архиве'],
+    'На модерации': ['В архиве'],
+    'В архиве': ['На модерации'],
+}
+
+
 class RealtyStatusUpdateSerializer(serializers.ModelSerializer):
     """Смена статуса объявления."""
 
@@ -105,28 +113,19 @@ class RealtyStatusUpdateSerializer(serializers.ModelSerializer):
         fields = ['realty_status']
 
     def validate_realty_status(self, value):
+        """Владельца проверяет разрешение вьюхи, здесь — только переход статуса."""
         obj = self.instance
-        request = self.context.get('request')
-        if obj.owner == request.user:
-            allowed_transitions = {
-                'Активно': ['В архиве'],
-                'Отклонено': ['В архиве'],
-                'На модерации': ['В архиве'],
-                'В архиве': ['На модерации'],
-            }
+        current = obj.realty_status.status
 
-            if obj.realty_status.status in allowed_transitions:
-                if str(value) not in allowed_transitions[obj.realty_status.status]:
-                    raise ValidationError(
-                        f"Статус можно изменить с '{obj.realty_status.status}' "
-                        f'только на {allowed_transitions[obj.realty_status.status]}.'
-                    )
-            else:
-                raise ValidationError(
-                    f"Недопустимая операция: статус '{obj.realty_status.status}' "
-                    f'нельзя изменить.'
-                )
+        if current not in ALLOWED_TRANSITIONS:
+            raise ValidationError(
+                f"Недопустимая операция: статус '{current}' нельзя изменить."
+            )
 
-            return value
-        else:
-            raise ValidationError('Вы не являетесь владельцем объявления!')
+        if str(value) not in ALLOWED_TRANSITIONS[current]:
+            raise ValidationError(
+                f"Статус можно изменить с '{current}' "
+                f'только на {ALLOWED_TRANSITIONS[current]}.'
+            )
+
+        return value

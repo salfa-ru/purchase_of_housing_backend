@@ -25,8 +25,22 @@ NOT_AVAILABLE = 'Добавить в сравнение можно только 
 NO_TRADE_TYPE = (
     'У объявления не указано, продажа это или аренда, поэтому его не с чем сравнить.'
 )
+KIND_LABELS = {False: 'жилую', True: 'коммерческую'}
+OTHER_KIND = (
+    'В этом списке сравнивается {current} недвижимость. Чтобы сравнить '
+    '{other}, сначала уберите объявления из списка.'
+)
 REALTY_NOT_FOUND = 'Объявление не найдено.'
 NOT_IN_COMPARISON = 'Этого объявления нет в сравнении.'
+
+
+def list_is_commercial(comparisons):
+    """Вид списка задаёт первое добавленное объявление: жилое или коммерческое.
+    У пустого списка вида нет — None."""
+    first = comparisons.select_related('realty__realty_type').first()
+    if first is None:
+        return None
+    return first.realty.realty_type.is_commercial
 
 
 @extend_schema_view(
@@ -35,10 +49,20 @@ NOT_IN_COMPARISON = 'Этого объявления нет в сравнени�
         summary='Списки сравнения',
         description='У пользователя два списка сравнения: продажа (sale) и '
         'аренда (rent). Объявление само попадает в список своего типа сделки, '
-        'поэтому смешать продажу и аренду в одной таблице нельзя. В каждом '
+        'поэтому смешать продажу и аренду в одной таблице нельзя. Жилую и '
+        'коммерческую недвижимость тоже нельзя: вид списка задаёт первое '
+        'добавленное объявление, он приходит в is_commercial (null у пустого '
+        'списка). В каждом '
         f'списке до {constants.COMPARISON_MAX} объявлений, в порядке '
         'добавления, с полными характеристиками для таблицы. Пустой список '
         'отдаётся с count = 0.\n\n'
+        'Группы строк таблицы. Жильё: «Общие сведения» — price, trade_type, '
+        'owner_type, address; «О квартире» — about_apartment; «О доме» — '
+        'about_building. Коммерция: «Общие сведения» — то же; «О здании» — '
+        'commercial_characteristics.building_type и entrance; «О помещении» — '
+        'about_apartment.area, floor, floors_number и '
+        'commercial_characteristics.ceiling_height, heating, finishing, '
+        'has_furniture.\n\n'
         'Удалённые и архивные объявления остаются в списке с '
         'is_available=false и занимают место, пока пользователь их не уберёт. '
         'У удалённого объявления realty = null, убрать его можно по realty_id.',
@@ -51,7 +75,8 @@ NOT_IN_COMPARISON = 'Этого объявления нет в сравнени�
         'или аренды по своему типу сделки (trade_type в ответе). Добавить можно '
         'только опубликованное объявление и не больше '
         f'{constants.COMPARISON_MAX} штук в один список: при попытке добавить '
-        f'лишнее — 400 с текстом «{LIMIT_REACHED}». Повтор или '
+        f'лишнее — 400 с текстом «{LIMIT_REACHED}». Коммерческое объявление в '
+        'список с жилыми (и наоборот) — 400. Повтор или '
         'неопубликованное объявление — тоже 400, несуществующее или '
         'удалённое — 404.',
         request=ComparisonSerializer,
@@ -83,7 +108,11 @@ class ComparisonListCreateView(generics.ListCreateAPIView):
         for trade_type in TRADE_TYPES:
             queryset = self.get_queryset().filter(**TRADE_TYPE_FILTERS[trade_type])
             results = self.get_serializer(queryset, many=True).data
-            data[trade_type] = {'count': len(results), 'results': results}
+            data[trade_type] = {
+                'count': len(results),
+                'is_commercial': list_is_commercial(queryset),
+                'results': results,
+            }
         return Response(data)
 
     def create(self, request, *args, **kwargs):
@@ -96,7 +125,9 @@ class ComparisonListCreateView(generics.ListCreateAPIView):
                 is_deleted=False,
                 owner__is_deleted=False,
             )
-            .select_related('realty_status', 'sale_profile', 'rent_profile')
+            .select_related(
+                'realty_status', 'realty_type', 'sale_profile', 'rent_profile'
+            )
             .first()
         )
         if realty is None:
@@ -113,6 +144,16 @@ class ComparisonListCreateView(generics.ListCreateAPIView):
             if comparisons.filter(realty=realty).exists():
                 raise ValidationError({'detail': ALREADY_ADDED})
             same_list = comparisons.filter(**TRADE_TYPE_FILTERS[realty.trade_type])
+            current = list_is_commercial(same_list)
+            if current is not None and current != realty.realty_type.is_commercial:
+                raise ValidationError(
+                    {
+                        'detail': OTHER_KIND.format(
+                            current=KIND_LABELS[current],
+                            other=KIND_LABELS[not current],
+                        )
+                    }
+                )
             if same_list.count() >= constants.COMPARISON_MAX:
                 raise ValidationError({'detail': LIMIT_REACHED})
 

@@ -1,7 +1,9 @@
 import base64
 
 from django.core.files.base import ContentFile
+from django.db import transaction
 from django.db.models import Max
+from drf_spectacular.utils import extend_schema_field
 from rest_framework import serializers
 from rest_framework.relations import SlugRelatedField
 
@@ -61,6 +63,43 @@ class PhotoUploadField(serializers.ListField):
         return processed_data
 
 
+TRADE_TYPE_CHOICES = ('sale', 'rent', 'unknown')
+
+
+def trade_type_field():
+    """Тип сделки в ответе: unknown — у объявления нет ни продажи, ни аренды."""
+    return serializers.ChoiceField(choices=TRADE_TYPE_CHOICES, read_only=True)
+
+
+def warnings_field():
+    return serializers.ListField(child=serializers.CharField(), read_only=True)
+
+
+class SaleBlockSerializer(serializers.Serializer):
+    """Блок продажи в ответе объявления."""
+
+    id = serializers.IntegerField(read_only=True)
+    sales_parameters = specif_serializers.SalesParametersSerializer(read_only=True)
+
+
+class RentBlockSerializer(serializers.Serializer):
+    """Блок аренды в ответе объявления."""
+
+    id = serializers.IntegerField(read_only=True)
+    rental_features = specif_serializers.RentalFeaturesSerializer(read_only=True)
+    lease_payments = specif_serializers.LeasePaymentsSerializer(read_only=True)
+    lease_type = serializers.CharField(read_only=True, allow_null=True)
+    utilities_included = serializers.BooleanField(read_only=True, allow_null=True)
+
+
+class ShortRentBlockSerializer(serializers.Serializer):
+    """Блок аренды в короткой карточке: без вложенных условий сдачи."""
+
+    lease_payments = specif_serializers.LeasePaymentsSerializer(read_only=True)
+    lease_type = serializers.CharField(read_only=True, allow_null=True)
+    utilities_included = serializers.BooleanField(read_only=True, allow_null=True)
+
+
 class RealtyBaseSerializer(serializers.ModelSerializer):
     """Чтение объявления, базовые поля."""
 
@@ -71,7 +110,8 @@ class RealtyBaseSerializer(serializers.ModelSerializer):
         help_text='Название коммерческого объекта: «Офис, 60 м²». У жилой — null'
     )
     page_title = serializers.SerializerMethodField(
-        help_text='Заголовок страницы: «Снять офис в Москве». У жилой — null'
+        help_text='Заголовок страницы: «Снять офисное помещение в Москве». '
+        'У жилой — null'
     )
 
     realty_status = serializers.IntegerField(source='realty_status_id', read_only=True)
@@ -109,7 +149,7 @@ class RealtyBaseSerializer(serializers.ModelSerializer):
         model = realty_models.Realty
         exclude = ['changed_at']
 
-    def get_is_commercial(self, obj):
+    def get_is_commercial(self, obj) -> bool:
         return obj.realty_type.is_commercial
 
     def get_title(self, obj) -> str | None:
@@ -118,11 +158,13 @@ class RealtyBaseSerializer(serializers.ModelSerializer):
     def get_page_title(self, obj) -> str | None:
         return titles.realty_page_title(obj)
 
+    @extend_schema_field(warnings_field())
     def get_warnings(self, obj):
         if hasattr(obj, '_warnings'):
             return obj._warnings
         return self.context.get('warnings', [])
 
+    @extend_schema_field(trade_type_field())
     def get_trade_type(self, obj):
         if hasattr(obj, 'sale_profile'):
             return 'sale'
@@ -130,6 +172,7 @@ class RealtyBaseSerializer(serializers.ModelSerializer):
             return 'rent'
         return 'unknown'
 
+    @extend_schema_field(SaleBlockSerializer(allow_null=True))
     def get_sale(self, obj):
         """Параметры продажи."""
         if hasattr(obj, 'sale_profile'):
@@ -142,6 +185,7 @@ class RealtyBaseSerializer(serializers.ModelSerializer):
             }
         return None
 
+    @extend_schema_field(RentBlockSerializer(allow_null=True))
     def get_rent(self, obj):
         """Условия аренды."""
         if hasattr(obj, 'rent_profile'):
@@ -471,6 +515,7 @@ class RealtyCreateSerializer(serializers.ModelSerializer):
             self.instance._warnings = warnings
         return data
 
+    @transaction.atomic
     def create(self, validated_data):
         return self._create_realty(validated_data)
 
@@ -487,28 +532,9 @@ class RealtyCreateSerializer(serializers.ModelSerializer):
         photos_upload = validated_data.pop('photos_upload', None)
 
         if address_data:
-            address_serializer = address_serializers.AddressCreateSerializer(
-                data=address_data
+            validated_data['address'] = address_serializers.resolve_address(
+                address_data
             )
-            if 'street' in address_data:
-                street_data = address_data['street']
-                if 'city' in street_data:
-                    city = street_data['city']
-                    street_data['city'] = city.id
-                if 'zone' in street_data and street_data['zone'] is not None:
-                    zone = street_data['zone']
-                    street_data['zone'] = zone.id
-                if 'district' in street_data and street_data['district'] is not None:
-                    district = street_data['district']
-                    street_data['district'] = district.id
-
-            if 'metro' in address_data and address_data['metro'] is not None:
-                metro = address_data['metro']
-                address_data['metro'] = metro.id
-
-            address_serializer.is_valid(raise_exception=True)
-            address = address_serializer.save()
-            validated_data['address'] = address
 
         about_building = (
             specificities_models.AboutBuilding.objects.create(**about_building_data)
@@ -565,6 +591,7 @@ class RealtyCreateSerializer(serializers.ModelSerializer):
             create_notification(realty, 'on_moderation')
         return realty
 
+    @transaction.atomic
     def update(self, instance, validated_data):
         return self._update_realty(instance, validated_data)
 
@@ -583,44 +610,9 @@ class RealtyCreateSerializer(serializers.ModelSerializer):
         uploaded_photos_to_remove = validated_data.pop('uploaded_photos_to_remove', [])
 
         if address_data:
-            if 'street' in address_data:
-                street_data = address_data.pop('street', None)
-
-                if 'city' in street_data:
-                    city = street_data['city']
-                    street_data['city'] = city.id
-
-                if 'zone' in street_data and street_data['zone'] is not None:
-                    zone = street_data['zone']
-                    street_data['zone'] = zone.id
-                else:
-                    street_data['zone'] = None
-
-                if 'district' in street_data and street_data['district'] is not None:
-                    district = street_data['district']
-                    street_data['district'] = district.id
-                else:
-                    street_data['district'] = None
-
-                street_serializer = address_serializers.StreetCreateSerializer(
-                    instance=realty_instance.address.street,
-                    data=street_data,
-                    partial=True,
-                )
-                street_serializer.is_valid(raise_exception=True)
-                street_serializer.save()
-
-            if 'metro' in address_data and address_data['metro'] is not None:
-                metro = address_data['metro']
-                address_data['metro'] = metro.id
-            else:
-                address_data['metro'] = None
-
-            address_date_serializer = address_serializers.AddressCreateSerializer(
-                instance=realty_instance.address, data=address_data, partial=True
+            validated_data['address'] = address_serializers.resolve_address(
+                address_data, realty_instance.address
             )
-            address_date_serializer.is_valid(raise_exception=True)
-            address_date_serializer.save()
 
         if about_building_data:
             if 'type' in about_building_data:
@@ -781,7 +773,7 @@ class ShortRealtySerializer(serializers.ModelSerializer):
         read_only=True
     )
 
-    def get_is_commercial(self, obj):
+    def get_is_commercial(self, obj) -> bool:
         return obj.realty_type.is_commercial
 
     def get_title(self, obj) -> str | None:
@@ -828,6 +820,7 @@ class ShortRealtySerializer(serializers.ModelSerializer):
         apartment = obj.about_apartment
         return f'{apartment.floor or "—"}/{apartment.floors_number} этаж'
 
+    @extend_schema_field(ShortRentBlockSerializer(allow_null=True))
     def get_rent(self, obj):
         """Условия аренды."""
         if hasattr(obj, 'rent_profile'):

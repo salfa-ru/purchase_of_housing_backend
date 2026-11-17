@@ -159,7 +159,9 @@ class CommercialSearchTest(TestCase):
         self.assertEqual(
             {item['id'] for item in response.data['results']}, {self.office.id}
         )
-        self.assertEqual(response.data['page_title'], 'Купить офис в Москве')
+        self.assertEqual(
+            response.data['page_title'], 'Купить офисное помещение в Москве'
+        )
 
     def test_map_points_follow_the_same_rule(self):
         """На карте по умолчанию жилая, с is_commercial=true — коммерческая"""

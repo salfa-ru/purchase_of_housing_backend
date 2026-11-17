@@ -28,80 +28,75 @@ logger = logging.getLogger(__name__)
 
 @receiver(pre_save, sender=Realty)
 def handle_realty_save(sender, instance, **kwargs):
-    """Обработка сохранения объявления:
-    - установка статуса "на модерации" новому объявлению
-    - создание уведомлений при смене статусов
-    - создание задач для django q2 на деактивацию объявлений"""
+    """Смена статуса объявления:
+    - проставляет и снимает дату публикации
+    - создаёт уведомления владельцу
+    - ставит и снимает задачу django q2 на автоматическую деактивацию
 
-    if hasattr(instance, '_pre_save_in_progress'):
+    Обработчик подключается в RealtyConfig.ready. Без этого дата публикации
+    не проставлялась, уведомления не приходили, а объявления не уходили
+    в архив по сроку."""
+
+    if instance.id is None:
         return
 
-    instance._pre_save_in_progress = True
+    try:
+        old_instance = Realty.objects.get(id=instance.id)
 
-    is_new = instance.id is None
-
-    if is_new:
+    except Realty.DoesNotExist:
         return
 
-    else:
-        try:
-            old_instance = Realty.objects.get(id=instance.id)
+    old_status = old_instance.realty_status
+    new_status = instance.realty_status
 
-        except Realty.DoesNotExist:
-            return
+    old_is_deleted = old_instance.is_deleted
+    new_is_deleted = instance.is_deleted
 
-        old_status = old_instance.realty_status
-        new_status = instance.realty_status
+    if old_is_deleted != new_is_deleted and new_is_deleted is True:
+        create_notification(instance, DELETED_CODE)
+        Schedule.objects.filter(
+            func='realty.tasks.expire_realty', args=instance.id
+        ).delete()
+        logger.info('объявление %s удалено, владелец уведомлен', instance.id)
 
-        old_is_deleted = old_instance.is_deleted
-        new_is_deleted = instance.is_deleted
+    if new_status != old_status:
+        if new_status.id == STATUS_ACTIVE_ID:
+            instance.published_at = timezone.now()
 
-        if old_is_deleted != new_is_deleted and new_is_deleted is True:
-            create_notification(instance, DELETED_CODE)
+            Schedule.objects.create(
+                func='realty.tasks.expire_realty',
+                name=f'Deactivation of Realty #{instance.id}',
+                args=instance.id,
+                schedule_type=Schedule.ONCE,
+                next_run=timezone.now() + MAX_LISTING_DURATION,
+            )
+
+        elif old_status and old_status.id == STATUS_ACTIVE_ID:
+            instance.published_at = None
+
             Schedule.objects.filter(
                 func='realty.tasks.expire_realty', args=instance.id
             ).delete()
-            logger.info('объявление %s удалено, владелец уведомлен', instance.id)
 
-        if new_status != old_status:
-            if new_status.id == STATUS_ACTIVE_ID:
-                instance.published_at = timezone.now()
-                instance.save()
+        logger.info(
+            'статус объявления %s: %s --> %s',
+            instance.id,
+            old_status.status,
+            new_status.status,
+        )
 
-                Schedule.objects.create(
-                    func='realty.tasks.expire_realty',
-                    name=f'Deactivation of Realty #{instance.id}',
-                    args=instance.id,
-                    schedule_type=Schedule.ONCE,
-                    next_run=timezone.now() + MAX_LISTING_DURATION,
-                )
+        if new_status.id == STATUS_ACTIVE_ID:
+            create_notification(instance, PUBLISHED_CODE)
 
-            elif old_status and old_status.id == STATUS_ACTIVE_ID:
-                instance.published_at = None
+        elif new_status.id == STATUS_ON_MODERATION_ID:
+            create_notification(instance, ON_MODERATION_CODE)
 
-                Schedule.objects.filter(
-                    func='realty.tasks.expire_realty', args=instance.id
-                ).delete()
+        elif new_status.id == STATUS_REJECTED_ID:
+            if old_status.id == STATUS_ACTIVE_ID:
+                create_notification(instance, BLOCKED_CODE)
+            elif old_status.id == STATUS_ON_MODERATION_ID:
+                create_notification(instance, REJECTED_CODE)
 
-            logger.info(
-                'статус объявления %s: %s --> %s',
-                instance.id,
-                old_status.status,
-                new_status.status,
-            )
-
-            if new_status.id == STATUS_ACTIVE_ID:
-                create_notification(instance, PUBLISHED_CODE)
-
-            elif new_status.id == STATUS_ON_MODERATION_ID:
-                create_notification(instance, ON_MODERATION_CODE)
-
-            elif new_status.id == STATUS_REJECTED_ID:
-                if old_status.id == STATUS_ACTIVE_ID:
-                    create_notification(instance, BLOCKED_CODE)
-                elif old_status.id == STATUS_ON_MODERATION_ID:
-                    create_notification(instance, REJECTED_CODE)
-
-            elif new_status.id == STATUS_ARCHIVED_ID:
-                if old_status.id == STATUS_ON_MODERATION_ID:
-                    create_notification(instance, ARCHIVED_CODE)
+        elif new_status.id == STATUS_ARCHIVED_ID:
+            if old_status.id == STATUS_ON_MODERATION_ID:
+                create_notification(instance, ARCHIVED_CODE)

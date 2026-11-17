@@ -41,7 +41,9 @@ def create_realty(
 
     owner_type, _ = TradeParticipant.objects.get_or_create(participant='Собственник')
     communication_method, _ = CommunicationMethod.objects.get_or_create(method='Звонок')
-    realty_status, _ = RealtyAdvStatus.objects.get_or_create(status='Опубликовано')
+    realty_status = kwargs.pop('realty_status', None)
+    if realty_status is None:
+        realty_status, _ = RealtyAdvStatus.objects.get_or_create(status='Опубликовано')
     rooms_number, _ = RoomsNumber.objects.get_or_create(number_of_rooms='2')
 
     address = Address.objects.create(house_number='1', latitude=55.7, longitude=37.6)

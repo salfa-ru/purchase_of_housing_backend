@@ -162,6 +162,58 @@ class GetAnnouncementsInMapPointRequestSerializer(serializers.Serializer):
     longitude = longitude_field()
 
 
+STREET_FIELDS = ('name', 'city', 'zone', 'district')
+ADDRESS_FIELDS = (
+    'house_number',
+    'corpus',
+    'building',
+    'ownership',
+    'latitude',
+    'longitude',
+    'metro',
+    'minutes_to_metro',
+)
+
+
+def resolve_street(street_data, current=None):
+    """Подбирает улицу под переданные данные, недостающее берёт у текущей.
+
+    Улица — общий справочник: на одну и ту же улицу ссылаются разные
+    объявления. Поэтому запись не переписывается, а подбирается готовая или
+    заводится новая. Иначе правка одного адреса переименует улицу у всех
+    соседних объявлений и обнулит у них район с округом."""
+    values = {
+        field: street_data[field]
+        if field in street_data
+        else (getattr(current, field) if current is not None else None)
+        for field in STREET_FIELDS
+    }
+    street, _ = address_models.Street.objects.get_or_create(**values)
+    return street
+
+
+def resolve_address(address_data, current=None):
+    """Подбирает адрес под переданные данные, недостающее берёт у текущего.
+
+    Адрес тоже общий: одна запись может стоять у нескольких объявлений."""
+    if 'street' in address_data and address_data['street'] is not None:
+        street = resolve_street(
+            address_data['street'], current.street if current is not None else None
+        )
+    else:
+        street = current.street if current is not None else None
+
+    values = {
+        field: address_data[field]
+        if field in address_data
+        else (getattr(current, field) if current is not None else None)
+        for field in ADDRESS_FIELDS
+    }
+    values['street'] = street
+    address, _ = address_models.Address.objects.get_or_create(**values)
+    return address
+
+
 class AddressCreateSerializer(serializers.ModelSerializer):
     """Создание адреса."""
 
@@ -184,12 +236,8 @@ class AddressCreateSerializer(serializers.ModelSerializer):
         required=False,
         allow_null=True,
     )
-    latitude = serializers.FloatField(
-        required=True,
-    )
-    longitude = serializers.FloatField(
-        required=True,
-    )
+    latitude = latitude_field()
+    longitude = longitude_field()
     street = StreetCreateSerializer(required=True)
     metro = serializers.PrimaryKeyRelatedField(
         queryset=address_models.Metro.objects.all(),
@@ -209,56 +257,12 @@ class AddressCreateSerializer(serializers.ModelSerializer):
         return value
 
     def create(self, validated_data):
-        street_data = validated_data.pop('street', None)
-        metro = validated_data.pop('metro', None)
-
-        if street_data:
-            street_serializer = StreetCreateSerializer(data=street_data)
-
-            if 'city' in street_data:
-                city = street_data['city']
-                street_data['city'] = city.id
-            if 'zone' in street_data and street_data['zone'] is not None:
-                zone = street_data['zone']
-                street_data['zone'] = zone.id
-            else:
-                street_data['zone'] = None
-            if 'district' in street_data and street_data['district'] is not None:
-                district = street_data['district']
-                street_data['district'] = district.id
-            else:
-                street_data['district'] = None
-
-            street_serializer.is_valid(raise_exception=True)
-            street = street_serializer.save()
-            validated_data['street'] = street
-
-        validated_data['metro'] = metro
-
-        address, _ = address_models.Address.objects.get_or_create(**validated_data)
-        return address
+        return resolve_address(validated_data)
 
     def update(self, instance, validated_data):
-        street_data = validated_data.pop('street', None)
-        metro = validated_data.pop('metro', None)
-
-        if street_data:
-            street_serializer = StreetCreateSerializer(
-                instance=instance.street, data=street_data, partial=True
-            )
-            street_serializer.is_valid(raise_exception=True)
-            street_serializer.save()
-
-        if metro is not None:
-            instance.metro = metro
-        else:
-            instance.metro = None
-
-        for attr, value in validated_data.items():
-            setattr(instance, attr, value)
-
-        instance.save()
-        return instance
+        """Возвращает подходящий адрес, а старую запись не трогает: она может
+        стоять у другого объявления."""
+        return resolve_address(validated_data, instance)
 
     class Meta:
         model = address_models.Address

@@ -1,3 +1,4 @@
+from django.db import transaction
 from rest_framework import serializers
 
 from config import constants
@@ -20,11 +21,14 @@ class SaleReadSerializer(serializers.ModelSerializer):
 class SaleCreateSerializer(realty_serializers.RealtyCreateSerializer):
     """Создание продажи."""
 
+    @transaction.atomic
     def create(self, validated_data):
+        """Объявление и продажа создаются вместе: если что-то не сложилось,
+        в базе не остаётся объявления без сделки."""
+        sales_parameters = validated_data.pop('sales_parameters', None)
         realty = super().create(validated_data)
-        validated_data['realty'] = realty
 
-        if 'sales_parameters' not in validated_data:
+        if sales_parameters is None:
             housing_type, _ = values_models.HousingType.objects.get_or_create(
                 type=constants.HOUSING_TYPE
             )
@@ -36,13 +40,13 @@ class SaleCreateSerializer(realty_serializers.RealtyCreateSerializer):
                     housing_type=housing_type, sale_type=sale_type
                 )
             )
-            validated_data['sales_parameters'] = sales_parameters
 
-        validated_data.pop('owner', None)
-        validated_data = {'realty': realty, 'sales_parameters': sales_parameters}
-        realty_models.Sale.objects.create(**validated_data)
+        realty_models.Sale.objects.create(
+            realty=realty, sales_parameters=sales_parameters
+        )
         return realty
 
+    @transaction.atomic
     def update(self, instance, validated_data):
         instance = super().update(instance, validated_data)
 

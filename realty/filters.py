@@ -1,6 +1,7 @@
 import django_filters
 from django.db.models import F, Q
 from rest_framework.exceptions import ValidationError
+from rest_framework.filters import OrderingFilter
 
 from config import constants
 from realty_specificities.models import CommercialCharacteristics
@@ -79,6 +80,14 @@ AREA_LON_ORDER = 'lon_min не может быть больше lon_max.'
 
 
 UNKNOWN_CHOICE = 'Недопустимое значение «{value}». Допустимые значения: {allowed}.'
+
+# Булевы параметры принимают только эти написания. Всё остальное django-filter
+# молча считает «значение не передано», поэтому проверяем сами: опечатка в
+# запросе должна давать 400, как и у остальных фильтров.
+BOOLEAN_VALUES = ('true', 'false', '1', '0')
+UNKNOWN_BOOLEAN = (
+    'Недопустимое значение «{value}». Допустимые значения: true, false, 1, 0.'
+)
 
 
 class CharInFilter(django_filters.BaseInFilter, django_filters.CharFilter):
@@ -314,6 +323,8 @@ class RealtyFilter(PriceRangeFilterSet):
     utilities_included = django_filters.BooleanFilter(
         field_name='rent_profile__utilities_included',
         label='Коммунальные платежи включены (коммерческая аренда)',
+        help_text='Заполняется только у аренды. С trade_type=sale фильтр всё '
+        'равно применяется и список получается пустым.',
     )
 
     residential_by_default = True
@@ -338,10 +349,27 @@ class RealtyFilter(PriceRangeFilterSet):
         self.queryset = self.queryset.filter(is_deleted=False, owner__is_deleted=False)
 
     def filter_queryset(self, queryset):
+        self._validate_booleans()
         self._validate_area(self.form.cleaned_data)
         if self.residential_by_default and self._kind_not_chosen():
             queryset = queryset.filter(realty_type__is_commercial=False)
         return super().filter_queryset(queryset)
+
+    def _validate_booleans(self):
+        """Опечатка в булевом параметре — 400, а не тихо проигнорированный фильтр."""
+        if not self.data:
+            return
+        errors = {}
+        for param, param_filter in self.filters.items():
+            if not isinstance(param_filter, django_filters.BooleanFilter):
+                continue
+            raw = self.data.get(param)
+            if raw in (None, ''):
+                continue
+            if str(raw).strip().lower() not in BOOLEAN_VALUES:
+                errors[param] = UNKNOWN_BOOLEAN.format(value=raw)
+        if errors:
+            raise ValidationError(errors)
 
     def _kind_not_chosen(self):
         """Пользователь не выбрал ни вид недвижимости, ни коммерческий фильтр."""
@@ -507,3 +535,17 @@ class LatestRealtyFilter(RealtyFilter):
                 )
             }
         )
+
+
+class StableOrderingFilter(OrderingFilter):
+    """Сортировка с уникальным довеском в конце.
+
+    Без него объявления с одинаковой датой публикации (а пока дата не
+    проставлена — все сразу) идут в произвольном порядке, и одно и то же
+    объявление попадает и на первую страницу, и на вторую."""
+
+    def get_ordering(self, request, queryset, view):
+        ordering = super().get_ordering(request, queryset, view)
+        if not ordering:
+            return ordering
+        return [*ordering, '-id']
