@@ -37,6 +37,8 @@ MAX_TIME = 60
 
 USER_TYPE_DEFAULT = 'Собственник'
 
+PUBLISHER_PARTICIPANTS = ('Собственник', 'Агент')
+
 REALTY_STATUS = 'На модерации'
 
 HOUSING_TYPE = 'Вторичное жилье'

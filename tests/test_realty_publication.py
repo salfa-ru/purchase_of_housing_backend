@@ -1,7 +1,11 @@
 """Дата публикации проставляется при выходе объявления в эфир, а список
 не повторяет одно и то же объявление на соседних страницах."""
 
+from io import StringIO
+
+from django.core.management import call_command
 from django.test import TestCase
+from django.utils import timezone
 from rest_framework import status
 from rest_framework.test import APIClient
 
@@ -94,3 +98,56 @@ class ListPaginationTest(TestCase):
     def test_order_is_stable_between_requests(self):
         """Повторный запрос той же страницы даёт тот же порядок"""
         self.assertEqual(self.page(1), self.page(1))
+
+
+class BackfillPublishedAtTest(TestCase):
+    """Разовая команда проставляет дату активным объявлениям без неё."""
+
+    @classmethod
+    def setUpTestData(cls):
+        RealtyAdvStatus.objects.all().delete()
+        cls.active = RealtyAdvStatus.objects.create(
+            id=constants.STATUS_ACTIVE_ID, status=constants.ADVERTISMENT_STATUS
+        )
+        cls.moderation = RealtyAdvStatus.objects.create(
+            id=constants.STATUS_ON_MODERATION_ID, status='На модерации'
+        )
+        owner = create_user('backfillowner')
+        cls.published = create_realty(
+            owner, trade_type='sale', realty_status=cls.active
+        )
+        cls.on_moderation = create_realty(
+            owner, trade_type='sale', realty_status=cls.moderation
+        )
+        Realty.objects.update(published_at=None)
+
+    def run_command(self, *args):
+        out = StringIO()
+        call_command('backfill_published_at', *args, stdout=out)
+        return out.getvalue()
+
+    def test_count_without_fix(self):
+        """Без --fix только считает и ничего не меняет"""
+        output = self.run_command()
+
+        self.assertIn('1', output)
+        self.published.refresh_from_db()
+        self.assertIsNone(self.published.published_at)
+
+    def test_fix_sets_date_only_for_active(self):
+        """С --fix дата появляется у активного и не появляется у остальных"""
+        self.run_command('--fix')
+
+        self.published.refresh_from_db()
+        self.on_moderation.refresh_from_db()
+
+        self.assertIsNotNone(self.published.published_at)
+        self.assertIsNone(self.on_moderation.published_at)
+
+    def test_date_is_not_backdated(self):
+        """Дата ставится текущая, иначе объявление сразу уйдёт в архив по сроку"""
+        before = timezone.now()
+        self.run_command('--fix')
+
+        self.published.refresh_from_db()
+        self.assertGreaterEqual(self.published.published_at, before)

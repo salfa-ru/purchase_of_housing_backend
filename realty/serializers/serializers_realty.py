@@ -259,6 +259,8 @@ class RealtyCreateSerializer(serializers.ModelSerializer):
     owner_type = serializers.PrimaryKeyRelatedField(
         queryset=values_models.TradeParticipant.objects.all(),
         required=True,
+        help_text='Публикатор объявления: «Собственник» или «Агент». Остальные '
+        'участники сделки из справочника здесь не принимаются.',
     )
     communication_method = serializers.PrimaryKeyRelatedField(
         queryset=values_models.CommunicationMethod.objects.all(),
@@ -325,6 +327,19 @@ class RealtyCreateSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError('Цена должна быть больше 0!')
 
         return price
+
+    def validate_owner_type(self, owner_type):
+        """Публикатор бывает только собственником или агентом. Остальные
+        участники сделки из того же справочника нужны для платежей аренды."""
+        if owner_type.participant not in constants.PUBLISHER_PARTICIPANTS:
+            allowed = ' или '.join(
+                f'«{participant}»' for participant in constants.PUBLISHER_PARTICIPANTS
+            )
+            raise serializers.ValidationError(
+                f'Публикатором объявления может быть только {allowed}.'
+            )
+
+        return owner_type
 
     def validate_photos_upload(self, value):
         if self.instance:
