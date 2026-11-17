@@ -113,6 +113,31 @@ class RealtyCreateIntegrityTest(TestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(Realty.objects.count(), before)
 
+    # --- Публикатор ---
+
+    def test_tenant_cannot_be_a_publisher(self):
+        """Публикатором может быть только собственник или агент (ФТ-1.6.2)"""
+        tenant, _ = TradeParticipant.objects.get_or_create(participant='Арендатор')
+        before = Realty.objects.count()
+
+        response = self.client.post(
+            SALES_URL, self.payload(owner_type=tenant.id), format='json'
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn('owner_type', response.json())
+        self.assertEqual(Realty.objects.count(), before)
+
+    def test_agent_can_be_a_publisher(self):
+        """Агент объявление разместить может"""
+        agent, _ = TradeParticipant.objects.get_or_create(participant='Агент')
+
+        response = self.client.post(
+            SALES_URL, self.payload(owner_type=agent.id), format='json'
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
+
     def test_coordinates_outside_the_globe_are_rejected(self):
         """Координаты вне допустимого диапазона — 400"""
         payload = self.payload()

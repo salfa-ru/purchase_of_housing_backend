@@ -8,12 +8,11 @@ from django.core.management.base import BaseCommand
 from django.db import transaction
 from django.db.models import Q
 
+from config.constants import PUBLISHER_PARTICIPANTS
 from realty.models import Realty
 
 MOSCOW_LATITUDE = (54.2, 56.9)
 MOSCOW_LONGITUDE = (35.1, 39.1)
-
-ALLOWED_PARTICIPANTS = ('Собственник', 'Агент')
 
 
 def describe(realty):
@@ -55,7 +54,7 @@ class Command(BaseCommand):
             address__longitude__range=MOSCOW_LONGITUDE,
         )
         strange_owner_type = base.exclude(
-            Q(owner_type__participant__in=ALLOWED_PARTICIPANTS)
+            Q(owner_type__participant__in=PUBLISHER_PARTICIPANTS)
         )
         blank_payment_participant = base.filter(
             Q(rent_profile__lease_payments__counters_payment__participant='')
