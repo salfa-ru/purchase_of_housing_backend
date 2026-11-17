@@ -158,7 +158,10 @@ FAVORITE_CREATE_SCHEMA = extend_schema(
     tags=['Избранные'],
     summary='Добавление объявления в избранное',
     description='Принимает realty_id и добавляет объявление в избранное текущего '
-    'пользователя',
+    'пользователя. В избранное можно положить любое доступное объявление, в том '
+    'числе снятое с публикации или в архиве: видно по realty_status_full. Этим '
+    'избранное отличается от сравнения, куда берутся только опубликованные. '
+    'Удалённое объявление и объявление удалённого владельца — 404.',
     request=FavoriteSerializer,
     responses={201: FavoriteSerializer},
 )
@@ -262,9 +265,15 @@ class FavoriteListCreateView(generics.ListCreateAPIView):
             raise ValidationError({'realty_id': 'Это поле обязательно'})
 
         try:
-            realty = Realty.objects.get(id=realty_id)
-        except Realty.DoesNotExist as err:
-            raise NotFound({'detail': 'Объявление не найдено'}) from err
+            realty_id = int(realty_id)
+        except (TypeError, ValueError) as err:
+            raise ValidationError({'realty_id': 'Должно быть целым числом.'}) from err
+
+        realty = Realty.objects.filter(
+            id=realty_id, is_deleted=False, owner__is_deleted=False
+        ).first()
+        if realty is None:
+            raise NotFound({'detail': 'Объявление не найдено'})
 
         if Favorite.objects.filter(user=request.user, realty=realty).exists():
             raise ValidationError({'detail': 'Объявление уже добавлено в избранное'})

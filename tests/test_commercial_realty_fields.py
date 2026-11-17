@@ -194,8 +194,9 @@ class CommercialRealtyFieldsTest(TestCase):
 
     # --- Описание ---
 
-    def test_description_limit_is_the_same_for_commercial(self):
-        """Лимит описания у коммерческой недвижимости такой же, как у жилой"""
+    def test_description_limit_is_five_thousand(self):
+        """Описание до 5000 символов (ФТ-1.5.6), дальше 400"""
+        self.assertEqual(constants.DESCRIPTION_LENGTH, 5000)
         long_text = 'а' * constants.DESCRIPTION_LENGTH
         self.assertEqual(self.create_sale(description=long_text).status_code, 201)
 

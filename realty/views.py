@@ -1,3 +1,4 @@
+from django.db.models import Q
 from django.utils import timezone
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_spectacular.helpers import forced_singular_serializer
@@ -10,7 +11,6 @@ from rest_framework import (
     viewsets,
 )
 from rest_framework.exceptions import ValidationError
-from rest_framework.filters import OrderingFilter
 from rest_framework.generics import GenericAPIView
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
@@ -24,6 +24,7 @@ from realty.filters import (
     CatalogPriceFilter,
     LatestRealtyFilter,
     RealtyFilter,
+    StableOrderingFilter,
 )
 from realty.pagination import (
     LatestRealtyPagination,
@@ -31,6 +32,7 @@ from realty.pagination import (
     MyRealtyPagination,
     PaginatedResponseSerializer,
 )
+from realty.permissions import IsRealtyOwner
 from realty.serializers import serializers_common as common_serializers
 from realty.serializers import serializers_realty as realty_serializers
 from realty.serializers import serializers_rent as rent_serializers
@@ -57,7 +59,7 @@ class BaseViewSet(viewsets.ModelViewSet):
         if self.request.method in ['GET', 'HEAD', 'OPTIONS']:
             permission_classes = [permissions.AllowAny]
         else:
-            permission_classes = [permissions.IsAuthenticated]
+            permission_classes = [permissions.IsAuthenticated, IsRealtyOwner]
         return [permission() for permission in permission_classes]
 
 
@@ -71,7 +73,11 @@ class BaseViewSet(viewsets.ModelViewSet):
     partial_update=extend_schema(
         summary='Частичное изменение объявления о продаже недвижимости.',
         description='Обновляет отдельные поля объявления о продаже. '
-        'Доступно только владельцу объявления.',
+        'Доступно только владельцу объявления, иначе 403.\n\n'
+        'В адресе стоит id записи о продаже — поле sale.id из карточки, '
+        'а не id объявления. По id объявления будет 404. Статус меняется '
+        'другим адресом: PATCH /api/realty/{id}/status/, и там как раз '
+        'id объявления.',
     ),
 )
 class SaleViewSet(BaseViewSet):
@@ -94,7 +100,11 @@ class SaleViewSet(BaseViewSet):
     partial_update=extend_schema(
         summary='Частичное изменение объявления об аренде недвижимости.',
         description='Обновляет отдельные поля объявления об аренде. '
-        'Доступно только владельцу объявления.',
+        'Доступно только владельцу объявления, иначе 403.\n\n'
+        'В адресе стоит id записи об аренде — поле rent.id из карточки, '
+        'а не id объявления. По id объявления будет 404. Статус меняется '
+        'другим адресом: PATCH /api/realty/{id}/status/, и там как раз '
+        'id объявления.',
     ),
 )
 class RentViewSet(BaseViewSet):
@@ -130,7 +140,7 @@ class LastRealtyListView(generics.ListAPIView):
             is_deleted=False,
             owner__is_deleted=False,
         )
-        .order_by('-published_at')
+        .order_by('-published_at', '-id')
     )
 
     def filter_queryset(self, queryset):
@@ -204,7 +214,7 @@ class RealtyListView(generics.ListAPIView):
                 owner__is_deleted=False,
             )
             .select_related('commercial_characteristics')
-            .order_by('-published_at')
+            .order_by('-published_at', '-id')
         )
 
     def list(self, request, *args, **kwargs):
@@ -229,8 +239,31 @@ class RealtyListView(generics.ListAPIView):
         return response
 
 
+def visible_realty(user):
+    """Что пользователю вообще можно показать по прямой ссылке.
+
+    Чужое объявление видно, только пока оно опубликовано: снятое с публикации,
+    отклонённое, в архиве и на модерации — личное дело владельца. Своё видно
+    всегда, модератору видно всё."""
+    queryset = realty_models.Realty.objects.filter(
+        is_deleted=False,
+        owner__is_deleted=False,
+    )
+    if user and user.is_authenticated:
+        if user.is_staff:
+            return queryset
+        return queryset.filter(
+            Q(realty_status__status=constants.ADVERTISMENT_STATUS) | Q(owner=user)
+        )
+    return queryset.filter(realty_status__status=constants.ADVERTISMENT_STATUS)
+
+
 @extend_schema(
-    tags=['Недвижимость | Основные'], summary='Получение объявления по его id'
+    tags=['Недвижимость | Основные'],
+    summary='Получение объявления по его id',
+    description='Опубликованное объявление доступно всем. Снятое с публикации, '
+    'отклонённое, в архиве или на модерации видит только его владелец, '
+    'остальным — 404.',
 )
 class RealtyDetailView(generics.RetrieveAPIView):
     """Объявление по id."""
@@ -238,10 +271,7 @@ class RealtyDetailView(generics.RetrieveAPIView):
     serializer_class = realty_serializers.RealtyBaseSerializer
 
     def get_queryset(self):
-        return realty_models.Realty.objects.filter(
-            is_deleted=False,
-            owner__is_deleted=False,
-        )
+        return visible_realty(self.request.user)
 
     def retrieve(self, request, *args, **kwargs):
         """Увеличение счетчика полных просмотров"""
@@ -291,27 +321,34 @@ class RealtyCountView(generics.ListAPIView):
     tags=['Недвижимость | Владелец'],
     summary='Получение информации о владельце объявления',
     description='Возвращает данные владельца: id, имя, телефон, QR-код телефона. '
-    'Доступно только авторизованным пользователям.',
+    'Доступно только авторизованным пользователям и только по объявлению, '
+    'которое им видно: опубликованному или своему. Иначе 404.',
 )
 class RealtyOwnerDataView(generics.RetrieveAPIView):
     """Данные владельца объявления."""
 
-    queryset = realty_models.Realty.objects.all()
     serializer_class = common_serializers.RealtyOwnerDataSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        return visible_realty(self.request.user)
 
 
 @extend_schema(
     tags=['Недвижимость | Владелец'],
     summary='Получение контактов владельца объявления',
     description='Возвращает контактные данные владельца: телефон и способ связи. '
-    'Доступно только авторизованным пользователям.',
+    'Доступно только авторизованным пользователям и только по объявлению, '
+    'которое им видно: опубликованному или своему. Иначе 404.',
 )
 class RealtyOwnerContactsView(generics.RetrieveAPIView):
     """Контакты владельца объявления."""
 
-    queryset = realty_models.Realty.objects.all()
     serializer_class = common_serializers.RealtyOwnerContactsSerializer
     permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        return visible_realty(self.request.user)
 
 
 @extend_schema(
@@ -360,7 +397,7 @@ class RealtyLKListView(generics.ListAPIView):
             owner_id=self.request.user,
             is_deleted=False,
             owner__is_deleted=False,
-        ).order_by('-published_at')
+        ).order_by('-published_at', '-id')
 
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
@@ -391,7 +428,7 @@ class ChangeStatusUpdateAPIView(generics.UpdateAPIView):
 
     queryset = realty_models.Realty.objects.all()
     serializer_class = common_serializers.RealtyStatusUpdateSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated, IsRealtyOwner]
 
     def perform_update(self, serializer):
         serializer.save()
@@ -402,13 +439,23 @@ def choice_options(choices):
     return [{'value': code, 'label': label} for code, label in choices]
 
 
+def boolean_options(yes, no):
+    """Значения булева фильтра: клиенту не нужно придумывать подписи самому."""
+    return [{'value': True, 'label': yes}, {'value': False, 'label': no}]
+
+
 @extend_schema(
     tags=['Недвижимость | Основные'],
     summary='Получение данных для фильтров',
     description='Возвращает все возможные значения для фильтров: типы недвижимости, '
     'статусы, метро, районы и т.д. В разделе commercial — значения для поиска '
     'коммерческой недвижимости: value передаётся в фильтр (можно несколько через '
-    'запятую), label показывается пользователю.',
+    'запятую), label показывается пользователю. У has_furniture и '
+    'utilities_included value булев: true или false.\n\n'
+    'Сброс фильтров — только на клиенте: форма возвращается к значениям по '
+    'умолчанию, а список не меняется, пока пользователь не нажмёт «Применить». '
+    'Тогда клиент заново запрашивает поиск без сброшенных параметров. Отдельного '
+    'запроса для сброса нет.',
 )
 class RealtyFilterOptionsView(views.APIView):
     """
@@ -431,6 +478,8 @@ class RealtyFilterOptionsView(views.APIView):
                 'heating': choice_options(commercial.HEATING_CHOICES),
                 'finishing': choice_options(commercial.FINISHING_CHOICES),
                 'lease_type': choice_options(realty_models.Rent.LEASE_TYPE_CHOICES),
+                'has_furniture': boolean_options('С мебелью', 'Без мебели'),
+                'utilities_included': boolean_options('Включены', 'Не включены'),
             },
             'address': {
                 'street': {
@@ -646,7 +695,7 @@ class BaseCatalogView(generics.ListAPIView):
 
     permission_classes = [AllowAny]
     serializer_class = RealtyBaseSerializer
-    filter_backends = [DjangoFilterBackend, OrderingFilter]
+    filter_backends = [DjangoFilterBackend, StableOrderingFilter]
     filterset_class = CatalogPriceFilter
     ordering_fields = ['price', 'published_at']
     ordering = ['-published_at']

@@ -6,4 +6,4 @@ class RealtyConfig(AppConfig):
     name = 'realty'
 
     def ready(self):
-        pass
+        from realty import signals  # noqa: F401

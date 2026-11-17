@@ -41,7 +41,7 @@ class GetlistMapPointsAPIView(APIView):
     queryset = (
         Realty.objects.all()
         .filter(realty_status__status=constants.ADVERTISMENT_STATUS)
-        .order_by('-published_at')
+        .order_by('-published_at', '-id')
     )
     filter_backends = (DjangoFilterBackend,)
     filterset_class = RealtyFilter
@@ -87,7 +87,7 @@ class GetListAnnouncementsInMapPoint(APIView):
     queryset = (
         Realty.objects.all()
         .filter(realty_status__status=constants.ADVERTISMENT_STATUS)
-        .order_by('-published_at')
+        .order_by('-published_at', '-id')
     )
     filter_backends = (DjangoFilterBackend,)
     filterset_class = RealtyFilter

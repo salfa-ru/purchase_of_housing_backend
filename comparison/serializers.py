@@ -33,6 +33,12 @@ class ComparisonTableSerializer(serializers.Serializer):
     """Один список сравнения: объявления одного типа сделки."""
 
     count = serializers.IntegerField(read_only=True)
+    is_commercial = serializers.BooleanField(
+        read_only=True,
+        allow_null=True,
+        help_text='Вид списка по первому объявлению: true — коммерческая, '
+        'false — жилая, null — список пуст',
+    )
     results = ComparisonSerializer(many=True, read_only=True)
 
 

@@ -22,14 +22,14 @@ class PageTitleVariantsTest(SimpleTestCase):
     def test_all_ten_variants(self):
         """Все 10 заголовков из ТЗ собираются в одном месте"""
         expected = {
-            ('rent', ('office',)): 'Снять офис в Москве',
+            ('rent', ('office',)): 'Снять офисное помещение в Москве',
             ('rent', ('retail',)): 'Снять торговое помещение в Москве',
-            ('rent', ('warehouse',)): 'Снять склад в Москве',
+            ('rent', ('warehouse',)): 'Снять складское помещение в Москве',
             ('rent', ('free_use',)): 'Снять помещение свободного назначения в Москве',
             ('rent', ('office', 'warehouse')): 'Снять коммерческое помещение в Москве',
-            ('sale', ('office',)): 'Купить офис в Москве',
+            ('sale', ('office',)): 'Купить офисное помещение в Москве',
             ('sale', ('retail',)): 'Купить торговое помещение в Москве',
-            ('sale', ('warehouse',)): 'Купить склад в Москве',
+            ('sale', ('warehouse',)): 'Купить складское помещение в Москве',
             ('sale', ('free_use',)): 'Купить помещение свободного назначения в Москве',
             ('sale', ('retail', 'free_use')): 'Купить коммерческое помещение в Москве',
         }
@@ -46,7 +46,8 @@ class PageTitleVariantsTest(SimpleTestCase):
     def test_same_type_twice_is_one_type(self):
         """Повтор одного типа — это один тип"""
         self.assertEqual(
-            titles.page_title('rent', ['office', 'office']), 'Снять офис в Москве'
+            titles.page_title('rent', ['office', 'office']),
+            'Снять офисное помещение в Москве',
         )
 
     def test_unknown_trade_type(self):
@@ -184,8 +185,10 @@ class CommercialCardTest(TestCase):
         response = self.client.get(f'/api/realty/{self.office.id}/')
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data['title'], 'Офис, 60.5 м²')
-        self.assertEqual(response.data['page_title'], 'Купить офис в Москве')
+        self.assertEqual(response.data['title'], 'Офис, 60,5 м²')
+        self.assertEqual(
+            response.data['page_title'], 'Купить офисное помещение в Москве'
+        )
 
     def test_detail_rent_page_title(self):
         """У аренды заголовок начинается со «Снять»"""

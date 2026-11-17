@@ -7,10 +7,11 @@ from django.test import TestCase
 from rest_framework import status
 from rest_framework.test import APIClient
 
-from comparison.views import LIMIT_REACHED, NO_TRADE_TYPE
+from comparison.views import LIMIT_REACHED, NO_TRADE_TYPE, OTHER_KIND
 from config import constants
 from realty.models import Realty
-from realty_values.models import RealtyAdvStatus
+from realty_specificities.models import CommercialCharacteristics
+from realty_values.models import RealtyAdvStatus, RealtyType
 from tests.factories import create_realty, create_user
 
 COMPARISON_URL = '/api/comparison/'
@@ -65,7 +66,7 @@ class ComparisonTest(TestCase):
 
     def test_empty_list(self):
         """Пустые списки продажи и аренды сообщают лимит"""
-        empty = {'count': 0, 'results': []}
+        empty = {'count': 0, 'is_commercial': None, 'results': []}
         self.assertEqual(self.listed(), {'max_count': 3, 'sale': empty, 'rent': empty})
 
     def test_added_realty_comes_with_characteristics(self):
@@ -280,3 +281,84 @@ class ComparisonTest(TestCase):
         self.assertEqual(
             anonymous.post(COMPARISON_URL, {'realty_id': 1}).status_code, 401
         )
+
+
+class ComparisonKindTest(TestCase):
+    """Жилая и коммерческая недвижимость не смешиваются в одном списке:
+    вид списка задаёт первое добавленное объявление."""
+
+    @classmethod
+    def setUpTestData(cls):
+        create_statuses()
+        cls.user = create_user('kindcomparer')
+        owner = create_user('kindowner')
+        office_type, _ = RealtyType.objects.get_or_create(
+            type='Офис', defaults={'is_commercial': True}
+        )
+        cls.flat = create_realty(owner, trade_type='sale')
+        cls.offices = [
+            create_realty(
+                owner,
+                realty_type=office_type,
+                trade_type='sale',
+                commercial_type='office',
+                commercial_characteristics=CommercialCharacteristics.objects.create(
+                    building_type='business_center'
+                ),
+            )
+            for _ in range(2)
+        ]
+        cls.rent_flat = create_realty(owner, trade_type='rent')
+
+    def setUp(self):
+        self.client = APIClient()
+        self.client.force_authenticate(user=self.user)
+
+    def add(self, realty):
+        return self.client.post(COMPARISON_URL, {'realty_id': realty.id}, format='json')
+
+    def listed(self):
+        return self.client.get(COMPARISON_URL).json()
+
+    def test_empty_list_has_no_kind(self):
+        """У пустого списка вида нет"""
+        self.assertIsNone(self.listed()['sale']['is_commercial'])
+
+    def test_first_realty_sets_kind(self):
+        """Первое объявление задаёт вид списка"""
+        self.add(self.offices[0])
+        self.add(self.rent_flat)
+        data = self.listed()
+        self.assertTrue(data['sale']['is_commercial'])
+        self.assertFalse(data['rent']['is_commercial'])
+
+    def test_commercial_into_residential_list_rejected(self):
+        """Офис нельзя добавить в список с квартирой"""
+        self.add(self.flat)
+        response = self.add(self.offices[0])
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(
+            response.json()['detail'],
+            OTHER_KIND.format(current='жилую', other='коммерческую'),
+        )
+        self.assertEqual(self.listed()['sale']['count'], 1)
+
+    def test_residential_into_commercial_list_rejected(self):
+        """Квартиру нельзя добавить в список с офисом, второй офис — можно"""
+        self.add(self.offices[0])
+        self.assertEqual(self.add(self.flat).status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(self.add(self.offices[1]).status_code, status.HTTP_201_CREATED)
+
+    def test_commercial_card_has_characteristics(self):
+        """В таблицу коммерции приходят характеристики помещения"""
+        self.add(self.offices[0])
+        realty = self.listed()['sale']['results'][0]['realty']
+        self.assertEqual(
+            realty['commercial_characteristics']['building_type'], 'business_center'
+        )
+
+    def test_kind_resets_when_list_emptied(self):
+        """Освободившийся список принимает недвижимость другого вида"""
+        self.add(self.flat)
+        self.client.delete(delete_url(self.flat.id))
+        self.assertEqual(self.add(self.offices[0]).status_code, status.HTTP_201_CREATED)

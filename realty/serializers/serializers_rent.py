@@ -1,3 +1,4 @@
+from django.db import transaction
 from rest_framework import serializers
 
 from realty import models as realty_models
@@ -59,7 +60,10 @@ class RentCreateSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError(errors)
         return data
 
+    @transaction.atomic
     def create(self, validated_data):
+        """Объявление и аренда создаются вместе: если что-то не сложилось,
+        в базе не остаётся объявления без сделки."""
         realty_data = validated_data.pop('realty', None)
         rental_features_data = validated_data.pop('rental_features', None)
         lease_payments_data = validated_data.pop('lease_payments', None)
@@ -88,6 +92,7 @@ class RentCreateSerializer(serializers.ModelSerializer):
         rent = realty_models.Rent.objects.create(**validated_data)
         return rent
 
+    @transaction.atomic
     def update(self, instance, validated_data):
         realty_data = validated_data.pop('realty', None)
         realty_instance = instance.realty

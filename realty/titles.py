@@ -7,9 +7,9 @@ CITY_IN = 'в Москве'
 MULTIPLE_TYPES = 'коммерческое помещение'
 
 COMMERCIAL_TYPE_ACCUSATIVE = {
-    'office': 'офис',
+    'office': 'офисное помещение',
     'retail': 'торговое помещение',
-    'warehouse': 'склад',
+    'warehouse': 'складское помещение',
     'free_use': 'помещение свободного назначения',
 }
 
@@ -17,8 +17,8 @@ TRADE_VERB = {'sale': 'Купить', 'rent': 'Снять'}
 
 
 def format_area(area):
-    """140.0 → «140», 60.5 → «60.5»."""
-    return f'{area:g}'
+    """140.0 → «140», 60.5 → «60,5»."""
+    return f'{area:g}'.replace('.', ',')
 
 
 def realty_title(realty):

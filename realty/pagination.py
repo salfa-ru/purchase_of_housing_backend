@@ -19,10 +19,10 @@ class LimitRealtyPagination(PageNumberPagination):
             'type': 'string',
             'nullable': True,
             'description': 'Заголовок страницы поиска коммерческой недвижимости: '
-            '«Снять офис в Москве», при нескольких типах — «Снять коммерческое '
-            'помещение в Москве». Есть, только когда переданы is_commercial=true '
-            'и trade_type; иначе null.',
-            'example': 'Снять офис в Москве',
+            '«Снять офисное помещение в Москве», при нескольких типах — '
+            '«Снять коммерческое помещение в Москве». Есть, только когда '
+            'переданы is_commercial=true и trade_type; иначе null.',
+            'example': 'Снять офисное помещение в Москве',
         }
         return response_schema
 
