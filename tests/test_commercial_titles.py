@@ -9,6 +9,7 @@ from rest_framework.test import APIClient
 from config import constants
 from realty import titles
 from realty.models import Realty, Rent
+from realty_addresses.models import Address, City, Street
 from realty_specificities.models import AboutApartment, CommercialCharacteristics
 from realty_values.models import RealtyAdvStatus, RealtyType
 from tests.factories import create_realty, create_user
@@ -85,6 +86,12 @@ class CommercialCardTest(TestCase):
         AboutApartment.objects.filter(pk=cls.office.about_apartment_id).update(
             number_of_rooms=None, area=60.5
         )
+        city, _ = City.objects.get_or_create(name='Москва')
+        street = Street.objects.create(name='Ленинский пр-кт', city=city)
+        Address.objects.filter(
+            pk__in=[cls.retail.address_id, cls.office.address_id]
+        ).update(street=street, house_number='7')
+
         characteristics = CommercialCharacteristics.objects.create(
             building_type='shopping_center', is_basement=True
         )
@@ -204,6 +211,57 @@ class CommercialCardTest(TestCase):
 
         self.assertIsNone(response.data['title'])
         self.assertIsNone(response.data['page_title'])
+        self.assertIsNone(response.data['short_description'])
+
+    def test_detail_gives_short_description(self):
+        """Краткое описание: что сделать, что за объект, площадь и адрес"""
+        response = self.client.get(f'/api/realty/{self.retail.id}/')
+
+        self.assertEqual(
+            response.data['short_description'],
+            'Снять торговое помещение, 140 м², Ленинский пр-кт, д. 7',
+        )
+
+    def test_short_description_for_sale_starts_with_buy(self):
+        """При продаже описание начинается с «Купить», дробная площадь с запятой"""
+        response = self.client.get(f'/api/realty/{self.office.id}/')
+
+        self.assertEqual(
+            response.data['short_description'],
+            'Купить офисное помещение, 60,5 м², Ленинский пр-кт, д. 7',
+        )
+
+    def test_short_description_without_commercial_type(self):
+        """Тип помещения не выбран — «коммерческое помещение»"""
+        Realty.objects.filter(pk=self.office.pk).update(commercial_type=None)
+        response = self.client.get(f'/api/realty/{self.office.id}/')
+
+        self.assertEqual(
+            response.data['short_description'],
+            'Купить коммерческое помещение, 60,5 м², Ленинский пр-кт, д. 7',
+        )
+
+    def test_short_description_keeps_corpus_and_building(self):
+        """Корпус и строение попадают в описание: иначе разные дома совпадут"""
+        Address.objects.filter(pk=self.retail.address_id).update(
+            house_number='45', corpus='1', building='А'
+        )
+        response = self.client.get(f'/api/realty/{self.retail.id}/')
+
+        self.assertEqual(
+            response.data['short_description'],
+            'Снять торговое помещение, 140 м², Ленинский пр-кт, д. 45, корп. 1, стр. А',
+        )
+
+    def test_short_description_without_street(self):
+        """Без улицы в адресе остаётся номер дома"""
+        Address.objects.filter(pk=self.retail.address_id).update(street=None)
+        response = self.client.get(f'/api/realty/{self.retail.id}/')
+
+        self.assertEqual(
+            response.data['short_description'],
+            'Снять торговое помещение, 140 м², д. 7',
+        )
 
     # --- Главная ---
 

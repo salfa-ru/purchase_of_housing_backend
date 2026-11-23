@@ -113,6 +113,11 @@ class RealtyBaseSerializer(serializers.ModelSerializer):
         help_text='Заголовок страницы: «Снять офисное помещение в Москве». '
         'У жилой — null'
     )
+    short_description = serializers.SerializerMethodField(
+        help_text='Краткое описание объекта одной строкой: «Снять торговое '
+        'помещение, 87,9 м², Ленинский пр-кт, д. 1». При продаже начинается '
+        'с «Купить». У жилой — null'
+    )
 
     realty_status = serializers.IntegerField(source='realty_status_id', read_only=True)
     realty_status_full = serializers.CharField(
@@ -157,6 +162,9 @@ class RealtyBaseSerializer(serializers.ModelSerializer):
 
     def get_page_title(self, obj) -> str | None:
         return titles.realty_page_title(obj)
+
+    def get_short_description(self, obj) -> str | None:
+        return titles.realty_short_description(obj)
 
     @extend_schema_field(warnings_field())
     def get_warnings(self, obj):

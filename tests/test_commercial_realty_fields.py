@@ -12,7 +12,11 @@ from realty.serializers.serializers_realty import (
     FLOOR_REQUIRED,
     ROOMS_REQUIRED,
 )
-from realty.serializers.serializers_rent import LEASE_TYPE_REQUIRED
+from realty.serializers.serializers_rent import (
+    COMMERCIAL_RENT_ONLY,
+    LEASE_TYPE_REQUIRED,
+    UTILITIES_REQUIRED,
+)
 from realty_addresses.models import City
 from realty_specificities.models import CommercialCharacteristics
 from realty_values.models import (
@@ -312,6 +316,32 @@ class CommercialRealtyFieldsTest(TestCase):
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
         self.assertEqual(str(response.data['lease_type'][0]), LEASE_TYPE_REQUIRED)
 
+    def test_commercial_rent_without_utilities_is_rejected(self):
+        """Коммерческая аренда без коммунальных платежей → 400"""
+        response = self.create_rent(lease_type='direct')
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertEqual(
+            str(response.data['utilities_included'][0]), UTILITIES_REQUIRED
+        )
+        self.assertFalse(Rent.objects.exists())
+
+    def test_utilities_not_included_is_a_valid_answer(self):
+        """«Не включены» — это ответ, а не пропущенное поле"""
+        response = self.create_rent(lease_type='direct', utilities_included=False)
+
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED, response.data)
+        self.assertIs(
+            Rent.objects.get(pk=response.data['id']).utilities_included, False
+        )
+
+    def test_commercial_rent_with_null_utilities_is_rejected(self):
+        """Явный null в коммунальных платежах тоже не проходит"""
+        response = self.create_rent(lease_type='direct', utilities_included=None)
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn('utilities_included', response.data)
+
     def test_residential_rent_with_lease_terms_is_rejected(self):
         """У жилой аренды типа аренды и коммуналки нет → 400"""
         response = self.create_rent(
@@ -398,7 +428,9 @@ class CommercialRealtyFieldsTest(TestCase):
 
     def test_lease_type_is_updated(self):
         """Тип аренды меняется через изменение аренды"""
-        rent_id = self.create_rent(lease_type='direct').data['id']
+        rent_id = self.create_rent(lease_type='direct', utilities_included=True).data[
+            'id'
+        ]
 
         response = self.client.patch(
             f'{RENTS_URL}{rent_id}/', {'lease_type': 'sublease'}, format='json'
@@ -407,9 +439,86 @@ class CommercialRealtyFieldsTest(TestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
         self.assertEqual(Rent.objects.get(pk=rent_id).lease_type, 'sublease')
 
+    def test_utilities_cannot_be_cleared_on_commercial_rent(self):
+        """У коммерческой аренды нельзя стереть коммунальные платежи"""
+        rent_id = self.create_rent(lease_type='direct', utilities_included=True).data[
+            'id'
+        ]
+
+        response = self.client.patch(
+            f'{RENTS_URL}{rent_id}/', {'utilities_included': None}, format='json'
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIs(Rent.objects.get(pk=rent_id).utilities_included, True)
+
+    def test_old_rent_without_utilities_can_still_be_edited(self):
+        """Аренду, заведённую до правила про коммуналку, можно править дальше"""
+        rent_id = self.create_rent(lease_type='direct', utilities_included=True).data[
+            'id'
+        ]
+        Rent.objects.filter(pk=rent_id).update(utilities_included=None)
+
+        response = self.client.patch(
+            f'{RENTS_URL}{rent_id}/', {'lease_type': 'sublease'}, format='json'
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+        self.assertEqual(Rent.objects.get(pk=rent_id).lease_type, 'sublease')
+
+    def test_switch_to_residential_keeps_lease_terms_out(self):
+        """Перевод коммерческой аренды в жилую с условиями аренды → 400"""
+        rent_id = self.create_rent(lease_type='direct', utilities_included=True).data[
+            'id'
+        ]
+
+        response = self.client.patch(
+            f'{RENTS_URL}{rent_id}/',
+            {
+                'realty': {
+                    'realty_type': self.flat.id,
+                    'commercial_type': None,
+                    'about_apartment': {'number_of_rooms': self.rooms.id},
+                }
+            },
+            format='json',
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        expected = COMMERCIAL_RENT_ONLY.format(realty_type='Квартира')
+        self.assertEqual(str(response.data['lease_type'][0]), expected)
+        self.assertEqual(str(response.data['utilities_included'][0]), expected)
+
+    def test_switch_to_residential_works_when_terms_are_cleared(self):
+        """Если условия аренды стереть в том же запросе, перевод проходит"""
+        rent_id = self.create_rent(lease_type='direct', utilities_included=True).data[
+            'id'
+        ]
+
+        response = self.client.patch(
+            f'{RENTS_URL}{rent_id}/',
+            {
+                'lease_type': None,
+                'utilities_included': None,
+                'realty': {
+                    'realty_type': self.flat.id,
+                    'commercial_type': None,
+                    'about_apartment': {'number_of_rooms': self.rooms.id},
+                },
+            },
+            format='json',
+        )
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK, response.data)
+        rent = Rent.objects.get(pk=rent_id)
+        self.assertIsNone(rent.lease_type)
+        self.assertIsNone(rent.utilities_included)
+
     def test_lease_type_cannot_be_cleared_on_commercial_rent(self):
         """У коммерческой аренды нельзя стереть тип аренды"""
-        rent_id = self.create_rent(lease_type='direct').data['id']
+        rent_id = self.create_rent(lease_type='direct', utilities_included=True).data[
+            'id'
+        ]
 
         response = self.client.patch(
             f'{RENTS_URL}{rent_id}/', {'lease_type': None}, format='json'
