@@ -60,6 +60,19 @@ class Command(BaseCommand):
             Q(rent_profile__lease_payments__counters_payment__participant='')
             | Q(rent_profile__lease_payments__communal_payment__participant='')
         )
+        commercial_rent_without_terms = base.filter(
+            realty_type__is_commercial=True, rent_profile__isnull=False
+        ).filter(
+            Q(rent_profile__lease_type__isnull=True)
+            | Q(rent_profile__lease_type='')
+            | Q(rent_profile__utilities_included__isnull=True)
+        )
+        residential_rent_with_terms = base.filter(
+            realty_type__is_commercial=False, rent_profile__isnull=False
+        ).filter(
+            Q(rent_profile__lease_type__isnull=False, rent_profile__lease_type__gt='')
+            | Q(rent_profile__utilities_included__isnull=False)
+        )
 
         self.report('Без продажи и без аренды', without_trade)
         self.report(
@@ -76,6 +89,14 @@ class Command(BaseCommand):
         self.report('Координаты вне Москвы', strange_coordinates)
         self.report('Публикатор не «Собственник» и не «Агент»', strange_owner_type)
         self.report('Платежи аренды с пустым участником', blank_payment_participant)
+        self.report(
+            'Коммерческая аренда без типа аренды или коммунальных платежей',
+            commercial_rent_without_terms,
+        )
+        self.report(
+            'Жилая аренда с условиями коммерческой аренды',
+            residential_rent_with_terms,
+        )
 
         if not fix:
             self.stdout.write(

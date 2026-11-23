@@ -218,7 +218,7 @@ class Rent(models.Model):
     )
     utilities_included = models.BooleanField(
         verbose_name='Коммунальные платежи включены',
-        help_text='Только для коммерческой недвижимости',
+        help_text='Только для коммерческой недвижимости, там обязательны',
         **NULLABLE_FIELD,
     )
 
