@@ -298,7 +298,12 @@ CORS_ALLOW_HEADERS = [
 ]
 
 CORS_ALLOW_CREDENTIALS = True
-CORS_ALLOW_ALL_LOCALHOST = True
+
+# Локальный фронт может крутиться на любом порту (Vite, CRA, Next и т.д.),
+# поэтому localhost и 127.0.0.1 пускаем целиком, а не по одному адресу.
+CORS_ALLOWED_ORIGIN_REGEXES = [
+    r'^https?://(localhost|127\.0\.0\.1)(:\d+)?$',
+]
 
 # ========== DJOSER ==========
 DJOSER = {
